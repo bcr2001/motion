@@ -22,8 +22,8 @@ class AppThemeModeProvider extends ChangeNotifier {
   // current theme mode name
   String _currentThemeModeName = "Light Mode";
 
-  // theme mode text color(dark mode)
-  Color _themeModeTextColor = Colors.white;
+  // theme mode text color(light mode)
+  Color _themeModeTextColor = Colors.black;
 
   // current switch value (false = light mode)
   bool switchValue = false;

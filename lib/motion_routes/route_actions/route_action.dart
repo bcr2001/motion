@@ -18,12 +18,13 @@ class _MotionAction extends State<MotionActionButtons> {
     // alert dialog width
     final double dialogWidth = MediaQuery.of(context).size.width * 0.9;
 
-      // return the current theme mode text color
+    // return the current theme mode text color
     Color themeModeColor(BuildContext context) {
       var themeModeColor = Provider.of<AppThemeModeProvider>(context);
       return themeModeColor.themeModeTextColor;
     }
 
+    
     showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -39,20 +40,22 @@ class _MotionAction extends State<MotionActionButtons> {
                 children: [
                   // divider
                   const Padding(
-                    padding:  EdgeInsets.only(right:22, left: 22),
-                    child:  Divider(),
+                    padding: EdgeInsets.only(right: 22, left: 22),
+                    child: Divider(),
                   ),
 
                   // log out query
                   Padding(
-                    padding: const EdgeInsets.only
-                    (right:22.0, left: 22),
-                    child:  Text("Are you sure you want to log out?", style: contentStyle,),
+                    padding: const EdgeInsets.only(right: 22.0, left: 22),
+                    child: Text(
+                      "Are you sure you want to log out?",
+                      style: contentStyle,
+                    ),
                   ),
 
                   // options (cancel and log out)
                   Padding(
-                    padding: const EdgeInsets.only(right:22, left: 22),
+                    padding: const EdgeInsets.only(right: 22, left: 22),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -61,20 +64,18 @@ class _MotionAction extends State<MotionActionButtons> {
                             onPressed: () {
                               Navigator.of(context).pop();
                             },
-                            child: Text("Cancel", 
-                            style:TextStyle(
-                              color: themeModeColor(context)
-                            ) )),
-                  
+                            child: Text("Cancel",
+                                style:
+                                    TextStyle(color: themeModeColor(context)))),
+
                         // logout
                         ElevatedButton(
                             onPressed: () {
                               Navigator.of(context).pop();
                             },
-                            child: Text("Logout", 
-                            style: TextStyle(
-                              color: themeModeColor(context)
-                            ))),
+                            child: Text("Logout",
+                                style:
+                                    TextStyle(color: themeModeColor(context)))),
                       ],
                     ),
                   )
@@ -98,10 +99,8 @@ class _MotionAction extends State<MotionActionButtons> {
           if (value == "logout") {
             _showAlertDialog(context);
           } else {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const SettingsPage()));
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const SettingsPage()));
           }
         }, itemBuilder: (BuildContext context) {
           return [

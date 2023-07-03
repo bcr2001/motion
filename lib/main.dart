@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:motion/motion_providers/theme_mode_provider.dart';
+import 'package:motion/motion_screens/settings_page.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:motion/motion_routes/home_route_m/home_route.dart';
-import 'motion_screens/settings_page.dart';
 import 'motion_themes/widget_bg_color.dart';
+import 'motion_themes/motion_text_styling.dart';
 
 
 
@@ -50,6 +51,8 @@ class MainMotionApp extends StatelessWidget {
               color:  darkThemeWidgetBgColor
             ),
             appBarTheme:  AppBarTheme(
+              centerTitle: true,
+              titleTextStyle: appTitleStyle,
               backgroundColor: darkThemeWidgetBgColor
             ),
             scaffoldBackgroundColor:Colors.black ,

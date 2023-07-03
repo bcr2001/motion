@@ -2,16 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:motion/motion_providers/theme_mode_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:motion/motion_routes/route_actions/route_action.dart';
+import 'package:intl/intl.dart';
 
 // home route
 class MotionHomeRoute extends StatelessWidget {
+
   const MotionHomeRoute({super.key});
 
-  // return the current theme mode text color
-  Color themeModeColor(BuildContext context) {
-    final themeModeColor = Provider.of<AppThemeModeProvider>(context);
-    return themeModeColor.themeModeTextColor;
-  }
 
   // return current theme mode (dark or light theme)
   ThemeModeSettings currentSelectedThemeMode(BuildContext context) {
@@ -21,23 +18,35 @@ class MotionHomeRoute extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+     // Get the current date
+    DateTime currentMonth = DateTime.now();
+
+// Get the month name using the intl package
+    String currentMonthName = DateFormat.MMMM().format(currentMonth);
+
     return CustomScrollView(
       slivers: [
         SliverAppBar(
-          backgroundColor: 
-          currentSelectedThemeMode(context) == ThemeModeSettings.darkMode ?
-          Colors.black: Colors.white,
+          backgroundColor:
+              currentSelectedThemeMode(context) == ThemeModeSettings.darkMode
+                  ? Colors.black
+                  : Colors.white,
           actions: const [MotionActionButtons()],
           floating: true,
           pinned: true,
           expandedHeight: 200,
           flexibleSpace: FlexibleSpaceBar(
             // title will be the current month data is being recorded for
-            title: Text("April",
-                style: TextStyle(
-                    fontWeight: FontWeight.w400,
-                    fontSize: 20,
-                    color: themeModeColor(context))),
+            title: Text(
+              currentMonthName,
+              style: TextStyle(
+                fontSize: 18,
+                color: currentSelectedThemeMode(context) ==
+                        ThemeModeSettings.darkMode
+                    ? Colors.white
+                    : Colors.black,
+              ),
+            ),
             centerTitle: true,
             titlePadding: const EdgeInsets.only(top: 18),
             // profile picture and username
