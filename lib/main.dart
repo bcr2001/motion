@@ -3,11 +3,12 @@ import 'package:motion/motion_providers/theme_mode_provider.dart';
 import 'package:motion/motion_screens/settings_page.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:motion/motion_routes/home_route_m/home_route.dart';
+import 'package:motion/motion_routes/home_route.dart';
+import 'motion_routes/motion_route.dart';
+import 'motion_screens/about_page.dart';
 import 'motion_themes/widget_bg_color.dart';
 import 'motion_themes/motion_text_styling.dart';
-
-
+import 'motion_routes/stats_route.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,9 +18,7 @@ void main() async {
   await appThemeMode.initializeSharedPreferences();
 
   runApp(MultiProvider(
-    providers: [
-      ChangeNotifierProvider.value(value: appThemeMode)
-    ],
+    providers: [ChangeNotifierProvider.value(value: appThemeMode)],
     child: const MainMotionApp(),
   ));
 }
@@ -37,6 +36,10 @@ class MainMotionApp extends StatelessWidget {
 
         // light mode theme data
         theme: ThemeData(
+          appBarTheme: AppBarTheme(
+            centerTitle: true,
+            titleTextStyle: appTitleStyle,
+          ),
           useMaterial3: true,
           visualDensity: VisualDensity.adaptivePlatformDensity,
           brightness: Brightness.light,
@@ -44,18 +47,13 @@ class MainMotionApp extends StatelessWidget {
 
         // dark mode theme data
         darkTheme: ThemeData(
-            dialogTheme: DialogTheme(
-              backgroundColor:  darkThemeWidgetBgColor
-            ) ,
-            popupMenuTheme: PopupMenuThemeData(
-              color:  darkThemeWidgetBgColor
-            ),
-            appBarTheme:  AppBarTheme(
-              centerTitle: true,
-              titleTextStyle: appTitleStyle,
-              backgroundColor: darkThemeWidgetBgColor
-            ),
-            scaffoldBackgroundColor:Colors.black ,
+            dialogTheme: DialogTheme(backgroundColor: darkThemeWidgetBgColor),
+            popupMenuTheme: PopupMenuThemeData(color: darkThemeWidgetBgColor),
+            appBarTheme: AppBarTheme(
+                centerTitle: true,
+                titleTextStyle: appTitleStyle,
+                backgroundColor: darkThemeWidgetBgColor),
+            scaffoldBackgroundColor: Colors.black,
             useMaterial3: true,
             visualDensity: VisualDensity.adaptivePlatformDensity,
             brightness: Brightness.dark),
@@ -86,7 +84,7 @@ class _MotionHome extends State<MainMotionHome> {
   // main app routes in the app
   List motionAppRoutes = const [
     MotionHomeRoute(),
-    Center(child: Text("Motion Page")),
+    MotionStatesRoute(),
   ];
 
   // get appropriate colors for bottom app bar element
@@ -95,11 +93,9 @@ class _MotionHome extends State<MainMotionHome> {
     final themeMode = themeValue.currentThemeMode;
 
     if (themeMode == ThemeModeSettings.lightMode) {
-      return navIndex == currentIndex ? 
-      const Color(0xFF00B0F0) : Colors.black;
+      return navIndex == currentIndex ? const Color(0xFF00B0F0) : Colors.black;
     } else {
-      return navIndex == currentIndex ? 
-      const Color(0xFF00B0F0) : Colors.white;
+      return navIndex == currentIndex ? const Color(0xFF00B0F0) : Colors.white;
     }
   }
 
@@ -115,8 +111,7 @@ class _MotionHome extends State<MainMotionHome> {
     return ElevatedButton(
         style: ButtonStyle(
             elevation: MaterialStateProperty.all(0),
-            backgroundColor: MaterialStateProperty.all(
-              Colors.transparent)),
+            backgroundColor: MaterialStateProperty.all(Colors.transparent)),
         onPressed: () {
           setState(() {
             currentIndex = navIndex;
@@ -172,7 +167,13 @@ class _MotionHome extends State<MainMotionHome> {
                       height: 30,
                       width: 30,
                     ),
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const MotionTrackRoute())
+                );
+              },
             ),
           ),
         ),
@@ -184,9 +185,9 @@ class _MotionHome extends State<MainMotionHome> {
           height: 68,
           notchMargin: 0,
           child: Container(
-            color:  themeValue.currentThemeMode == ThemeModeSettings.darkMode
-                      ? darkThemeWidgetBgColor
-                      : Colors.white,
+            color: themeValue.currentThemeMode == ThemeModeSettings.darkMode
+                ? darkThemeWidgetBgColor
+                : Colors.white,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -199,16 +200,17 @@ class _MotionHome extends State<MainMotionHome> {
                       height: 24,
                       width: 24,
                     ),
-                    navName:const Text(
+                    navName: const Text(
                       "Home",
-    
                     )),
 
                 // stats
                 _buildNavButton(
                     navIndex: 1,
-                    navIconImage: const Icon(Icons.bubble_chart_outlined,),
-                    navName:const Text(
+                    navIconImage: const Icon(
+                      Icons.bubble_chart_outlined,
+                    ),
+                    navName: const Text(
                       "Stats",
                     )),
               ],

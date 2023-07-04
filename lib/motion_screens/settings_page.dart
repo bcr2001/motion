@@ -3,6 +3,8 @@ import 'package:motion/motion_providers/theme_mode_provider.dart';
 import 'package:motion/motion_themes/motion_text_styling.dart';
 import 'package:provider/provider.dart';
 
+import 'about_page.dart';
+
 // settings page
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -78,7 +80,12 @@ class SettingsPage extends StatelessWidget {
 
             // about motion
             settingsOption(
-                settingsName: "About Motion", settingsFunction: () {})
+                settingsName: "About Motion", settingsFunction: () {
+                  Navigator.push(
+                    context, 
+                    MaterialPageRoute(
+                      builder: (context) => const AboutPage()));
+                })
           ],
         ),
       ),

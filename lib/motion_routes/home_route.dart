@@ -1,20 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:motion/motion_providers/theme_mode_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:motion/motion_routes/route_actions/route_action.dart';
+import 'package:motion/motion_routes/route_action.dart';
 import 'package:intl/intl.dart';
+
+import '../motion_reusable/resuable.dart';
 
 // home route
 class MotionHomeRoute extends StatelessWidget {
 
   const MotionHomeRoute({super.key});
-
-
-  // return current theme mode (dark or light theme)
-  ThemeModeSettings currentSelectedThemeMode(BuildContext context) {
-    final selectedTheme = Provider.of<AppThemeModeProvider>(context);
-    return selectedTheme.currentThemeMode;
-  }
 
   @override
   Widget build(BuildContext context) {
