@@ -1,19 +1,14 @@
 import "package:flutter/material.dart";
 import "package:flutter_svg/flutter_svg.dart";
-import 'package:motion/motion_reusable/resuable.dart';
+import 'package:motion/motion_reusable/reuseable.dart';
 import 'package:motion/motion_providers/theme_mode_provider.dart';
 import 'package:motion/motion_themes/motion_text_styling.dart';
-import 'package:intl/intl.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // get the current year
-    DateTime getCurrentYear = DateTime.now();
-    int year = getCurrentYear.year;
-
     return Scaffold(
         appBar: AppBar(
           title: const Text("About Motion"),
@@ -36,7 +31,7 @@ class AboutPage extends StatelessWidget {
                         TextStyle(fontWeight: FontWeight.bold, fontSize: 25)),
                 // app version
                 Padding(
-                  padding:const EdgeInsets.only(top: 5, bottom: 5),
+                  padding: const EdgeInsets.only(top: 5, bottom: 5),
                   child: Text(
                     "Current App version 0.0.1.",
                     style: contentStyle,
@@ -59,7 +54,7 @@ class AboutPage extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.only(bottom: 10),
                       child: Text(
-                        "$year MOTION LLC. ALL RIGHTS RESERVED",
+                        "${currentYear()} MOTION LLC. ALL RIGHTS RESERVED",
                         style: const TextStyle(
                             color: Color(0xFF00B0F0),
                             fontWeight: FontWeight.bold),

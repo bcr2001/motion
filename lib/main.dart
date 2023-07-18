@@ -4,6 +4,7 @@ import 'package:motion/motion_screens/settings_page.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:motion/motion_routes/home_route.dart';
+import 'motion_providers/zen_quotes_provider.dart';
 import 'motion_routes/motion_route.dart';
 import 'motion_screens/about_page.dart';
 import 'motion_themes/widget_bg_color.dart';
@@ -17,8 +18,14 @@ void main() async {
   final appThemeMode = AppThemeModeProvider();
   await appThemeMode.initializeSharedPreferences();
 
+  // ZenQuoteProvider
+  final zenQuoteProvider = ZenQuoteProvider();
+  await zenQuoteProvider.initializeSharedPreferences();
+
   runApp(MultiProvider(
-    providers: [ChangeNotifierProvider.value(value: appThemeMode)],
+    providers: [
+      ChangeNotifierProvider.value(value: appThemeMode),
+      ChangeNotifierProvider(create: (context)=>zenQuoteProvider)],
     child: const MainMotionApp(),
   ));
 }
@@ -169,10 +176,9 @@ class _MotionHome extends State<MainMotionHome> {
                     ),
               onPressed: () {
                 Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const MotionTrackRoute())
-                );
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const MotionTrackRoute()));
               },
             ),
           ),
