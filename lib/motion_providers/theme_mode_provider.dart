@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:motion/motion_reusable/reuseable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:logger/logger.dart';
 
-// logger instance
-var logger = Logger();
 
 // app theme modes
 enum ThemeModeSettings { darkMode, lightMode }

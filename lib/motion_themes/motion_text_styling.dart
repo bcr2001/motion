@@ -4,4 +4,13 @@ import 'package:flutter/material.dart';
 TextStyle appTitleStyle = const TextStyle(fontSize: 23, color: Color(0xFF00B0F0));
 
 // content text style
-TextStyle contentStyle = const TextStyle(fontSize: 17, fontWeight: FontWeight.w400);
+TextStyle contentStyle(
+    {double fontSize = 17,
+    FontWeight fontWeight = FontWeight.w400,
+    Color color = Colors.black}) {
+  return TextStyle(
+    fontSize: fontSize,
+    fontWeight: fontWeight,
+    color: color,
+  );
+}

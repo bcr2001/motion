@@ -34,7 +34,7 @@ class AboutPage extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 5, bottom: 5),
                   child: Text(
                     "Current App version 0.0.1.",
-                    style: contentStyle,
+                    style: contentStyle(),
                   ),
                 ),
                 // app description
@@ -43,7 +43,7 @@ class AboutPage extends StatelessWidget {
                   child: Text(
                     "Motion offers a user-friendly and effective solution for tracking and analyzing time, providing tools for seamless data collection, visual representation, and comprehensive reporting.",
                     textAlign: TextAlign.center,
-                    style: contentStyle,
+                    style: contentStyle(),
                   ),
                 ),
 

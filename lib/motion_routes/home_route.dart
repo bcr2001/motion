@@ -79,11 +79,13 @@ class MotionHomeRoute extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(
-      slivers: [
-        _buildAppBar(context),
-        SliverList(delegate: SliverChildListDelegate([quoteOfTheDay()]))
-      ],
+    return Scaffold(
+      body: CustomScrollView(
+        slivers: [
+          _buildAppBar(context),
+          SliverList(delegate: SliverChildListDelegate([quoteOfTheDay()]))
+        ],
+      ),
     );
   }
 }

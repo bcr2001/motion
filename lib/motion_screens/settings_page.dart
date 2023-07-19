@@ -18,7 +18,7 @@ class SettingsPage extends StatelessWidget {
       return ListTile(
         title: Text(
           "Theme",
-          style: contentStyle,
+          style: contentStyle(),
         ),
         subtitle: Text(themeValue.currentThemeModeName),
         trailing: Switch(
@@ -44,7 +44,7 @@ class SettingsPage extends StatelessWidget {
         onTap: settingsFunction,
         child: Text(
           settingsName,
-          style: contentStyle,
+          style: contentStyle(),
         ),
       ),
     );

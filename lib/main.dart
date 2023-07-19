@@ -1,18 +1,21 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:motion/firebase_options.dart';
 import 'package:motion/motion_providers/theme_mode_provider.dart';
-import 'package:motion/motion_screens/settings_page.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:motion/motion_routes/home_route.dart';
 import 'motion_providers/zen_quotes_provider.dart';
 import 'motion_routes/motion_route.dart';
-import 'motion_screens/about_page.dart';
 import 'motion_themes/widget_bg_color.dart';
 import 'motion_themes/motion_text_styling.dart';
 import 'motion_routes/stats_route.dart';
+import 'motion_user/auth_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // AppThemeModeProvider Instance
   final appThemeMode = AppThemeModeProvider();
@@ -25,7 +28,8 @@ void main() async {
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider.value(value: appThemeMode),
-      ChangeNotifierProvider(create: (context)=>zenQuoteProvider)],
+      ChangeNotifierProvider(create: (context) => zenQuoteProvider)
+    ],
     child: const MainMotionApp(),
   ));
 }
@@ -43,6 +47,9 @@ class MainMotionApp extends StatelessWidget {
 
         // light mode theme data
         theme: ThemeData(
+          textTheme: TextTheme(
+            bodySmall: contentStyle()
+          ),
           appBarTheme: AppBarTheme(
             centerTitle: true,
             titleTextStyle: appTitleStyle,
@@ -70,7 +77,7 @@ class MainMotionApp extends StatelessWidget {
             ? ThemeMode.light
             : ThemeMode.dark,
 
-        home: const MainMotionHome(),
+        home: const AuthPage(),
       );
     });
   }

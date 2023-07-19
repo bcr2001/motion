@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:motion/motion_core/firebase_services.dart';
 import 'package:motion/motion_providers/theme_mode_provider.dart';
 import 'package:motion/motion_screens/settings_page.dart';
 import 'package:motion/motion_themes/motion_text_styling.dart';
@@ -39,7 +40,7 @@ showAlertDialog(BuildContext context) {
                   padding: const EdgeInsets.only(right: 22.0, left: 22),
                   child: Text(
                     "Are you sure you want to log out?",
-                    style: contentStyle,
+                    style: contentStyle(),
                   ),
                 ),
 
@@ -49,23 +50,24 @@ showAlertDialog(BuildContext context) {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      
+                      // sign out
+                      ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF00B0F0)),
+                          onPressed: () {
+                            Navigator.pop(context);
+                            AuthServices.signOutUser(context);
+                          },
+                          child: Text("Sign Out",
+                              style: contentStyle(color: Colors.white, fontSize: 15))),
+
                       // cancel
                       ElevatedButton(
                           onPressed: () {
                             Navigator.of(context).pop();
                           },
                           child: Text("Cancel",
-                              style:
-                                  TextStyle(color: themeModeColor(context)))),
-
-                      // logout
-                      ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF00B0F0)),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: Text("Logout",
                               style:
                                   TextStyle(color: themeModeColor(context)))),
                     ],
@@ -89,11 +91,13 @@ Widget mainRoutePopUpMenu(BuildContext context) {
     }
   }, itemBuilder: (BuildContext context) {
     return [
-      // logout
-      const PopupMenuItem(value: "logout", child: Text("Logout")),
-
+      
       // settings
-      const PopupMenuItem(value: "settings", child: Text("Settings"))
+      const PopupMenuItem(value: "settings", child: Text("Settings")),
+      
+      // logout
+      const PopupMenuItem(value: "logout", child: Text("Logout"))
+
     ];
   });
 }
