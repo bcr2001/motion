@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:motion/motion_themes/app_strings.dart';
 import 'package:motion/motion_themes/motion_text_styling.dart';
 import 'package:motion/motion_themes/widget_bg_color.dart';
 
@@ -51,8 +52,6 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-
-  // sign up button
   Widget _signUpButton({required VoidCallback onPressed}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
@@ -67,7 +66,7 @@ class _SignUpPageState extends State<SignUpPage> {
             width: double.infinity,
             child: Center(
                 child: Text(
-              "Sign in",
+              AppString.registerTitle,
               style: contentStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w500,
@@ -85,14 +84,13 @@ class _SignUpPageState extends State<SignUpPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(
-            "Are you already a member??",
-            style: contentStyle(),
+          const Text(
+            AppString.alreadyMember,
           ),
           GestureDetector(
             onTap: widget.toSignInPage,
             child: Text(
-              " Sign In",
+              AppString.logInTitle,
               style: contentStyle(color: blueMainColor),
             ),
           )
@@ -114,7 +112,6 @@ class _SignUpPageState extends State<SignUpPage> {
                 // Graphics SVG,
                 _signUpGraphics(),
 
-
                 // TextFields
 
                   // user name text field
@@ -123,7 +120,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                   child: TextFormField(
                     controller: _userNameController,
-                    decoration:const InputDecoration(hintText: "Username"),
+                    decoration:const InputDecoration(hintText: AppString.userNameHintText),
                   ),
                 ),
                 
@@ -133,7 +130,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                   child: TextFormField(
                     controller: _signUpEmailController,
-                    decoration: const InputDecoration(hintText: "Email"),
+                    decoration: const InputDecoration(hintText: AppString.emailHintText),
                   ),
                 ),
 
@@ -142,7 +139,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                   child: TextFormField(
                     controller: _signUpPasswordController,
-                    decoration: const InputDecoration(hintText: "Password"),
+                    decoration: const InputDecoration(hintText: AppString.passwordHintText),
                   ),
                 ),
 
@@ -151,7 +148,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
                   child: TextFormField(
                     controller: _signUpConfirmPasswordController,
-                    decoration: const InputDecoration(hintText: "Confirm Password"),
+                    decoration: const InputDecoration(hintText: AppString.confirmPasswordHintText),
                   ),
                 ),
 

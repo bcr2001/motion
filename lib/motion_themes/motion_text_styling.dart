@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
 // route appbar title text style
-TextStyle appTitleStyle = const TextStyle(fontSize: 23, color: Color(0xFF00B0F0));
+const TextStyle   appTitleStyle =
+     TextStyle(fontSize: 23, color: Color(0xFF00B0F0));
 
-// content text style
+// content text style (with color options)
 TextStyle contentStyle(
     {double fontSize = 17,
     FontWeight fontWeight = FontWeight.w400,
@@ -14,3 +15,7 @@ TextStyle contentStyle(
     color: color,
   );
 }
+
+// dialog title text style
+const dialogTitleTextStyle =
+    TextStyle(color: Colors.blue, fontSize: 20, fontWeight: FontWeight.w600);

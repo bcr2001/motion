@@ -5,3 +5,6 @@ Color darkThemeWidgetBgColor = const Color(0xFF1A1D26);
 
 // main app theme color
 Color blueMainColor = const Color(0xFF00B0F0);
+
+// dialog cancel button color
+Color dialogGreyColor = const Color(0XFF2C3040);

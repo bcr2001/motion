@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:motion/motion_routes/home_route.dart';
+import 'package:motion/motion_main_home/main_home.dart';
 import 'package:motion/motion_themes/widget_bg_color.dart';
-import 'appDirection.dart';
+import 'app_direction.dart';
 
 class AuthPage extends StatelessWidget {
   const AuthPage({super.key});
@@ -27,7 +27,7 @@ class AuthPage extends StatelessWidget {
 
           // user is signed in
           else if (snapshot.hasData) {
-            return const MotionHomeRoute();
+            return const MainMotionHome();
           }
 
           // user is not signed in

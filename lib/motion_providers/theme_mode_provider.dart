@@ -37,11 +37,12 @@ class AppThemeModeProvider extends ChangeNotifier {
   Color get themeModeTextColor => _themeModeTextColor;
 
   // initialize shared preferenced
-  Future<void> initializeSharedPreferences() async {
+ Future<void> initializeSharedPreferences() async {
     _prefs = await SharedPreferences.getInstance();
-    _loadSavedThemeMode();
+    if (_prefs != null) {
+      _loadSavedThemeMode();
+    }
   }
-
   // theme mode change handler
   void switchThemeModes(bool value) {
     // dark mode

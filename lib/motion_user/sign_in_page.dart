@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:motion/motion_core/firebase_services.dart';
+import 'package:motion/motion_themes/app_strings.dart';
 import 'package:motion/motion_themes/motion_text_styling.dart';
 import 'package:motion/motion_themes/widget_bg_color.dart';
 
@@ -32,7 +33,7 @@ class _SignInPageState extends State<SignInPage> {
     super.dispose();
   }
 
-  // sign in graphics
+  // the first svg image displayed on the top-right
   Widget _signInGraphics() {
     return Align(
       alignment: Alignment.topRight,
@@ -41,7 +42,7 @@ class _SignInPageState extends State<SignInPage> {
     );
   }
 
-  //welcome svg
+  //second svg image 
   Widget welcomeToMotion() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 25),
@@ -52,7 +53,6 @@ class _SignInPageState extends State<SignInPage> {
     );
   }
 
-  // sign in button
   Widget _signInButton({required VoidCallback onPressed}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
@@ -67,7 +67,7 @@ class _SignInPageState extends State<SignInPage> {
             width: double.infinity,
             child: Center(
                 child: Text(
-              "Sign in",
+              AppString.logInTitle,
               style: contentStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w500,
@@ -84,7 +84,7 @@ class _SignInPageState extends State<SignInPage> {
         children: [
           SvgPicture.asset("assets/images/motion_icons/devices.svg"),
           Text(
-            "*motion on other devices coming soon!!",
+            AppString.otherDevices,
             style: contentStyle(fontSize: 11, color: Colors.black),
           )
         ],
@@ -99,14 +99,13 @@ class _SignInPageState extends State<SignInPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(
-            "Are you not a member?",
-            style: contentStyle(),
+          const Text(
+            AppString.areYouAMemeber,
           ),
           GestureDetector(
             onTap: widget.toSignUpPage,
             child: Text(
-              " Register Here",
+              AppString.registerHere,
               style: contentStyle(color: blueMainColor),
             ),
           )
@@ -132,24 +131,24 @@ class _SignInPageState extends State<SignInPage> {
                 welcomeToMotion(),
 
                 // Email and password TextField,
-                // email text field
+                  // email text field
                 Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 25, vertical: 30),
                   child: TextFormField(
                     controller: _signInEmailController,
-                    decoration: const InputDecoration(hintText: "Email"),
+                    decoration: const InputDecoration(hintText: AppString.emailHintText),
                     keyboardType: TextInputType.emailAddress,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return "please enter an email";
+                        return AppString.emptyEmailValidatorMessage;
                       } else {
                         // Regular expression for email validation
                         String pattern =
                             r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$';
                         RegExp regExp = RegExp(pattern);
                         if (!regExp.hasMatch(value)) {
-                          return 'Enter a valid email';
+                          return AppString.invalidEmailValidatorMessage;
                         }
                       }
                       return null;
@@ -162,13 +161,13 @@ class _SignInPageState extends State<SignInPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 25),
                   child: TextFormField(
                     controller: _signInPasswordController,
-                    decoration: const InputDecoration(hintText: "Password"),
+                    decoration: const InputDecoration(hintText: AppString.passwordHintText),
                     obscureText: true,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return "please enter a password";
+                        return AppString.passwordHintText;
                       } else if (value.length < 6) {
-                        return "password must be more than 6 characters long";
+                        return AppString.invalidPasswordValidatorMessage;
                       }
                       return null;
                     },

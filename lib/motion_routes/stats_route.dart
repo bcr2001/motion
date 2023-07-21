@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:motion/motion_routes/route_action.dart';
+import 'package:motion/motion_themes/app_strings.dart';
 
 // stats route
 class MotionStatesRoute extends StatelessWidget {
@@ -8,8 +9,9 @@ class MotionStatesRoute extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Annual Overview",)
-      ,actions: [mainRoutePopUpMenu(context)],),
+      appBar: AppBar(title: const Text(
+          AppString.statsRouteTitle,)
+      ,actions: const [MainRoutePopUpMenu()],),
 
     );
   }

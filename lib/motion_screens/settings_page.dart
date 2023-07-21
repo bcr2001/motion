@@ -1,37 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:motion/motion_providers/theme_mode_provider.dart';
+import 'package:motion/motion_themes/app_strings.dart';
 import 'package:motion/motion_themes/motion_text_styling.dart';
 import 'package:provider/provider.dart';
-
 import 'about_page.dart';
 
 // settings page
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
-  // theme mode provider
-
-  // theme mode settings option
-  Widget themeModeSettings() {
-    return Consumer<AppThemeModeProvider>(
-        builder: (context, themeValue, child) {
-      return ListTile(
-        title: Text(
-          "Theme",
-          style: contentStyle(),
-        ),
-        subtitle: Text(themeValue.currentThemeModeName),
-        trailing: Switch(
-          activeColor: const Color(0xFF00B0F0),
-          value: themeValue.switchValue,
-          onChanged: (value) {
-            Provider.of<AppThemeModeProvider>(context, listen: false)
-                .switchThemeModes(value);
-          },
-        ),
-      );
-    });
-  }
 
   // other settings options builder
   Widget settingsOption({
@@ -39,12 +16,11 @@ class SettingsPage extends StatelessWidget {
     required VoidCallback settingsFunction,
   }) {
     return Padding(
-      padding: const EdgeInsets.all(12.5),
+      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
       child: GestureDetector(
         onTap: settingsFunction,
         child: Text(
           settingsName,
-          style: contentStyle(),
         ),
       ),
     );
@@ -52,11 +28,10 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "Settings",
+        title: const Text(
+          AppString.settingsTitle,
           style: appTitleStyle,
         ),
         centerTitle: true,
@@ -67,28 +42,57 @@ class SettingsPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // theme mode settings
-            themeModeSettings(),
+            const ThemeModeSettingsOption(),
 
             // download personal information settings
             settingsOption(
-                settingsName: "Download Personal Data",
+                settingsName: AppString.downloadDataTitle,
                 settingsFunction: () {}),
 
             // notifications settings
             settingsOption(
-                settingsName: "Notification", settingsFunction: () {}),
+                settingsName: AppString.notificationTitle, settingsFunction: () {}),
 
             // about motion
             settingsOption(
-                settingsName: "About Motion", settingsFunction: () {
+                settingsName: AppString.aboutMotionTitle,
+                settingsFunction: () {
                   Navigator.push(
-                    context, 
-                    MaterialPageRoute(
-                      builder: (context) => const AboutPage()));
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const AboutPage()));
                 })
           ],
         ),
       ),
+    );
+  }
+}
+
+
+
+// theme mode settings option
+class ThemeModeSettingsOption extends StatelessWidget {
+  const ThemeModeSettingsOption({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<AppThemeModeProvider>(
+      builder: (context, themeValue, child) {
+        return ListTile(
+          title: const Text(
+            AppString.themeTitle,
+          ),
+          subtitle: Text(themeValue.currentThemeModeName),
+          trailing: Switch(
+            activeColor: const Color(0xFF00B0F0),
+            value: themeValue.switchValue,
+            onChanged: (value) {
+              themeValue.switchThemeModes(value);
+            },
+          ),
+        );
+      },
     );
   }
 }

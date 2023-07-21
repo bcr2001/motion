@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:motion/motion_providers/theme_mode_provider.dart';
 import 'package:motion/motion_providers/zen_quotes_provider.dart';
-import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 import 'package:motion/motion_routes/route_action.dart';
-import 'package:intl/intl.dart';
 import 'package:motion/motion_reusable/reuseable.dart';
 
 // home route
@@ -24,15 +22,7 @@ class MotionHomeRoute extends StatelessWidget {
       expandedHeight: 200,
       flexibleSpace: FlexibleSpaceBar(
         title: Text(
-          currentMonth(),
-          style: TextStyle(
-            fontSize: 18,
-            color:
-                currentSelectedThemeMode(context) == ThemeModeSettings.darkMode
-                    ? Colors.white
-                    : Colors.black,
-          ),
-        ),
+          currentMonth(),),
         centerTitle: true,
         titlePadding: const EdgeInsets.only(top: 18),
         background: _buildProfileBackground(),
