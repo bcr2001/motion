@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:motion/main.dart';
 import 'package:motion/motion_reusable/reuseable.dart';
 
 //handles the sign in and sign up of users
@@ -24,10 +25,8 @@ class AuthServices {
           email: userEmail, password: userPassword);
 
       // circularIndicator disposed upon sign-in completion
-      Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
       // // circularIndicator disposed upon sign-in error
-      Navigator.pop(context);
 
       if (e.code == "user-not-found") {
         logger.e("no user in the system!");
@@ -40,6 +39,8 @@ class AuthServices {
         logger.e("something went wrong during the sign in process");
         errorSnack(context, errorMessage: "Something went wrong on our side:(");
       }
+    } finally {
+      navigationKey.currentState!.pop();
     }
   }
 
@@ -49,6 +50,7 @@ class AuthServices {
       required String userPasswordSignUp,
       required String userName}) async {
     circularIndicator(context);
+
     try {
       // create a new user
       UserCredential userCredential =
@@ -65,6 +67,8 @@ class AuthServices {
       }
     } on FirebaseAuthException catch (e) {
       logger.e("something went wrong during the sign up process $e");
+    }finally {
+      navigationKey.currentState!.pop();
     }
   }
 

@@ -8,7 +8,7 @@ import 'motion_providers/zen_quotes_provider.dart';
 import 'motion_themes/dark_theme.dart';
 import 'motion_themes/light_theme.dart';
 
-
+final GlobalKey<NavigatorState> navigationKey = GlobalKey<NavigatorState>() ;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,6 +41,7 @@ class MainMotionApp extends StatelessWidget {
     return Consumer<AppThemeModeProvider>(
         builder: (context, themeValue, child) {
       return MaterialApp(
+        navigatorKey: navigationKey,
         debugShowCheckedModeBanner: false,
 
         // light mode theme data

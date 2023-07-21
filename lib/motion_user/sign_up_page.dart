@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:motion/motion_core/firebase_services.dart';
 import 'package:motion/motion_reusable/reuseable.dart';
 import 'package:motion/motion_themes/app_images.dart';
 import 'package:motion/motion_themes/app_strings.dart';
@@ -126,10 +127,11 @@ class _SignUpPageState extends State<SignUpPage> {
 
                   // password text field
                   TextFormFieldBuilder(
-                      fieldTextEditingController: _signUpPasswordController,
-                      fieldHintText: AppString.passwordHintText,
-                      fieldValidator: FormValidator.passwordValidator,
-                      fieldObscureText: true,),
+                    fieldTextEditingController: _signUpPasswordController,
+                    fieldHintText: AppString.passwordHintText,
+                    fieldValidator: FormValidator.passwordValidator,
+                    fieldObscureText: true,
+                  ),
 
                   // confirm password text field
                   TextFormFieldBuilder(
@@ -151,9 +153,11 @@ class _SignUpPageState extends State<SignUpPage> {
                   // Sign In Button,
                   _signUpButton(onPressed: () {
                     if (_signUpFormKey.currentState!.validate()) {
-                      logger.i("It worked fine");
+                      AuthServices.signUpUser(context,
+                          userEmailSignup: _signUpEmailController.text.trim(),
+                          userPasswordSignUp: _signUpPasswordController.text.trim(),
+                          userName: _userNameController.text.trim());
                     }
-                    ;
                   }),
 
                   // Sign Up Option
