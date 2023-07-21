@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:motion/motion_reusable/reuseable.dart';
+import 'package:motion/motion_themes/app_images.dart';
 import 'package:motion/motion_themes/app_strings.dart';
 import 'package:motion/motion_themes/motion_text_styling.dart';
 import 'package:motion/motion_themes/widget_bg_color.dart';
+import 'package:motion/motion_user/user_reusable.dart';
+import 'package:motion/motion_user/user_validator.dart';
 
-// sign up page when I new user wants to sign up
+// sign up page when a new user wants to sign up
 class SignUpPage extends StatefulWidget {
   final VoidCallback toSignInPage;
 
@@ -18,7 +21,6 @@ class _SignUpPageState extends State<SignUpPage> {
   // form key
   final _signUpFormKey = GlobalKey<FormState>();
 
-
   // text editing controllers
   final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _signUpEmailController = TextEditingController();
@@ -26,7 +28,6 @@ class _SignUpPageState extends State<SignUpPage> {
       TextEditingController();
   final TextEditingController _signUpConfirmPasswordController =
       TextEditingController();
-
 
   // dispose controller to free up resources
   @override
@@ -39,22 +40,20 @@ class _SignUpPageState extends State<SignUpPage> {
     super.dispose();
   }
 
-
   // sign up graphics
   Widget _signUpGraphics() {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 25),
+      padding: const EdgeInsets.symmetric(vertical: 10),
       child: Align(
         alignment: Alignment.topLeft,
-        child:
-            SvgPicture.asset("assets/images/motion_icons/sign_up_graphics.svg"),
+        child: AppImages.signUpImage,
       ),
     );
   }
 
   Widget _signUpButton({required VoidCallback onPressed}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+      padding: const EdgeInsets.symmetric(vertical: 25),
       child: ElevatedButton(
           style: ElevatedButton.styleFrom(
             elevation: 0,
@@ -75,7 +74,6 @@ class _SignUpPageState extends State<SignUpPage> {
           )),
     );
   }
-
 
   // sign-in option
   Widget _bottomSignInOption() {
@@ -107,59 +105,61 @@ class _SignUpPageState extends State<SignUpPage> {
           key: _signUpFormKey,
           child: SingleChildScrollView(
             // handle overflow in case the keyboard covers the fields
-            child: Column(
-              children: [
-                // Graphics SVG,
-                _signUpGraphics(),
-
-                // TextFields
+            child: Padding(
+              padding: const EdgeInsetsDirectional.symmetric(horizontal: 30),
+              child: Column(
+                children: [
+                  // Graphics SVG,
+                  _signUpGraphics(),
 
                   // user name text field
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
-                  child: TextFormField(
-                    controller: _userNameController,
-                    decoration:const InputDecoration(hintText: AppString.userNameHintText),
-                  ),
-                ),
-                
+                  TextFormFieldBuilder(
+                      fieldTextEditingController: _userNameController,
+                      fieldHintText: AppString.userNameHintText,
+                      fieldValidator: FormValidator.userNameValidator),
+
                   // email text field
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
-                  child: TextFormField(
-                    controller: _signUpEmailController,
-                    decoration: const InputDecoration(hintText: AppString.emailHintText),
-                  ),
-                ),
+                  TextFormFieldBuilder(
+                      fieldTextEditingController: _signUpEmailController,
+                      fieldHintText: AppString.emailHintText,
+                      fieldValidator: FormValidator.emailValidator),
 
-                // password text field
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
-                  child: TextFormField(
-                    controller: _signUpPasswordController,
-                    decoration: const InputDecoration(hintText: AppString.passwordHintText),
-                  ),
-                ),
+                  // password text field
+                  TextFormFieldBuilder(
+                      fieldTextEditingController: _signUpPasswordController,
+                      fieldHintText: AppString.passwordHintText,
+                      fieldValidator: FormValidator.passwordValidator,
+                      fieldObscureText: true,),
 
-                // confirm password text field
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
-                  child: TextFormField(
-                    controller: _signUpConfirmPasswordController,
-                    decoration: const InputDecoration(hintText: AppString.confirmPasswordHintText),
-                  ),
-                ),
+                  // confirm password text field
+                  TextFormFieldBuilder(
+                      fieldTextEditingController:
+                          _signUpConfirmPasswordController,
+                      fieldHintText: AppString.confirmPasswordHintText,
+                      fieldObscureText: true,
+                      fieldValidator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return AppString.emptyConfirmPasswordValidatorMessage;
+                        } else if (value.length < 6) {
+                          return AppString.invalidPasswordValidatorMessage;
+                        } else if (value != _signUpPasswordController.text) {
+                          return AppString.confirmNotEqual;
+                        }
+                        return null;
+                      }),
 
+                  // Sign In Button,
+                  _signUpButton(onPressed: () {
+                    if (_signUpFormKey.currentState!.validate()) {
+                      logger.i("It worked fine");
+                    }
+                    ;
+                  }),
 
-                // Sign In Button,
-                _signUpButton(onPressed: () {}),
-
-
-                // Sign Up Option
-                _bottomSignInOption(),
-              ],
+                  // Sign Up Option
+                  _bottomSignInOption(),
+                ],
+              ),
             ),
           ),
         ),

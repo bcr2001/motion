@@ -22,6 +22,9 @@ ThemeData darkThemeData = ThemeData(
       textColor: Colors.white
     ),
 
+    // text form field
+    
+
     dialogTheme: DialogTheme(
       titleTextStyle: dialogTitleTextStyle,
     backgroundColor: darkThemeWidgetBgColor),

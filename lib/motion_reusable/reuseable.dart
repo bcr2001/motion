@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:motion/motion_providers/theme_mode_provider.dart';
+import 'package:motion/motion_themes/motion_text_styling.dart';
 import 'package:motion/motion_themes/widget_bg_color.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
 // logger instance
 var logger = Logger();
-
 
 // return current theme mode (dark or light theme)
 ThemeModeSettings currentSelectedThemeMode(BuildContext context) {
@@ -43,4 +43,11 @@ Future circularIndicator(context) {
           ),
         );
       });
+}
+
+// snack bar for sign in and sign out error messages
+errorSnack(context, {required errorMessage}) {
+  return ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(errorMessage, style: contentStyle(color: Colors.redAccent),))
+  ); 
 }

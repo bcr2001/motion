@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:motion/motion_core/firebase_services.dart';
+import 'package:motion/motion_themes/app_images.dart';
 import 'package:motion/motion_themes/app_strings.dart';
 import 'package:motion/motion_themes/motion_text_styling.dart';
 import 'package:motion/motion_themes/widget_bg_color.dart';
+
+import 'user_reusable.dart';
+import 'user_validator.dart';
 
 // sign in screen when the user is signed out
 class SignInPage extends StatefulWidget {
@@ -33,29 +36,27 @@ class _SignInPageState extends State<SignInPage> {
     super.dispose();
   }
 
-  // the first svg image displayed on the top-right
+  // the first image displayed on the top-right
+  // formless design
   Widget _signInGraphics() {
     return Align(
       alignment: Alignment.topRight,
-      child:
-          SvgPicture.asset("assets/images/motion_icons/sign_in_graphics.svg"),
+      child: AppImages.formlessShapeImage,
     );
   }
 
-  //second svg image 
+  //second image (Welcome To Motion)
   Widget welcomeToMotion() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 25),
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
       child: Align(
-          alignment: Alignment.topLeft,
-          child:
-              SvgPicture.asset("assets/images/motion_icons/welcome_back.svg")),
+          alignment: Alignment.topLeft, child: AppImages.welcomeToMotionImage),
     );
   }
 
   Widget _signInButton({required VoidCallback onPressed}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+      padding: const EdgeInsets.symmetric(vertical: 25),
       child: ElevatedButton(
           style: ElevatedButton.styleFrom(
             elevation: 0,
@@ -77,18 +78,10 @@ class _SignInPageState extends State<SignInPage> {
     );
   }
 
-  // multiple devices svg
-  Widget mulitpleDevicesSvg() {
+  // multiple devices image
+  Widget mulitpleDevices() {
     return Center(
-      child: Column(
-        children: [
-          SvgPicture.asset("assets/images/motion_icons/devices.svg"),
-          Text(
-            AppString.otherDevices,
-            style: contentStyle(fontSize: 11, color: Colors.black),
-          )
-        ],
-      ),
+      child: AppImages.devicesImage,
     );
   }
 
@@ -122,71 +115,49 @@ class _SignInPageState extends State<SignInPage> {
           key: _signInFormKey,
           child: SingleChildScrollView(
             // Add this to handle overflow in case the keyboard covers the fields
-            child: Column(
-              children: [
-                // Graphics SVG,
-                _signInGraphics(),
+            child: Padding(
+              padding: const EdgeInsetsDirectional.symmetric(horizontal: 30),
+              child: Column(
+                children: [
+                  // Graphics SVG,
+                  _signInGraphics(),
 
-                // Welcome to motion SVG,
-                welcomeToMotion(),
+                  // Welcome to motion SVG,
+                  welcomeToMotion(),
 
-                // Email and password TextField,
+                  // Email and password TextField,
                   // email text field
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 25, vertical: 30),
-                  child: TextFormField(
-                    controller: _signInEmailController,
-                    decoration: const InputDecoration(hintText: AppString.emailHintText),
-                    keyboardType: TextInputType.emailAddress,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return AppString.emptyEmailValidatorMessage;
-                      } else {
-                        // Regular expression for email validation
-                        String pattern =
-                            r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$';
-                        RegExp regExp = RegExp(pattern);
-                        if (!regExp.hasMatch(value)) {
-                          return AppString.invalidEmailValidatorMessage;
-                        }
-                      }
-                      return null;
-                    },
+                  TextFormFieldBuilder(
+                    fieldTextEditingController: _signInEmailController,
+                    fieldHintText: AppString.emailHintText,
+                    fieldKeyboardType: TextInputType.emailAddress,
+                    fieldValidator: FormValidator.emailValidator
                   ),
-                ),
 
-                // password text field
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25),
-                  child: TextFormField(
-                    controller: _signInPasswordController,
-                    decoration: const InputDecoration(hintText: AppString.passwordHintText),
-                    obscureText: true,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return AppString.passwordHintText;
-                      } else if (value.length < 6) {
-                        return AppString.invalidPasswordValidatorMessage;
-                      }
-                      return null;
-                    },
+                  // password text field
+                  TextFormFieldBuilder(
+                    fieldTextEditingController: _signInPasswordController,
+                    fieldObscureText: true,
+                    fieldHintText: AppString.passwordHintText,
+                    fieldValidator: FormValidator.passwordValidator
                   ),
-                ),
 
-                // Sign In Button,
-                _signInButton(onPressed: () {
-                  if(_signInFormKey.currentState!.validate()){
-                    AuthServices.signInUser(context, userEmail: _signInEmailController.text.trim(), userPassword: _signInPasswordController.text.trim());
-                  }
-                }),
+                  // Sign In Button,
+                  _signInButton(onPressed: () {
+                    if (_signInFormKey.currentState!.validate()) {
+                      AuthServices.signInUser(context,
+                          userEmail: _signInEmailController.text.trim(),
+                          userPassword: _signInPasswordController.text.trim());
+                    }
+                  }),
 
-                // Devices svg,
-                mulitpleDevicesSvg(),
+                  // Devices svg,
+                  mulitpleDevices(),
 
-                // Sign Up Option
-                _bottomSignUpOption(),
-              ],
+                  // Sign Up Option
+                  _bottomSignUpOption(),
+                ],
+              ),
             ),
           ),
         ),
