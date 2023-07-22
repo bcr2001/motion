@@ -30,9 +30,9 @@ class SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title:  Text(
           AppString.settingsTitle,
-          style: appTitleStyle,
+          style: TextEditingStyling.appTitleStyle,
         ),
         centerTitle: true,
       ),

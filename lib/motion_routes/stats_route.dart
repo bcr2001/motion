@@ -11,7 +11,7 @@ class MotionStatesRoute extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text(
           AppString.statsRouteTitle,)
-      ,actions: const [MainRoutePopUpMenu()],),
+      ,actions: const [MotionActionButtons()],),
 
     );
   }

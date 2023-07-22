@@ -10,21 +10,21 @@ ThemeData lightThemeData = ThemeData(
   ),
 
   // app bar theme
-  appBarTheme: AppBarTheme(
+  appBarTheme:  AppBarTheme(
     centerTitle: true,
-    titleTextStyle: appTitleStyle,
+    titleTextStyle: TextEditingStyling.appTitleStyle,
   ),
 
   // text theme
-  textTheme: GoogleFonts.latoTextTheme().copyWith(
-    bodyLarge: const TextStyle(fontSize: 17, fontWeight: FontWeight.w400),
-    bodyMedium: const TextStyle(fontSize: 17, fontWeight: FontWeight.w400),
-    bodySmall: const TextStyle(fontSize: 17, fontWeight: FontWeight.w400)
+  textTheme: TextTheme(
+    bodyLarge: TextEditingStyling.bodyStylingLightMode,
+    bodyMedium:  TextEditingStyling.bodyStylingLightMode,
+    bodySmall: TextEditingStyling.bodyStylingLightMode
   ),
 
   // alert dialog theme
-  dialogTheme:  const DialogTheme(
-    titleTextStyle: dialogTitleTextStyle
+  dialogTheme:  DialogTheme(
+    titleTextStyle: TextEditingStyling.dialogTitleTextStyle
   ),
 
   // elevated button
