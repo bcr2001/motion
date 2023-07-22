@@ -1,8 +1,9 @@
 import "package:flutter/material.dart";
-import "package:flutter_svg/flutter_svg.dart";
 import 'package:motion/motion_reusable/reuseable.dart';
 import 'package:motion/motion_providers/theme_mode_provider.dart';
-import 'package:motion/motion_themes/motion_text_styling.dart';
+import 'package:motion/motion_themes/app_images.dart';
+import 'package:motion/motion_themes/app_strings.dart';
+import 'package:motion/motion_themes/widget_bg_color.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
@@ -11,39 +12,35 @@ class AboutPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text("About Motion"),
+          title: const Text(AppString.aboutMotionTitle),
         ),
         body: Center(
           child: Container(
-            margin: const EdgeInsets.only(top: 20, right: 12, left: 12),
+            margin: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
             child: Column(
               children: [
                 // app logo
                 currentSelectedThemeMode(context) == ThemeModeSettings.lightMode
-                    ? SvgPicture.asset(
-                        "assets/images/motion_icons/about_motion_logo_light.svg")
-                    : SvgPicture.asset(
-                        "assets/images/motion_icons/about_motion_logo.svg"),
+                    ? getSvgAsset("about_motion_logo_light.svg")
+                    : getSvgAsset("about_motion_logo.svg"),
 
                 // app name
-                const Text("Motion",
+                Text(AppString.motionTitle,
                     style:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 25)),
+                        TextStyle(color: blueMainColor,fontWeight: FontWeight.bold, fontSize: 25)),
                 // app version
-                Padding(
-                  padding: const EdgeInsets.only(top: 5, bottom: 5),
+                const Padding(
+                  padding: EdgeInsets.only(top: 5, bottom: 5),
                   child: Text(
-                    "Current App version 0.0.1.",
-                    style: contentStyle(),
+                    AppString.currentMotionVersion,
                   ),
                 ),
+
                 // app description
-                Padding(
-                  padding: const EdgeInsets.only(top: 10, bottom: 10),
-                  child: Text(
-                    "Motion offers a user-friendly and effective solution for tracking and analyzing time, providing tools for seamless data collection, visual representation, and comprehensive reporting.",
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 10),
+                  child: Text(AppString.appDescription,
                     textAlign: TextAlign.center,
-                    style: contentStyle(),
                   ),
                 ),
 
@@ -54,10 +51,8 @@ class AboutPage extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.only(bottom: 10),
                       child: Text(
-                        "${currentYear()} MOTION LLC. ALL RIGHTS RESERVED",
-                        style: const TextStyle(
-                            color: Color(0xFF00B0F0),
-                            fontWeight: FontWeight.bold),
+                        "${currentYear()} ${AppString.motionLLC}",
+                        style: Theme.of(context).textTheme.headlineLarge,
                       ),
                     ),
                   ),

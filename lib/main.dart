@@ -1,10 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:motion/firebase_options.dart';
 import 'package:motion/motion_providers/firestore_provider.dart';
 import 'package:motion/motion_providers/theme_mode_provider.dart';
-import 'package:motion/motion_screens/settings_page.dart';
+import 'package:motion/motion_screens/about_page.dart';
 import 'package:motion/motion_user/auth_page.dart';
 import 'package:provider/provider.dart';
 import 'motion_providers/zen_quotes_provider.dart';
