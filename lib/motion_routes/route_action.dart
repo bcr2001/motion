@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:motion/motion_core/firebase_services.dart';
+import 'package:motion/motion_providers/firestore_provider.dart';
 import 'package:motion/motion_screens/settings_page.dart';
 import 'package:motion/motion_themes/app_strings.dart';
 import 'package:motion/motion_themes/motion_text_styling.dart';
 import 'package:motion/motion_themes/widget_bg_color.dart';
+import 'package:provider/provider.dart';
 
 // app bar action button
 

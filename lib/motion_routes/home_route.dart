@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:motion/motion_providers/firestore_provider.dart';
 import 'package:motion/motion_providers/theme_mode_provider.dart';
 import 'package:motion/motion_providers/zen_quotes_provider.dart';
 import 'package:provider/provider.dart';
@@ -22,7 +23,8 @@ class MotionHomeRoute extends StatelessWidget {
       expandedHeight: 200,
       flexibleSpace: FlexibleSpaceBar(
         title: Text(
-          currentMonth(),),
+          currentMonth(),
+        ),
         centerTitle: true,
         titlePadding: const EdgeInsets.only(top: 18),
         background: _buildProfileBackground(),
@@ -36,17 +38,21 @@ class MotionHomeRoute extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 20),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
+        children: [
           // user profile picture
-          CircleAvatar(
+          const CircleAvatar(
             radius: 60,
             backgroundImage:
                 AssetImage("assets/images/motion_icons/motion_pfp.jpg"),
           ),
           // UserName
-          Text(
-            "智也tomoya_hx",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+          Consumer<FirestoreProvider>(
+            builder: (context, userName, child) {
+              return Text(
+                userName.userName,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+              );
+            },
           )
         ],
       ),
