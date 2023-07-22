@@ -14,21 +14,44 @@ TextStyle contentStyle(
 }
 
 class TextEditingStyling {
+  static final TextStyle _baseStyle = GoogleFonts.openSans(fontSize: 16.5);
+
   // route appbar title text style
-  static final TextStyle appTitleStyle = GoogleFonts.openSans(
-      fontSize: 23,
-      color: const Color(0xFF00B0F0),
-      fontWeight: FontWeight.w500);
+  static final TextStyle appTitleStyle = _baseStyle.copyWith(
+    color: const Color(0xFF00B0F0),
+    fontSize: 23,
+    fontWeight: FontWeight.w500,
+  );
 
   // dialog title text style
-  static final TextStyle dialogTitleTextStyle = GoogleFonts.openSans(
-      color: Colors.blue, fontSize: 23, fontWeight: FontWeight.w700);
+  static final TextStyle dialogTitleTextStyle = _baseStyle.copyWith(
+    color: Colors.blue,
+    fontSize: 23,
+    fontWeight: FontWeight.w700,
+  );
 
-  // body styling (light mode)
-  static final TextStyle bodyStylingLightMode =
-      GoogleFonts.openSans(color: Colors.black, fontSize: 16.5);
+  // body styling
+  static TextStyle bodyStyling(bool isDarkMode) {
+    return _baseStyle.copyWith(
+      color: isDarkMode ? const Color(0XFFF5F5F5) : Colors.black,
+    );
+  }
 
-  // body styling (dark mode)
-  static final TextStyle bodyStylingDarkMode =
-      GoogleFonts.openSans(color:const Color(0XFFF5F5F5), fontSize: 16.5);
+  // headline (ListTile title) Large
+  static TextStyle headingLarge(bool isDarkMode) {
+    return _baseStyle.copyWith(
+      fontSize: 18,
+      color: isDarkMode ? const Color(0XFFF5F5F5)  :
+       Colors.black,
+    );
+  }
+
+  // headline (ListTile title) Medium
+  static TextStyle headingMedium(bool isDarkMode) {
+    return _baseStyle.copyWith(
+      fontSize: 16,
+      color: isDarkMode ? const Color(0XFFF5F5F5).withOpacity(0.6)  :
+       Colors.black54,
+    );
+  }
 }

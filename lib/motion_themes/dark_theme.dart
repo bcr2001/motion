@@ -5,9 +5,14 @@ import 'widget_bg_color.dart';
 ThemeData darkThemeData = ThemeData(
 
     textTheme: TextTheme(
-      bodyLarge: TextEditingStyling.bodyStylingDarkMode,
-      bodyMedium:TextEditingStyling.bodyStylingDarkMode,
-      bodySmall: TextEditingStyling.bodyStylingDarkMode,
+      // theme for the app body
+      bodyLarge: TextEditingStyling.bodyStyling(true),
+      bodyMedium:TextEditingStyling.bodyStyling(true),
+      bodySmall: TextEditingStyling.bodyStyling(true),
+
+      // theme for headings 
+      headlineLarge: TextEditingStyling.headingLarge(true),
+      headlineMedium: TextEditingStyling.headingMedium(true),
     ),
 
     colorScheme: ColorScheme.dark(
@@ -16,7 +21,8 @@ ThemeData darkThemeData = ThemeData(
 
     // list tile
     listTileTheme:const ListTileThemeData(
-      textColor: Colors.white
+
+      textColor: Colors.blue
     ),
 
     // text form field

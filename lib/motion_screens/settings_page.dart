@@ -9,59 +9,47 @@ import 'about_page.dart';
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
-
-  // other settings options builder
-  Widget settingsOption({
-    required String settingsName,
-    required VoidCallback settingsFunction,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-      child: GestureDetector(
-        onTap: settingsFunction,
-        child: Text(
-          settingsName,
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:  Text(
+        title: Text(
           AppString.settingsTitle,
           style: TextEditingStyling.appTitleStyle,
         ),
         centerTitle: true,
       ),
       body: Container(
-        margin: const EdgeInsets.all(10.0),
+        padding: const EdgeInsets.all(10.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // theme mode settings
-            const ThemeModeSettingsOption(),
+            const _ThemeModeSettingsOption(),
 
             // download personal information settings
-            settingsOption(
-                settingsName: AppString.downloadDataTitle,
-                settingsFunction: () {}),
+            _SettingsOptions(
+              onTap: (){},
+              settingsTitle: AppString.downloadDataTitle,
+              settingsDesciption: AppString.downloadDataDescription,),
 
             // notifications settings
-            settingsOption(
-                settingsName: AppString.notificationTitle, settingsFunction: () {}),
+            _SettingsOptions(
+              onTap: () {},
+              settingsTitle: AppString.notificationTitle,
+              settingsDesciption: AppString.notificationDescription,
+            ),
 
             // about motion
-            settingsOption(
-                settingsName: AppString.aboutMotionTitle,
-                settingsFunction: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const AboutPage()));
-                })
+            _SettingsOptions(
+              onTap: () {
+              Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => const AboutPage()));
+              },
+              settingsTitle: AppString.aboutMotionTitle,
+              settingsDesciption: AppString.aboutMotionDescription,
+            ),
+
           ],
         ),
       ),
@@ -69,21 +57,22 @@ class SettingsPage extends StatelessWidget {
   }
 }
 
-
-
 // theme mode settings option
-class ThemeModeSettingsOption extends StatelessWidget {
-  const ThemeModeSettingsOption({super.key});
+class _ThemeModeSettingsOption extends StatelessWidget {
+  const _ThemeModeSettingsOption();
 
   @override
   Widget build(BuildContext context) {
     return Consumer<AppThemeModeProvider>(
       builder: (context, themeValue, child) {
         return ListTile(
-          title: const Text(
+          title: Text(
             AppString.themeTitle,
+            style: Theme.of(context).textTheme.headlineLarge,
           ),
-          subtitle: Text(themeValue.currentThemeModeName),
+          subtitle: Text(
+            themeValue.currentThemeModeName,
+            style: Theme.of(context).textTheme.headlineMedium,),
           trailing: Switch(
             activeColor: const Color(0xFF00B0F0),
             value: themeValue.switchValue,
@@ -94,5 +83,29 @@ class ThemeModeSettingsOption extends StatelessWidget {
         );
       },
     );
+  }
+}
+
+// setting options list tile constructors
+class _SettingsOptions extends StatelessWidget {
+  final String settingsTitle;
+  final String settingsDesciption;
+  final VoidCallback onTap;
+
+  const _SettingsOptions(
+      {required this.settingsTitle,
+      required this.settingsDesciption,
+      required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child:ListTile(
+          onTap: onTap,
+            title: Text(settingsTitle, style: Theme.of(context).textTheme.headlineLarge,),
+            subtitle: Text(settingsDesciption, style: Theme.of(context).textTheme.headlineMedium,),
+          ),
+        );
   }
 }

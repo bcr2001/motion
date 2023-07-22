@@ -1,7 +1,5 @@
 // contains all the main app string
 class AppString {
-
-
   // App bar titles
   static const String statsRouteTitle = "Annual Overview";
   static const String motionRouteTitle = "Track";
@@ -11,11 +9,9 @@ class AppString {
 
   static const String logOutQuestion = "Are you sure you want to log out?";
 
-
   // popup menu button values
   static const String logOutValue = "logout";
   static const String settingsValue = "setting";
-
 
   // settings page
   static const String themeTitle = "Theme";
@@ -23,6 +19,9 @@ class AppString {
   static const String notificationTitle = "Notification";
   static const String aboutMotionTitle = "About Motion";
 
+  static const String downloadDataDescription = "Download all data collected";
+  static const String notificationDescription = "Customize your notifications";
+  static const String aboutMotionDescription = "Get to know what Motion is all about";
 
   // sign in/ sign out page
   static const String logInTitle = "Log In";
@@ -38,9 +37,9 @@ class AppString {
   static const String invalidPasswordValidatorMessage =
       "password must be more than 6 characters long";
   static const String emptyPasswordValidatorMessage = "please enter a password";
-  static const String emptyConfirmPasswordValidatorMessage = "please confirm password";
+  static const String emptyConfirmPasswordValidatorMessage =
+      "please confirm password";
   static const String emptyUserNameValidatorMessage = "please enter a username";
-
 
   static const String areYouAMemeber = "Are you not a member?";
   static const String registerHere = " Register Here";
