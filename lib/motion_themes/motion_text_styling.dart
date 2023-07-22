@@ -12,8 +12,12 @@ TextStyle contentStyle(
     color: color,
   );
 }
+// main dark mode color
+Color darkModeTextColor = const Color(0XFFF5F5F5);
+
 
 class TextEditingStyling {
+  // base styling
   static final TextStyle _baseStyle = GoogleFonts.openSans(fontSize: 16.5);
 
   // route appbar title text style
@@ -33,7 +37,7 @@ class TextEditingStyling {
   // body styling
   static TextStyle bodyStyling(bool isDarkMode) {
     return _baseStyle.copyWith(
-      color: isDarkMode ? const Color(0XFFF5F5F5) : Colors.black,
+      color: isDarkMode ? darkModeTextColor : Colors.black,
     );
   }
 
@@ -41,8 +45,7 @@ class TextEditingStyling {
   static TextStyle headingLarge(bool isDarkMode) {
     return _baseStyle.copyWith(
       fontSize: 18,
-      color: isDarkMode ? const Color(0XFFF5F5F5)  :
-       Colors.black,
+      color: isDarkMode ? darkModeTextColor : Colors.black,
     );
   }
 
@@ -50,8 +53,9 @@ class TextEditingStyling {
   static TextStyle headingMedium(bool isDarkMode) {
     return _baseStyle.copyWith(
       fontSize: 16,
-      color: isDarkMode ? const Color(0XFFF5F5F5).withOpacity(0.6)  :
-       Colors.black54,
+      color: isDarkMode
+          ? darkModeTextColor.withOpacity(0.6)
+          : Colors.black54,
     );
   }
 }
