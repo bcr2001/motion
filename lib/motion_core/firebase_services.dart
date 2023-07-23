@@ -48,7 +48,8 @@ class AuthServices {
   static signUpUser(context,
       {required String userEmailSignup,
       required String userPasswordSignUp,
-      required String userName}) async {
+      required String userName,
+      required String imagePfpPath}) async {
     circularIndicator(context);
 
     try {
@@ -61,7 +62,7 @@ class AuthServices {
         String userId = userCredential.user!.uid;
         // add user info to firestore
         await _addUserSignUpDetail(
-            uid: userId, userName: userName, userEmailAdress: userEmailSignup);
+            uid: userId, userName: userName, userEmailAdress: userEmailSignup, userPfpPath: imagePfpPath);
       } else {
         logger.e("Something went wrong");
       }
@@ -76,11 +77,12 @@ class AuthServices {
   static Future<void> _addUserSignUpDetail(
       {required String uid,
       required String userName,
-      required String userEmailAdress}) async {
+      required String userEmailAdress,
+      required String userPfpPath}) async {
     await _firestore
         .collection("users")
         .doc(uid)
-        .set({"user name": userName, "email": userEmailAdress});
+        .set({"user name": userName, "email": userEmailAdress, "pfpPath": userPfpPath});
   }
 
   // sign out user

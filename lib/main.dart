@@ -5,6 +5,7 @@ import 'package:motion/motion_providers/firestore_provider.dart';
 import 'package:motion/motion_providers/theme_mode_provider.dart';
 import 'package:motion/motion_screens/about_page.dart';
 import 'package:motion/motion_user/auth_page.dart';
+import 'package:motion/motion_user/sign_up_page.dart';
 import 'package:provider/provider.dart';
 import 'motion_providers/zen_quotes_provider.dart';
 import 'motion_themes/dark_theme.dart';

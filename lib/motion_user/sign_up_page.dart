@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:motion/motion_core/firebase_services.dart';
-import 'package:motion/motion_reusable/reuseable.dart';
+import 'package:motion/motion_reusable/user_pfp.dart';
 import 'package:motion/motion_themes/app_images.dart';
 import 'package:motion/motion_themes/app_strings.dart';
 import 'package:motion/motion_themes/motion_text_styling.dart';
 import 'package:motion/motion_themes/widget_bg_color.dart';
 import 'package:motion/motion_user/user_reusable.dart';
 import 'package:motion/motion_user/user_validator.dart';
+import 'package:image_picker/image_picker.dart';
 
 // sign up page when a new user wants to sign up
 class SignUpPage extends StatefulWidget {
@@ -19,6 +20,9 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
+  final ImagePicker _picker = ImagePicker();
+  XFile? _imageFile;
+
   // form key
   final _signUpFormKey = GlobalKey<FormState>();
 
@@ -45,9 +49,12 @@ class _SignUpPageState extends State<SignUpPage> {
   Widget _signUpGraphics() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Align(
-        alignment: Alignment.topLeft,
-        child: AppImages.signUpImage,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: AppImages.signUpImage,
+        ),
       ),
     );
   }
@@ -110,8 +117,17 @@ class _SignUpPageState extends State<SignUpPage> {
               padding: const EdgeInsetsDirectional.symmetric(horizontal: 30),
               child: Column(
                 children: [
-                  // Graphics SVG,
+                  // sign up graphics
+                  AppImages.signUpGraphics,
+
+                  // sign up SVG,
                   _signUpGraphics(),
+
+                  // pfp holder and setter
+                  UserPfp(
+                    imagePath: _imageFile,
+                    picker: _picker,
+                  ),
 
                   // user name text field
                   TextFormFieldBuilder(
@@ -155,8 +171,11 @@ class _SignUpPageState extends State<SignUpPage> {
                     if (_signUpFormKey.currentState!.validate()) {
                       AuthServices.signUpUser(context,
                           userEmailSignup: _signUpEmailController.text.trim(),
-                          userPasswordSignUp: _signUpPasswordController.text.trim(),
-                          userName: _userNameController.text.trim());
+                          userPasswordSignUp:
+                              _signUpPasswordController.text.trim(),
+                          userName: _userNameController.text.trim(),
+                          imagePfpPath: _imageFile!.path);
+                      print(_imageFile!.path);
                     }
                   }),
 
