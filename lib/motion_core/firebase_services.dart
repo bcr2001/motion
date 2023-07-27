@@ -71,7 +71,11 @@ class AuthServices {
         logger.e("Something went wrong");
       }
     } on FirebaseAuthException catch (e) {
-      logger.e("something went wrong during the sign up process $e");
+      if (e.code == "email-already-in-use") {
+        logger.e("something went wrong during the sign up process $e");
+        errorSnack(context,
+            errorMessage: "The email you provided is already in use");
+      }
     } finally {
       navigationKey.currentState!.pop();
     }
