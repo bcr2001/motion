@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:motion/motion_core/firebase_services.dart';
-import 'package:motion/motion_providers/user_pfp_provider.dart';
+import 'package:motion/motion_providers/pfp_pvd/user_pfp_provider.dart';
 import 'package:motion/motion_reusable/user_pfp.dart';
 import 'package:motion/motion_themes/app_images.dart';
 import 'package:motion/motion_themes/app_strings.dart';
@@ -8,7 +8,6 @@ import 'package:motion/motion_themes/motion_text_styling.dart';
 import 'package:motion/motion_themes/widget_bg_color.dart';
 import 'package:motion/motion_user/user_reusable.dart';
 import 'package:motion/motion_user/user_validator.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 // sign up page when a new user wants to sign up

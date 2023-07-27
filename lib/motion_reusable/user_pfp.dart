@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:motion/motion_providers/user_pfp_provider.dart';
+import 'package:motion/motion_providers/pfp_pvd/user_pfp_provider.dart';
 import 'package:motion/motion_themes/app_strings.dart';
 import 'package:motion/motion_themes/widget_bg_color.dart';
 import 'package:provider/provider.dart';

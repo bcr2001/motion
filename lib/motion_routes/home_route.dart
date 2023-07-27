@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:motion/motion_providers/firestore_provider.dart';
-import 'package:motion/motion_providers/theme_mode_provider.dart';
-import 'package:motion/motion_providers/zen_quotes_provider.dart';
-import 'package:path/path.dart';
+import 'package:motion/motion_providers/date_data_pvd/current_month_provider.dart';
+import 'package:motion/motion_providers/firestore_pvd/firestore_provider.dart';
+import 'package:motion/motion_providers/theme_pvd/theme_mode_provider.dart';
+import 'package:motion/motion_providers/web_api_pvd/zen_quotes_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:motion/motion_routes/route_action.dart';
 import 'package:motion/motion_reusable/reuseable.dart';
@@ -14,23 +14,26 @@ class MotionHomeRoute extends StatelessWidget {
   // home sliverapp bar
   SliverAppBar _buildAppBar(BuildContext context) {
     return SliverAppBar(
-      backgroundColor:
-          currentSelectedThemeMode(context) == ThemeModeSettings.darkMode
-              ? Colors.black
-              : Colors.white,
-      actions: const [MotionActionButtons()],
-      floating: true,
-      pinned: true,
-      expandedHeight: 200,
-      flexibleSpace: FlexibleSpaceBar(
-        title: Text(
-          currentMonth(),
-        ),
-        centerTitle: true,
-        titlePadding: const EdgeInsets.only(top: 18),
-        background: _buildProfileBackground(),
-      ),
-    );
+        backgroundColor:
+            currentSelectedThemeMode(context) == ThemeModeSettings.darkMode
+                ? Colors.black
+                : Colors.white,
+        actions: const [MotionActionButtons()],
+        floating: true,
+        pinned: true,
+        expandedHeight: 200,
+        flexibleSpace: Consumer<CurrentMonthProvider>(
+          builder: (context, month, child) {
+            return FlexibleSpaceBar(
+              title: Text(
+                month.currentMonthName,
+              ),
+              centerTitle: true,
+              titlePadding: const EdgeInsets.only(top: 18),
+              background: _buildProfileBackground(),
+            );
+          },
+        ));
   }
 
   // sliverapp bar background
@@ -44,10 +47,12 @@ class MotionHomeRoute extends StatelessWidget {
               children: [
                 // user profile picture
                 CircleAvatar(
-                  radius: 60,
-                  backgroundImage: storeInfo.userPfpUrl != null ? NetworkImage(storeInfo.userPfpUrl!): const AssetImage(
-                            "assets/images/motion_icons/default_pfp.png") as ImageProvider
-                ),
+                    radius: 60,
+                    backgroundImage: storeInfo.userPfpUrl != null
+                        ? NetworkImage(storeInfo.userPfpUrl!)
+                        : const AssetImage(
+                                "assets/images/motion_icons/default_pfp.png")
+                            as ImageProvider),
 
                 // UserName
                 Text(

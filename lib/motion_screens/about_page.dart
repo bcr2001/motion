@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 import 'package:motion/motion_reusable/reuseable.dart';
-import 'package:motion/motion_providers/theme_mode_provider.dart';
+import 'package:motion/motion_providers/theme_pvd/theme_mode_provider.dart';
 import 'package:motion/motion_themes/app_images.dart';
 import 'package:motion/motion_themes/app_strings.dart';
 import 'package:motion/motion_themes/widget_bg_color.dart';

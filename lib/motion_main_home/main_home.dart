@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:motion/motion_providers/theme_mode_provider.dart';
+import 'package:motion/motion_providers/theme_pvd/theme_mode_provider.dart';
 import 'package:motion/motion_routes/home_route.dart';
 import 'package:motion/motion_routes/motion_route.dart';
 import 'package:motion/motion_routes/stats_route.dart';
