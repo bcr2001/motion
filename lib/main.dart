@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:motion/firebase_options.dart';
 import 'package:motion/motion_providers/firestore_provider.dart';
 import 'package:motion/motion_providers/theme_mode_provider.dart';
+import 'package:motion/motion_providers/user_pfp_provider.dart';
 import 'package:motion/motion_screens/about_page.dart';
 import 'package:motion/motion_user/auth_page.dart';
 import 'package:motion/motion_user/sign_up_page.dart';
@@ -31,7 +32,8 @@ void main() async {
     providers: [
       ChangeNotifierProvider.value(value: appThemeMode),
       ChangeNotifierProvider(create: (context) => zenQuoteProvider),
-      ChangeNotifierProvider(create: (context)=>FirestoreProvider())
+      ChangeNotifierProvider(create: (context)=>FirestoreProvider()),
+      ChangeNotifierProvider(create: ((context) => UserPfpProvider()))
     ],
     child: const MainMotionApp(),
   ));
@@ -61,7 +63,7 @@ class MainMotionApp extends StatelessWidget {
             ? ThemeMode.light
             : ThemeMode.dark,
 
-        home: const AuthPage(),
+        home:const  AuthPage(),
       );
     });
   }

@@ -28,4 +28,26 @@ class FirestoreServices {
       return "Error: ${e.toString()}";
     }
   }
+
+  // get the user profile image URL
+  static Future<String?> getUserProfile(String userId) async {
+    try {
+      DocumentReference documentReference =
+          FirebaseFirestore.instance.collection("users").doc(userId);
+
+      DocumentSnapshot docSnapshot = await documentReference.get();
+
+      if (docSnapshot.exists) {
+        Map<String, dynamic> data = docSnapshot.data() as Map<String, dynamic>;
+
+        return data["pfpPath"];
+      } else {
+        logger.i("The document you are looking for does not exist");
+        return null;
+      }
+    } catch (e) {
+      logger.e("The Following error occured: $e");
+      return null;
+    }
+  }
 }

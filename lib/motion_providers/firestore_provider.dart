@@ -5,34 +5,43 @@ import 'package:motion/motion_core/firestore_services.dart';
 
 class FirestoreProvider extends ChangeNotifier {
   String _userName = "";
-  late StreamSubscription<User?> _userChangesSubscription;
+  String? _userPfpUrl;
 
   String get userName => _userName;
+  String? get userPfpUrl => _userPfpUrl;
+
+  StreamSubscription<User?>? _userChangesSubscription;
 
   FirestoreProvider() {
-    fetchUserName();
+    fetchUserNamePfp();
   }
 
-  Future<void> fetchUserName() async {
+  Future<void> fetchUserNamePfp() async {
+    // cancel any existing subscription before starting a new one
+    await _userChangesSubscription?.cancel();
+
     _userChangesSubscription =
         FirebaseAuth.instance.userChanges().listen((user) async {
       if (user != null) {
         String userNameData =
             await FirestoreServices.getCurrentUserName(user.uid);
 
-        _userName = userNameData;
+        String? userNamePfpUrl =
+            await FirestoreServices.getUserProfile(user.uid);
 
-        notifyListeners();
+        _userName = userNameData;
+        _userPfpUrl = userNamePfpUrl;
       } else {
         _userName = "";
-        notifyListeners();
+        _userPfpUrl = null;
       }
+      notifyListeners();
     });
   }
 
   @override
   void dispose() {
-    _userChangesSubscription.cancel();
+    _userChangesSubscription?.cancel();
     super.dispose();
   }
 }

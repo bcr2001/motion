@@ -47,12 +47,13 @@ class AppString {
   static const String alreadyMember = "Already a memeber? ";
   static const String confirmNotEqual = "does not match password";
 
+  static const String userPfpModalProfile = "Profile Picture";
+  static const String userPfpModalGallery = "Gallery";
+
   // About page
   static const String motionTitle = "Motion";
   static const String currentMotionVersion = "Current App version 0.0.1.2";
-  static const String appDescription =                     "Motion offers a user-friendly and effective solution for tracking and analyzing time, providing tools for seamless data collection, visual representation, and comprehensive reporting.";
-    static const String motionLLC = "MOTION LLC. ALL RIGHTS RESERVED";
-
-
-
+  static const String appDescription =
+      "Motion offers a user-friendly and effective solution for tracking and analyzing time, providing tools for seamless data collection, visual representation, and comprehensive reporting.";
+  static const String motionLLC = "MOTION LLC. ALL RIGHTS RESERVED";
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:motion/motion_providers/firestore_provider.dart';
 import 'package:motion/motion_providers/theme_mode_provider.dart';
 import 'package:motion/motion_providers/zen_quotes_provider.dart';
+import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 import 'package:motion/motion_routes/route_action.dart';
 import 'package:motion/motion_reusable/reuseable.dart';
@@ -35,28 +36,29 @@ class MotionHomeRoute extends StatelessWidget {
   // sliverapp bar background
   Widget _buildProfileBackground() {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // user profile picture
-          const CircleAvatar(
-            radius: 60,
-            backgroundImage:
-                AssetImage("assets/images/motion_icons/motion_pfp.jpg"),
-          ),
-          // UserName
-          Consumer<FirestoreProvider>(
-            builder: (context, userName, child) {
-              return Text(
-                userName.userName,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-              );
-            },
-          )
-        ],
-      ),
-    );
+        padding: const EdgeInsets.only(bottom: 20),
+        child: Consumer<FirestoreProvider>(
+          builder: (context, storeInfo, child) {
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // user profile picture
+                CircleAvatar(
+                  radius: 60,
+                  backgroundImage: storeInfo.userPfpUrl != null ? NetworkImage(storeInfo.userPfpUrl!): const AssetImage(
+                            "assets/images/motion_icons/default_pfp.png") as ImageProvider
+                ),
+
+                // UserName
+                Text(
+                  storeInfo.userName,
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.w500),
+                )
+              ],
+            );
+          },
+        ));
   }
 
   // quote of the day

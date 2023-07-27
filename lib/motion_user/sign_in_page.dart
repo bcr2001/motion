@@ -36,15 +36,6 @@ class _SignInPageState extends State<SignInPage> {
     super.dispose();
   }
 
-  // the first image displayed on the top-right
-  // formless design
-  Widget _signInGraphics() {
-    return Align(
-      alignment: Alignment.topRight,
-      child: AppImages.formlessShapeImage,
-    );
-  }
-
   //second image (Welcome To Motion)
   Widget welcomeToMotion() {
     return Padding(
@@ -111,52 +102,51 @@ class _SignInPageState extends State<SignInPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Form(
-          key: _signInFormKey,
-          child: SingleChildScrollView(
-            // Add this to handle overflow in case the keyboard covers the fields
-            child: Padding(
-              padding: const EdgeInsetsDirectional.symmetric(horizontal: 30),
-              child: Column(
-                children: [
-                  // Graphics SVG,
-                  _signInGraphics(),
-
-                  // Welcome to motion SVG,
-                  welcomeToMotion(),
-
-                  // Email and password TextField,
-                  // email text field
-                  TextFormFieldBuilder(
-                    fieldTextEditingController: _signInEmailController,
-                    fieldHintText: AppString.emailHintText,
-                    fieldKeyboardType: TextInputType.emailAddress,
-                    fieldValidator: FormValidator.emailValidator
-                  ),
-
-                  // password text field
-                  TextFormFieldBuilder(
-                    fieldTextEditingController: _signInPasswordController,
-                    fieldObscureText: true,
-                    fieldHintText: AppString.passwordHintText,
-                    fieldValidator: FormValidator.passwordValidator
-                  ),
-
-                  // Sign In Button,
-                  _signInButton(onPressed: () {
-                    if (_signInFormKey.currentState!.validate()) {
-                      AuthServices.signInUser(context,
-                          userEmail: _signInEmailController.text.trim(),
-                          userPassword: _signInPasswordController.text.trim());
-                    }
-                  }),
-
-                  // Devices svg,
-                  mulitpleDevices(),
-
-                  // Sign Up Option
-                  _bottomSignUpOption(),
-                ],
+        child: Center(
+          child: Form(
+            key: _signInFormKey,
+            child: SingleChildScrollView(
+              // Add this to handle overflow in case the keyboard covers the fields
+              child: Padding(
+                padding: const EdgeInsetsDirectional.symmetric(horizontal: 30),
+                child: Column(
+                  children: [
+                    // Welcome to motion SVG,
+                    welcomeToMotion(),
+        
+                    // Email and password TextField,
+                    // email text field
+                    TextFormFieldBuilder(
+                      fieldTextEditingController: _signInEmailController,
+                      fieldHintText: AppString.emailHintText,
+                      fieldKeyboardType: TextInputType.emailAddress,
+                      fieldValidator: FormValidator.emailValidator
+                    ),
+        
+                    // password text field
+                    TextFormFieldBuilder(
+                      fieldTextEditingController: _signInPasswordController,
+                      fieldObscureText: true,
+                      fieldHintText: AppString.passwordHintText,
+                      fieldValidator: FormValidator.passwordValidator
+                    ),
+        
+                    // Sign In Button,
+                    _signInButton(onPressed: () {
+                      if (_signInFormKey.currentState!.validate()) {
+                        AuthServices.signInUser(context,
+                            userEmail: _signInEmailController.text.trim(),
+                            userPassword: _signInPasswordController.text.trim());
+                      }
+                    }),
+        
+                    // Devices svg,
+                    mulitpleDevices(),
+        
+                    // Sign Up Option
+                    _bottomSignUpOption(),
+                  ],
+                ),
               ),
             ),
           ),

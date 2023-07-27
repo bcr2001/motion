@@ -1,14 +1,15 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:motion/motion_providers/user_pfp_provider.dart';
+import 'package:motion/motion_themes/app_strings.dart';
 import 'package:motion/motion_themes/widget_bg_color.dart';
+import 'package:provider/provider.dart';
 import 'reuseable.dart';
 import 'package:image_picker/image_picker.dart';
 
+// handles setting of the user profile picture
 class UserPfp extends StatefulWidget {
-  XFile? imagePath;
-  final ImagePicker picker;
-
-   UserPfp({super.key, required this.imagePath, required this.picker});
+  const UserPfp({super.key});
 
   @override
   State<UserPfp> createState() => _UserPfpState();
@@ -23,28 +24,35 @@ class _UserPfpState extends State<UserPfp> {
           return Container(
             height: 110,
             padding: const EdgeInsets.all(15.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text("Profile Picture"),
+            child: GestureDetector(
+              onTap: () {
+                Provider.of<UserPfpProvider>(context, listen: false)
+                    .fetchUserPfpFromGallery();
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // modal sheet title
+                  const Padding(
+                    padding:  EdgeInsets.only(top: 8.0, bottom: 8.0),
+                    child:  Text(AppString.userPfpModalProfile),
+                  ),
 
-                // profile source (Gallary)
-                Row(
-                  children: [
-                    IconButton(
-                        onPressed: () async {
-                          logger.i("getting from gallary");
-                          final XFile? selectedImage = await widget.picker
-                              .pickImage(source: ImageSource.gallery);
-                          setState(() {
-                            widget.imagePath = selectedImage;
-                          });
-                        },
-                        icon: const Icon(Icons.photo)),
-                    const Text("Gallary")
-                  ],
-                )
-              ],
+                  // profile source (Gallary)
+                  Row(
+                    children: const [
+                      // galley icon
+                      Icon(Icons.add_photo_alternate_outlined),
+
+                      // icon name
+                      Padding(
+                        padding: EdgeInsets.only(left: 8.0),
+                        child: Text(AppString.userPfpModalGallery),
+                      )
+                    ],
+                  )
+                ],
+              ),
             ),
           );
         });
@@ -52,25 +60,32 @@ class _UserPfpState extends State<UserPfp> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        _profileModalSheetOptions(context);
-      },
-      child: Stack(
-        // pfp holder
-        children: [
-          CircleAvatar(
-            backgroundImage: widget.imagePath == null
-                ? const AssetImage("assets/images/motion_icons/default_pfp.png")
-                : FileImage(File(widget.imagePath!.path)) as ImageProvider,
-            radius: 70,
-          ),
+    return GestureDetector(onTap: () {
+      _profileModalSheetOptions(context);
+    }, child: Consumer<UserPfpProvider>(
+      builder: (context, imagePath, child) {
+        return Stack(
+          // pfp holder
+          children: [
+            CircleAvatar(
+              backgroundImage: imagePath.imagePath == null
+                  ? const AssetImage(
+                      "assets/images/motion_icons/default_pfp.png")
+                  : FileImage(File(imagePath.imagePath!.path)) as ImageProvider,
+              radius: 70,
+            ),
 
-          // camera icon
-          Positioned(
-              bottom: 20, right: 5, child: Icon(Icons.photo_camera, color: blueMainColor,))
-        ],
-      ),
-    );
+            // camera icon
+            Positioned(
+                bottom: 20,
+                right: 5,
+                child: Icon(
+                  Icons.photo_camera,
+                  color: blueMainColor,
+                ))
+          ],
+        );
+      },
+    ));
   }
 }

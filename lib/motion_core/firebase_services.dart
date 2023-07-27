@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:motion/main.dart';
 import 'package:motion/motion_reusable/reuseable.dart';
+
+import 'storage_serices.dart';
 
 //handles the sign in and sign up of users
 //adds user information to the firestore database
@@ -15,7 +18,7 @@ class AuthServices {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // sign in users using email and password
-  static signInUser(context,
+  static Future<void> signInUser(context,
       {required String userEmail, required userPassword}) async {
     // //dialog displayed during sign-in process
     circularIndicator(context);
@@ -23,11 +26,7 @@ class AuthServices {
     try {
       await _auth.signInWithEmailAndPassword(
           email: userEmail, password: userPassword);
-
-      // circularIndicator disposed upon sign-in completion
     } on FirebaseAuthException catch (e) {
-      // // circularIndicator disposed upon sign-in error
-
       if (e.code == "user-not-found") {
         logger.e("no user in the system!");
         // error message
@@ -37,9 +36,11 @@ class AuthServices {
         errorSnack(context, errorMessage: "Incorrect password");
       } else {
         logger.e("something went wrong during the sign in process");
-        errorSnack(context, errorMessage: "Something went wrong on our side:(");
+        errorSnack(context,
+            errorMessage: "Something went wrong on our side:( ");
       }
     } finally {
+      // circularIndicator disposed upon sign-in completion
       navigationKey.currentState!.pop();
     }
   }
@@ -49,7 +50,7 @@ class AuthServices {
       {required String userEmailSignup,
       required String userPasswordSignUp,
       required String userName,
-      required String imagePfpPath}) async {
+      required XFile? imagePfpPath}) async {
     circularIndicator(context);
 
     try {
@@ -62,13 +63,16 @@ class AuthServices {
         String userId = userCredential.user!.uid;
         // add user info to firestore
         await _addUserSignUpDetail(
-            uid: userId, userName: userName, userEmailAdress: userEmailSignup, userPfpPath: imagePfpPath);
+            uid: userId,
+            userName: userName,
+            userEmailAddress: userEmailSignup,
+            userPfpPath: imagePfpPath);
       } else {
         logger.e("Something went wrong");
       }
     } on FirebaseAuthException catch (e) {
       logger.e("something went wrong during the sign up process $e");
-    }finally {
+    } finally {
       navigationKey.currentState!.pop();
     }
   }
@@ -77,12 +81,20 @@ class AuthServices {
   static Future<void> _addUserSignUpDetail(
       {required String uid,
       required String userName,
-      required String userEmailAdress,
-      required String userPfpPath}) async {
-    await _firestore
-        .collection("users")
-        .doc(uid)
-        .set({"user name": userName, "email": userEmailAdress, "pfpPath": userPfpPath});
+      required String userEmailAddress,
+      required XFile? userPfpPath}) async {
+    String? pfpUrl = await StorageServices.uploadUserPfpToFirebaseStorage(
+        userId: uid, userPfpPath: userPfpPath);
+
+    try {
+      await _firestore.collection("users").doc(uid).set({
+        "user name": userName,
+        "email": userEmailAddress,
+        "pfpPath": pfpUrl,
+      });
+    } catch (e) {
+      logger.e("Error: $e");
+    }
   }
 
   // sign out user
@@ -91,11 +103,11 @@ class AuthServices {
 
     try {
       await _auth.signOut();
-
-      Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
-      Navigator.pop(context);
       logger.e("unable to sign out $e");
+      errorSnack(context, errorMessage: "Unable to sign out");
+    } finally {
+      navigationKey.currentState!.pop();
     }
   }
 }

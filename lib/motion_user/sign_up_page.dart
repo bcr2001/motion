@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:motion/motion_core/firebase_services.dart';
+import 'package:motion/motion_providers/user_pfp_provider.dart';
 import 'package:motion/motion_reusable/user_pfp.dart';
 import 'package:motion/motion_themes/app_images.dart';
 import 'package:motion/motion_themes/app_strings.dart';
@@ -8,6 +9,7 @@ import 'package:motion/motion_themes/widget_bg_color.dart';
 import 'package:motion/motion_user/user_reusable.dart';
 import 'package:motion/motion_user/user_validator.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 
 // sign up page when a new user wants to sign up
 class SignUpPage extends StatefulWidget {
@@ -20,9 +22,6 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
-  final ImagePicker _picker = ImagePicker();
-  XFile? _imageFile;
-
   // form key
   final _signUpFormKey = GlobalKey<FormState>();
 
@@ -117,17 +116,11 @@ class _SignUpPageState extends State<SignUpPage> {
               padding: const EdgeInsetsDirectional.symmetric(horizontal: 30),
               child: Column(
                 children: [
-                  // sign up graphics
-                  AppImages.signUpGraphics,
-
                   // sign up SVG,
                   _signUpGraphics(),
 
                   // pfp holder and setter
-                  UserPfp(
-                    imagePath: _imageFile,
-                    picker: _picker,
-                  ),
+                  const UserPfp(),
 
                   // user name text field
                   TextFormFieldBuilder(
@@ -174,8 +167,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           userPasswordSignUp:
                               _signUpPasswordController.text.trim(),
                           userName: _userNameController.text.trim(),
-                          imagePfpPath: _imageFile!.path);
-                      print(_imageFile!.path);
+                          imagePfpPath: Provider.of<UserPfpProvider>(context, listen: false).imagePath);
                     }
                   }),
 
