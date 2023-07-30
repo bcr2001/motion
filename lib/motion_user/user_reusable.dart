@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:motion/motion_themes/motion_text_styling.dart';
 import 'package:motion/motion_themes/widget_bg_color.dart';
 
 // TEXT FIELD CONSTRUCTOR
@@ -35,6 +37,86 @@ class TextFormFieldBuilder extends StatelessWidget {
         ),
         validator: fieldValidator,
       ),
+    );
+  }
+}
+
+// SIGN IN AND SIGN OUT PAGE BUTTON BUILDER
+class AuthPageButtons extends StatelessWidget {
+  final VoidCallback onPressed;
+  final String buttonName;
+
+  const AuthPageButtons(
+      {super.key, required this.buttonName, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 25),
+      child: OutlinedButton(
+          onPressed: onPressed,
+          child: SizedBox(
+            height: 50,
+            width: double.infinity,
+            child: Center(
+                child: Text(
+              buttonName,
+              style: contentStyle(
+                  color: blueMainColor,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 18),
+            )),
+          )),
+    );
+  }
+}
+
+// REGISTER HERE OR LOG IN OPTION
+class RegSignOption extends StatelessWidget {
+  final String optionQuestion;
+  final String optionName;
+  final VoidCallback onTap;
+
+  const RegSignOption(
+      {super.key,
+      required this.optionQuestion,
+      required this.optionName,
+      required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 30),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            optionQuestion,
+          ),
+          GestureDetector(
+            onTap: onTap,
+            child: Text(
+              optionName,
+              style: contentStyle(color: blueMainColor),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+// SVG IMAGE
+class SvgImage extends StatelessWidget {
+  final SvgPicture svgImage;
+
+  const SvgImage({super.key, required this.svgImage});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12.0),
+      child: Align(alignment: Alignment.topLeft, child: svgImage),
     );
   }
 }

@@ -4,8 +4,6 @@ import 'package:motion/motion_providers/pfp_pvd/user_pfp_provider.dart';
 import 'package:motion/motion_reusable/user_pfp.dart';
 import 'package:motion/motion_themes/app_images.dart';
 import 'package:motion/motion_themes/app_strings.dart';
-import 'package:motion/motion_themes/motion_text_styling.dart';
-import 'package:motion/motion_themes/widget_bg_color.dart';
 import 'package:motion/motion_user/user_reusable.dart';
 import 'package:motion/motion_user/user_validator.dart';
 import 'package:provider/provider.dart';
@@ -43,66 +41,6 @@ class _SignUpPageState extends State<SignUpPage> {
     super.dispose();
   }
 
-  // sign up graphics
-  Widget _signUpGraphics() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Align(
-          alignment: Alignment.topLeft,
-          child: AppImages.signUpImage,
-        ),
-      ),
-    );
-  }
-
-  Widget _signUpButton({required VoidCallback onPressed}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 25),
-      child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            elevation: 0,
-            backgroundColor: blueMainColor,
-          ),
-          onPressed: onPressed,
-          child: SizedBox(
-            height: 50,
-            width: double.infinity,
-            child: Center(
-                child: Text(
-              AppString.registerTitle,
-              style: contentStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
-                  fontSize: 18),
-            )),
-          )),
-    );
-  }
-
-  // sign-in option
-  Widget _bottomSignInOption() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 30),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text(
-            AppString.alreadyMember,
-          ),
-          GestureDetector(
-            onTap: widget.toSignInPage,
-            child: Text(
-              AppString.logInTitle,
-              style: contentStyle(color: blueMainColor),
-            ),
-          )
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -116,7 +54,7 @@ class _SignUpPageState extends State<SignUpPage> {
               child: Column(
                 children: [
                   // sign up SVG,
-                  _signUpGraphics(),
+                  SvgImage(svgImage: AppImages.signUpImage),
 
                   // pfp holder and setter
                   const UserPfp(),
@@ -158,20 +96,28 @@ class _SignUpPageState extends State<SignUpPage> {
                         return null;
                       }),
 
-                  // Sign In Button,
-                  _signUpButton(onPressed: () {
-                    if (_signUpFormKey.currentState!.validate()) {
-                      AuthServices.signUpUser(context,
-                          userEmailSignup: _signUpEmailController.text.trim(),
-                          userPasswordSignUp:
-                              _signUpPasswordController.text.trim(),
-                          userName: _userNameController.text.trim(),
-                          imagePfpPath: Provider.of<UserPfpProvider>(context, listen: false).imagePath);
-                    }
-                  }),
+                  // register button
+                  AuthPageButtons(
+                    onPressed: () {
+                      if (_signUpFormKey.currentState!.validate()) {
+                        AuthServices.signUpUser(context,
+                            userEmailSignup: _signUpEmailController.text.trim(),
+                            userPasswordSignUp:
+                                _signUpPasswordController.text.trim(),
+                            userName: _userNameController.text.trim(),
+                            imagePfpPath: Provider.of<UserPfpProvider>(context,
+                                    listen: false)
+                                .imagePath);
+                      }
+                    },
+                    buttonName: AppString.registerTitle,
+                  ),
 
                   // Sign Up Option
-                  _bottomSignInOption(),
+                  RegSignOption(
+                      optionQuestion: AppString.alreadyMember,
+                      optionName: AppString.logInTitle,
+                      onTap: widget.toSignInPage)
                 ],
               ),
             ),

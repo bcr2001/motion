@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:motion/motion_core/firebase_services.dart';
 import 'package:motion/motion_themes/app_images.dart';
 import 'package:motion/motion_themes/app_strings.dart';
-import 'package:motion/motion_themes/motion_text_styling.dart';
-import 'package:motion/motion_themes/widget_bg_color.dart';
 
 import 'user_reusable.dart';
 import 'user_validator.dart';
@@ -36,65 +34,10 @@ class _SignInPageState extends State<SignInPage> {
     super.dispose();
   }
 
-  //second image (Welcome To Motion)
-  Widget welcomeToMotion() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10.0),
-      child: Align(
-          alignment: Alignment.topLeft, child: AppImages.welcomeToMotionImage),
-    );
-  }
-
-  Widget _signInButton({required VoidCallback onPressed}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 25),
-      child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            elevation: 0,
-            backgroundColor: blueMainColor,
-          ),
-          onPressed: onPressed,
-          child: SizedBox(
-            height: 50,
-            width: double.infinity,
-            child: Center(
-                child: Text(
-              AppString.logInTitle,
-              style: contentStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
-                  fontSize: 18),
-            )),
-          )),
-    );
-  }
-
   // multiple devices image
   Widget mulitpleDevices() {
     return Center(
       child: AppImages.devicesImage,
-    );
-  }
-
-  // sign-up option
-  Widget _bottomSignUpOption() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 30),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text(
-            AppString.areYouAMemeber,
-          ),
-          GestureDetector(
-            onTap: widget.toSignUpPage,
-            child: Text(
-              AppString.registerHere,
-              style: contentStyle(color: blueMainColor),
-            ),
-          )
-        ],
-      ),
     );
   }
 
@@ -111,8 +54,8 @@ class _SignInPageState extends State<SignInPage> {
                 padding: const EdgeInsetsDirectional.symmetric(horizontal: 30),
                 child: Column(
                   children: [
-                    // Welcome to motion SVG,
-                    welcomeToMotion(),
+                    // Welcome to motion
+                    SvgImage(svgImage: AppImages.welcomeToMotionImage),
         
                     // Email and password TextField,
                     // email text field
@@ -130,21 +73,26 @@ class _SignInPageState extends State<SignInPage> {
                       fieldHintText: AppString.passwordHintText,
                       fieldValidator: FormValidator.passwordValidator
                     ),
-        
-                    // Sign In Button,
-                    _signInButton(onPressed: () {
-                      if (_signInFormKey.currentState!.validate()) {
-                        AuthServices.signInUser(context,
-                            userEmail: _signInEmailController.text.trim(),
-                            userPassword: _signInPasswordController.text.trim());
-                      }
+                    // Log in button
+                    AuthPageButtons(buttonName: AppString.logInTitle, 
+                    onPressed: (){
+                         if (_signInFormKey.currentState!.validate()) {
+                            AuthServices.signInUser(context,
+                                userEmail: _signInEmailController.text.trim(),
+                                userPassword:
+                                    _signInPasswordController.text.trim());
+                          }
                     }),
         
                     // Devices svg,
                     mulitpleDevices(),
         
                     // Sign Up Option
-                    _bottomSignUpOption(),
+                    RegSignOption(
+                      onTap: widget.toSignUpPage,
+                      optionQuestion: AppString.areYouAMemeber,
+                      optionName: AppString.registerHere,
+                      )
                   ],
                 ),
               ),

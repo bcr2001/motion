@@ -7,6 +7,7 @@ import 'package:motion/motion_providers/theme_pvd/theme_mode_provider.dart';
 import 'package:motion/motion_providers/pfp_pvd/user_pfp_provider.dart';
 import 'package:motion/motion_screens/about_page.dart';
 import 'package:motion/motion_user/auth_page.dart';
+import 'package:motion/motion_user/sign_in_page.dart';
 import 'package:motion/motion_user/sign_up_page.dart';
 import 'package:path/path.dart';
 import 'package:provider/provider.dart';
@@ -66,7 +67,7 @@ class MainMotionApp extends StatelessWidget {
             ? ThemeMode.light
             : ThemeMode.dark,
 
-        home:const  AuthPage(),
+        home:  const AuthPage()
       );
     });
   }
