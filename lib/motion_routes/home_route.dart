@@ -21,49 +21,12 @@ class MotionHomeRoute extends StatelessWidget {
         actions: const [MotionActionButtons()],
         floating: true,
         pinned: true,
-        expandedHeight: 200,
-        flexibleSpace: Consumer<CurrentMonthProvider>(
-          builder: (context, month, child) {
-            return FlexibleSpaceBar(
-              title: Text(
-                month.currentMonthName,
-              ),
-              centerTitle: true,
-              titlePadding: const EdgeInsets.only(top: 18),
-              background: _buildProfileBackground(),
-            );
-          },
-        ));
-  }
-
-  // sliverapp bar background
-  Widget _buildProfileBackground() {
-    return Padding(
-        padding: const EdgeInsets.only(bottom: 20),
-        child: Consumer<FirestoreProvider>(
-          builder: (context, storeInfo, child) {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // user profile picture
-                CircleAvatar(
-                    radius: 60,
-                    backgroundImage: storeInfo.userPfpUrl != null
-                        ? NetworkImage(storeInfo.userPfpUrl!)
-                        : const AssetImage(
-                                "assets/images/motion_icons/default_pfp.png")
-                            as ImageProvider),
-
-                // UserName
-                Text(
-                  storeInfo.userName,
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.w500),
-                )
-              ],
-            );
-          },
-        ));
+        centerTitle: false,
+        title: Consumer<FirestoreProvider>(builder: (context, username, child) {
+          return Text(
+            username.userName,
+          );
+        }));
   }
 
   // quote of the day
@@ -86,7 +49,24 @@ class MotionHomeRoute extends StatelessWidget {
       body: CustomScrollView(
         slivers: [
           _buildAppBar(context),
-          SliverList(delegate: SliverChildListDelegate([quoteOfTheDay()]))
+          SliverList(
+              delegate: SliverChildListDelegate([
+            // current month
+            Consumer<CurrentMonthProvider>(
+              builder: (context, month, child) {
+                return Center(
+                  child: Text(
+                    month.currentMonthName,
+                    style: Theme.of(context).textTheme.headlineSmall,),
+
+                );
+              },
+            ),
+
+            // quote from the zenQuotes API
+            quoteOfTheDay(),
+            
+          ]))
         ],
       ),
     );

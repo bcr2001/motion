@@ -13,6 +13,7 @@ ThemeData darkThemeData = ThemeData(
       // theme for headings 
       headlineLarge: TextEditingStyling.headingLarge(true),
       headlineMedium: TextEditingStyling.headingMedium(true),
+      headlineSmall: TextEditingStyling.headingSmall(true)
     ),
 
     colorScheme: ColorScheme.dark(

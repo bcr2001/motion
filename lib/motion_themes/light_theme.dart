@@ -21,6 +21,7 @@ ThemeData lightThemeData = ThemeData(
     // theme for headings
     headlineLarge: TextEditingStyling.headingLarge(false),
     headlineMedium: TextEditingStyling.headingMedium(false),
+    headlineSmall: TextEditingStyling.headingSmall(false)
   ),
 
   // alert dialog theme

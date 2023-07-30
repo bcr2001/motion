@@ -58,4 +58,14 @@ class TextEditingStyling {
           : Colors.black54,
     );
   }
+
+
+  // headline (Regular page titles) Medium
+  static TextStyle headingSmall(bool isDarkMode) {
+    return _baseStyle.copyWith(
+      fontSize: 20,
+      color: isDarkMode
+          ? darkModeTextColor: Colors.black,
+    );
+  }
 }
