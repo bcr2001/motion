@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:motion/motion_providers/theme_pvd/theme_mode_provider.dart';
-import 'package:motion/motion_themes/motion_text_styling.dart';
-import 'package:motion/motion_themes/widget_bg_color.dart';
+import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
+import 'package:motion/motion_themes/mth_styling/widget_bg_color.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 
 // logger instance
 var logger = Logger();
@@ -13,23 +12,6 @@ var logger = Logger();
 ThemeModeSettings currentSelectedThemeMode(BuildContext context) {
   final selectedTheme = Provider.of<AppThemeModeProvider>(context);
   return selectedTheme.currentThemeMode;
-}
-
-// returns the current month
-String currentMonth() {
-  DateTime currentDate = DateTime.now();
-
-  String currentMonthName = DateFormat.MMMM().format(currentDate);
-
-  return currentMonthName;
-}
-
-// returns the current year
-String currentYear() {
-  // date
-  int currentYearIn = DateTime.now().year;
-
-  return currentYearIn.toString();
 }
 
 // Circular progress indicator

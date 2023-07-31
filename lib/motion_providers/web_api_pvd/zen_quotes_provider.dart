@@ -1,5 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:motion/motion_core/api_requests.dart';
+import 'package:motion/motion_core/mc_api/api_requests.dart';
 import 'package:flutter/material.dart';
 
 // this class handles fetching and

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:motion/motion_themes/app_strings.dart';
+import 'package:motion/motion_themes/mth_app/app_strings.dart';
 
 class MotionTrackRoute extends StatelessWidget {
   const MotionTrackRoute({super.key});

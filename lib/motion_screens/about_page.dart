@@ -1,9 +1,9 @@
 import "package:flutter/material.dart";
 import 'package:motion/motion_reusable/reuseable.dart';
 import 'package:motion/motion_providers/theme_pvd/theme_mode_provider.dart';
-import 'package:motion/motion_themes/app_images.dart';
-import 'package:motion/motion_themes/app_strings.dart';
-import 'package:motion/motion_themes/widget_bg_color.dart';
+import 'package:motion/motion_themes/mth_app/app_images.dart';
+import 'package:motion/motion_themes/mth_app/app_strings.dart';
+import 'package:motion/motion_themes/mth_styling/widget_bg_color.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
@@ -51,7 +51,7 @@ class AboutPage extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.only(bottom: 10),
                       child: Text(
-                        "${currentYear()} ${AppString.motionLLC}",
+                        "2023 ${AppString.motionLLC}",
                         style: Theme.of(context).textTheme.headlineLarge,
                       ),
                     ),

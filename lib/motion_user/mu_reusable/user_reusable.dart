@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:motion/motion_themes/motion_text_styling.dart';
-import 'package:motion/motion_themes/widget_bg_color.dart';
+import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
+import 'package:motion/motion_themes/mth_styling/widget_bg_color.dart';
 
 // TEXT FIELD CONSTRUCTOR
 typedef StringValidator = String? Function(String? value);

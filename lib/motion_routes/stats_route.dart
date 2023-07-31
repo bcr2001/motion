@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:motion/motion_routes/route_action.dart';
-import 'package:motion/motion_themes/app_strings.dart';
+import 'package:motion/motion_themes/mth_app/app_strings.dart';
 
 // stats route
 class MotionStatesRoute extends StatelessWidget {

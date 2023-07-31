@@ -1,11 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:motion/main.dart';
 import 'package:motion/motion_reusable/reuseable.dart';
-
-import 'storage_serices.dart';
 
 //handles the sign in and sign up of users
 //adds user information to the firestore database
@@ -49,8 +45,7 @@ class AuthServices {
   static signUpUser(context,
       {required String userEmailSignup,
       required String userPasswordSignUp,
-      required String userName,
-      required XFile? imagePfpPath}) async {
+      required String userName}) async {
     circularIndicator(context);
 
     try {
@@ -65,8 +60,7 @@ class AuthServices {
         await _addUserSignUpDetail(
             uid: userId,
             userName: userName,
-            userEmailAddress: userEmailSignup,
-            userPfpPath: imagePfpPath);
+            userEmailAddress: userEmailSignup);
       } else {
         logger.e("Something went wrong");
       }
@@ -85,16 +79,11 @@ class AuthServices {
   static Future<void> _addUserSignUpDetail(
       {required String uid,
       required String userName,
-      required String userEmailAddress,
-      required XFile? userPfpPath}) async {
-    String? pfpUrl = await StorageServices.uploadUserPfpToFirebaseStorage(
-        userId: uid, userPfpPath: userPfpPath);
-
+      required String userEmailAddress}) async {
     try {
       await _firestore.collection("users").doc(uid).set({
         "user name": userName,
         "email": userEmailAddress,
-        "pfpPath": pfpUrl,
       });
     } catch (e) {
       logger.e("Error: $e");

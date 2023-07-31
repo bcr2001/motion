@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'motion_text_styling.dart';
-import 'widget_bg_color.dart';
+import '../mth_styling/motion_text_styling.dart';
+import '../mth_styling/widget_bg_color.dart';
 
 ThemeData darkThemeData = ThemeData(
 
@@ -34,7 +34,6 @@ ThemeData darkThemeData = ThemeData(
 
     appBarTheme: AppBarTheme(
         centerTitle: true,
-        titleTextStyle: TextEditingStyling.appTitleStyle,
         backgroundColor: darkThemeWidgetBgColor),
 
     scaffoldBackgroundColor: Colors.black,

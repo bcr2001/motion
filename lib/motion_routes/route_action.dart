@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:motion/motion_core/firebase_services.dart';
+import 'package:motion/motion_core/mc_firebase/firebase_services.dart';
 import 'package:motion/motion_providers/firestore_pvd/firestore_provider.dart';
 import 'package:motion/motion_screens/settings_page.dart';
-import 'package:motion/motion_themes/app_strings.dart';
-import 'package:motion/motion_themes/motion_text_styling.dart';
-import 'package:motion/motion_themes/widget_bg_color.dart';
+import 'package:motion/motion_themes/mth_app/app_strings.dart';
+import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
+import 'package:motion/motion_themes/mth_styling/widget_bg_color.dart';
 import 'package:provider/provider.dart';
 
 // app bar action button

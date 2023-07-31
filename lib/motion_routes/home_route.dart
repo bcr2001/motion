@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:motion/motion_providers/date_data_pvd/current_month_provider.dart';
-import 'package:motion/motion_providers/firestore_pvd/firestore_provider.dart';
 import 'package:motion/motion_providers/theme_pvd/theme_mode_provider.dart';
 import 'package:motion/motion_providers/web_api_pvd/zen_quotes_provider.dart';
 import 'package:provider/provider.dart';
@@ -14,19 +13,24 @@ class MotionHomeRoute extends StatelessWidget {
   // home sliverapp bar
   SliverAppBar _buildAppBar(BuildContext context) {
     return SliverAppBar(
-        backgroundColor:
-            currentSelectedThemeMode(context) == ThemeModeSettings.darkMode
-                ? Colors.black
-                : Colors.white,
-        actions: const [MotionActionButtons()],
-        floating: true,
-        pinned: true,
-        centerTitle: false,
-        title: Consumer<FirestoreProvider>(builder: (context, username, child) {
+      backgroundColor:
+          currentSelectedThemeMode(context) == ThemeModeSettings.darkMode
+              ? Colors.black
+              : Colors.white,
+      actions: const [MotionActionButtons()],
+      floating: true,
+      pinned: true,
+      centerTitle: false,
+      title: // current month
+          Consumer<CurrentMonthProvider>(
+        builder: (context, month, child) {
           return Text(
-            username.userName,
+            month.currentMonthName,
+            style: Theme.of(context).textTheme.headlineSmall,
           );
-        }));
+        },
+      ),
+    );
   }
 
   // quote of the day
@@ -51,21 +55,8 @@ class MotionHomeRoute extends StatelessWidget {
           _buildAppBar(context),
           SliverList(
               delegate: SliverChildListDelegate([
-            // current month
-            Consumer<CurrentMonthProvider>(
-              builder: (context, month, child) {
-                return Center(
-                  child: Text(
-                    month.currentMonthName,
-                    style: Theme.of(context).textTheme.headlineSmall,),
-
-                );
-              },
-            ),
-
             // quote from the zenQuotes API
             quoteOfTheDay(),
-            
           ]))
         ],
       ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'motion_text_styling.dart';
+import '../mth_styling/motion_text_styling.dart';
 
 ThemeData lightThemeData = ThemeData(
   colorScheme: const ColorScheme.light(
@@ -7,9 +7,8 @@ ThemeData lightThemeData = ThemeData(
   ),
 
   // app bar theme
-  appBarTheme: AppBarTheme(
+  appBarTheme: const AppBarTheme(
     centerTitle: true,
-    titleTextStyle: TextEditingStyling.appTitleStyle,
   ),
 
   // text theme

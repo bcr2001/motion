@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:motion/motion_providers/theme_pvd/theme_mode_provider.dart';
-import 'package:motion/motion_themes/app_strings.dart';
-import 'package:motion/motion_themes/motion_text_styling.dart';
+import 'package:motion/motion_themes/mth_app/app_strings.dart';
+import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:provider/provider.dart';
 import 'about_page.dart';
+import 'screens_reusable.dart';
 
 // settings page
 class SettingsPage extends StatelessWidget {
@@ -13,9 +14,8 @@ class SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           AppString.settingsTitle,
-          style: TextEditingStyling.appTitleStyle,
         ),
         centerTitle: true,
       ),
@@ -24,32 +24,38 @@ class SettingsPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // user information and editing
+            const UserSettingsInfo(),
+
             // theme mode settings
             const _ThemeModeSettingsOption(),
 
             // download personal information settings
-            _SettingsOptions(
-              onTap: (){},
+            SettingsOptions(
+              null,
+              onTap: () {},
               settingsTitle: AppString.downloadDataTitle,
-              settingsDesciption: AppString.downloadDataDescription,),
+              settingsDesciption: AppString.downloadDataDescription,
+            ),
 
             // notifications settings
-            _SettingsOptions(
+            SettingsOptions(
+              null,
               onTap: () {},
               settingsTitle: AppString.notificationTitle,
               settingsDesciption: AppString.notificationDescription,
             ),
-
+  
             // about motion
-            _SettingsOptions(
+            SettingsOptions(
+              null,
               onTap: () {
-              Navigator.push(context,
+                Navigator.push(context,
                     MaterialPageRoute(builder: (context) => const AboutPage()));
               },
               settingsTitle: AppString.aboutMotionTitle,
               settingsDesciption: AppString.aboutMotionDescription,
             ),
-
           ],
         ),
       ),
@@ -72,7 +78,8 @@ class _ThemeModeSettingsOption extends StatelessWidget {
           ),
           subtitle: Text(
             themeValue.currentThemeModeName,
-            style: Theme.of(context).textTheme.headlineMedium,),
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
           trailing: Switch(
             activeColor: const Color(0xFF00B0F0),
             value: themeValue.switchValue,
@@ -83,29 +90,5 @@ class _ThemeModeSettingsOption extends StatelessWidget {
         );
       },
     );
-  }
-}
-
-// setting options list tile constructors
-class _SettingsOptions extends StatelessWidget {
-  final String settingsTitle;
-  final String settingsDesciption;
-  final VoidCallback onTap;
-
-  const _SettingsOptions(
-      {required this.settingsTitle,
-      required this.settingsDesciption,
-      required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child:ListTile(
-          onTap: onTap,
-            title: Text(settingsTitle, style: Theme.of(context).textTheme.headlineLarge,),
-            subtitle: Text(settingsDesciption, style: Theme.of(context).textTheme.headlineMedium,),
-          ),
-        );
   }
 }

@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:motion/motion_core/firestore_services.dart';
+import 'package:motion/motion_core/mc_firebase/firestore_services.dart';
 
+// this provider gets the current user's user name 
 class FirestoreProvider extends ChangeNotifier {
   String _userName = "";
 

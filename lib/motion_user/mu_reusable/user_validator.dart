@@ -1,4 +1,4 @@
-import 'package:motion/motion_themes/app_strings.dart';
+import 'package:motion/motion_themes/mth_app/app_strings.dart';
 
 // TEXT FORM FIELD VALIDATOR
 class FormValidator {

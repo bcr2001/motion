@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:motion/motion_core/firebase_services.dart';
-import 'package:motion/motion_themes/app_images.dart';
-import 'package:motion/motion_themes/app_strings.dart';
+import 'package:motion/motion_core/mc_firebase/firebase_services.dart';
+import 'package:motion/motion_themes/mth_app/app_images.dart';
+import 'package:motion/motion_themes/mth_app/app_strings.dart';
 
-import 'user_reusable.dart';
-import 'user_validator.dart';
+import '../mu_reusable/user_reusable.dart';
+import '../mu_reusable/user_validator.dart';
 
 // sign in screen when the user is signed out
 class SignInPage extends StatefulWidget {
