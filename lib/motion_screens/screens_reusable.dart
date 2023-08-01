@@ -9,6 +9,7 @@ class UserSettingsInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        // username
         // user name
         Consumer<FirestoreProvider>(
           builder: (context, username, child) {

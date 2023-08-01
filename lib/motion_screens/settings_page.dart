@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:motion/motion_providers/theme_pvd/theme_mode_provider.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
-import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:provider/provider.dart';
 import 'about_page.dart';
 import 'screens_reusable.dart';
@@ -45,7 +44,7 @@ class SettingsPage extends StatelessWidget {
               settingsTitle: AppString.notificationTitle,
               settingsDesciption: AppString.notificationDescription,
             ),
-  
+
             // about motion
             SettingsOptions(
               null,

@@ -4,7 +4,6 @@ import 'package:motion/motion_providers/theme_pvd/theme_mode_provider.dart';
 import 'package:motion/motion_routes/home_route.dart';
 import 'package:motion/motion_routes/motion_route.dart';
 import 'package:motion/motion_routes/stats_route.dart';
-import 'package:motion/motion_themes/mth_styling/widget_bg_color.dart';
 import 'package:provider/provider.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 
