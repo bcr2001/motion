@@ -27,8 +27,12 @@ ThemeData lightThemeData = ThemeData(
   dialogTheme:
       DialogTheme(titleTextStyle: TextEditingStyling.dialogTitleTextStyle),
 
-  // elevated button
-
+  // expansion tile
+  cardTheme: const CardTheme(
+    elevation: 1,
+    margin:  EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
+    color:  Color(0xFFF8F8FF)
+  ),
   useMaterial3: true,
   visualDensity: VisualDensity.adaptivePlatformDensity,
   brightness: Brightness.light,

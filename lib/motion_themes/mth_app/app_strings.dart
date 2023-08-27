@@ -56,4 +56,7 @@ class AppString {
   static const String appDescription =
       "Motion offers a user-friendly and effective solution for tracking and analyzing time, providing tools for seamless data collection, visual representation, and comprehensive reporting.";
   static const String motionLLC = "MOTION LLC. ALL RIGHTS RESERVED";
+
+  // TRACK (MOTION) PAGE
+  static const String educationMainCategory = "Education";
 }

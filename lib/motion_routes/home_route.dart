@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:motion/motion_providers/date_data_pvd/current_month_provider.dart';
-import 'package:motion/motion_providers/theme_pvd/theme_mode_provider.dart';
-import 'package:motion/motion_providers/web_api_pvd/zen_quotes_provider.dart';
+import 'package:motion/motion_core/motion_providers/date_pvd/current_month_provider.dart';
+import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_provider.dart';
+import 'package:motion/motion_core/motion_providers/web_api_pvd/zen_quotes_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:motion/motion_routes/route_action.dart';
 import 'package:motion/motion_reusable/reuseable.dart';
