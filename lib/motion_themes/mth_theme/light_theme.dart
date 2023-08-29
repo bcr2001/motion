@@ -48,7 +48,7 @@ ThemeData lightThemeData = ThemeData(
   iconTheme: const IconThemeData(
     color: Colors.black
   ),
-
+  
   useMaterial3: true,
   visualDensity: VisualDensity.adaptivePlatformDensity,
   brightness: Brightness.light,

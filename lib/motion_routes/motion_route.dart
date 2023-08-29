@@ -1,7 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:motion/main.dart';
+import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_provider.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/assigner.dart';
+import 'package:motion/motion_core/motion_providers/track_pcd/track.dart';
 import 'package:motion/motion_reusable/mu_reusable/user_validator.dart';
-import 'package:motion/motion_reusable/reuseable.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:motion/motion_reusable/mu_reusable/user_reusable.dart';
 import 'package:provider/provider.dart';
@@ -19,6 +22,7 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
 
   // subcategory text editting controller
   TextEditingController subcategoryController = TextEditingController();
+
 
   @override
   void dispose() {
@@ -65,20 +69,46 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
           return AlertDialog(
             title: const Text(AppString.alertDialogTitle),
             content: SizedBox(
-              height: screenHeight * 0.4,
+              height: screenHeight * 0.25,
               child: Form(
                 key: _formKey,
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     // drop down menu to select main category
                     const MyDropdownButton(),
+
 
                     // text field to type subcategory name
                     TextFormFieldBuilder(
                         fieldKeyboardType: TextInputType.text,
                         fieldTextEditingController: subcategoryController,
-                        fieldHintText: "Subcategory Name",
-                        fieldValidator: FormValidator.subcategoryValidator)
+                        fieldHintText: AppString.trackTextFormFieldHintText,
+                        fieldValidator: FormValidator.subcategoryValidator),
+
+                    // cancel and add buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // cancel
+                        TextButton(
+                            onPressed: () {
+                              navigationKey.currentState!.pop();
+                            },
+                            child: Text(
+                              AppString.trackCancelTextButton,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            )),
+
+                        // add
+                        TextButton(
+                            onPressed: () {},
+                            child: Text(
+                              AppString.trackAddTextButton,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ))
+                      ],
+                    )
                   ],
                 ),
               ),
@@ -125,7 +155,7 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                                     title: Text(assigned.subcategoryName),
                                   )
                                 : const SizedBox.shrink();
-                          }))
+                          })),
                 ],
               );
             },
@@ -142,9 +172,6 @@ class MyDropdownButton extends StatefulWidget {
 }
 
 class _MyDropdownButtonState extends State<MyDropdownButton> {
-  String? _selectedCategory;
-
-
   List<String> listItems = [
     "Education",
     "Skills",
@@ -155,24 +182,29 @@ class _MyDropdownButtonState extends State<MyDropdownButton> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: DropdownButton(
-        isExpanded: true,
-        icon: const Icon(Icons.arrow_drop_down),
-        value: _selectedCategory,
-        hint: const Text('Select a value'),
-        items: listItems.map((String value) {
-          return DropdownMenuItem(
-            value: value,
-            child: Text(value),
-          );
-        }).toList(),
-        onChanged: (String? newValue) {
-          setState(() {
-            _selectedCategory = newValue;
-          });
-        },
-      ),
+    return Consumer<TrackProvider>(
+      builder: (context, selectedValue, child) {
+        return DropdownButton(
+          isExpanded: true,
+          elevation: 0,
+          icon: const Icon(Icons.arrow_drop_down),
+          iconSize: 28,
+          value: selectedValue.selectedValue,
+          hint: const Text(AppString.trackDropDownHintText),
+          items: listItems.map((String value) {
+            return DropdownMenuItem(
+              value: value,
+              child: Text(value),
+            );
+          }).toList(),
+          onChanged: (String? newValue) {
+            if (newValue != null) {
+              Provider.of<TrackProvider>(context, listen: false)
+                  .changeSelectedValue(newValue);
+            }
+          },
+        );
+      },
     );
   }
 }

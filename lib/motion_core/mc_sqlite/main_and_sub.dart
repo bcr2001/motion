@@ -4,56 +4,90 @@ import 'package:path/path.dart';
 
 class Assigner {
   int? id;
+  final String currentLoggedInUser;
   final String subcategoryName;
   final String mainCategoryName;
+  int isActive;
   final String dateCreated;
 
   Assigner(
-      {required this.subcategoryName, required this.mainCategoryName, required this.dateCreated,this.id});
+      {required this.currentLoggedInUser,
+      required this.subcategoryName,
+      required this.mainCategoryName,
+      required this.dateCreated,
+      this.isActive = 0,
+      this.id});
+  // (0 == false while 1 == true)
 
   factory Assigner.fromAssignerMap(Map<String, dynamic> map) {
     return Assigner(
+        currentLoggedInUser: map["currentLoggedInUser"],
         subcategoryName: map["subcategoryName"],
         mainCategoryName: map["mainCategoryName"],
-        dateCreated: map["dataCreated"]);
+        isActive: map["isActive"],
+        dateCreated: map["dateCreated"]);
   }
 
   Map<String, dynamic> toMap() {
     return {
       "id": id,
+      "currentLoggedInUser": currentLoggedInUser,
       "subcategoryName": subcategoryName,
       "mainCategoryName": mainCategoryName,
-      "dataCreated": dateCreated
+      "isActive": isActive,
+      "dateCreated": dateCreated
     };
   }
 
   @override
   String toString() {
-    return 'CategoryAssigner{id: $id, subcategoryName: $subcategoryName, mainCategoryName: $mainCategoryName}, dataCreated: $dateCreated';
+    return 'CategoryAssigner{id: $id,currentLoggedInUser: $currentLoggedInUser ,subcategoryName: $subcategoryName, mainCategoryName: $mainCategoryName, isActive: $isActive,dateCreated: $dateCreated}';
   }
 }
 
 class AssignerDatabaseHelper {
-  static Future<Database> assignerDatabase() async {
-    final dbPath = await getDatabasesPath();
+  static final AssignerDatabaseHelper _instance =
+      AssignerDatabaseHelper._privateConstructor();
 
-    return await openDatabase(join(dbPath, "assigner.db"), version: 1,
-        onCreate: (db, version) async {
-      await db.execute("""
-        CREATE TABLE to_assign(
-          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-          subcategoryName TEXT,
-          mainCategoryName TEXT,
-          dataCreated TEXT
-        )
-        """);
-    });
+  static Database? _database;
+
+  AssignerDatabaseHelper._privateConstructor();
+
+  factory AssignerDatabaseHelper() {
+    return _instance;
   }
 
-  // insert data into the database
-  static Future<void> assignInsert(Assigner categoryAssigner) async {
+  Future<Database> get database async {
+    if (_database != null) {
+      return _database!;
+    }
+    _database = await _initDatabase();
+    return _database!;
+  }
+
+  Future<Database> _initDatabase() async {
+    final dbPath = await getDatabasesPath();
+    final path = join(dbPath, "assigner.db");
+
+    return await openDatabase(path, version: 1, onCreate: _onCreate);
+  }
+
+  Future<void> _onCreate(Database db, int version) async {
+    await db.execute("""
+      CREATE TABLE to_assign(
+        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+        currentLoggedInUser TEXT,
+        subcategoryName TEXT,
+        mainCategoryName TEXT,
+        isActive INTEGER,
+        dataCreated TEXT
+      )
+    """);
+  }
+
+  Future<void> assignInsert(Assigner categoryAssigner) async {
     try {
-      final db = await AssignerDatabaseHelper.assignerDatabase();
+      final db = await database;
 
       await db.insert("to_assign", categoryAssigner.toMap(),
           conflictAlgorithm: ConflictAlgorithm.replace);
@@ -62,10 +96,9 @@ class AssignerDatabaseHelper {
     }
   }
 
-  // update data
-  static Future<void> assignUpdate(Assigner categoryAssigner) async {
+  Future<void> assignUpdate(Assigner categoryAssigner) async {
     try {
-      final db = await AssignerDatabaseHelper.assignerDatabase();
+      final db = await database;
 
       await db.update("to_assign", categoryAssigner.toMap(),
           where: "id = ?", whereArgs: [categoryAssigner.id]);
@@ -74,10 +107,9 @@ class AssignerDatabaseHelper {
     }
   }
 
-  // delete data
-  static Future<void> assignDelete(int id) async {
+  Future<void> assignDelete(int id) async {
     try {
-      final db = await AssignerDatabaseHelper.assignerDatabase();
+      final db = await database;
 
       await db.delete("to_assign", where: "id = ?", whereArgs: [id]);
     } catch (e) {
@@ -85,8 +117,7 @@ class AssignerDatabaseHelper {
     }
   }
 
-  // delete the database
-  static Future<void> deleteDB() async {
+  Future<void> deleteDB() async {
     try {
       final dbPath = await getDatabasesPath();
 
@@ -96,10 +127,9 @@ class AssignerDatabaseHelper {
     }
   }
 
-  // get all data in the database
-  static Future<List<Assigner>> getAllItems() async {
+  Future<List<Assigner>> getAllItems() async {
     try {
-      final db = await AssignerDatabaseHelper.assignerDatabase();
+      final db = await database;
 
       final allItems = await db.query("to_assign");
 
@@ -110,14 +140,15 @@ class AssignerDatabaseHelper {
     }
   }
 
-  // get all the subcategories under a main category
-  static Future<List<Assigner>> getSubcategories(
-      String mainCategoryName) async {
+  Future<List<Assigner>> getSubcategories(String mainCategoryName) async {
     try {
-      final db = await AssignerDatabaseHelper.assignerDatabase();
+      final db = await database;
 
-      final subcategories = await db.query("to_assign",
-          where: "mainCategoryName = ?", whereArgs: [mainCategoryName]);
+      final subcategories = await db.query(
+        "to_assign",
+        where: "mainCategoryName = ?",
+        whereArgs: [mainCategoryName],
+      );
 
       return subcategories.map((map) => Assigner.fromAssignerMap(map)).toList();
     } catch (e) {
