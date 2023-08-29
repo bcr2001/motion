@@ -59,4 +59,11 @@ class AppString {
 
   // TRACK (MOTION) PAGE
   static const String educationMainCategory = "Education";
+  static const String addItem = "Add";
+  static const String alertDialogTitle = "Create a new subcatrgory";
+  static const String emptySubcategoryValidatorMessage = "cannot create an empty subcategory";
+  static const String subcategoryContainsNumberMessage = "a subcategory name cannot contain numbers";
+  static const String subcategoryContainsSpacesMessage = "use '/' to separate grouped subcategories";
+
+
 }

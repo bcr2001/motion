@@ -6,27 +6,30 @@ class Assigner {
   int? id;
   final String subcategoryName;
   final String mainCategoryName;
+  final String dateCreated;
 
   Assigner(
-      {required this.subcategoryName, required this.mainCategoryName, this.id});
+      {required this.subcategoryName, required this.mainCategoryName, required this.dateCreated,this.id});
 
   factory Assigner.fromAssignerMap(Map<String, dynamic> map) {
     return Assigner(
         subcategoryName: map["subcategoryName"],
-        mainCategoryName: map["mainCategoryName"]);
+        mainCategoryName: map["mainCategoryName"],
+        dateCreated: map["dataCreated"]);
   }
 
   Map<String, dynamic> toMap() {
     return {
       "id": id,
       "subcategoryName": subcategoryName,
-      "mainCategoryName": mainCategoryName
+      "mainCategoryName": mainCategoryName,
+      "dataCreated": dateCreated
     };
   }
 
   @override
   String toString() {
-    return 'CategoryAssigner{id: $id, subcategoryName: $subcategoryName, mainCategoryName: $mainCategoryName}';
+    return 'CategoryAssigner{id: $id, subcategoryName: $subcategoryName, mainCategoryName: $mainCategoryName}, dataCreated: $dateCreated';
   }
 }
 
@@ -40,7 +43,8 @@ class AssignerDatabaseHelper {
         CREATE TABLE to_assign(
           id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
           subcategoryName TEXT,
-          mainCategoryName TEXT
+          mainCategoryName TEXT,
+          dataCreated TEXT
         )
         """);
     });
