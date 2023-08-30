@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:motion/firebase_options.dart';
+import 'package:motion/motion_core/mc_sqlite/main_and_sub.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_month_provider.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/firestore_provider.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_provider.dart';
@@ -20,14 +21,21 @@ import 'motion_themes/mth_theme/light_theme.dart';
 
 final GlobalKey<NavigatorState> navigationKey = GlobalKey<NavigatorState>();
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
 
+
+  AssignerDatabaseHelper databaseHelper = AssignerDatabaseHelper();
+
+  // List alldata = await databaseHelper.getAllItems("unknown");
+
+  // print(alldata);
+
+  await databaseHelper.deleteDB();
+
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  final userUidProvider = UserUidProvider();
 
   // AppThemeModeProvider Instance
   final appThemeMode = AppThemeModeProvider();
@@ -39,13 +47,7 @@ void main() async {
 
   runApp(MultiProvider(
     providers: [
-      ChangeNotifierProvider.value(value: userUidProvider),
-      StreamProvider<User?>.value(
-        initialData: null,
-        value: FirebaseAuth.instance.authStateChanges(),
-      ),
       ChangeNotifierProvider(create: (context) => TrackProvider()),
-      ChangeNotifierProvider(create: (context) => AssignerProvider()),
       ChangeNotifierProvider(create: (context) => CurrentDataProvider()),
       ChangeNotifierProvider.value(value: appThemeMode),
       ChangeNotifierProvider(create: (context) => zenQuoteProvider),
@@ -54,6 +56,8 @@ void main() async {
     ],
     child: const MainMotionApp(),
   ));
+
+
 }
 
 // Material App and theme configuration
@@ -78,7 +82,7 @@ class MainMotionApp extends StatelessWidget {
           themeMode: themeValue.currentThemeMode == ThemeModeSettings.lightMode
               ? ThemeMode.light
               : ThemeMode.dark,
-          home: const MotionTrackRoute());
+          home: const AuthPage());
     });
   }
 }

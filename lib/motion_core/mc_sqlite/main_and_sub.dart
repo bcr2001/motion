@@ -11,16 +11,19 @@ class Assigner {
   final String dateCreated;
 
   Assigner(
-      {required this.currentLoggedInUser,
-      required this.subcategoryName,
-      required this.mainCategoryName,
-      required this.dateCreated,
-      this.isActive = 0,
-      this.id});
+    {
+    this.id, 
+    required this.currentLoggedInUser,
+    required this.subcategoryName,
+    required this.mainCategoryName,
+    required this.dateCreated,
+    this.isActive = 0,
+  });
   // (0 == false while 1 == true)
 
   factory Assigner.fromAssignerMap(Map<String, dynamic> map) {
     return Assigner(
+        id: map["id"],
         currentLoggedInUser: map["currentLoggedInUser"],
         subcategoryName: map["subcategoryName"],
         mainCategoryName: map["mainCategoryName"],
@@ -30,7 +33,6 @@ class Assigner {
 
   Map<String, dynamic> toMap() {
     return {
-      "id": id,
       "currentLoggedInUser": currentLoggedInUser,
       "subcategoryName": subcategoryName,
       "mainCategoryName": mainCategoryName,
@@ -69,7 +71,7 @@ class AssignerDatabaseHelper {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, "assigner.db");
 
-    return await openDatabase(path, version: 1, onCreate: _onCreate);
+    return await openDatabase(path, version: 4, onCreate: _onCreate);
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -80,7 +82,7 @@ class AssignerDatabaseHelper {
         subcategoryName TEXT,
         mainCategoryName TEXT,
         isActive INTEGER,
-        dataCreated TEXT
+        dateCreated TEXT
       )
     """);
   }
@@ -127,11 +129,12 @@ class AssignerDatabaseHelper {
     }
   }
 
-  Future<List<Assigner>> getAllItems() async {
+  Future<List<Assigner>> getAllItems(String currentUser) async {
     try {
       final db = await database;
 
-      final allItems = await db.query("to_assign");
+      final allItems = await db.query("to_assign",
+          where: "currentLoggedInUser = ?", whereArgs: [currentUser]);
 
       return allItems.map((map) => Assigner.fromAssignerMap(map)).toList();
     } catch (e) {

@@ -24,13 +24,6 @@ class AuthServices {
     try {
       await _auth.signInWithEmailAndPassword(
           email: userEmail, password: userPassword);
-
-      final user = _auth.currentUser;
-      if (user != null) {
-        final userUidProvider =
-            Provider.of<UserUidProvider>(context, listen: false);
-        userUidProvider.setUserUid(user.uid);
-      }
     } on FirebaseAuthException catch (e) {
       if (e.code == "user-not-found") {
         logger.e("no user in the system!");

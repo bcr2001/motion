@@ -1,10 +1,12 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:motion/main.dart';
+import 'package:motion/motion_core/mc_sqlite/main_and_sub.dart';
+import 'package:motion/motion_core/motion_providers/date_pvd/current_date.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_provider.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/assigner.dart';
 import 'package:motion/motion_core/motion_providers/track_pcd/track.dart';
 import 'package:motion/motion_reusable/mu_reusable/user_validator.dart';
+import 'package:motion/motion_reusable/reuseable.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:motion/motion_reusable/mu_reusable/user_reusable.dart';
 import 'package:provider/provider.dart';
@@ -23,17 +25,18 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
   // subcategory text editting controller
   TextEditingController subcategoryController = TextEditingController();
 
-
   @override
   void dispose() {
     subcategoryController.dispose();
     super.dispose();
   }
 
+
   // card constructor
   Widget _cardConstructor(context,
       {required cardTitle, required ListView cardListView}) {
-    return SizedBox(
+    return Container(
+      margin: const EdgeInsets.only(top: 10.0),
       child: Card(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -78,7 +81,6 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                     // drop down menu to select main category
                     const MyDropdownButton(),
 
-
                     // text field to type subcategory name
                     TextFormFieldBuilder(
                         fieldKeyboardType: TextInputType.text,
@@ -100,13 +102,14 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                               style: Theme.of(context).textTheme.bodyMedium,
                             )),
 
-                        // add
                         TextButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              navigationKey.currentState!.pop();
+                            },
                             child: Text(
                               AppString.trackAddTextButton,
                               style: Theme.of(context).textTheme.bodyMedium,
-                            ))
+                            )),  
                       ],
                     )
                   ],
@@ -137,30 +140,29 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
           ),
         ),
         body: Padding(
-          padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
-          child: Consumer<AssignerProvider>(
-            builder: (context, assignedList, child) {
-              return ListView(
-                children: [
-                  // Education Category
-                  _cardConstructor(context,
-                      cardTitle: AppString.educationMainCategory,
-                      cardListView: ListView.builder(
-                          itemCount: assignedList.assignedItems.length,
-                          shrinkWrap: true,
-                          itemBuilder: (BuildContext context, index) {
-                            var assigned = assignedList.assignedItems[index];
-                            return assigned.mainCategoryName == "Education"
-                                ? ListTile(
-                                    title: Text(assigned.subcategoryName),
-                                  )
-                                : const SizedBox.shrink();
-                          })),
+          padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+          child: ListView(
+                children: const  [
+                  // // // Education Category
+                  // _cardConstructor(context,
+                  //     cardTitle: AppString.educationMainCategory,
+                  //     cardListView: ListView.builder(
+                  //         itemCount: assignedList.assignedItems.length,
+                  //         shrinkWrap: true,
+                  //         itemBuilder: (BuildContext context, index) {
+                  //           var assigned = assignedList.assignedItems[index];
+                  //           return assigned.mainCategoryName == "Education"
+                  //               ? ListTile(
+                  //                   title: Text(assigned.subcategoryName),
+                  //                 )
+                  //               : const SizedBox.shrink();
+                  //         })),
+
                 ],
-              );
-            },
+            
           ),
-        ));
+          ),
+        );
   }
 }
 
