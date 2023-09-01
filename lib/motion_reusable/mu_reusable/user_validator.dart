@@ -37,9 +37,6 @@ class FormValidator {
       return AppString.emptySubcategoryValidatorMessage;
     } else if (value.contains(RegExp(r'[0-9]'))) {
       return AppString.subcategoryContainsNumberMessage;
-    } else if (value.contains(RegExp(r'\s'))) {
-      return AppString.subcategoryContainsSpacesMessage;
-    }
-    return null;
+    }return null;
   }
 }

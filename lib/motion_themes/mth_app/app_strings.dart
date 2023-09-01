@@ -60,6 +60,9 @@ class AppString {
   // TRACK (MOTION) PAGE
   static const String educationMainCategory = "Education";
   static const String skillMainCategory = "Skills";
+  static const String entertainmentMainCategory = "Entertainment";
+  static const String pgMainCategory = "Personal Growth";
+  static const String sleepMainCategory = "Sleep";
   static const String addItem = "Add";
   static const String alertDialogTitle = "Add a new subcategory";
   static const String emptySubcategoryValidatorMessage = "cannot create an empty subcategory";

@@ -10,5 +10,5 @@ Color blueMainColor = const Color(0xFF00B0F0);
 Color dialogGreyColor = const Color(0XFF2C3040);
 
 // app content widget background colot
-Color lightModeContentWidget = const Color(0xFFF8F8FF);
+Color lightModeContentWidget = const Color(0xFFF5F5FF);
 Color darkModeContentWidget = const Color(0xFF1F222E);

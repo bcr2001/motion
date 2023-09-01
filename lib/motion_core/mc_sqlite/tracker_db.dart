@@ -1,8 +1,6 @@
-import 'package:motion/motion_reusable/reuseable.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
-// main categories structure
 class MainCategory {
   final String date;
   final int education;
@@ -10,206 +8,184 @@ class MainCategory {
   final int entertainment;
   final int personalGrowth;
   final int sleep;
+  final String currentLoggedInUser;
 
-  MainCategory(
-      {required this.date,
-      required this.education,
-      required this.skills,
-      required this.entertainment,
-      required this.personalGrowth,
-      required this.sleep});
+  MainCategory({
+    required this.date,
+    required this.education,
+    required this.skills,
+    required this.entertainment,
+    required this.personalGrowth,
+    required this.sleep,
+    required this.currentLoggedInUser,
+  });
 
-  factory MainCategory.fromMainMap(Map<String, dynamic> map) {
+  // Factory constructor to convert a map to MainCategory object
+  factory MainCategory.fromMap(Map<String, dynamic> map) {
     return MainCategory(
-      date: map["date"],
-      education: map["education"],
-      skills: map["skills"],
-      entertainment: map["entertainment"],
-      personalGrowth: map["personalGrowth"],
-      sleep: map["sleep"],
+      date: map['date'],
+      education: map['education'],
+      skills: map['skills'],
+      entertainment: map['entertainment'],
+      personalGrowth: map['personalGrowth'],
+      sleep: map['sleep'],
+      currentLoggedInUser: map['currentLoggedInUser'],
     );
   }
 
-  Map<String, dynamic> toMapMain() {
+  // Convert MainCategory object to a map
+  Map<String, dynamic> toMap() {
     return {
-      "date": date,
-      "education": education,
-      "skills": skills,
-      "entertainment": entertainment,
-      "personalGrowth": personalGrowth,
-      "sleep": sleep
+      'date': date,
+      'education': education,
+      'skills': skills,
+      'entertainment': entertainment,
+      'personalGrowth': personalGrowth,
+      'sleep': sleep,
+      'currentLoggedInUser': currentLoggedInUser,
     };
-  }
-
-  @override
-  String toString() {
-    return 'MainCategory{'
-        'date: $date, '
-        'education: $education, '
-        'skills: $skills, '
-        'entertainment: $entertainment, '
-        'personalGrowth: $personalGrowth, '
-        'sleep: $sleep'
-        '}';
   }
 }
 
-// subcategories structure
 class Subcategories {
   final String subDate;
   final String mainCategoryName;
   final String subcategoryName;
   final int timeSpent;
+  final String currentLoggedInUser;
 
-  Subcategories(
-      {required this.subDate,
-      required this.mainCategoryName,
-      required this.subcategoryName,
-      required this.timeSpent});
+  Subcategories({
+    required this.subDate,
+    required this.mainCategoryName,
+    required this.subcategoryName,
+    required this.timeSpent,
+    required this.currentLoggedInUser,
+  });
 
-  factory Subcategories.fromMapSubs(Map<String, dynamic> map) {
+  // Factory constructor to convert a map to Subcategories object
+  factory Subcategories.fromMap(Map<String, dynamic> map) {
     return Subcategories(
-        subDate: map["subDate"],
-        mainCategoryName: map["mainCategoryName"],
-        subcategoryName: map["subcategoryName"],
-        timeSpent: map["timeSpent"]);
+      subDate: map['subDate'],
+      mainCategoryName: map['mainCategoryName'],
+      subcategoryName: map['subcategoryName'],
+      timeSpent: map['timeSpent'],
+      currentLoggedInUser: map['currentLoggedInUser'],
+    );
   }
 
-  Map<String, dynamic> toMapSubs() {
+  // Convert Subcategories object to a map
+  Map<String, dynamic> toMap() {
     return {
-      "subDate": subDate,
-      "mainCategoryName": mainCategoryName,
-      "subcategoryName": subcategoryName,
-      "timeSpent": timeSpent
+      'subDate': subDate,
+      'mainCategoryName': mainCategoryName,
+      'subcategoryName': subcategoryName,
+      'timeSpent': timeSpent,
+      'currentLoggedInUser': currentLoggedInUser,
     };
   }
-
-  @override
-  String toString() {
-    return 'Subcategory{'
-        'subDate: $subDate, '
-        'mainCategoryName: $mainCategoryName, '
-        'subcategoryName: $subcategoryName, '
-        'timeSpent: $timeSpent'
-        '}';
-  }
 }
 
-// database helper
-class DatabaseHelper {
-  static Future<Database> database() async {
+class TrackerDatabaseHelper {
+  // Private constructor to prevent instantiation from outside
+  TrackerDatabaseHelper._();
+
+  // Singleton instance
+  static final TrackerDatabaseHelper _instance = TrackerDatabaseHelper._();
+
+  // Database instance
+  static Database? _database;
+
+  // Getter for the instance
+  static TrackerDatabaseHelper get instance => _instance;
+
+  // Initialize and/or return the database instance
+  Future<Database> get database async {
+    if (_database != null) {
+      return _database!;
+    } else {
+      _database = await _initDatabase();
+      return _database!;
+    }
+  }
+
+  Future<Database> _initDatabase() async {
     final dbPath = await getDatabasesPath();
-    return await openDatabase(join(dbPath, "tracker.db"), version: 1,
-        onCreate: (db, version) async {
-      await db.execute("""
-        CREATE TABLE main_category(
-          date TEXT PRIMARY KEY,
-          education REAL,
-          skills REAL,
-          entertainment REAL,
-          personalGrowth REAL,
-          sleep REAL
-        )
-        """);
-      await db.execute("""
-        CREATE TABLE subcategory(
-          subDate TEXT  PRIMARY KEY,
-          mainCategoryName TEXT,
-          subcategoryName TEXT,
-          timeSpent REAL,
-          FOREIGN KEY(subDate) REFERENCES main_category(date)
-        )
-        """);
-    });
+    final path = join(dbPath, 'tracker.db');
+
+    return await openDatabase(path, version: 1, onCreate: _createDatabase);
   }
 
-  // INSERT DATA INTO THE DATABASE
-  // main category table
-  static Future<void> insertToMain(MainCategory main) async {
-    try {
-      // access the database
-      final db = await DatabaseHelper.database();
-
-      // insert the data
-      await db.insert("main_category", main.toMapMain(),
-          conflictAlgorithm: ConflictAlgorithm.replace);
-    } catch (e) {
-      logger.e("Error: $e");
-    }
+  void _createDatabase(Database db, int version) async {
+    await db.execute('''
+      CREATE TABLE main_category(
+        date TEXT PRIMARY KEY,
+        education INTEGER,
+        skills INTEGER,
+        entertainment INTEGER,
+        personalGrowth INTEGER,
+        sleep INTEGER,
+        currentLoggedInUser TEXT
+      )
+    ''');
+    await db.execute('''
+      CREATE TABLE subcategory(
+        subDate TEXT PRIMARY KEY,
+        mainCategoryName TEXT,
+        subcategoryName TEXT,
+        timeSpent INTEGER,
+        currentLoggedInUser TEXT,
+        FOREIGN KEY(subDate) REFERENCES main_category(date)
+      )
+    ''');
   }
 
-  // subcategory table
-  static Future<void> insertToSubcategory(Subcategories subcategory) async {
-    try {
-      final db = await DatabaseHelper.database();
-
-      await db.insert("subcategory", subcategory.toMapSubs(),
-          conflictAlgorithm: ConflictAlgorithm.replace);
-    } catch (e) {
-      logger.e("Error: $e");
-    }
+  // CRUD operations for MainCategory
+  Future<void> insertMainCategory(MainCategory mainCategory) async {
+    final db = await database;
+    await db.insert('main_category', mainCategory.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
-  // UPDATE DATA INTO THE DATABASE
-  // main category table
-  static Future<void> updateMain(MainCategory main) async {
-    try {
-      final db = await DatabaseHelper.database();
+  Future<List<MainCategory>> getAllMainCategories() async {
+    final db = await database;
 
-      await db.update("main_category", main.toMapMain(),
-          where: "date = ?", whereArgs: [main.date]);
-    } catch (e) {
-      logger.e("Error: $e");
-    }
+    final List<Map<String, dynamic>> maps = await db.query('main_category');
+
+    return maps.map((map) => MainCategory.fromMap(map)).toList();
   }
 
-  // subcategory table
-  static Future<void> updateSubcategory(Subcategories subcategory) async {
-    try {
-      final db = await DatabaseHelper.database();
-
-      await db.update("subcategory", subcategory.toMapSubs(),
-          where: "subDate = ?", whereArgs: [subcategory.subDate]);
-    } catch (e) {
-      logger.e("Error: $e");
-    }
+  Future<void> updateMainCategory(MainCategory mainCategory) async {
+    final db = await database;
+    await db.update('main_category', mainCategory.toMap(),
+        where: 'date = ?', whereArgs: [mainCategory.date]);
   }
 
-  // DELETE DATA FROM THE DATABASE
-  // main category
-  static Future<void> deleteFromMain(String date) async {
-    try {
-      final db = await DatabaseHelper.database();
-
-      await db.delete("main_category", where: "date = ?", whereArgs: [date]);
-    } catch (e) {
-      logger.e("Error: $e");
-    }
+  Future<void> deleteMainCategory(String date) async {
+    final db = await database;
+    await db.delete('main_category', where: 'date = ?', whereArgs: [date]);
   }
 
-  // subcategory
-  static Future<void> deleteFromSubcategory(int subDate) async {
-    try {
-      final db = await DatabaseHelper.database();
-
-      await db
-          .delete("subcategory", where: "subDate = ?", whereArgs: [subDate]);
-    } catch (e) {
-      logger.e("Error: $e");
-    }
+  // CRUD operations for Subcategories
+  Future<void> insertSubcategory(Subcategories subcategory) async {
+    final db = await database;
+    await db.insert('subcategory', subcategory.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
-  // DELETE THE ENTIRE DATABASE
-  static Future<void> deleteEntireDatabase() async {
-    try {
-      final dbPath = await getDatabasesPath();
-      final path = join(dbPath, "tracker.db");
+  Future<List<Subcategories>> getAllSubcategories() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('subcategory');
+    return maps.map((map) => Subcategories.fromMap(map)).toList();
+  }
 
-      await deleteDatabase(path);
-    } catch (e) {
-      logger.e("Error: $e");
-    }
+  Future<void> updateSubcategory(Subcategories subcategory) async {
+    final db = await database;
+    await db.update('subcategory', subcategory.toMap(),
+        where: 'subDate = ?', whereArgs: [subcategory.subDate]);
+  }
+
+  Future<void> deleteSubcategory(String subDate) async {
+    final db = await database;
+    await db.delete('subcategory', where: 'subDate = ?', whereArgs: [subDate]);
   }
 }
-
-

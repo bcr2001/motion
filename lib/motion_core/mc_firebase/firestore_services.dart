@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:motion/motion_reusable/reuseable.dart';
+import 'package:motion/motion_reusable/general_reuseable.dart';
 
 class FirestoreServices {
   // get the username of the current user

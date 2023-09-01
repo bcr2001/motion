@@ -1,4 +1,4 @@
-import 'package:motion/motion_reusable/reuseable.dart';
+import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -10,9 +10,8 @@ class Assigner {
   int isActive;
   final String dateCreated;
 
-  Assigner(
-    {
-    this.id, 
+  Assigner({
+    this.id,
     required this.currentLoggedInUser,
     required this.subcategoryName,
     required this.mainCategoryName,
@@ -129,12 +128,12 @@ class AssignerDatabaseHelper {
     }
   }
 
-  Future<List<Assigner>> getAllItems(String currentUser) async {
+  // get all items in the database
+  Future<List<Assigner>> getAllItems() async {
     try {
       final db = await database;
 
-      final allItems = await db.query("to_assign",
-          where: "currentLoggedInUser = ?", whereArgs: [currentUser]);
+      final allItems = await db.query("to_assign");
 
       return allItems.map((map) => Assigner.fromAssignerMap(map)).toList();
     } catch (e) {
@@ -143,17 +142,15 @@ class AssignerDatabaseHelper {
     }
   }
 
-  Future<List<Assigner>> getSubcategories(String mainCategoryName) async {
+  // get all items that are active
+  Future<List<Assigner>> getAllActiveItems() async {
     try {
       final db = await database;
 
-      final subcategories = await db.query(
-        "to_assign",
-        where: "mainCategoryName = ?",
-        whereArgs: [mainCategoryName],
-      );
+      final activeItems =
+          await db.query("to_assign", where: "isActive = ?", whereArgs: [1]);
 
-      return subcategories.map((map) => Assigner.fromAssignerMap(map)).toList();
+      return activeItems.map((map) => Assigner.fromAssignerMap(map)).toList();
     } catch (e) {
       logger.e("Error: $e");
       return [];

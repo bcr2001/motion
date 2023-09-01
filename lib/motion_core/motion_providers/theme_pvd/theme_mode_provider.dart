@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:motion/motion_reusable/reuseable.dart';
+import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:logger/logger.dart';
 

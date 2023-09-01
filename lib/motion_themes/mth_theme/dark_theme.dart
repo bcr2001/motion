@@ -15,14 +15,14 @@ ThemeData darkThemeData = ThemeData(
         headlineSmall: TextEditingStyling.headingSmall(true)),
     colorScheme: ColorScheme.dark(primary: darkThemeWidgetBgColor),
 
-    // list tile
-    listTileTheme: const ListTileThemeData(textColor: Colors.blue),
 
     // text form field
     dialogTheme: DialogTheme(
         titleTextStyle: TextEditingStyling.dialogTitleTextStyle,
         backgroundColor: darkThemeWidgetBgColor),
     popupMenuTheme: PopupMenuThemeData(color: darkThemeWidgetBgColor),
+
+    
 
     // app bar theme
     appBarTheme:
@@ -43,6 +43,7 @@ ThemeData darkThemeData = ThemeData(
 
     // icon theme
     iconTheme: const IconThemeData(color: Colors.white),
+
 
     scaffoldBackgroundColor: Colors.black,
     useMaterial3: true,

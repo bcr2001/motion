@@ -8,14 +8,13 @@ import 'package:motion/motion_core/motion_providers/firebase_pvd/firestore_provi
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_provider.dart';
 import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_provider.dart';
 import 'package:motion/motion_core/motion_providers/track_pcd/track.dart';
-import 'package:motion/motion_reusable/reuseable.dart';
+import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_user/mu_ops/auth_page.dart';
 
 import 'package:provider/provider.dart';
 import 'motion_core/motion_providers/date_pvd/current_date.dart';
 import 'motion_core/motion_providers/sql_pvd/assigner.dart';
 import 'motion_core/motion_providers/web_api_pvd/zen_quotes_provider.dart';
-import 'motion_routes/motion_route.dart';
 import 'motion_themes/mth_theme/dark_theme.dart';
 import 'motion_themes/mth_theme/light_theme.dart';
 
@@ -24,18 +23,15 @@ final GlobalKey<NavigatorState> navigationKey = GlobalKey<NavigatorState>();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-
-
   AssignerDatabaseHelper databaseHelper = AssignerDatabaseHelper();
 
-  // List alldata = await databaseHelper.getAllItems("unknown");
+  List alldata = await databaseHelper.getAllItems();
 
-  // print(alldata);
+  print(alldata);
 
-  await databaseHelper.deleteDB();
+  // await databaseHelper.deleteDB();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
 
   // AppThemeModeProvider Instance
   final appThemeMode = AppThemeModeProvider();
@@ -45,9 +41,27 @@ void main() async {
   final zenQuoteProvider = ZenQuoteProvider();
   await zenQuoteProvider.initializeSharedPreferences();
 
+  // UserUidProvider
+  final userUidProvider = UserUidProvider();
+  userUidProvider.initializeUidSharedPreferences();
+
+  // AssignerProvider
+  final assignerProvider = AssignerMainProvider();
+  assignerProvider.getAllUserItems();
+
+  final activeAssignerProvider = ActiveAssignedProvider();
+  activeAssignerProvider.activeSubcategoriesList();
+
   runApp(MultiProvider(
     providers: [
-      ChangeNotifierProvider(create: (context) => TrackProvider()),
+      ChangeNotifierProvider.value(value: assignerProvider),
+      ChangeNotifierProvider.value(value: activeAssignerProvider),
+      ChangeNotifierProvider.value(value: userUidProvider),
+      StreamProvider<User?>.value(
+        initialData: null,
+        value: FirebaseAuth.instance.authStateChanges(),
+      ),
+      ChangeNotifierProvider(create: (context) => DropDownTrackProvider()),
       ChangeNotifierProvider(create: (context) => CurrentDataProvider()),
       ChangeNotifierProvider.value(value: appThemeMode),
       ChangeNotifierProvider(create: (context) => zenQuoteProvider),
@@ -56,8 +70,6 @@ void main() async {
     ],
     child: const MainMotionApp(),
   ));
-
-
 }
 
 // Material App and theme configuration

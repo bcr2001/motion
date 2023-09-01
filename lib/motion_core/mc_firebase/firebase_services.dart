@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:motion/main.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_provider.dart';
-import 'package:motion/motion_reusable/reuseable.dart';
+import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:provider/provider.dart';
 
 //handles the sign in and sign up of users
@@ -24,6 +24,14 @@ class AuthServices {
     try {
       await _auth.signInWithEmailAndPassword(
           email: userEmail, password: userPassword);
+
+      
+      if (_auth.currentUser != null) {
+        final userUidProvider =
+            Provider.of<UserUidProvider>(context, listen: false);
+        userUidProvider.setUserUid(_auth.currentUser!.uid);
+      }
+
     } on FirebaseAuthException catch (e) {
       if (e.code == "user-not-found") {
         logger.e("no user in the system!");

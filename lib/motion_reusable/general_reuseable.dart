@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 // logger instance
 var logger = Logger();
 
-// return current theme mode (dark or light theme)
+// // return current theme mode (dark or light theme)
 ThemeModeSettings currentSelectedThemeMode(BuildContext context) {
   final selectedTheme = Provider.of<AppThemeModeProvider>(context);
   return selectedTheme.currentThemeMode;
