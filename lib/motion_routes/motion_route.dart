@@ -6,7 +6,7 @@ import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_provider.da
 import 'package:motion/motion_core/motion_providers/sql_pvd/assigner.dart';
 import 'package:motion/motion_core/motion_providers/track_pcd/track.dart';
 import 'package:motion/motion_reusable/mu_reusable/user_validator.dart';
-import 'package:motion/motion_reusable/general_reuseable.dart';
+import 'package:motion/motion_reusable/sub_reuseable.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:motion/motion_reusable/mu_reusable/user_reusable.dart';
 import 'package:provider/provider.dart';
@@ -92,16 +92,15 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
     return ListTile(
       title: Text(tileTitle),
       trailing: IconButton(
-        onPressed: () async {
-          await _handleItemPressed(context, item);
-        },
-        icon: iconSelected
-      ),
+          onPressed: () async {
+            await _handleItemPressed(context, item);
+          },
+          icon: iconSelected),
     );
   }
 
   // alert dialog to create new subcategory
-  void _showAlertDialog(BuildContext context) {
+  void _showTrackAlertDialog(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
 
     showDialog(
@@ -128,48 +127,33 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                       TextFormFieldBuilder(
                           fieldTextEditingController: subcategoryController,
                           fieldHintText: AppString.trackTextFormFieldHintText,
-                          fieldValidator: FormValidator.subcategoryValidator),
+                          fieldValidator: FormValidator.subcategoryValidator
+                          ),
 
-                      // Buttons that use saved provider references
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          TextButton(
-                            onPressed: () {
-                              navigationKey.currentState!.pop();
-                            },
-                            child: Text(
-                              AppString.trackCancelTextButton,
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              if (_formKey.currentState!.validate()) {
-                                _formKey.currentState!.save();
-                                Provider.of<AssignerMainProvider>(context,
-                                        listen: false)
-                                    .insertIntoAssignerDb(Assigner(
-                                  currentLoggedInUser:
-                                      userUidProvider.userUid == null
-                                          ? "unknown"
-                                          : userUidProvider.userUid!,
-                                  subcategoryName: subcategoryController.text,
-                                  mainCategoryName:
-                                      mainCategoryProvider.selectedValue!,
-                                  dateCreated: date.currentData,
-                                ));
-                              }
-                              navigationKey.currentState!.pop();
-                              subcategoryController.text = "";
-                              mainCategoryProvider.changeSelectedValue(null);
-                            },
-                            child: Text(
-                              AppString.trackAddTextButton,
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                          ),
-                        ],
+                      // Cancel and Add Text Buttons
+                      CancelAddTextButtons(
+                        onPressedCancel: () =>
+                            navigationKey.currentState!.pop(),
+                        onPressedAdd: () {
+                          if (_formKey.currentState!.validate()) {
+                            _formKey.currentState!.save();
+                            Provider.of<AssignerMainProvider>(context,
+                                    listen: false)
+                                .insertIntoAssignerDb(Assigner(
+                              currentLoggedInUser:
+                                  userUidProvider.userUid == null
+                                      ? "unknown"
+                                      : userUidProvider.userUid!,
+                              subcategoryName: subcategoryController.text,
+                              mainCategoryName:
+                                  mainCategoryProvider.selectedValue!,
+                              dateCreated: date.currentData,
+                            ));
+                            navigationKey.currentState!.pop();
+                            subcategoryController.text = "";
+                            mainCategoryProvider.changeSelectedValue(null);
+                          }
+                        },
                       ),
                     ],
                   ),
@@ -190,7 +174,7 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          _showAlertDialog(context);
+          _showTrackAlertDialog(context);
         },
         label: Text(
           AppString.addItem,

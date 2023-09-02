@@ -10,16 +10,18 @@ class TextFormFieldBuilder extends StatelessWidget {
   final TextEditingController fieldTextEditingController;
   final String fieldHintText;
   final TextInputType fieldKeyboardType;
-  final StringValidator fieldValidator;
+  final StringValidator? fieldValidator;
   final bool fieldObscureText;
+  final InputBorder? border;
+  final TextStyle? hintTextStyle;
 
   const TextFormFieldBuilder(
       {super.key,
       required this.fieldTextEditingController,
       required this.fieldHintText,
       this.fieldKeyboardType = TextInputType.text,
-      required this.fieldValidator,
-      this.fieldObscureText = false});
+      this.fieldValidator,
+      this.fieldObscureText = false, this.border, this.hintTextStyle});
 
   @override
   Widget build(BuildContext context) {
@@ -30,10 +32,12 @@ class TextFormFieldBuilder extends StatelessWidget {
         keyboardType: fieldKeyboardType,
         obscureText: fieldObscureText,
         decoration: InputDecoration(
+          border: border,
           contentPadding: const EdgeInsets.only(left: 5.0),
           focusedBorder: UnderlineInputBorder(
               borderSide: BorderSide(color: blueMainColor, width: 2.0)),
           hintText: fieldHintText,
+          hintStyle: hintTextStyle
         ),
         validator: fieldValidator,
       ),

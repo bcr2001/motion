@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:motion/motion_core/mc_sqlite/main_and_sub.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_month_provider.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/assigner.dart';
 import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_provider.dart';
 import 'package:motion/motion_core/motion_providers/web_api_pvd/zen_quotes_provider.dart';
+import 'package:motion/motion_screens/manual_tracking.dart';
 import 'package:provider/provider.dart';
 import 'package:motion/motion_routes/route_action.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
@@ -102,9 +102,19 @@ class TrackedSubcategories extends StatelessWidget {
                       itemBuilder: (BuildContext context, index) {
                         return activeItems[index].isActive == 1
                             ? ListTile(
-                              title: Text(activeItems[index].subcategoryName),
-                            )
-                            :const SizedBox.shrink();
+                                title: Text(activeItems[index].subcategoryName),
+                                onTap: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            ManualTimeRecordingRoute(
+                                          subcategoryName: activeItems[index]
+                                              .subcategoryName,
+                                        ),
+                                      ));
+                                })
+                            : const SizedBox.shrink();
                       });
                 },
               )))

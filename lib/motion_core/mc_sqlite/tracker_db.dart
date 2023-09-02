@@ -3,20 +3,20 @@ import 'package:path/path.dart';
 
 class MainCategory {
   final String date;
-  final int education;
-  final int skills;
-  final int entertainment;
-  final int personalGrowth;
-  final int sleep;
-  final String currentLoggedInUser;
+  int education;
+  int skills;
+  int entertainment;
+  int personalGrowth;
+  int sleep;
+  String currentLoggedInUser;
 
   MainCategory({
     required this.date,
-    required this.education,
-    required this.skills,
-    required this.entertainment,
-    required this.personalGrowth,
-    required this.sleep,
+    this.education = 0,
+    this.skills = 0,
+    this.entertainment = 0,
+    this.personalGrowth = 0,
+    this.sleep = 0,
     required this.currentLoggedInUser,
   });
 
@@ -48,23 +48,26 @@ class MainCategory {
 }
 
 class Subcategories {
+  int? id;
   final String subDate;
   final String mainCategoryName;
   final String subcategoryName;
-  final int timeSpent;
+  int timeSpent;
   final String currentLoggedInUser;
 
   Subcategories({
+    this.id,
     required this.subDate,
     required this.mainCategoryName,
     required this.subcategoryName,
-    required this.timeSpent,
+    this.timeSpent = 0,
     required this.currentLoggedInUser,
   });
 
   // Factory constructor to convert a map to Subcategories object
   factory Subcategories.fromMap(Map<String, dynamic> map) {
     return Subcategories(
+      id: map["id"],
       subDate: map['subDate'],
       mainCategoryName: map['mainCategoryName'],
       subcategoryName: map['subcategoryName'],
@@ -128,15 +131,16 @@ class TrackerDatabaseHelper {
       )
     ''');
     await db.execute('''
-      CREATE TABLE subcategory(
-        subDate TEXT PRIMARY KEY,
-        mainCategoryName TEXT,
-        subcategoryName TEXT,
-        timeSpent INTEGER,
-        currentLoggedInUser TEXT,
-        FOREIGN KEY(subDate) REFERENCES main_category(date)
-      )
-    ''');
+    CREATE TABLE subcategory(
+      id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, // Add id as the primary key
+      subDate TEXT,
+      mainCategoryName TEXT,
+      subcategoryName TEXT,
+      timeSpent INTEGER,
+      currentLoggedInUser TEXT,
+      FOREIGN KEY(subDate) REFERENCES main_category(date)
+    )
+  ''');
   }
 
   // CRUD operations for MainCategory
@@ -181,11 +185,11 @@ class TrackerDatabaseHelper {
   Future<void> updateSubcategory(Subcategories subcategory) async {
     final db = await database;
     await db.update('subcategory', subcategory.toMap(),
-        where: 'subDate = ?', whereArgs: [subcategory.subDate]);
+        where: 'id = ?', whereArgs: [subcategory.id]);
   }
 
-  Future<void> deleteSubcategory(String subDate) async {
+  Future<void> deleteSubcategory(String id) async {
     final db = await database;
-    await db.delete('subcategory', where: 'subDate = ?', whereArgs: [subDate]);
+    await db.delete('subcategory', where: 'id = ?', whereArgs: [id]);
   }
 }

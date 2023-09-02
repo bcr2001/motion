@@ -19,6 +19,7 @@ class AssignerMainProvider extends ChangeNotifier {
   // insert items into the assigner.db database
   Future<void> insertIntoAssignerDb(Assigner categoryAssigner) async {
     await dbInstance.assignInsert(categoryAssigner);
+    await getAllUserItems();
 
     notifyListeners();
   }

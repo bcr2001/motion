@@ -65,14 +65,17 @@ class AppString {
   static const String sleepMainCategory = "Sleep";
   static const String addItem = "Add";
   static const String alertDialogTitle = "Add a new subcategory";
-  static const String emptySubcategoryValidatorMessage = "cannot create an empty subcategory";
-  static const String subcategoryContainsNumberMessage = "a subcategory name cannot contain numbers";
-  static const String subcategoryContainsSpacesMessage = "use '/' to separate grouped subcategories";
+  static const String emptySubcategoryValidatorMessage =
+      "cannot create an empty subcategory";
+  static const String subcategoryContainsNumberMessage =
+      "a subcategory name cannot contain numbers";
+  static const String subcategoryContainsSpacesMessage =
+      "use '/' to separate grouped subcategories";
   static const String trackTextFormFieldHintText = "Subcategory Name";
   static const String trackCancelTextButton = "CANCEL";
   static const String trackAddTextButton = "ADD";
   static const String trackDropDownHintText = "Select a Main Category";
 
-
-
+  // MANUAL RECORDING ROUTE
+  static const String manualAddBlock = "Add time block";
 }

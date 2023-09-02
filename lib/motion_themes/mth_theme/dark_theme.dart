@@ -9,6 +9,9 @@ ThemeData darkThemeData = ThemeData(
         bodyMedium: TextEditingStyling.bodyStyling(true),
         bodySmall: TextEditingStyling.bodyStyling(true),
 
+        // theme for manual tracking
+        
+
         // theme for headings
         headlineLarge: TextEditingStyling.headingLarge(true),
         headlineMedium: TextEditingStyling.headingMedium(true),

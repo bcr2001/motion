@@ -20,6 +20,14 @@ class TextEditingStyling {
   // base styling
   static final TextStyle _baseStyle = GoogleFonts.openSans(fontSize: 16.5);
 
+  // manual recording hint text style
+  static TextStyle manualHintTextStyle() {
+    return _baseStyle.copyWith(
+      fontSize: 28,
+      color: const Color(0xff777777),
+    );
+  }
+
   // route appbar title text style
   static final TextStyle appTitleStyle = _baseStyle.copyWith(
     color: const Color(0xFF00B0F0),
