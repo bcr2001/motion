@@ -30,6 +30,7 @@ Future circularIndicator(context) {
 // snack bar for sign in and sign out error messages
 errorSnack(context, {required errorMessage}) {
   return ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text(errorMessage, style: contentStyle(color:const Color.fromARGB(255, 177, 12, 0)),))
+    SnackBar(
+      content: Text(errorMessage, style: contentStyle(color:const Color(0xFFFF6B00)),))
   ); 
 }

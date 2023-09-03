@@ -111,6 +111,7 @@ class TrackedSubcategories extends StatelessWidget {
                                             ManualTimeRecordingRoute(
                                           subcategoryName: activeItems[index]
                                               .subcategoryName,
+                                          mainCategoryName: activeItems[index].mainCategoryName,
                                         ),
                                       ));
                                 })

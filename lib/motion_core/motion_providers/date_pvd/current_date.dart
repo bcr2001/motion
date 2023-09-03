@@ -11,11 +11,11 @@ class CurrentDataProvider extends ChangeNotifier {
 
   CurrentDataProvider() {
     _timer = Timer.periodic(const Duration(days: 1), (Timer t) {
-      _getCurrentDate();
+      getCurrentDate();
     });
   }
 
-  void _getCurrentDate() {
+  void getCurrentDate() {
     final String thisMoment = DateFormat("dd/MM/yyy").format(DateTime.now());
 
     if (thisMoment != _currentData) {

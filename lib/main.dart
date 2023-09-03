@@ -2,16 +2,19 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:motion/firebase_options.dart';
-import 'package:motion/motion_core/mc_sqlite/main_and_sub.dart';
+import 'package:motion/motion_core/mc_sqlite/tracker_db.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_month_provider.dart';
+import 'package:motion/motion_core/motion_providers/date_pvd/current_time.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/firestore_provider.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_provider.dart';
+import 'package:motion/motion_core/motion_providers/sql_pvd/track_db.dart';
 import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_provider.dart';
-import 'package:motion/motion_core/motion_providers/track_pcd/track.dart';
+import 'package:motion/motion_core/motion_providers/dropDown_pcd/dropDown.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_user/mu_ops/auth_page.dart';
 
 import 'package:provider/provider.dart';
+import 'package:sqflite/sqflite.dart';
 import 'motion_core/motion_providers/date_pvd/current_date.dart';
 import 'motion_core/motion_providers/sql_pvd/assigner.dart';
 import 'motion_core/motion_providers/web_api_pvd/zen_quotes_provider.dart';
@@ -22,14 +25,6 @@ final GlobalKey<NavigatorState> navigationKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  AssignerDatabaseHelper databaseHelper = AssignerDatabaseHelper();
-
-  List alldata = await databaseHelper.getAllItems();
-
-  print(alldata);
-
-  // await databaseHelper.deleteDB();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
@@ -52,8 +47,24 @@ void main() async {
   final activeAssignerProvider = ActiveAssignedProvider();
   activeAssignerProvider.activeSubcategoriesList();
 
+  // TrackDatabaseProvider
+  final trackSubcategoryDatabaseProvider = SubcategoryTrackerDatabaseProvider();
+
+  final trackMainCategoryDatabaseProvider = MainCategoryTrackerProvider();
+
+  // Initialize the database helper
+  final TrackerDatabaseHelper databaseHelper = TrackerDatabaseHelper();
+
+  final allSubs = databaseHelper.getAllSubcategories();
+
+  print(allSubs);
+
+
   runApp(MultiProvider(
     providers: [
+      ChangeNotifierProvider(create: (context) => CurrentTimeProvider()),
+      ChangeNotifierProvider.value(value: trackMainCategoryDatabaseProvider),
+      ChangeNotifierProvider.value(value: trackSubcategoryDatabaseProvider),
       ChangeNotifierProvider.value(value: assignerProvider),
       ChangeNotifierProvider.value(value: activeAssignerProvider),
       ChangeNotifierProvider.value(value: userUidProvider),

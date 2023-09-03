@@ -3,11 +3,11 @@ import 'package:path/path.dart';
 
 class MainCategory {
   final String date;
-  int education;
-  int skills;
-  int entertainment;
-  int personalGrowth;
-  int sleep;
+  double education;
+  double skills;
+  double entertainment;
+  double personalGrowth;
+  double sleep;
   String currentLoggedInUser;
 
   MainCategory({
@@ -52,7 +52,8 @@ class Subcategories {
   final String subDate;
   final String mainCategoryName;
   final String subcategoryName;
-  int timeSpent;
+  final String timeRecorded;
+  double timeSpent;
   final String currentLoggedInUser;
 
   Subcategories({
@@ -60,6 +61,7 @@ class Subcategories {
     required this.subDate,
     required this.mainCategoryName,
     required this.subcategoryName,
+    required this.timeRecorded,
     this.timeSpent = 0,
     required this.currentLoggedInUser,
   });
@@ -71,6 +73,7 @@ class Subcategories {
       subDate: map['subDate'],
       mainCategoryName: map['mainCategoryName'],
       subcategoryName: map['subcategoryName'],
+      timeRecorded: map["timeRecorded"],
       timeSpent: map['timeSpent'],
       currentLoggedInUser: map['currentLoggedInUser'],
     );
@@ -82,24 +85,39 @@ class Subcategories {
       'subDate': subDate,
       'mainCategoryName': mainCategoryName,
       'subcategoryName': subcategoryName,
+      'timeRecorded': timeRecorded,
       'timeSpent': timeSpent,
       'currentLoggedInUser': currentLoggedInUser,
     };
   }
+
+  @override
+  String toString() {
+    return 'Subcategories {'
+        'ID: $id, '
+        'Sub Date: $subDate, '
+        'Main Category Name: $mainCategoryName, '
+        'Subcategory Name: $subcategoryName, '
+        'timeRecorded: $timeRecorded,'
+        'Time Spent: $timeSpent, '
+        'Current Logged-In User: $currentLoggedInUser'
+        '}';
+  }
 }
 
 class TrackerDatabaseHelper {
-  // Private constructor to prevent instantiation from outside
-  TrackerDatabaseHelper._();
-
   // Singleton instance
-  static final TrackerDatabaseHelper _instance = TrackerDatabaseHelper._();
+  static final TrackerDatabaseHelper _instance =
+      TrackerDatabaseHelper._privateConstructor();
 
   // Database instance
   static Database? _database;
 
-  // Getter for the instance
-  static TrackerDatabaseHelper get instance => _instance;
+  TrackerDatabaseHelper._privateConstructor();
+
+  factory TrackerDatabaseHelper() {
+    return _instance;
+  }
 
   // Initialize and/or return the database instance
   Future<Database> get database async {
@@ -122,21 +140,22 @@ class TrackerDatabaseHelper {
     await db.execute('''
       CREATE TABLE main_category(
         date TEXT PRIMARY KEY,
-        education INTEGER,
-        skills INTEGER,
-        entertainment INTEGER,
-        personalGrowth INTEGER,
-        sleep INTEGER,
+        education REAL,
+        skills REAL,
+        entertainment REAL,
+        personalGrowth REAL,
+        sleep REAL,
         currentLoggedInUser TEXT
       )
     ''');
     await db.execute('''
     CREATE TABLE subcategory(
-      id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, // Add id as the primary key
+      id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
       subDate TEXT,
       mainCategoryName TEXT,
       subcategoryName TEXT,
-      timeSpent INTEGER,
+      timeRecorded TEXT,
+      timeSpent REAL,
       currentLoggedInUser TEXT,
       FOREIGN KEY(subDate) REFERENCES main_category(date)
     )
@@ -176,10 +195,24 @@ class TrackerDatabaseHelper {
         conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
+  // gets all the subcategories regardless of the date
   Future<List<Subcategories>> getAllSubcategories() async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query('subcategory');
     return maps.map((map) => Subcategories.fromMap(map)).toList();
+  }
+
+  // gets all the subcategories depending on the current date
+  Future<List<Subcategories>> getCurrentDateSubcategory(
+      String currentDate) async {
+    final db = await database;
+
+    final specificSubcategories = await db
+        .query("subcategory", where: "subDate = ?", whereArgs: [currentDate]);
+
+    return specificSubcategories
+        .map((map) => Subcategories.fromMap(map))
+        .toList();
   }
 
   Future<void> updateSubcategory(Subcategories subcategory) async {
@@ -188,7 +221,7 @@ class TrackerDatabaseHelper {
         where: 'id = ?', whereArgs: [subcategory.id]);
   }
 
-  Future<void> deleteSubcategory(String id) async {
+  Future<void> deleteSubcategory(int id) async {
     final db = await database;
     await db.delete('subcategory', where: 'id = ?', whereArgs: [id]);
   }

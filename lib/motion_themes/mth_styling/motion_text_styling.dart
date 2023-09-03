@@ -23,7 +23,7 @@ class TextEditingStyling {
   // manual recording hint text style
   static TextStyle manualHintTextStyle() {
     return _baseStyle.copyWith(
-      fontSize: 28,
+      fontSize: 23,
       color: const Color(0xff777777),
     );
   }
@@ -52,7 +52,7 @@ class TextEditingStyling {
   // headline (ListTile title) Large
   static TextStyle headingLarge(bool isDarkMode) {
     return _baseStyle.copyWith(
-      fontSize: 18,
+      fontSize: 23,
       color: isDarkMode ? darkModeTextColor : Colors.black,
     );
   }
@@ -60,7 +60,7 @@ class TextEditingStyling {
   // headline (ListTile title) Medium
   static TextStyle headingMedium(bool isDarkMode) {
     return _baseStyle.copyWith(
-      fontSize: 16,
+      fontSize: 20,
       color: isDarkMode
           ? darkModeTextColor.withOpacity(0.6)
           : Colors.black54,
@@ -71,7 +71,7 @@ class TextEditingStyling {
   // headline (Regular page titles) Medium
   static TextStyle headingSmall(bool isDarkMode) {
     return _baseStyle.copyWith(
-      fontSize: 20,
+      fontSize: 18,
       color: isDarkMode
           ? darkModeTextColor: Colors.black,
     );

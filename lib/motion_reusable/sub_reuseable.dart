@@ -39,3 +39,8 @@ class CancelAddTextButtons extends StatelessWidget {
 }
 
 
+
+// time measurement adder
+// double timeAdder({required String h, required String m, required String s}){
+
+// }

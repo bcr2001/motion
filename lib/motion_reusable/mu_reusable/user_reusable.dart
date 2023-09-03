@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:motion/motion_themes/mth_styling/widget_bg_color.dart';
@@ -14,6 +15,8 @@ class TextFormFieldBuilder extends StatelessWidget {
   final bool fieldObscureText;
   final InputBorder? border;
   final TextStyle? hintTextStyle;
+  final int? maxCharacterLen;
+
 
   const TextFormFieldBuilder(
       {super.key,
@@ -21,13 +24,18 @@ class TextFormFieldBuilder extends StatelessWidget {
       required this.fieldHintText,
       this.fieldKeyboardType = TextInputType.text,
       this.fieldValidator,
-      this.fieldObscureText = false, this.border, this.hintTextStyle});
+      this.fieldObscureText = false, this.border, this.hintTextStyle, this.maxCharacterLen});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 10),
       child: TextFormField(
+        maxLength: maxCharacterLen,
+        buildCounter: (BuildContext context,
+                {int? currentLength, int? maxLength, bool? isFocused}) =>
+            null,
+        style: Theme.of(context).textTheme.headlineLarge,
         controller: fieldTextEditingController,
         keyboardType: fieldKeyboardType,
         obscureText: fieldObscureText,
