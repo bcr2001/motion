@@ -79,4 +79,8 @@ class AppString {
   // MANUAL RECORDING ROUTE
   static const String manualAddBlock = "Add time block";
   static const String manualSave = "Save";
+  static const String manualCardTitle = "Today’s Blocks";
+
+  // HOME ROUTE
+  static const String homeSubcategoryTitle = "Subcategory";
 }

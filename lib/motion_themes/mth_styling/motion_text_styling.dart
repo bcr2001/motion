@@ -12,9 +12,9 @@ TextStyle contentStyle(
     color: color,
   );
 }
+
 // main dark mode color
 Color darkModeTextColor = const Color(0XFFF5F5F5);
-
 
 class TextEditingStyling {
   // base styling
@@ -42,11 +42,23 @@ class TextEditingStyling {
     fontWeight: FontWeight.w700,
   );
 
-  // body styling
-  static TextStyle bodyStyling(bool isDarkMode) {
+  // body styling (Medium)
+  static TextStyle bodyStylingMedium(bool isDarkMode) {
     return _baseStyle.copyWith(
       color: isDarkMode ? darkModeTextColor : Colors.black,
     );
+  }
+
+  // body styling (small)
+  static TextStyle bodyStylingSmall(bool isDarkMode) {
+    return _baseStyle.copyWith(
+        color: isDarkMode ? darkModeTextColor : Colors.black, fontSize: 15);
+  }
+
+  // body styling (large)
+  static TextStyle bodyStylingLarge(bool isDarkMode) {
+    return _baseStyle.copyWith(
+        color: isDarkMode ? darkModeTextColor : Colors.black, fontSize: 18);
   }
 
   // headline (ListTile title) Large
@@ -61,19 +73,15 @@ class TextEditingStyling {
   static TextStyle headingMedium(bool isDarkMode) {
     return _baseStyle.copyWith(
       fontSize: 20,
-      color: isDarkMode
-          ? darkModeTextColor.withOpacity(0.6)
-          : Colors.black54,
+      color: isDarkMode ? darkModeTextColor.withOpacity(0.6) : Colors.black54,
     );
   }
-
 
   // headline (Regular page titles) Medium
   static TextStyle headingSmall(bool isDarkMode) {
     return _baseStyle.copyWith(
       fontSize: 18,
-      color: isDarkMode
-          ? darkModeTextColor: Colors.black,
+      color: isDarkMode ? darkModeTextColor : Colors.black,
     );
   }
 }

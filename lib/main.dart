@@ -7,17 +7,18 @@ import 'package:motion/motion_core/motion_providers/date_pvd/current_month_provi
 import 'package:motion/motion_core/motion_providers/date_pvd/current_time.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/firestore_provider.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_provider.dart';
-import 'package:motion/motion_core/motion_providers/sql_pvd/track_db.dart';
+import 'package:motion/motion_core/motion_providers/sql_pvd/track_provider.dart';
 import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_provider.dart';
-import 'package:motion/motion_core/motion_providers/dropDown_pcd/dropDown.dart';
+import 'package:motion/motion_core/motion_providers/dropDown_pcd/drop_down.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_user/mu_ops/auth_page.dart';
 
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'motion_core/motion_providers/date_pvd/current_date.dart';
-import 'motion_core/motion_providers/sql_pvd/assigner.dart';
+import 'motion_core/motion_providers/sql_pvd/assigner_provider.dart';
 import 'motion_core/motion_providers/web_api_pvd/zen_quotes_provider.dart';
+import 'motion_reusable/sub_reuseable.dart';
 import 'motion_themes/mth_theme/dark_theme.dart';
 import 'motion_themes/mth_theme/light_theme.dart';
 
@@ -55,10 +56,11 @@ void main() async {
   // Initialize the database helper
   final TrackerDatabaseHelper databaseHelper = TrackerDatabaseHelper();
 
-  final allSubs = databaseHelper.getAllSubcategories();
+  final allSubs = await databaseHelper.getAllSubcategories();
 
   print(allSubs);
 
+  // databaseHelper.deleteMainDb();
 
   runApp(MultiProvider(
     providers: [

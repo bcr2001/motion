@@ -48,11 +48,11 @@ class SettingsOptions extends StatelessWidget {
         onTap: onTap,
         title: Text(
           settingsTitle,
-          style: Theme.of(context).textTheme.headlineMedium,
+          style: Theme.of(context).textTheme.headlineSmall,
         ),
         subtitle: Text(
           settingsDesciption,
-          style: Theme.of(context).textTheme.headlineSmall,
+          style: Theme.of(context).textTheme.bodyMedium,
         ),
         trailing: trailing,
       ),

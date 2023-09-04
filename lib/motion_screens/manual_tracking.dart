@@ -4,7 +4,8 @@ import 'package:motion/motion_core/mc_sqlite/tracker_db.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_date.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_time.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_provider.dart';
-import 'package:motion/motion_core/motion_providers/sql_pvd/track_db.dart';
+import 'package:motion/motion_core/motion_providers/sql_pvd/assigner_provider.dart';
+import 'package:motion/motion_core/motion_providers/sql_pvd/track_provider.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_reusable/mu_reusable/user_reusable.dart';
 import 'package:motion/motion_reusable/sub_reuseable.dart';
@@ -176,8 +177,16 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                                               widget.subcategoryName,
                                           currentLoggedInUser: uid.userUid!,
                                           // timeAdder functions converts all the time components to minutes
-                                          timeSpent: timeAdder(h: hourController.text, m: minuteController.text, s: secondController.text),
+                                          timeSpent: timeAdder(
+                                              h: hourController.text,
+                                              m: minuteController.text,
+                                              s: secondController.text),
                                           timeRecorded: time.formattedTime));
+                                  navigationKey.currentState!.pop();
+
+                                  hourController.text = "";
+                                  minuteController.text = "";
+                                  secondController.text = "";
                                 }
                               }
                             },
@@ -195,8 +204,6 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-
     return Scaffold(
       appBar: AppBar(
         // the selected subcategory displayed as app bar title
@@ -210,29 +217,53 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
         ],
       ),
       // allows uses to update the main category table
-      floatingActionButton: floatingActionButton(
-        context, 
-        onPressed: (){}, 
-        label:AppString.manualSave , 
-        icon: Icons.save_rounded),
+      floatingActionButton: floatingActionButton(context,
+          onPressed: () {},
+          label: AppString.manualSave,
+          icon: Icons.save_rounded),
 
       body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(
-            height: screenHeight * 0.35,
-            child: Card(child: Consumer<SubcategoryTrackerDatabaseProvider>(
-              builder: (context, subs, child) {
-                var subsTrackedOnCurrentDay = subs.currentDateSubcategories;
-                // the time spent on a particular subcategory at a particular time of day is displayed below
-                return ListView.builder(
-                    itemCount: subsTrackedOnCurrentDay.length,
-                    itemBuilder: (BuildContext context, index) {
-                      return null;
-                    });
-              },
-            )),
-          )
+          Consumer3<SubcategoryTrackerDatabaseProvider, CurrentDataProvider,
+              UserUidProvider>(
+            builder: (context, subs, date, user, child) {
+              // Call retrieveCurrentDateSubcategories to fetch subcategories for the current date
+              subs.retrieveCurrentDateSubcategories(
+                  date.currentData, user.userUid!, widget.subcategoryName);
+
+              // Access the fetched subcategories from the provider
+              List<Subcategories> subsTrackedOnCurrentDay =
+                  subs.currentDateSubcategories;
+
+              return CardConstructor(
+                  cardTitle: AppString.manualCardTitle,
+                  cardListView:
+                      // the time spent on a particular subcategory at a particular time of day is displayed below
+                      ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: subsTrackedOnCurrentDay.length,
+                          itemBuilder: (BuildContext context, index) {
+                            return ListTile(
+                              leading: Text(
+                                  subsTrackedOnCurrentDay[index].timeRecorded,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                  )),
+                              title: Text(
+                                  "${subsTrackedOnCurrentDay[index].timeSpent.toString()} mins"),
+                              trailing:
+                                  // deletes entry in the subcategory table
+                                  IconButton(
+                                onPressed: () {
+                                  subs.deleteSubcategoryEntry(
+                                      subsTrackedOnCurrentDay[index].id!);
+                                },
+                                icon: const Icon(Icons.delete_outlined),
+                              ),
+                            );
+                          }));
+            },
+          ),
         ],
       ),
     );

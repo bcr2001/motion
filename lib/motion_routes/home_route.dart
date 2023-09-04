@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:motion/motion_core/motion_providers/date_pvd/current_date.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_month_provider.dart';
-import 'package:motion/motion_core/motion_providers/sql_pvd/assigner.dart';
+import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_provider.dart';
+import 'package:motion/motion_core/motion_providers/sql_pvd/assigner_provider.dart';
+import 'package:motion/motion_core/motion_providers/sql_pvd/track_provider.dart';
 import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_provider.dart';
 import 'package:motion/motion_core/motion_providers/web_api_pvd/zen_quotes_provider.dart';
+import 'package:motion/motion_reusable/sub_reuseable.dart';
 import 'package:motion/motion_screens/manual_tracking.dart';
+import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:provider/provider.dart';
 import 'package:motion/motion_routes/route_action.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
@@ -44,6 +49,7 @@ class MotionHomeRoute extends StatelessWidget {
             return Text(
               zenQuoteValue.todaysQuote,
               textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodySmall,
             );
           },
         ));
@@ -84,13 +90,17 @@ class TrackedSubcategories extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // subcategory title
-          const Text("Subcategory"),
+          Text(AppString.homeSubcategoryTitle, style: Theme.of(context).textTheme.bodyMedium,),
 
           // card that holds subcategories that are active
           SizedBox(
               height: screenHeight * 0.35,
-              child: Card(child: Consumer<AssignerMainProvider>(
-                builder: (context, active, child) {
+              child: Card(child: Consumer4<
+                  AssignerMainProvider,
+                  SubcategoryTrackerDatabaseProvider,
+                  CurrentDataProvider,
+                  UserUidProvider>(
+                builder: (context, active, sub, date, user, child) {
                   var activeItems = active.assignerItems;
 
                   // generates list tiles of categories where
@@ -101,20 +111,54 @@ class TrackedSubcategories extends StatelessWidget {
                       itemCount: activeItems.length,
                       itemBuilder: (BuildContext context, index) {
                         return activeItems[index].isActive == 1
-                            ? ListTile(
-                                title: Text(activeItems[index].subcategoryName),
-                                onTap: () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            ManualTimeRecordingRoute(
-                                          subcategoryName: activeItems[index]
-                                              .subcategoryName,
-                                          mainCategoryName: activeItems[index].mainCategoryName,
-                                        ),
-                                      ));
-                                })
+                            ? FutureBuilder<double>(
+                                future: sub.retrieveTotalTimeSpent(
+                                    date.currentData,
+                                    user.userUid!,
+                                    activeItems[index].subcategoryName),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    // Return a loading indicator while waiting for the data
+                                    return const CircularProgressIndicator();
+                                  } else if (snapshot.hasError) {
+                                    // Handle any errors here
+                                    return Text('Error: ${snapshot.error}');
+                                  } else {
+                                    // Data is available, use it to build the ListTile
+                                    final totalTimeSpentSub =
+                                        snapshot.data ?? 0.0;
+                                    
+                                    // convert total
+                                    final convertedTotalTimeSpent =
+                                        convertMinutesToTime(totalTimeSpentSub);
+
+
+                                    return ListTile(
+                                      title: Text(
+                                          activeItems[index].subcategoryName),
+                                      trailing:
+                                          Text(convertedTotalTimeSpent, style: Theme.of(context).textTheme.bodySmall,),
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                ManualTimeRecordingRoute(
+                                              subcategoryName:
+                                                  activeItems[index]
+                                                      .subcategoryName,
+                                              mainCategoryName:
+                                                  activeItems[index]
+                                                      .mainCategoryName,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  }
+                                },
+                              )
                             : const SizedBox.shrink();
                       });
                 },

@@ -23,9 +23,6 @@ class SettingsPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // user information and editing
-            const UserSettingsInfo(),
-
             // theme mode settings
             const _ThemeModeSettingsOption(),
 
@@ -73,11 +70,11 @@ class _ThemeModeSettingsOption extends StatelessWidget {
         return ListTile(
           title: Text(
             AppString.themeTitle,
-            style: Theme.of(context).textTheme.headlineLarge,
+            style: Theme.of(context).textTheme.headlineSmall,
           ),
           subtitle: Text(
             themeValue.currentThemeModeName,
-            style: Theme.of(context).textTheme.headlineMedium,
+            style: Theme.of(context).textTheme.bodyMedium,
           ),
           trailing: Switch(
             activeColor: const Color(0xFF00B0F0),

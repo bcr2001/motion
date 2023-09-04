@@ -14,41 +14,37 @@ ThemeData lightThemeData = ThemeData(
 
   // text theme
   textTheme: TextTheme(
-    bodyLarge: TextEditingStyling.bodyStyling(false),
-    bodyMedium: TextEditingStyling.bodyStyling(false),
-    bodySmall: TextEditingStyling.bodyStyling(false),
+      bodyLarge: TextEditingStyling.bodyStylingLarge(false),
+      bodyMedium: TextEditingStyling.bodyStylingMedium(false),
+      bodySmall: TextEditingStyling.bodyStylingSmall(false),
 
-    // theme for headings
-    headlineLarge: TextEditingStyling.headingLarge(false),
-    headlineMedium: TextEditingStyling.headingMedium(false),
-    headlineSmall: TextEditingStyling.headingSmall(false)
-  ),
+      // theme for headings
+      headlineLarge: TextEditingStyling.headingLarge(false),
+      headlineMedium: TextEditingStyling.headingMedium(false),
+      headlineSmall: TextEditingStyling.headingSmall(false)),
 
   // alert dialog theme
   dialogTheme:
       DialogTheme(titleTextStyle: TextEditingStyling.dialogTitleTextStyle),
 
   // card theme
-  cardTheme:  CardTheme(
-    elevation: 1,
-    margin:  const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
-    color: lightModeContentWidget
-  ),
+  cardTheme: CardTheme(
+      elevation: 1,
+      margin: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
+      color: lightModeContentWidget),
 
   // floating action button
   floatingActionButtonTheme: FloatingActionButtonThemeData(
     elevation: 1,
     backgroundColor: lightModeContentWidget,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(25.0)
-    ),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0)),
   ),
 
   // icon theme
-  iconTheme: const IconThemeData(
-    color: Colors.black
-  ),
-  
+  iconTheme: const IconThemeData(color: Colors.black),
+
+  dividerTheme: const DividerThemeData(color: Colors.black),
+
   useMaterial3: true,
   visualDensity: VisualDensity.adaptivePlatformDensity,
   brightness: Brightness.light,

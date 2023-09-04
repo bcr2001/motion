@@ -3,8 +3,8 @@ import 'package:motion/main.dart';
 import 'package:motion/motion_core/mc_sqlite/main_and_sub.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_date.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_provider.dart';
-import 'package:motion/motion_core/motion_providers/sql_pvd/assigner.dart';
-import 'package:motion/motion_core/motion_providers/dropDown_pcd/dropDown.dart';
+import 'package:motion/motion_core/motion_providers/sql_pvd/assigner_provider.dart';
+import 'package:motion/motion_core/motion_providers/dropDown_pcd/drop_down.dart';
 import 'package:motion/motion_reusable/mu_reusable/user_validator.dart';
 import 'package:motion/motion_reusable/sub_reuseable.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
@@ -29,39 +29,6 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
   void dispose() {
     subcategoryController.dispose();
     super.dispose();
-  }
-
-  // card constructor
-  Widget _cardConstructor(context,
-      {required cardTitle, required ListView cardListView}) {
-    return Container(
-      margin: const EdgeInsets.only(top: 20.0),
-      child: Card(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // card title
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0, left: 8.0),
-              child: Text(
-                cardTitle,
-                style: Theme.of(context).textTheme.headlineLarge,
-              ),
-            ),
-
-            // title and content divider
-            const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Divider(
-                thickness: 1.5,
-                color: Colors.black,
-              ),
-            ),
-            cardListView
-          ],
-        ),
-      ),
-    );
   }
 
   // Define a reusable function for onPressed

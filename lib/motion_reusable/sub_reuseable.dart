@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
+import 'package:motion/motion_themes/mth_styling/widget_bg_color.dart';
 
 // this class creates an add and a cancel text button
 // the add text button interracts with the database
@@ -53,21 +55,21 @@ class CardConstructor extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-             // card title
+            // card title
             Padding(
               padding: const EdgeInsets.only(top: 8.0, left: 8.0),
               child: Text(
                 cardTitle,
-                style: Theme.of(context).textTheme.headlineLarge,
+                style: Theme.of(context).textTheme.headlineSmall,
               ),
             ),
 
             // title and content divider
-            const Padding(
-              padding: EdgeInsets.all(8.0),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
               child: Divider(
                 thickness: 1.5,
-                color: Colors.black,
+                color: Theme.of(context).dividerTheme.color,
               ),
             ),
 
@@ -106,5 +108,23 @@ double timeAdder({required String h, required String m, required String s}) {
 
   double addedTimeComponents = hours + minutes + seconds;
 
+  logger.i("$addedTimeComponents");
+
   return addedTimeComponents;
+}
+
+// minutes to respective time components
+String convertMinutesToTime(double minutes) {
+  if (minutes < 60) {
+    return '$minutes mins';
+  } else {
+    final hours = minutes ~/ 60;
+    final remainingMinutes = minutes % 60;
+
+    if (remainingMinutes == 0) {
+      return '$hours hrs';
+    } else {
+      return '$hours hrs ${remainingMinutes.toStringAsFixed(0)} mins';
+    }
+  }
 }

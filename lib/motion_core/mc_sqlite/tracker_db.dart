@@ -1,3 +1,4 @@
+import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -133,7 +134,7 @@ class TrackerDatabaseHelper {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, 'tracker.db');
 
-    return await openDatabase(path, version: 1, onCreate: _createDatabase);
+    return await openDatabase(path, version: 2, onCreate: _createDatabase);
   }
 
   void _createDatabase(Database db, int version) async {
@@ -204,11 +205,13 @@ class TrackerDatabaseHelper {
 
   // gets all the subcategories depending on the current date
   Future<List<Subcategories>> getCurrentDateSubcategory(
-      String currentDate) async {
+      String currentDate, String currentUser, String subcategoryName) async {
     final db = await database;
 
-    final specificSubcategories = await db
-        .query("subcategory", where: "subDate = ?", whereArgs: [currentDate]);
+    final specificSubcategories = await db.query("subcategory",
+        where:
+            "subDate = ? AND currentLoggedInUser = ? AND subcategoryName = ?",
+        whereArgs: [currentDate, currentUser, subcategoryName]);
 
     return specificSubcategories
         .map((map) => Subcategories.fromMap(map))
@@ -222,7 +225,33 @@ class TrackerDatabaseHelper {
   }
 
   Future<void> deleteSubcategory(int id) async {
+    try {
+      final db = await database;
+      await db.delete('subcategory', where: 'id = ?', whereArgs: [id]);
+    } catch (e) {
+      logger.e("Error: $e");
+    }
+  }
+
+  Future<double> getTotalTimeSpent(
+      String currentDate, String currentUser, String subcategoryName) async {
     final db = await database;
-    await db.delete('subcategory', where: 'id = ?', whereArgs: [id]);
+
+    final result = await db.rawQuery('''
+    SELECT SUM(timeSpent) as total_time_spent
+    FROM subcategory
+    WHERE subDate = ? AND currentLoggedInUser = ? AND subcategoryName = ?
+  ''', [currentDate, currentUser, subcategoryName]);
+
+    if (result.isNotEmpty) {
+      final total = result.first['total_time_spent'];
+      if (total is double) {
+        return total;
+      } else {
+        return 0.0; // Handle the case where the result is not a double
+      }
+    } else {
+      return 0.0; // Return 0.0 if no matching records are found
+    }
   }
 }
