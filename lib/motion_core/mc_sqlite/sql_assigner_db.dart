@@ -86,6 +86,7 @@ class AssignerDatabaseHelper {
     """);
   }
 
+  // insert data into the to_assign table
   Future<void> assignInsert(Assigner categoryAssigner) async {
     try {
       final db = await database;
@@ -97,37 +98,7 @@ class AssignerDatabaseHelper {
     }
   }
 
-  Future<void> assignUpdate(Assigner categoryAssigner) async {
-    try {
-      final db = await database;
-
-      await db.update("to_assign", categoryAssigner.toMap(),
-          where: "id = ?", whereArgs: [categoryAssigner.id]);
-    } catch (e) {
-      logger.e("Error: $e");
-    }
-  }
-
-  Future<void> assignDelete(int id) async {
-    try {
-      final db = await database;
-
-      await db.delete("to_assign", where: "id = ?", whereArgs: [id]);
-    } catch (e) {
-      logger.e("Error: $e");
-    }
-  }
-
-  Future<void> deleteDB() async {
-    try {
-      final dbPath = await getDatabasesPath();
-
-      await deleteDatabase(join(dbPath, "assigner.db"));
-    } catch (e) {
-      logger.e("Error: $e");
-    }
-  }
-
+  
   // get all items in the database
   Future<List<Assigner>> getAllItems() async {
     try {
@@ -154,6 +125,41 @@ class AssignerDatabaseHelper {
     } catch (e) {
       logger.e("Error: $e");
       return [];
+    }
+  }
+
+  // update rows in the to_assign database
+  Future<void> assignUpdate(Assigner categoryAssigner) async {
+    try {
+      final db = await database;
+
+      await db.update("to_assign", categoryAssigner.toMap(),
+          where: "id = ?", whereArgs: [categoryAssigner.id]);
+    } catch (e) {
+      logger.e("Error: $e");
+    }
+  }
+
+  // delete rows in the to_assign database
+  Future<void> assignDelete(int id) async {
+    try {
+      final db = await database;
+
+      await db.delete("to_assign", where: "id = ?", whereArgs: [id]);
+    } catch (e) {
+      logger.e("Error: $e");
+    }
+  }
+
+  // delete the entire database
+  Future<void> deleteDB() async {
+    try {
+      final dbPath = await getDatabasesPath();
+
+      await deleteDatabase(join(dbPath, "assigner.db"));
+      _database = null;
+    } catch (e) {
+      logger.e("Error: $e");
     }
   }
 }

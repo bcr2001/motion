@@ -1,4 +1,3 @@
-import 'package:logger/logger.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -51,7 +50,7 @@ class MainCategory {
 
 class Subcategories {
   int? id;
-  final String subDate;
+  final String date;
   final String mainCategoryName;
   final String subcategoryName;
   final String timeRecorded;
@@ -60,7 +59,7 @@ class Subcategories {
 
   Subcategories({
     this.id,
-    required this.subDate,
+    required this.date,
     required this.mainCategoryName,
     required this.subcategoryName,
     required this.timeRecorded,
@@ -72,7 +71,7 @@ class Subcategories {
   factory Subcategories.fromMap(Map<String, dynamic> map) {
     return Subcategories(
       id: map["id"],
-      subDate: map['subDate'],
+      date: map['date'],
       mainCategoryName: map['mainCategoryName'],
       subcategoryName: map['subcategoryName'],
       timeRecorded: map["timeRecorded"],
@@ -84,7 +83,7 @@ class Subcategories {
   // Convert Subcategories object to a map
   Map<String, dynamic> toMap() {
     return {
-      'subDate': subDate,
+      'date': date,
       'mainCategoryName': mainCategoryName,
       'subcategoryName': subcategoryName,
       'timeRecorded': timeRecorded,
@@ -97,12 +96,12 @@ class Subcategories {
   String toString() {
     return 'Subcategories {'
         'Id: $id, '
-        'subDate: $subDate, '
+        'date: $date, '
         'mainCategoryName: $mainCategoryName, '
         'subcategoryName $subcategoryName, '
         'timeRecorded: $timeRecorded,'
         'timeSpent: $timeSpent, '
-        'currentLoggedInUserr: $currentLoggedInUser'
+        'currentLoggedInUser: $currentLoggedInUser'
         '}';
   }
 }
@@ -135,7 +134,7 @@ class TrackerDatabaseHelper {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, 'tracker.db');
 
-    return await openDatabase(path, version: 2, onCreate: _createDatabase);
+    return await openDatabase(path, version: 3, onCreate: _createDatabase);
   }
 
   void _createDatabase(Database db, int version) async {
@@ -153,13 +152,13 @@ class TrackerDatabaseHelper {
     await db.execute('''
     CREATE TABLE subcategory(
       id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
-      subDate TEXT,
+      date TEXT,
       mainCategoryName TEXT,
       subcategoryName TEXT,
       timeRecorded TEXT,
       timeSpent REAL,
       currentLoggedInUser TEXT,
-      FOREIGN KEY(subDate) REFERENCES main_category(date)
+      FOREIGN KEY(date) REFERENCES main_category(date)
     )
   ''');
   }
@@ -225,6 +224,15 @@ class TrackerDatabaseHelper {
     }
   }
 
+  // get all data in the subcategories table
+  Future<List<Subcategories>> getAllSubcategories() async {
+    final db = await database;
+
+    final allSubs = await db.query("subcategory");
+
+    return allSubs.map((map) => Subcategories.fromMap(map)).toList();
+  }
+
   // gets all the subcategories depending on the current date
   Future<List<Subcategories>> getCurrentDateSubcategory(
       String currentDate, String currentUser, String subcategoryName) async {
@@ -232,8 +240,7 @@ class TrackerDatabaseHelper {
       final db = await database;
 
       final specificSubcategories = await db.query("subcategory",
-          where:
-              "subDate = ? AND currentLoggedInUser = ? AND subcategoryName = ?",
+          where: "date = ? AND currentLoggedInUser = ? AND subcategoryName = ?",
           whereArgs: [currentDate, currentUser, subcategoryName]);
 
       return specificSubcategories
@@ -254,7 +261,7 @@ class TrackerDatabaseHelper {
     final result = await db.rawQuery('''
     SELECT SUM(timeSpent) as total_time_spent
     FROM subcategory
-    WHERE subDate = ? AND currentLoggedInUser = ? AND subcategoryName = ?
+    WHERE date = ? AND currentLoggedInUser = ? AND subcategoryName = ?
   ''', [currentDate, currentUser, subcategoryName]);
 
     if (result.isNotEmpty) {
@@ -298,6 +305,7 @@ class TrackerDatabaseHelper {
       final path = join(dbPath, "tracker.db");
 
       await deleteDatabase(path);
+      _database = null; // Reset the database instance
     } catch (e) {
       logger.e("Error: $e");
     }

@@ -56,11 +56,11 @@ void main() async {
   // Initialize the database helper
   final TrackerDatabaseHelper databaseHelper = TrackerDatabaseHelper();
 
-  // final allSubs = await databaseHelper.getAllSubcategories();
+  final allSubs = await databaseHelper.getAllSubcategories();
 
-  // print(allSubs);
+  print(allSubs);
 
-  await databaseHelper.deleteDb();
+  // await databaseHelper.deleteDb();
 
   runApp(MultiProvider(
     providers: [

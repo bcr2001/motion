@@ -170,7 +170,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
 
                                   subTrackerProvider.insertIntoSubcategoryTable(
                                       Subcategories(
-                                          subDate: date.currentData,
+                                          date: date.currentData,
                                           mainCategoryName:
                                               widget.mainCategoryName,
                                           subcategoryName:
