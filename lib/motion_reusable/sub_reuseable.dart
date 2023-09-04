@@ -24,7 +24,7 @@ class CancelAddTextButtons extends StatelessWidget {
             style: Theme.of(context).textTheme.bodyMedium,
           ),
         ),
-        
+
         // Add button
         TextButton(
           onPressed: onPressedAdd,
@@ -38,9 +38,27 @@ class CancelAddTextButtons extends StatelessWidget {
   }
 }
 
-
+// floating action button
+FloatingActionButton floatingActionButton(context,
+  {
+    required VoidCallback onPressed,
+    required String label,
+    required IconData icon
+  }
+) {
+  return FloatingActionButton.extended(
+    onPressed: onPressed,
+    label: Text(label, style: Theme.of(context).textTheme.bodyMedium,),
+    icon: Icon(icon, color: Theme.of(context).iconTheme.color,),);
+}
 
 // time measurement adder
-// double timeAdder({required String h, required String m, required String s}){
+double timeAdder({required String h, required String m, required String s}) {
+  double hours = double.parse(h) * 60;
+  double minutes = double.parse(m);
+  double seconds = double.parse(s) / 60;
 
-// }
+  double addedTimeComponents = hours + minutes + seconds;
+
+  return addedTimeComponents;
+}

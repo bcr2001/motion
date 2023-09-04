@@ -172,19 +172,12 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
       appBar: AppBar(
         title: const Text(AppString.motionRouteTitle),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          _showTrackAlertDialog(context);
-        },
-        label: Text(
-          AppString.addItem,
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-        icon: Icon(
-          Icons.add,
-          color: Theme.of(context).iconTheme.color,
-        ),
-      ),
+      // displays the alert dialog to add ne subcategories
+      floatingActionButton: floatingActionButton(
+        context,
+        onPressed: () => _showTrackAlertDialog(context), label: AppString.addItem, 
+        icon: Icons.add), 
+
       body: Padding(
           padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 85),
           child: Consumer2<AssignerMainProvider, UserUidProvider>(

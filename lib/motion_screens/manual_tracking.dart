@@ -104,7 +104,6 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
             insetPadding: EdgeInsets.zero,
             title: const Text(AppString.manualAddBlock),
             content: Builder(builder: (BuildContext context) {
-
               var subTrackerProvider =
                   context.read<SubcategoryTrackerDatabaseProvider>();
 
@@ -142,11 +141,12 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                       ),
 
                       // cancel and add button
-                      Consumer3<CurrentDataProvider, UserUidProvider, CurrentTimeProvider>(
-                        builder: (context, date, uid,time,child) {
+                      Consumer3<CurrentDataProvider, UserUidProvider,
+                          CurrentTimeProvider>(
+                        builder: (context, date, uid, time, child) {
                           return CancelAddTextButtons(
                             onPressedCancel: () {
-                              // exits the alart dialog and resets the text contoller content 
+                              // exits the alart dialog and resets the text contoller content
                               navigationKey.currentState!.pop();
 
                               hourController.text = "";
@@ -167,7 +167,6 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                                 } else {
                                   logger.i("Passed Validation");
 
-                                  // don't forget to add the timeSpent data 
                                   subTrackerProvider.insertIntoSubcategoryTable(
                                       Subcategories(
                                           subDate: date.currentData,
@@ -175,7 +174,10 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                                               widget.mainCategoryName,
                                           subcategoryName:
                                               widget.subcategoryName,
-                                          currentLoggedInUser: uid.userUid!, timeRecorded: time.formattedTime));
+                                          currentLoggedInUser: uid.userUid!,
+                                          // timeAdder functions converts all the time components to minutes
+                                          timeSpent: timeAdder(h: hourController.text, m: minuteController.text, s: secondController.text),
+                                          timeRecorded: time.formattedTime));
                                 }
                               }
                             },
@@ -207,6 +209,8 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
               icon: const Icon(Icons.add))
         ],
       ),
+      // allows uses to update the main category table
+      floatingActionButton: FloatingActionButton.extended(onPressed: (){}, label: const Text("Save"), icon: const Icon(Icons.save_alt_rounded),),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
