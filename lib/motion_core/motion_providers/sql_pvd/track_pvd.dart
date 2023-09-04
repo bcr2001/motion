@@ -20,16 +20,11 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
   }
 }
 
-
 // subcategory table provider
 class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
+  // a list of subcategories tracked for a specific date
   List<Subcategories> _currentDateSubcategories = [];
-
   List<Subcategories> get currentDateSubcategories => _currentDateSubcategories;
-
-  double? _totalTimeSpent;
-
-  double? get totalTimeSpent => _totalTimeSpent;
 
   // get subcategories tracked on the current date
   Future<void> retrieveCurrentDateSubcategories(
@@ -43,10 +38,17 @@ class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // get the total time spent
-  Future<double> retrieveTotalTimeSpent(
+  // gets the total time spent for all subcategories (current date)
+  Future<double> retrieveTotalTimeSpentAllSubs(
+      String currentDate, String currentUser) async {
+    return await trackDbInstance.getTotalTimeForCurrentDate(
+        currentDate, currentUser);
+  }
+
+  // get the total time spent for s specific subcategory
+  Future<double> retrieveTotalTimeSpentSubSpecific(
       String currentDate, String currentUser, String subcategoryName) async {
-    return await trackDbInstance.getTotalTimeSpent(
+    return await trackDbInstance.getTotalTimeSpentPerSubcategory(
         currentDate, currentUser, subcategoryName);
   }
 

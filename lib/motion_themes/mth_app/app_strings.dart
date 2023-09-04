@@ -82,5 +82,5 @@ class AppString {
   static const String manualCardTitle = "Today’s Blocks";
 
   // HOME ROUTE
-  static const String homeSubcategoryTitle = "Subcategory";
+  static const String homeSubcategoryTitle = "Subcategories";
 }

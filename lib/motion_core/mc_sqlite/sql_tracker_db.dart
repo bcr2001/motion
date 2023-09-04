@@ -252,8 +252,31 @@ class TrackerDatabaseHelper {
     }
   }
 
+  // calculate and return the total time spent on all the categories for a particular date
+  Future<double> getTotalTimeForCurrentDate(
+      String currentDate, String currentUser) async {
+    final db = await database;
+
+    final result = await db.rawQuery('''
+    SELECT SUM(timeSpent) as total
+    FROM subcategory
+    WHERE date = ? AND currentLoggedInUser = ?;
+    ''', [currentDate, currentUser]);
+
+    if (result.isNotEmpty) {
+      final total = result.first["total"];
+      if (total is double) {
+        return total;
+      } else {
+        return 0.0; // Handle the case where the result is not a double
+      }
+    } else {
+      return 0.0; // Return 0.0 if no matching records are found
+    }
+  }
+
   // calculates and returns the total time spent on a particular subcategory
-  Future<double> getTotalTimeSpent(
+  Future<double> getTotalTimeSpentPerSubcategory(
       String currentDate, String currentUser, String subcategoryName) async {
     final db = await database;
 

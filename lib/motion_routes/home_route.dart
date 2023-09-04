@@ -90,78 +90,144 @@ class TrackedSubcategories extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // subcategory title
-          Text(AppString.homeSubcategoryTitle, style: Theme.of(context).textTheme.bodyMedium,),
+          Text(
+            AppString.homeSubcategoryTitle,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
 
           // card that holds subcategories that are active
           SizedBox(
               height: screenHeight * 0.35,
-              child: Card(child: Consumer4<
-                  AssignerMainProvider,
-                  SubcategoryTrackerDatabaseProvider,
-                  CurrentDataProvider,
-                  UserUidProvider>(
-                builder: (context, active, sub, date, user, child) {
-                  var activeItems = active.assignerItems;
+              child: Card(
+                  child: Column(
+                children: [
+                  // Time Accounted and Current Date
+                  Consumer3<SubcategoryTrackerDatabaseProvider,
+                      CurrentDataProvider, UserUidProvider>(
+                    builder: (context, sub, date, user, child) {
+                      String formattedDate = date.getFormattedDate();
 
-                  // generates list tiles of categories where
-                  // isActive = 1
-                  // else is returns an empty widget
-                  return ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: activeItems.length,
-                      itemBuilder: (BuildContext context, index) {
-                        return activeItems[index].isActive == 1
-                            ? FutureBuilder<double>(
-                                future: sub.retrieveTotalTimeSpent(
-                                    date.currentData,
-                                    user.userUid!,
-                                    activeItems[index].subcategoryName),
-                                builder: (context, snapshot) {
+                      return Padding(
+                        padding:
+                            const EdgeInsets.only(top: 15, left: 10, right: 10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            // Accounted
+                            FutureBuilder<double>(
+                                future: sub.retrieveTotalTimeSpentAllSubs(
+                                    date.currentData, user.userUid!),
+                                builder: (BuildContext context, snapshot) {
                                   if (snapshot.connectionState ==
                                       ConnectionState.waiting) {
-                                    // Return a loading indicator while waiting for the data
-                                    return const CircularProgressIndicator();
+                                    return const Center(
+                                      child: CircularProgressIndicator(),
+                                    );
                                   } else if (snapshot.hasError) {
-                                    // Handle any errors here
-                                    return Text('Error: ${snapshot.error}');
+                                    return const Text("Error :( ");
                                   } else {
-                                    // Data is available, use it to build the ListTile
-                                    final totalTimeSpentSub =
+
+                                    final totalTimeSpentAllSub =
                                         snapshot.data ?? 0.0;
-                                    
+
                                     // convert total
-                                    final convertedTotalTimeSpent =
-                                        convertMinutesToTime(totalTimeSpentSub);
-
-
-                                    return ListTile(
-                                      title: Text(
-                                          activeItems[index].subcategoryName),
-                                      trailing:
-                                          Text(convertedTotalTimeSpent, style: Theme.of(context).textTheme.bodySmall,),
-                                      onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                ManualTimeRecordingRoute(
-                                              subcategoryName:
-                                                  activeItems[index]
-                                                      .subcategoryName,
-                                              mainCategoryName:
-                                                  activeItems[index]
-                                                      .mainCategoryName,
-                                            ),
-                                          ),
-                                        );
-                                      },
+                                    final convertedAllTotalTimeSpent =
+                                        convertMinutesToTime(totalTimeSpentAllSub);
+                                    return Text(
+                                      "$convertedAllTotalTimeSpent\nAccounted", style: const TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.w600
+                                      ),
                                     );
                                   }
-                                },
-                              )
-                            : const SizedBox.shrink();
-                      });
-                },
+                                }),
+
+                            // current date
+                            Text(
+                              formattedDate,
+                              style: Theme.of(context).textTheme.bodySmall,
+                            )
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+
+                  // subcategory + total time spent
+                  Consumer4<
+                      AssignerMainProvider,
+                      SubcategoryTrackerDatabaseProvider,
+                      CurrentDataProvider,
+                      UserUidProvider>(
+                    builder: (context, active, sub, date, user, child) {
+                      var activeItems = active.assignerItems;
+
+                      // generates list tiles of categories where
+                      // isActive = 1
+                      // else is returns an empty widget
+                      return ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: activeItems.length,
+                          itemBuilder: (BuildContext context, index) {
+                            return activeItems[index].isActive == 1
+                                ? FutureBuilder<double>(
+                                    future:
+                                        sub.retrieveTotalTimeSpentSubSpecific(
+                                            date.currentData,
+                                            user.userUid!,
+                                            activeItems[index].subcategoryName),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        // Return a loading indicator while waiting for the data
+                                        return const CircularProgressIndicator();
+                                      } else if (snapshot.hasError) {
+                                        // Handle any errors here
+                                        return Text('Error: ${snapshot.error}');
+                                      } else {
+                                        // Data is available, use it to build the ListTile
+                                        final totalTimeSpentSub =
+                                            snapshot.data ?? 0.0;
+
+                                        // convert total
+                                        final convertedTotalTimeSpent =
+                                            convertMinutesToTime(
+                                                totalTimeSpentSub);
+
+                                        return ListTile(
+                                          title: Text(activeItems[index]
+                                              .subcategoryName),
+                                          trailing: Text(
+                                            convertedTotalTimeSpent,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall,
+                                          ),
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    ManualTimeRecordingRoute(
+                                                  subcategoryName:
+                                                      activeItems[index]
+                                                          .subcategoryName,
+                                                  mainCategoryName:
+                                                      activeItems[index]
+                                                          .mainCategoryName,
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        );
+                                      }
+                                    },
+                                  )
+                                : const SizedBox.shrink();
+                          });
+                    },
+                  ),
+                ],
               )))
         ],
       ),
