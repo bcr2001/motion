@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:motion/main.dart';
-import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_provider.dart';
+import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:provider/provider.dart';
 

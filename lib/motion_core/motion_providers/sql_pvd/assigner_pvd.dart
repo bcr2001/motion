@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:motion/motion_core/mc_sqlite/main_and_sub.dart';
+import 'package:motion/motion_core/mc_sqlite/sql_assigner_db.dart';
 
 // database instance
 final AssignerDatabaseHelper dbInstance = AssignerDatabaseHelper();

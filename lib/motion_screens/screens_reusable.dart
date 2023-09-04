@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:motion/motion_core/motion_providers/firebase_pvd/firestore_provider.dart';
+import 'package:motion/motion_core/motion_providers/firebase_pvd/firestore_pvd.dart';
 import 'package:provider/provider.dart';
 
 class UserSettingsInfo extends StatelessWidget {

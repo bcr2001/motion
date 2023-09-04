@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_provider.dart';
+import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_pvd.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:provider/provider.dart';
 import 'about_page.dart';

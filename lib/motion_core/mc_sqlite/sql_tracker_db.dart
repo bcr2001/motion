@@ -1,3 +1,4 @@
+import 'package:logger/logger.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -95,13 +96,13 @@ class Subcategories {
   @override
   String toString() {
     return 'Subcategories {'
-        'ID: $id, '
-        'Sub Date: $subDate, '
-        'Main Category Name: $mainCategoryName, '
-        'Subcategory Name: $subcategoryName, '
+        'Id: $id, '
+        'subDate: $subDate, '
+        'mainCategoryName: $mainCategoryName, '
+        'subcategoryName $subcategoryName, '
         'timeRecorded: $timeRecorded,'
-        'Time Spent: $timeSpent, '
-        'Current Logged-In User: $currentLoggedInUser'
+        'timeSpent: $timeSpent, '
+        'currentLoggedInUserr: $currentLoggedInUser'
         '}';
   }
 }
@@ -163,67 +164,124 @@ class TrackerDatabaseHelper {
   ''');
   }
 
-  // CRUD operations for MainCategory
+// CRUD operations for MainCategory
+
+  // insert new rows into the main category table
   Future<void> insertMainCategory(MainCategory mainCategory) async {
-    final db = await database;
-    await db.insert('main_category', mainCategory.toMap(),
-        conflictAlgorithm: ConflictAlgorithm.replace);
+    try {
+      final db = await database;
+      await db.insert('main_category', mainCategory.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace);
+    } catch (e) {
+      logger.e("Error: $e");
+    }
   }
 
+  // gets all the entries added to the main category table
   Future<List<MainCategory>> getAllMainCategories() async {
-    final db = await database;
+    try {
+      final db = await database;
 
-    final List<Map<String, dynamic>> maps = await db.query('main_category');
+      final List<Map<String, dynamic>> maps = await db.query('main_category');
 
-    return maps.map((map) => MainCategory.fromMap(map)).toList();
+      return maps.map((map) => MainCategory.fromMap(map)).toList();
+    } catch (e) {
+      logger.e("Error: $e");
+      return [];
+    }
   }
 
+  // updates existing main categories rows
   Future<void> updateMainCategory(MainCategory mainCategory) async {
-    final db = await database;
-    await db.update('main_category', mainCategory.toMap(),
-        where: 'date = ?', whereArgs: [mainCategory.date]);
+    try {
+      final db = await database;
+      await db.update('main_category', mainCategory.toMap(),
+          where: 'date = ?', whereArgs: [mainCategory.date]);
+    } catch (e) {
+      logger.e("Error: $e");
+    }
   }
 
+  // delete rows in the main category table
   Future<void> deleteMainCategory(String date) async {
-    final db = await database;
-    await db.delete('main_category', where: 'date = ?', whereArgs: [date]);
+    try {
+      final db = await database;
+      await db.delete('main_category', where: 'date = ?', whereArgs: [date]);
+    } catch (e) {
+      logger.e("Error: $e");
+    }
   }
 
-  // CRUD operations for Subcategories
+// CRUD operations for Subcategories
+
+  // insert new rows into the subcategory category table
   Future<void> insertSubcategory(Subcategories subcategory) async {
-    final db = await database;
-    await db.insert('subcategory', subcategory.toMap(),
-        conflictAlgorithm: ConflictAlgorithm.replace);
-  }
-
-  // gets all the subcategories regardless of the date
-  Future<List<Subcategories>> getAllSubcategories() async {
-    final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('subcategory');
-    return maps.map((map) => Subcategories.fromMap(map)).toList();
+    try {
+      final db = await database;
+      await db.insert('subcategory', subcategory.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace);
+    } catch (e) {
+      logger.e("Error: $e");
+    }
   }
 
   // gets all the subcategories depending on the current date
   Future<List<Subcategories>> getCurrentDateSubcategory(
       String currentDate, String currentUser, String subcategoryName) async {
-    final db = await database;
+    try {
+      final db = await database;
 
-    final specificSubcategories = await db.query("subcategory",
-        where:
-            "subDate = ? AND currentLoggedInUser = ? AND subcategoryName = ?",
-        whereArgs: [currentDate, currentUser, subcategoryName]);
+      final specificSubcategories = await db.query("subcategory",
+          where:
+              "subDate = ? AND currentLoggedInUser = ? AND subcategoryName = ?",
+          whereArgs: [currentDate, currentUser, subcategoryName]);
 
-    return specificSubcategories
-        .map((map) => Subcategories.fromMap(map))
-        .toList();
+      return specificSubcategories
+          .map((map) => Subcategories.fromMap(map))
+          .toList();
+    } catch (e) {
+      logger.e("Error: $e");
+      return [];
+    }
   }
 
+  // calculates and returns the total time spent on a particular subcategory
+  Future<double> getTotalTimeSpent(
+      String currentDate, String currentUser, String subcategoryName) async {
+    final db = await database;
+
+    // returns total based on the current date, user, and subcategory name
+    final result = await db.rawQuery('''
+    SELECT SUM(timeSpent) as total_time_spent
+    FROM subcategory
+    WHERE subDate = ? AND currentLoggedInUser = ? AND subcategoryName = ?
+  ''', [currentDate, currentUser, subcategoryName]);
+
+    if (result.isNotEmpty) {
+      // first row and column
+      final total = result.first['total_time_spent'];
+      if (total is double) {
+        return total;
+      } else {
+        return 0.0; // Handle the case where the result is not a double
+      }
+    } else {
+      return 0.0; // Return 0.0 if no matching records are found
+    }
+  }
+
+  // updates existing subcategory categories rows
   Future<void> updateSubcategory(Subcategories subcategory) async {
-    final db = await database;
-    await db.update('subcategory', subcategory.toMap(),
-        where: 'id = ?', whereArgs: [subcategory.id]);
+    try {
+      final db = await database;
+      await db.update('subcategory', subcategory.toMap(),
+          where: 'id = ?', whereArgs: [subcategory.id]);
+    } catch (e) {
+      logger.e("Error: $e");
+    }
   }
 
+  // deletes subcategory rows
   Future<void> deleteSubcategory(int id) async {
     try {
       final db = await database;
@@ -233,25 +291,15 @@ class TrackerDatabaseHelper {
     }
   }
 
-  Future<double> getTotalTimeSpent(
-      String currentDate, String currentUser, String subcategoryName) async {
-    final db = await database;
+// Delete the entire database
+  Future<void> deleteDb() async {
+    try {
+      final dbPath = await getDatabasesPath();
+      final path = join(dbPath, "tracker.db");
 
-    final result = await db.rawQuery('''
-    SELECT SUM(timeSpent) as total_time_spent
-    FROM subcategory
-    WHERE subDate = ? AND currentLoggedInUser = ? AND subcategoryName = ?
-  ''', [currentDate, currentUser, subcategoryName]);
-
-    if (result.isNotEmpty) {
-      final total = result.first['total_time_spent'];
-      if (total is double) {
-        return total;
-      } else {
-        return 0.0; // Handle the case where the result is not a double
-      }
-    } else {
-      return 0.0; // Return 0.0 if no matching records are found
+      await deleteDatabase(path);
+    } catch (e) {
+      logger.e("Error: $e");
     }
   }
 }

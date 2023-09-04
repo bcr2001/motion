@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:motion/main.dart';
-import 'package:motion/motion_core/mc_sqlite/main_and_sub.dart';
-import 'package:motion/motion_core/motion_providers/date_pvd/current_date.dart';
-import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_provider.dart';
-import 'package:motion/motion_core/motion_providers/sql_pvd/assigner_provider.dart';
-import 'package:motion/motion_core/motion_providers/dropDown_pcd/drop_down.dart';
+import 'package:motion/motion_core/mc_sqlite/sql_assigner_db.dart';
+import 'package:motion/motion_core/motion_providers/date_pvd/current_date_pvd.dart';
+import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
+import 'package:motion/motion_core/motion_providers/sql_pvd/assigner_pvd.dart';
+import 'package:motion/motion_core/motion_providers/dropDown_pvd/drop_down_pvd.dart';
 import 'package:motion/motion_reusable/mu_reusable/user_validator.dart';
 import 'package:motion/motion_reusable/sub_reuseable.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';

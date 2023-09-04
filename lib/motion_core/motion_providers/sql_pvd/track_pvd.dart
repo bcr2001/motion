@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:motion/motion_core/mc_sqlite/tracker_db.dart';
+import 'package:motion/motion_core/mc_sqlite/sql_tracker_db.dart';
 
 final TrackerDatabaseHelper trackDbInstance = TrackerDatabaseHelper();
 

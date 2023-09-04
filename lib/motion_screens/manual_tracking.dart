@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:motion/main.dart';
-import 'package:motion/motion_core/mc_sqlite/tracker_db.dart';
-import 'package:motion/motion_core/motion_providers/date_pvd/current_date.dart';
-import 'package:motion/motion_core/motion_providers/date_pvd/current_time.dart';
-import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_provider.dart';
-import 'package:motion/motion_core/motion_providers/sql_pvd/assigner_provider.dart';
-import 'package:motion/motion_core/motion_providers/sql_pvd/track_provider.dart';
+import 'package:motion/motion_core/mc_sqlite/sql_tracker_db.dart';
+import 'package:motion/motion_core/motion_providers/date_pvd/current_date_pvd.dart';
+import 'package:motion/motion_core/motion_providers/date_pvd/current_time_pvd.dart';
+import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
+import 'package:motion/motion_core/motion_providers/sql_pvd/assigner_pvd.dart';
+import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_reusable/mu_reusable/user_reusable.dart';
 import 'package:motion/motion_reusable/sub_reuseable.dart';

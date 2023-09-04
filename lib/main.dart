@@ -2,22 +2,22 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:motion/firebase_options.dart';
-import 'package:motion/motion_core/mc_sqlite/tracker_db.dart';
-import 'package:motion/motion_core/motion_providers/date_pvd/current_month_provider.dart';
-import 'package:motion/motion_core/motion_providers/date_pvd/current_time.dart';
-import 'package:motion/motion_core/motion_providers/firebase_pvd/firestore_provider.dart';
-import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_provider.dart';
-import 'package:motion/motion_core/motion_providers/sql_pvd/track_provider.dart';
-import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_provider.dart';
-import 'package:motion/motion_core/motion_providers/dropDown_pcd/drop_down.dart';
+import 'package:motion/motion_core/mc_sqlite/sql_tracker_db.dart';
+import 'package:motion/motion_core/motion_providers/date_pvd/current_month_provider_pvd.dart';
+import 'package:motion/motion_core/motion_providers/date_pvd/current_time_pvd.dart';
+import 'package:motion/motion_core/motion_providers/firebase_pvd/firestore_pvd.dart';
+import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
+import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
+import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_pvd.dart';
+import 'package:motion/motion_core/motion_providers/dropDown_pvd/drop_down_pvd.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_user/mu_ops/auth_page.dart';
 
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
-import 'motion_core/motion_providers/date_pvd/current_date.dart';
-import 'motion_core/motion_providers/sql_pvd/assigner_provider.dart';
-import 'motion_core/motion_providers/web_api_pvd/zen_quotes_provider.dart';
+import 'motion_core/motion_providers/date_pvd/current_date_pvd.dart';
+import 'motion_core/motion_providers/sql_pvd/assigner_pvd.dart';
+import 'motion_core/motion_providers/web_api_pvd/zen_quotes_pvd.dart';
 import 'motion_reusable/sub_reuseable.dart';
 import 'motion_themes/mth_theme/dark_theme.dart';
 import 'motion_themes/mth_theme/light_theme.dart';
@@ -56,11 +56,11 @@ void main() async {
   // Initialize the database helper
   final TrackerDatabaseHelper databaseHelper = TrackerDatabaseHelper();
 
-  final allSubs = await databaseHelper.getAllSubcategories();
+  // final allSubs = await databaseHelper.getAllSubcategories();
 
-  print(allSubs);
+  // print(allSubs);
 
-  // databaseHelper.deleteMainDb();
+  await databaseHelper.deleteDb();
 
   runApp(MultiProvider(
     providers: [
