@@ -38,18 +38,64 @@ class CancelAddTextButtons extends StatelessWidget {
   }
 }
 
+// card widget plus a ListView.Builder() to display SQLite database table content
+class CardConstructor extends StatelessWidget {
+  final String cardTitle;
+  final ListView cardListView;
+
+  const CardConstructor(
+      {super.key, required this.cardTitle, required this.cardListView});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(top: 20.0),
+      child: Card(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+             // card title
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0, left: 8.0),
+              child: Text(
+                cardTitle,
+                style: Theme.of(context).textTheme.headlineLarge,
+              ),
+            ),
+
+            // title and content divider
+            const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Divider(
+                thickness: 1.5,
+                color: Colors.black,
+              ),
+            ),
+
+            // listView widget
+            cardListView
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 // floating action button
 FloatingActionButton floatingActionButton(context,
-  {
-    required VoidCallback onPressed,
+    {required VoidCallback onPressed,
     required String label,
-    required IconData icon
-  }
-) {
+    required IconData icon}) {
   return FloatingActionButton.extended(
     onPressed: onPressed,
-    label: Text(label, style: Theme.of(context).textTheme.bodyMedium,),
-    icon: Icon(icon, color: Theme.of(context).iconTheme.color,),);
+    label: Text(
+      label,
+      style: Theme.of(context).textTheme.bodyMedium,
+    ),
+    icon: Icon(
+      icon,
+      color: Theme.of(context).iconTheme.color,
+    ),
+  );
 }
 
 // time measurement adder

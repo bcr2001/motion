@@ -78,4 +78,5 @@ class AppString {
 
   // MANUAL RECORDING ROUTE
   static const String manualAddBlock = "Add time block";
+  static const String manualSave = "Save";
 }

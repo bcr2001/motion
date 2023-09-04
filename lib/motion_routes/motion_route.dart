@@ -40,6 +40,7 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // card title
             Padding(
               padding: const EdgeInsets.only(top: 8.0, left: 8.0),
               child: Text(
@@ -47,6 +48,8 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                 style: Theme.of(context).textTheme.headlineLarge,
               ),
             ),
+
+            // title and content divider
             const Padding(
               padding: EdgeInsets.all(8.0),
               child: Divider(
@@ -195,9 +198,8 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                   ),
 
                   // education category
-                  _cardConstructor(context,
-                      cardTitle: AppString.educationMainCategory,
-                      cardListView: ListView.builder(
+                  CardConstructor(
+                    cardTitle: AppString.educationMainCategory, cardListView: ListView.builder(
                           shrinkWrap: true,
                           itemCount: items.length,
                           itemBuilder: (BuildContext context, index) {
@@ -211,9 +213,8 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                           })),
 
                   // // skills category
-                  _cardConstructor(context,
-                      cardTitle: AppString.skillMainCategory,
-                      cardListView: ListView.builder(
+                  CardConstructor(
+                    cardTitle: AppString.skillMainCategory, cardListView: ListView.builder(
                           shrinkWrap: true,
                           itemCount: items.length,
                           itemBuilder: (BuildContext context, index) {
@@ -225,11 +226,10 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                                     item: items[index])
                                 : const SizedBox.shrink();
                           })),
-
+                    
                   // entertainment category
-                  _cardConstructor(context,
-                      cardTitle: AppString.entertainmentMainCategory,
-                      cardListView: ListView.builder(
+                  CardConstructor(
+                    cardTitle: AppString.entertainmentMainCategory, cardListView: ListView.builder(
                           shrinkWrap: true,
                           itemCount: items.length,
                           itemBuilder: (BuildContext context, index) {
@@ -244,9 +244,9 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                           })),
 
                   // personal growth category
-                  _cardConstructor(context,
-                      cardTitle: AppString.pgMainCategory,
-                      cardListView: ListView.builder(
+                  CardConstructor(
+                    cardTitle:  AppString.pgMainCategory, 
+                    cardListView: ListView.builder(
                           shrinkWrap: true,
                           itemCount: items.length,
                           itemBuilder: (BuildContext context, index) {
@@ -261,9 +261,9 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                           })),
 
                   //sleep category
-                  _cardConstructor(context,
-                      cardTitle: AppString.sleepMainCategory,
-                      cardListView: ListView.builder(
+                  CardConstructor(
+                    cardTitle:  AppString.sleepMainCategory, 
+                    cardListView: ListView.builder(
                           shrinkWrap: true,
                           itemCount: items.length,
                           itemBuilder: (BuildContext context, index) {
@@ -274,7 +274,7 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                                     tileTitle: items[index].subcategoryName,
                                     item: items[index])
                                 : const SizedBox.shrink();
-                          })),
+                          }))
                 ],
               );
             },

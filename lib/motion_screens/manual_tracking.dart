@@ -210,7 +210,12 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
         ],
       ),
       // allows uses to update the main category table
-      floatingActionButton: FloatingActionButton.extended(onPressed: (){}, label: const Text("Save"), icon: const Icon(Icons.save_alt_rounded),),
+      floatingActionButton: floatingActionButton(
+        context, 
+        onPressed: (){}, 
+        label:AppString.manualSave , 
+        icon: Icons.save_rounded),
+
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
