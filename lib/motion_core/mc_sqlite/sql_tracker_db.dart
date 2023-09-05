@@ -22,7 +22,7 @@ class MainCategory {
   });
 
   // Factory constructor to convert a map to MainCategory object
-factory MainCategory.fromMap(Map<String, dynamic> map) {
+  factory MainCategory.fromMap(Map<String, dynamic> map) {
     return MainCategory(
       date: map['date'],
       education: map['education'] ?? 0.0,
@@ -33,7 +33,6 @@ factory MainCategory.fromMap(Map<String, dynamic> map) {
       currentLoggedInUser: map['currentLoggedInUser'],
     );
   }
-
 
   // Convert MainCategory object to a map
   Map<String, dynamic> toMap() {
@@ -48,9 +47,9 @@ factory MainCategory.fromMap(Map<String, dynamic> map) {
     };
   }
 
-   @override
+  @override
   String toString() {
-    return 'Main category{date: $date, education: $education, skills: $skills, "entertainment: $entertainment", personalGrowth: $personalGrowth, sleep: $sleep, user: $currentLoggedInUser}';
+    return 'Main category{date: $date, education: $education, skills: $skills, entertainment: $entertainment, personalGrowth: $personalGrowth, sleep: $sleep, user: $currentLoggedInUser}';
   }
 }
 
@@ -184,6 +183,20 @@ class TrackerDatabaseHelper {
         WHERE date = NEW.date AND currentLoggedInUser = NEW.currentLoggedInUser;
       END;
       ''');
+
+    await db.execute('''
+        CREATE TRIGGER IF NOT EXISTS update_main_category_after_delete
+        AFTER DELETE ON subcategory
+        BEGIN
+          UPDATE main_category
+          SET education = (SELECT SUM(timeSpent) FROM subcategory WHERE mainCategoryName = 'Education' AND date = OLD.date AND currentLoggedInUser = OLD.currentLoggedInUser),
+              skills = (SELECT SUM(timeSpent) FROM subcategory WHERE mainCategoryName = 'Skills' AND date = OLD.date AND currentLoggedInUser = OLD.currentLoggedInUser),
+              entertainment = (SELECT SUM(timeSpent) FROM subcategory WHERE mainCategoryName = 'Entertainment' AND date = OLD.date AND currentLoggedInUser = OLD.currentLoggedInUser),
+              personalGrowth = (SELECT SUM(timeSpent) FROM subcategory WHERE mainCategoryName = 'Personal Growth' AND date = OLD.date AND currentLoggedInUser = OLD.currentLoggedInUser),
+              sleep = (SELECT SUM(timeSpent) FROM subcategory WHERE mainCategoryName = 'Sleep' AND date = OLD.date AND currentLoggedInUser = OLD.currentLoggedInUser)
+          WHERE date = OLD.date AND currentLoggedInUser = OLD.currentLoggedInUser;
+        END;
+        ''');
   }
 
 // CRUD operations for MainCategory
