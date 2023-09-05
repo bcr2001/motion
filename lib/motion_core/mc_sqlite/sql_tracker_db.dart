@@ -13,26 +13,27 @@ class MainCategory {
 
   MainCategory({
     required this.date,
-    this.education = 0,
-    this.skills = 0,
-    this.entertainment = 0,
-    this.personalGrowth = 0,
-    this.sleep = 0,
+    this.education = 0.0,
+    this.skills = 0.0,
+    this.entertainment = 0.0,
+    this.personalGrowth = 0.0,
+    this.sleep = 0.0,
     required this.currentLoggedInUser,
   });
 
   // Factory constructor to convert a map to MainCategory object
-  factory MainCategory.fromMap(Map<String, dynamic> map) {
+factory MainCategory.fromMap(Map<String, dynamic> map) {
     return MainCategory(
       date: map['date'],
-      education: map['education'],
-      skills: map['skills'],
-      entertainment: map['entertainment'],
-      personalGrowth: map['personalGrowth'],
-      sleep: map['sleep'],
+      education: map['education'] ?? 0.0,
+      skills: map['skills'] ?? 0.0,
+      entertainment: map['entertainment'] ?? 0.0,
+      personalGrowth: map['personalGrowth'] ?? 0.0,
+      sleep: map['sleep'] ?? 0.0,
       currentLoggedInUser: map['currentLoggedInUser'],
     );
   }
+
 
   // Convert MainCategory object to a map
   Map<String, dynamic> toMap() {
@@ -45,6 +46,11 @@ class MainCategory {
       'sleep': sleep,
       'currentLoggedInUser': currentLoggedInUser,
     };
+  }
+
+   @override
+  String toString() {
+    return 'Main category{date: $date, education: $education, skills: $skills, "entertainment: $entertainment", personalGrowth: $personalGrowth, sleep: $sleep, user: $currentLoggedInUser}';
   }
 }
 
@@ -63,7 +69,7 @@ class Subcategories {
     required this.mainCategoryName,
     required this.subcategoryName,
     required this.timeRecorded,
-    this.timeSpent = 0,
+    this.timeSpent = 0.0,
     required this.currentLoggedInUser,
   });
 
@@ -134,19 +140,20 @@ class TrackerDatabaseHelper {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, 'tracker.db');
 
-    return await openDatabase(path, version: 3, onCreate: _createDatabase);
+    return await openDatabase(path, version: 6, onCreate: _createDatabase);
   }
 
   void _createDatabase(Database db, int version) async {
     await db.execute('''
       CREATE TABLE main_category(
-        date TEXT PRIMARY KEY,
+        date TEXT,
         education REAL,
         skills REAL,
         entertainment REAL,
         personalGrowth REAL,
         sleep REAL,
-        currentLoggedInUser TEXT
+        currentLoggedInUser TEXT,
+        PRIMARY KEY (date, currentLoggedInUser)
       )
     ''');
     await db.execute('''
@@ -158,9 +165,25 @@ class TrackerDatabaseHelper {
       timeRecorded TEXT,
       timeSpent REAL,
       currentLoggedInUser TEXT,
-      FOREIGN KEY(date) REFERENCES main_category(date)
+      FOREIGN KEY (date, currentLoggedInUser) REFERENCES main_category(date, 	currentLoggedInUser)
     )
   ''');
+    //Create a trigger to update the main_category table
+    //Calculate the sums from the subcategory table and update the main_category table
+    await db.execute('''
+
+      CREATE TRIGGER IF NOT EXISTS update_main_category
+      AFTER INSERT ON subcategory
+      BEGIN
+        UPDATE main_category
+        SET education = (SELECT SUM(timeSpent) FROM subcategory WHERE mainCategoryName = 'Education' AND date = NEW.date AND currentLoggedInUser = NEW.currentLoggedInUser),
+            skills = (SELECT SUM(timeSpent) FROM subcategory WHERE mainCategoryName = 'Skills' AND date = NEW.date AND currentLoggedInUser = NEW.currentLoggedInUser),
+            entertainment = (SELECT SUM(timeSpent) FROM subcategory WHERE mainCategoryName = 'Entertainment' AND date = NEW.date AND currentLoggedInUser = NEW.currentLoggedInUser),
+            personalGrowth = (SELECT SUM(timeSpent) FROM subcategory WHERE mainCategoryName = 'Personal Growth' AND date = NEW.date AND currentLoggedInUser = NEW.currentLoggedInUser),
+            sleep = (SELECT SUM(timeSpent) FROM subcategory WHERE mainCategoryName = 'Sleep' AND date = NEW.date AND currentLoggedInUser = NEW.currentLoggedInUser)
+        WHERE date = NEW.date AND currentLoggedInUser = NEW.currentLoggedInUser;
+      END;
+      ''');
   }
 
 // CRUD operations for MainCategory
@@ -181,9 +204,12 @@ class TrackerDatabaseHelper {
     try {
       final db = await database;
 
-      final List<Map<String, dynamic>> maps = await db.query('main_category');
+      final allMainCats = await db.rawQuery('''
+      SELECT * 
+      FROM main_category;
+      ''');
 
-      return maps.map((map) => MainCategory.fromMap(map)).toList();
+      return allMainCats.map((map) => MainCategory.fromMap(map)).toList();
     } catch (e) {
       logger.e("Error: $e");
       return [];
@@ -329,6 +355,8 @@ class TrackerDatabaseHelper {
 
       await deleteDatabase(path);
       _database = null; // Reset the database instance
+
+      logger.i("Database has been deleted");
     } catch (e) {
       logger.e("Error: $e");
     }

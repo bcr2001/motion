@@ -51,6 +51,7 @@ dependencies:
   image_picker: ^1.0.1
   firebase_storage: ^11.2.5
   google_nav_bar: ^5.0.6
+  shimmer: ^3.0.0
 
 dev_dependencies:
   flutter_test:

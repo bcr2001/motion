@@ -6,12 +6,14 @@ import 'package:motion/motion_core/motion_providers/date_pvd/current_time_pvd.da
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/assigner_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
+import 'package:motion/motion_reusable/db_re/sub_logic.dart';
+import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_reusable/mu_reusable/user_reusable.dart';
-import 'package:motion/motion_reusable/sub_reuseable.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:provider/provider.dart';
+import 'package:sqflite/sqflite.dart';
 
 class ManualTimeRecordingRoute extends StatefulWidget {
   // main and subcategory names from the home page
@@ -142,20 +144,22 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                       ),
 
                       // cancel and add button
-                      Consumer3<CurrentDataProvider, UserUidProvider,
-                          CurrentTimeProvider>(
-                        builder: (context, date, uid, time, child) {
+                      Consumer4<CurrentDataProvider, UserUidProvider,
+                          CurrentTimeProvider, MainCategoryTrackerProvider>(
+                        builder: (context, date, uid, time, mainCat, child) {
                           return CancelAddTextButtons(
                             onPressedCancel: () {
-                              // exits the alart dialog and resets the text contoller content
+                              // exits the alart dialog and resets the text
+                              // contoller content
                               navigationKey.currentState!.pop();
 
                               hourController.text = "";
                               minuteController.text = "";
                               secondController.text = "";
                             },
-                            onPressedAdd: () {
-                              // adds the necessary data to the subcategory table if validation passes
+                            onPressedAdd: () async {
+                              // adds the necessary data to the subcategory
+                              // table if validation passes
                               if (_timeFormKey.currentState!.validate()) {
                                 _timeFormKey.currentState!.save();
                                 if (int.parse(hourController.text) > 25 ||
@@ -168,20 +172,44 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                                 } else {
                                   logger.i("Passed Validation");
 
-                                  subTrackerProvider.insertIntoSubcategoryTable(
-                                      Subcategories(
-                                          date: date.currentData,
-                                          mainCategoryName:
-                                              widget.mainCategoryName,
-                                          subcategoryName:
-                                              widget.subcategoryName,
-                                          currentLoggedInUser: uid.userUid!,
-                                          // timeAdder functions converts all the time components to minutes
-                                          timeSpent: timeAdder(
-                                              h: hourController.text,
-                                              m: minuteController.text,
-                                              s: secondController.text),
-                                          timeRecorded: time.formattedTime));
+                                  // Check if the date and currentLoggedInUser
+                                  // exist in the main category table
+                                  final mainCategoryExists1 =
+                                      await mainCategoryExists(
+                                          date.currentData, uid.userUid!);
+
+                                  logger.i(mainCategoryExists1);
+
+                                  if (!mainCategoryExists1) {
+                                    logger.i("Main Category is being added");
+                                    logger.i(date.currentData);
+                                    logger.i("${uid.userUid}");
+                                    // Insert date and currentLoggedInUser into
+                                    //the main category table
+                                    final mainCategory = MainCategory(
+                                      date: date.currentData,
+                                      currentLoggedInUser: uid.userUid!,
+                                    );
+
+                                    await mainCat.insertIntoMainCategoryTable(
+                                        mainCategory);
+                                    logger.i("a new row has been inserted");
+                                  }
+
+                                  final subcategory = Subcategories(
+                                      date: date.currentData,
+                                      mainCategoryName: widget.mainCategoryName,
+                                      subcategoryName: widget.subcategoryName,
+                                      currentLoggedInUser: uid.userUid!,
+                                      // timeAdder functions converts all the time components to minutes
+                                      timeSpent: timeAdder(
+                                          h: hourController.text,
+                                          m: minuteController.text,
+                                          s: secondController.text),
+                                      timeRecorded: time.formattedTime);
+
+                                  subTrackerProvider
+                                      .insertIntoSubcategoryTable(subcategory);
                                   navigationKey.currentState!.pop();
 
                                   hourController.text = "";
@@ -250,7 +278,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                                     fontSize: 13,
                                   )),
                               title: Text(
-                                  "${subsTrackedOnCurrentDay[index].timeSpent.toString()} mins"),
+                                  "${subsTrackedOnCurrentDay[index].timeSpent.toStringAsFixed(2)} mins"),
                               trailing:
                                   // deletes entry in the subcategory table
                                   IconButton(

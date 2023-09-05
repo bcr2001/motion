@@ -6,12 +6,14 @@ import 'package:motion/motion_core/motion_providers/sql_pvd/assigner_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_pvd.dart';
 import 'package:motion/motion_core/motion_providers/web_api_pvd/zen_quotes_pvd.dart';
-import 'package:motion/motion_reusable/sub_reuseable.dart';
+import 'package:motion/motion_reusable/db_re/sub_logic.dart';
+import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 import 'package:motion/motion_screens/manual_tracking.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:provider/provider.dart';
 import 'package:motion/motion_routes/route_action.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
+import 'package:shimmer/shimmer.dart';
 
 // home route
 class MotionHomeRoute extends StatelessWidget {
@@ -120,24 +122,23 @@ class TrackedSubcategories extends StatelessWidget {
                                 builder: (BuildContext context, snapshot) {
                                   if (snapshot.connectionState ==
                                       ConnectionState.waiting) {
-                                    return const Center(
-                                      child: CircularProgressIndicator(),
-                                    );
+                                    return const ShimmerWidget.rectangular(
+                                        width: 120, height: 40);
                                   } else if (snapshot.hasError) {
-                                    return const Text("Error :( ");
+                                    return Text('Error: ${snapshot.error}');
                                   } else {
-
                                     final totalTimeSpentAllSub =
                                         snapshot.data ?? 0.0;
 
                                     // convert total
                                     final convertedAllTotalTimeSpent =
-                                        convertMinutesToTime(totalTimeSpentAllSub);
+                                        convertMinutesToTime(
+                                            totalTimeSpentAllSub);
                                     return Text(
-                                      "$convertedAllTotalTimeSpent\nAccounted", style: const TextStyle(
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.w600
-                                      ),
+                                      "$convertedAllTotalTimeSpent\nAccounted",
+                                      style: const TextStyle(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.w600),
                                     );
                                   }
                                 }),
@@ -180,7 +181,7 @@ class TrackedSubcategories extends StatelessWidget {
                                       if (snapshot.connectionState ==
                                           ConnectionState.waiting) {
                                         // Return a loading indicator while waiting for the data
-                                        return const CircularProgressIndicator();
+                                        return buildShimmerProgress();
                                       } else if (snapshot.hasError) {
                                         // Handle any errors here
                                         return Text('Error: ${snapshot.error}');

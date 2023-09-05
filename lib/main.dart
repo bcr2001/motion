@@ -18,7 +18,6 @@ import 'package:sqflite/sqflite.dart';
 import 'motion_core/motion_providers/date_pvd/current_date_pvd.dart';
 import 'motion_core/motion_providers/sql_pvd/assigner_pvd.dart';
 import 'motion_core/motion_providers/web_api_pvd/zen_quotes_pvd.dart';
-import 'motion_reusable/sub_reuseable.dart';
 import 'motion_themes/mth_theme/dark_theme.dart';
 import 'motion_themes/mth_theme/light_theme.dart';
 
@@ -56,9 +55,9 @@ void main() async {
   // Initialize the database helper
   final TrackerDatabaseHelper databaseHelper = TrackerDatabaseHelper();
 
-  final allSubs = await databaseHelper.getAllSubcategories();
+  final allMain = await databaseHelper.getAllMainCategories();
 
-  print(allSubs);
+  print(allMain);
 
   // await databaseHelper.deleteDb();
 

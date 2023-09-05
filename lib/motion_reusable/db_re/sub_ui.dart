@@ -1,7 +1,8 @@
+
 import 'package:flutter/material.dart';
-import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
-import 'package:motion/motion_themes/mth_styling/widget_bg_color.dart';
+import 'package:shimmer/shimmer.dart';
+
 
 // this class creates an add and a cancel text button
 // the add text button interracts with the database
@@ -39,6 +40,7 @@ class CancelAddTextButtons extends StatelessWidget {
     );
   }
 }
+
 
 // card widget plus a ListView.Builder() to display SQLite database table content
 class CardConstructor extends StatelessWidget {
@@ -82,6 +84,7 @@ class CardConstructor extends StatelessWidget {
   }
 }
 
+
 // floating action button
 FloatingActionButton floatingActionButton(context,
     {required VoidCallback onPressed,
@@ -100,31 +103,34 @@ FloatingActionButton floatingActionButton(context,
   );
 }
 
-// time measurement adder
-double timeAdder({required String h, required String m, required String s}) {
-  double hours = double.parse(h) * 60;
-  double minutes = double.parse(m);
-  double seconds = double.parse(s) / 60;
 
-  double addedTimeComponents = hours + minutes + seconds;
+// SHIMMER WIDGETs
+// list tile shimmer widget
+Widget buildShimmerProgress() => const ListTile(
+      title: ShimmerWidget.rectangular(
+        height: 20,
+        width: 18,
+      ),
+      trailing: ShimmerWidget.rectangular(width: 25, height: 16),
+    );
 
-  logger.i("$addedTimeComponents");
+class ShimmerWidget extends StatelessWidget {
+  final double width;
+  final double height;
 
-  return addedTimeComponents;
-}
+  const ShimmerWidget.rectangular(
+      {super.key, required this.width, required this.height});
 
-// minutes to respective time components
-String convertMinutesToTime(double minutes) {
-  if (minutes < 60) {
-    return '$minutes mins';
-  } else {
-    final hours = minutes ~/ 60;
-    final remainingMinutes = minutes % 60;
-
-    if (remainingMinutes == 0) {
-      return '$hours hrs';
-    } else {
-      return '$hours hrs ${remainingMinutes.toStringAsFixed(0)} mins';
-    }
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey[400]!,
+      highlightColor: Colors.grey[300]!,
+      child: Container(
+        width: width,
+        height: height,
+        color: Colors.grey,
+      ),
+    );
   }
 }

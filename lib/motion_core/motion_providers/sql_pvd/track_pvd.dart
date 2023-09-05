@@ -3,8 +3,10 @@ import 'package:motion/motion_core/mc_sqlite/sql_tracker_db.dart';
 
 final TrackerDatabaseHelper trackDbInstance = TrackerDatabaseHelper();
 
-// main category table provider
+//MAIN CATEGORY TABLE
 class MainCategoryTrackerProvider extends ChangeNotifier {
+
+  
   // insert data into the main_category table
   Future<void> insertIntoMainCategoryTable(MainCategory mainCategory) async {
     await trackDbInstance.insertMainCategory(mainCategory);
@@ -18,6 +20,8 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
 
     notifyListeners();
   }
+
+
 }
 
 // subcategory table provider
