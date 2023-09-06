@@ -40,6 +40,12 @@ ThemeData darkThemeData = ThemeData(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0)),
     ),
 
+
+    // elevated button theme
+    elevatedButtonTheme: const ElevatedButtonThemeData(
+        style: ButtonStyle(
+            backgroundColor: MaterialStatePropertyAll(Colors.white))),
+
     // icon theme
     iconTheme: const IconThemeData(color: Colors.white),
     dividerTheme: const DividerThemeData(color: Colors.white),

@@ -1,8 +1,6 @@
-
 import 'package:flutter/material.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:shimmer/shimmer.dart';
-
 
 // this class creates an add and a cancel text button
 // the add text button interracts with the database
@@ -41,11 +39,10 @@ class CancelAddTextButtons extends StatelessWidget {
   }
 }
 
-
 // card widget plus a ListView.Builder() to display SQLite database table content
 class CardConstructor extends StatelessWidget {
   final String cardTitle;
-  final ListView cardListView;
+  final Widget cardListView;
 
   const CardConstructor(
       {super.key, required this.cardTitle, required this.cardListView});
@@ -84,7 +81,6 @@ class CardConstructor extends StatelessWidget {
   }
 }
 
-
 // floating action button
 FloatingActionButton floatingActionButton(context,
     {required VoidCallback onPressed,
@@ -102,7 +98,6 @@ FloatingActionButton floatingActionButton(context,
     ),
   );
 }
-
 
 // SHIMMER WIDGETs
 // list tile shimmer widget

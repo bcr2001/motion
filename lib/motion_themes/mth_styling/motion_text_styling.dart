@@ -42,23 +42,27 @@ class TextEditingStyling {
     fontWeight: FontWeight.w700,
   );
 
-  // body styling (Medium)
-  static TextStyle bodyStylingMedium(bool isDarkMode) {
-    return _baseStyle.copyWith(
-      color: isDarkMode ? darkModeTextColor : Colors.black,
-    );
-  }
-
+  
   // body styling (small)
   static TextStyle bodyStylingSmall(bool isDarkMode) {
     return _baseStyle.copyWith(
         color: isDarkMode ? darkModeTextColor : Colors.black, fontSize: 15);
   }
 
+
+  // body styling (Medium)
+  static TextStyle bodyStylingMedium(bool isDarkMode) {
+    return _baseStyle.copyWith(
+      color: isDarkMode ? 
+      darkModeTextColor : Colors.black,
+      fontSize: 17
+    );
+  }
+
   // body styling (large)
   static TextStyle bodyStylingLarge(bool isDarkMode) {
     return _baseStyle.copyWith(
-        color: isDarkMode ? darkModeTextColor : Colors.black, fontSize: 18);
+        color: isDarkMode ? darkModeTextColor : Colors.black, fontSize: 19);
   }
 
   // headline (ListTile title) Large

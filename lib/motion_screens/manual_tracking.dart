@@ -4,7 +4,6 @@ import 'package:motion/motion_core/mc_sqlite/sql_tracker_db.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_date_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_time_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
-import 'package:motion/motion_core/motion_providers/sql_pvd/assigner_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_reusable/db_re/sub_logic.dart';
 import 'package:motion/motion_reusable/db_re/sub_ui.dart';
@@ -13,8 +12,8 @@ import 'package:motion/motion_reusable/mu_reusable/user_reusable.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:provider/provider.dart';
-import 'package:sqflite/sqflite.dart';
 
+// this returns the page where users can add data into the database tables
 class ManualTimeRecordingRoute extends StatefulWidget {
   // main and subcategory names from the home page
   final String subcategoryName;
@@ -264,32 +263,34 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                   subs.currentDateSubcategories;
 
               return CardConstructor(
-                  cardTitle: AppString.manualCardTitle,
-                  cardListView:
-                      // the time spent on a particular subcategory at a particular time of day is displayed below
-                      ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: subsTrackedOnCurrentDay.length,
-                          itemBuilder: (BuildContext context, index) {
-                            return ListTile(
-                              leading: Text(
-                                  subsTrackedOnCurrentDay[index].timeRecorded,
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                  )),
-                              title: Text(
-                                  "${subsTrackedOnCurrentDay[index].timeSpent.toStringAsFixed(2)} mins"),
-                              trailing:
-                                  // deletes entry in the subcategory table
-                                  IconButton(
-                                onPressed: () {
-                                  subs.deleteSubcategoryEntry(
-                                      subsTrackedOnCurrentDay[index].id!);
-                                },
-                                icon: const Icon(Icons.delete_outlined),
-                              ),
-                            );
-                          }));
+                cardTitle: AppString.manualCardTitle,
+                cardListView:
+                    // the time spent on a particular subcategory at a
+                    //particular time of day is displayed below
+                ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: subsTrackedOnCurrentDay.length,
+                    itemBuilder: (BuildContext context, index) {
+                      return ListTile(
+                        leading:
+                            Text(subsTrackedOnCurrentDay[index].timeRecorded,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                )),
+                        title: Text(
+                            "${subsTrackedOnCurrentDay[index].timeSpent.toStringAsFixed(2)} mins"),
+                        trailing:
+                            // deletes entry in the subcategory table
+                            IconButton(
+                          onPressed: () {
+                            subs.deleteSubcategoryEntry(
+                                subsTrackedOnCurrentDay[index].id!);
+                          },
+                          icon: const Icon(Icons.delete_outlined),
+                        ),
+                      );
+                }
+              ));
             },
           ),
         ],
