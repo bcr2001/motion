@@ -9,7 +9,9 @@ import 'package:motion/motion_core/motion_providers/web_api_pvd/zen_quotes_pvd.d
 import 'package:motion/motion_reusable/db_re/sub_logic.dart';
 import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 import 'package:motion/motion_routes/mr_home/category_direction.dart';
-import 'package:motion/motion_routes/mr_home/tw_ui.dart';
+import 'package:motion/motion_routes/mr_home/ru_home.dart';
+import 'package:motion/motion_routes/mr_home/sub_weekly_summary.dart';
+import 'package:motion/motion_routes/mr_home/tracking_window.dart';
 import 'package:motion/motion_screens/manual_tracking.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:provider/provider.dart';
@@ -70,13 +72,21 @@ class MotionHomeRoute extends StatelessWidget {
                 delegate: SliverChildListDelegate([
               // quote from the zenQuotes API
               quoteOfTheDay(),
+              
+              // tracking window title
+              cardTitle(titleName: AppString.weeklySummaryTitle),
 
-              // Tracking Window view
-              MainAndSubView(
-                  viewTitle: "Tracking Window",
-                  subcategoryView: TrackedSubcategories1(),
+              // tracking window
+              const TrackedSubcategories(),
+
+              // weekly summary title
+              cardTitle(titleName: AppString.weeklySummaryTitle),
+
+              // weekly summary card views
+              const MainAndSubView(
+                  subcategoryView: SubcategoryWeeklySummary(),
                   mainCategoryView:
-                      const Text("Main Category under construction"))
+                      Text("Main Category under construction"))
               
             ]))
           ],

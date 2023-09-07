@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 
 class MainAndSubView extends StatefulWidget {
-  final String viewTitle;
   final Widget subcategoryView;
   final Widget mainCategoryView;
 
-  const MainAndSubView({super.key, required this.viewTitle, required this.subcategoryView,required this.mainCategoryView});
+  const MainAndSubView({super.key, required this.subcategoryView,required this.mainCategoryView});
 
   @override
   State<MainAndSubView> createState() => _MainAndSubViewState();
@@ -33,11 +32,6 @@ class _MainAndSubViewState extends State<MainAndSubView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // view title
-        Text(widget.viewTitle,
-            style:
-                const TextStyle(fontSize: 18.5, fontWeight: FontWeight.w600)),
-
         Row(
           children: [
             // subcategory view button
