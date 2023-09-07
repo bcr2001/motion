@@ -143,7 +143,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                       ),
 
                       // cancel and add button
-                      Consumer4<CurrentDataProvider, UserUidProvider,
+                      Consumer4<CurrentDateProvider, UserUidProvider,
                           CurrentTimeProvider, MainCategoryTrackerProvider>(
                         builder: (context, date, uid, time, mainCat, child) {
                           return CancelAddTextButtons(
@@ -251,7 +251,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
 
       body: Column(
         children: [
-          Consumer3<SubcategoryTrackerDatabaseProvider, CurrentDataProvider,
+          Consumer3<SubcategoryTrackerDatabaseProvider, CurrentDateProvider,
               UserUidProvider>(
             builder: (context, subs, date, user, child) {
               // Call retrieveCurrentDateSubcategories to fetch subcategories for the current date
@@ -263,34 +263,33 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                   subs.currentDateSubcategories;
 
               return CardConstructor(
-                cardTitle: AppString.manualCardTitle,
-                cardListView:
-                    // the time spent on a particular subcategory at a
-                    //particular time of day is displayed below
-                ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: subsTrackedOnCurrentDay.length,
-                    itemBuilder: (BuildContext context, index) {
-                      return ListTile(
-                        leading:
-                            Text(subsTrackedOnCurrentDay[index].timeRecorded,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                )),
-                        title: Text(
-                            "${subsTrackedOnCurrentDay[index].timeSpent.toStringAsFixed(2)} mins"),
-                        trailing:
-                            // deletes entry in the subcategory table
-                            IconButton(
-                          onPressed: () {
-                            subs.deleteSubcategoryEntry(
-                                subsTrackedOnCurrentDay[index].id!);
-                          },
-                          icon: const Icon(Icons.delete_outlined),
-                        ),
-                      );
-                }
-              ));
+                  cardTitle: AppString.manualCardTitle,
+                  cardListView:
+                      // the time spent on a particular subcategory at a
+                      //particular time of day is displayed below
+                      ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: subsTrackedOnCurrentDay.length,
+                          itemBuilder: (BuildContext context, index) {
+                            return ListTile(
+                              leading: Text(
+                                  subsTrackedOnCurrentDay[index].timeRecorded,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                  )),
+                              title: Text(
+                                  "${subsTrackedOnCurrentDay[index].timeSpent.toStringAsFixed(2)} mins"),
+                              trailing:
+                                  // deletes entry in the subcategory table
+                                  IconButton(
+                                onPressed: () {
+                                  subs.deleteSubcategoryEntry(
+                                      subsTrackedOnCurrentDay[index].id!);
+                                },
+                                icon: const Icon(Icons.delete_outlined),
+                              ),
+                            );
+                          }));
             },
           ),
         ],

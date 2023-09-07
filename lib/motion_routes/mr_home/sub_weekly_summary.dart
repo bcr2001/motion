@@ -32,7 +32,8 @@ class _SubcategoryWeeklySummaryState extends State<SubcategoryWeeklySummary> {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return SizedBox(
+    return Container(
+      margin: const EdgeInsets.only(bottom: 15, top: 5),
       height: screenHeight * 0.35,
       child: Card(
         child: PageView(

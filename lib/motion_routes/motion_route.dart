@@ -78,7 +78,7 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
       context: context,
       builder: (BuildContext context) {
         return Consumer3<UserUidProvider, DropDownTrackProvider,
-            CurrentDataProvider>(
+            CurrentDateProvider>(
           builder: (context, userUid, mainCategory, date, child) {
             // Save references to the providers
             final userUidProvider = userUid;
@@ -98,8 +98,7 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                       TextFormFieldBuilder(
                           fieldTextEditingController: subcategoryController,
                           fieldHintText: AppString.trackTextFormFieldHintText,
-                          fieldValidator: FormValidator.subcategoryValidator
-                          ),
+                          fieldValidator: FormValidator.subcategoryValidator),
 
                       // Cancel and Add Text Buttons
                       CancelAddTextButtons(
@@ -144,10 +143,10 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
         title: const Text(AppString.motionRouteTitle),
       ),
       // displays the alert dialog to add ne subcategories
-      floatingActionButton: floatingActionButton(
-        context,
-        onPressed: () => _showTrackAlertDialog(context), label: AppString.addItem, 
-        icon: Icons.add), 
+      floatingActionButton: floatingActionButton(context,
+          onPressed: () => _showTrackAlertDialog(context),
+          label: AppString.addItem,
+          icon: Icons.add),
 
       body: Padding(
           padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 85),
@@ -167,7 +166,8 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
 
                   // education category
                   CardConstructor(
-                    cardTitle: AppString.educationMainCategory, cardListView: ListView.builder(
+                      cardTitle: AppString.educationMainCategory,
+                      cardListView: ListView.builder(
                           shrinkWrap: true,
                           itemCount: items.length,
                           itemBuilder: (BuildContext context, index) {
@@ -182,7 +182,8 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
 
                   // // skills category
                   CardConstructor(
-                    cardTitle: AppString.skillMainCategory, cardListView: ListView.builder(
+                      cardTitle: AppString.skillMainCategory,
+                      cardListView: ListView.builder(
                           shrinkWrap: true,
                           itemCount: items.length,
                           itemBuilder: (BuildContext context, index) {
@@ -194,10 +195,11 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                                     item: items[index])
                                 : const SizedBox.shrink();
                           })),
-                    
+
                   // entertainment category
                   CardConstructor(
-                    cardTitle: AppString.entertainmentMainCategory, cardListView: ListView.builder(
+                      cardTitle: AppString.entertainmentMainCategory,
+                      cardListView: ListView.builder(
                           shrinkWrap: true,
                           itemCount: items.length,
                           itemBuilder: (BuildContext context, index) {
@@ -213,8 +215,8 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
 
                   // personal growth category
                   CardConstructor(
-                    cardTitle:  AppString.pgMainCategory, 
-                    cardListView: ListView.builder(
+                      cardTitle: AppString.pgMainCategory,
+                      cardListView: ListView.builder(
                           shrinkWrap: true,
                           itemCount: items.length,
                           itemBuilder: (BuildContext context, index) {
@@ -230,8 +232,8 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
 
                   //sleep category
                   CardConstructor(
-                    cardTitle:  AppString.sleepMainCategory, 
-                    cardListView: ListView.builder(
+                      cardTitle: AppString.sleepMainCategory,
+                      cardListView: ListView.builder(
                           shrinkWrap: true,
                           itemCount: items.length,
                           itemBuilder: (BuildContext context, index) {

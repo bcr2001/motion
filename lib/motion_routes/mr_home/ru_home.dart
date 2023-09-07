@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_date_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/assigner_pvd.dart';
@@ -8,25 +9,21 @@ import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 import 'package:motion/motion_screens/manual_tracking.dart';
 import 'package:provider/provider.dart';
 
-
 // title builder
 Widget cardTitle({required String titleName}) {
   return Padding(
-    padding: const EdgeInsets.only(left: 10),
+    padding: const EdgeInsets.only(left: 10, top: 10),
     child: Text(
-      titleName, 
-      style: const TextStyle(
-        fontSize: 17.5,
-        fontWeight: FontWeight.w600
-      ),),);
+      titleName,
+      style: const TextStyle(fontSize: 17.5, fontWeight: FontWeight.w600),
+    ),
+  );
 }
-
-
 
 // returns the total time accounted for the current date
 // and the current date text to the right
 Widget timeAccountedAndCurrentDate() {
-  return Consumer3<SubcategoryTrackerDatabaseProvider, CurrentDataProvider,
+  return Consumer3<SubcategoryTrackerDatabaseProvider, CurrentDateProvider,
       UserUidProvider>(
     builder: (context, sub, date, user, child) {
       String formattedDate = date.getFormattedDate();
@@ -84,7 +81,7 @@ Widget timeAccountedAndCurrentDate() {
 Widget subcategoryAndCurrentDayTotals() {
   return // subcategory + total time spent
       Consumer4<AssignerMainProvider, SubcategoryTrackerDatabaseProvider,
-          CurrentDataProvider, UserUidProvider>(
+          CurrentDateProvider, UserUidProvider>(
     builder: (context, active, sub, date, user, child) {
       var activeItems = active.assignerItems;
 
@@ -143,4 +140,22 @@ Widget subcategoryAndCurrentDayTotals() {
           });
     },
   );
+}
+
+Widget weeklySummaryView() {
+  return Consumer2<AssignerMainProvider, UserUidProvider>(
+      builder: (context, active, user, child) {
+    var activeWeeklyItems = active.assignerItems;
+
+    // generates list tiles of categories where
+    // isActive = 1
+    // else is returns an empty widget
+    return ListView.builder(
+        itemCount: activeWeeklyItems.length,
+        itemBuilder: (BuildContext context, index) {
+          return activeWeeklyItems[index].isActive == 1
+              ? SizedBox()
+              : const SizedBox.shrink();
+        });
+  });
 }

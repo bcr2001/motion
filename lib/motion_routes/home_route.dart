@@ -1,18 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:motion/motion_core/motion_providers/date_pvd/current_date_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_month_provider_pvd.dart';
-import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
-import 'package:motion/motion_core/motion_providers/sql_pvd/assigner_pvd.dart';
-import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_pvd.dart';
 import 'package:motion/motion_core/motion_providers/web_api_pvd/zen_quotes_pvd.dart';
-import 'package:motion/motion_reusable/db_re/sub_logic.dart';
-import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 import 'package:motion/motion_routes/mr_home/category_direction.dart';
 import 'package:motion/motion_routes/mr_home/ru_home.dart';
 import 'package:motion/motion_routes/mr_home/sub_weekly_summary.dart';
 import 'package:motion/motion_routes/mr_home/tracking_window.dart';
-import 'package:motion/motion_screens/manual_tracking.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:provider/provider.dart';
 import 'package:motion/motion_routes/route_action.dart';
@@ -25,13 +18,14 @@ class MotionHomeRoute extends StatelessWidget {
   // home sliverapp bar
   SliverAppBar _buildAppBar(BuildContext context) {
     return SliverAppBar(
+      elevation: 0,
       backgroundColor:
           currentSelectedThemeMode(context) == ThemeModeSettings.darkMode
               ? Colors.black
               : Colors.white,
       actions: const [MotionActionButtons()],
-      floating: true,
       pinned: true,
+      floating: true,
       centerTitle: false,
       title: // current month
           Consumer<CurrentMonthProvider>(
@@ -73,16 +67,12 @@ class MotionHomeRoute extends StatelessWidget {
               // quote from the zenQuotes API
               quoteOfTheDay(),
               
-              // tracking window title
-              cardTitle(titleName: AppString.weeklySummaryTitle),
-
-              // tracking window
+              // Tracking Window
+              cardTitle(titleName: AppString.trackingWindowTitle),
               const TrackedSubcategories(),
 
-              // weekly summary title
+              //Weekly Summary
               cardTitle(titleName: AppString.weeklySummaryTitle),
-
-              // weekly summary card views
               const MainAndSubView(
                   subcategoryView: SubcategoryWeeklySummary(),
                   mainCategoryView:

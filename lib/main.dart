@@ -74,7 +74,7 @@ void main() async {
         value: FirebaseAuth.instance.authStateChanges(),
       ),
       ChangeNotifierProvider(create: (context) => DropDownTrackProvider()),
-      ChangeNotifierProvider(create: (context) => CurrentDataProvider()),
+      ChangeNotifierProvider(create: (context) => CurrentDateProvider()),
       ChangeNotifierProvider.value(value: appThemeMode),
       ChangeNotifierProvider(create: (context) => zenQuoteProvider),
       ChangeNotifierProvider(create: (context) => FirestoreProvider()),

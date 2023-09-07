@@ -5,8 +5,6 @@ final TrackerDatabaseHelper trackDbInstance = TrackerDatabaseHelper();
 
 //MAIN CATEGORY TABLE
 class MainCategoryTrackerProvider extends ChangeNotifier {
-
-  
   // insert data into the main_category table
   Future<void> insertIntoMainCategoryTable(MainCategory mainCategory) async {
     await trackDbInstance.insertMainCategory(mainCategory);
@@ -20,8 +18,6 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
 
     notifyListeners();
   }
-
-
 }
 
 // subcategory table provider
@@ -54,6 +50,16 @@ class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
       String currentDate, String currentUser, String subcategoryName) async {
     return await trackDbInstance.getTotalTimeSpentPerSubcategory(
         currentDate, currentUser, subcategoryName);
+  }
+
+  // gets the weekly total and average for specific subcategory
+  Future<Map<String, dynamic>> retrieveWeeklyTotalAndAverage(
+    String subcategoryName,
+      String currentUser,
+      String startingDate,
+      String endingDate 
+  ) async {
+    return await trackDbInstance.getWeeklyTotalAndAverage(subcategoryName, currentUser, startingDate, endingDate);
   }
 
   // inserting data into the subcategory table
