@@ -53,7 +53,7 @@ class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
   }
 
   // gets the weekly total and average for specific subcategory
-  Future<Map<String, dynamic>> retrieveWeeklyTotalAndAverage(
+  Future<double> retrieveWeeklyTotalAndAverage(
     String subcategoryName,
       String currentUser,
       String startingDate,

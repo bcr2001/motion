@@ -5,6 +5,7 @@ import 'package:motion/firebase_options.dart';
 import 'package:motion/motion_core/mc_sqlite/sql_tracker_db.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_month_provider_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_time_pvd.dart';
+import 'package:motion/motion_core/motion_providers/date_pvd/current_year_pcd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/firestore_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
@@ -12,6 +13,7 @@ import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_pvd.dar
 import 'package:motion/motion_core/motion_providers/dropDown_pvd/drop_down_pvd.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_user/mu_ops/auth_page.dart';
+import 'package:path/path.dart';
 
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -63,6 +65,7 @@ void main() async {
 
   runApp(MultiProvider(
     providers: [
+      ChangeNotifierProvider(create: (context) => CurrentYearProvider()),
       ChangeNotifierProvider(create: (context) => CurrentTimeProvider()),
       ChangeNotifierProvider.value(value: trackMainCategoryDatabaseProvider),
       ChangeNotifierProvider.value(value: trackSubcategoryDatabaseProvider),

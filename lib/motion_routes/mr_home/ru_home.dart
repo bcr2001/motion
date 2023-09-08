@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_date_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/assigner_pvd.dart';
@@ -7,6 +6,7 @@ import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_reusable/db_re/sub_logic.dart';
 import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 import 'package:motion/motion_screens/manual_tracking.dart';
+import 'package:motion/motion_themes/mth_styling/widget_bg_color.dart';
 import 'package:provider/provider.dart';
 
 // title builder
@@ -101,7 +101,11 @@ Widget subcategoryAndCurrentDayTotals() {
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         // Return a loading indicator while waiting for the data
-                        return buildShimmerProgress();
+                        return Center(
+                          child: CircularProgressIndicator(
+                            color: lightModeContentWidget,
+                          ),
+                        );
                       } else if (snapshot.hasError) {
                         // Handle any errors here
                         return Text('Error: ${snapshot.error}');
@@ -142,9 +146,16 @@ Widget subcategoryAndCurrentDayTotals() {
   );
 }
 
-Widget weeklySummaryView() {
-  return Consumer2<AssignerMainProvider, UserUidProvider>(
-      builder: (context, active, user, child) {
+Widget weeklySummaryView(
+    {required String startingDate, required String endingDate, avgValue = 7}) {
+
+  // Create a UniqueKey to control the FutureBuilder
+  final uniqueKey = UniqueKey();
+
+
+  return Consumer3<AssignerMainProvider, UserUidProvider,
+          SubcategoryTrackerDatabaseProvider>(
+      builder: (context, active, user, sub, child) {
     var activeWeeklyItems = active.assignerItems;
 
     // generates list tiles of categories where
@@ -154,7 +165,46 @@ Widget weeklySummaryView() {
         itemCount: activeWeeklyItems.length,
         itemBuilder: (BuildContext context, index) {
           return activeWeeklyItems[index].isActive == 1
-              ? SizedBox()
+              ? FutureBuilder(
+                  key: uniqueKey,
+                  future: sub.retrieveWeeklyTotalAndAverage(
+                      activeWeeklyItems[index].subcategoryName,
+                      user.userUid!,
+                      startingDate,
+                      endingDate),
+                  builder: (BuildContext context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(
+                        child: CircularProgressIndicator(
+                          color: lightModeContentWidget,
+                        ),
+                      );
+                    } else if (snapshot.hasError) {
+                      return Text("Error: ${snapshot.error}");
+                    } else {
+                      double totalAndAverage = snapshot.data!;
+
+                      String convertedtotalAndAverage =
+                          convertMinutesToTime(totalAndAverage);
+
+                      // average
+                      String average =
+                          convertMinutesToHoursOnly(totalAndAverage / avgValue);
+
+                      return totalAndAverage > 0
+                          ? ListTile(
+                              title: Text(
+                                  activeWeeklyItems[index].subcategoryName),
+                              trailing: Text(
+                                convertedtotalAndAverage,
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                              subtitle: Text(average,
+                                  textAlign: TextAlign.left,
+                                  style: Theme.of(context).textTheme.bodySmall))
+                          : const SizedBox.shrink();
+                    }
+                  })
               : const SizedBox.shrink();
         });
   });

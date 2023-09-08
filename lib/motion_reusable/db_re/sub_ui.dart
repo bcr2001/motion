@@ -109,6 +109,12 @@ Widget buildShimmerProgress() => const ListTile(
       trailing: ShimmerWidget.rectangular(width: 25, height: 16),
     );
 
+Widget buildShimmerProgressAll() => const ListTile(
+  title: ShimmerWidget.rectangular(width: 5, height: 20),
+  subtitle: ShimmerWidget.rectangular(width: 5, height: 10),
+  trailing: ShimmerWidget.rectangular(width: 20, height: 10),
+);
+
 class ShimmerWidget extends StatelessWidget {
   final double width;
   final double height;

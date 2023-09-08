@@ -7,17 +7,29 @@ import 'package:sqflite/sqflite.dart';
 // for example 150mins => 2hrs 50mins
 String convertMinutesToTime(double minutes) {
   if (minutes < 60) {
-    return '${minutes.toStringAsFixed(2)} mins';
+    return '${minutes.toStringAsFixed(2)}mins';
   } else {
     final hours = minutes ~/ 60;
     final remainingMinutes = minutes % 60;
 
+    final combinedResult = hours == 1
+        ? '${hours}hr ${remainingMinutes.toStringAsFixed(0)}mins'
+        : '${hours}hrs ${remainingMinutes.toStringAsFixed(0)}mins';
+
+    final combinedRemainingMinutes = hours == 1 ? '${hours}hr' : '${hours}hrs';
+
     if (remainingMinutes == 0) {
-      return '${hours}hrs';
+      return combinedRemainingMinutes;
     } else {
-      return '${hours}hrs ${remainingMinutes.toStringAsFixed(0)}mins';
+      return combinedResult;
     }
   }
+}
+
+String convertMinutesToHoursOnly(double minutes) {
+  final hours = minutes / 60;
+
+  return "${hours.toStringAsFixed(2)}hrs/day";
 }
 
 // time measurement adder
@@ -37,7 +49,6 @@ double timeAdder({required String h, required String m, required String s}) {
   // Parse the formatted string back to double if needed
   return double.parse(formattedTime);
 }
-
 
 // Check if the date and currentLoggedInUser exist in the main category table
 Future<bool> mainCategoryExists(String date, String currentUser) async {

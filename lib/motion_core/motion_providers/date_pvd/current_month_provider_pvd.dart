@@ -3,6 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class CurrentMonthProvider extends ChangeNotifier {
+  // number rep of the month
+  int _currentMonthNumber = DateTime.now().month;
+
+  int get currentMonthNumber => _currentMonthNumber;
+
+  // name of the month
   String _currentMonthName = DateFormat.MMMM().format(DateTime.now());
 
   String get currentMonthName => _currentMonthName;
@@ -12,6 +18,7 @@ class CurrentMonthProvider extends ChangeNotifier {
   CurrentMonthProvider() {
     _timer = Timer.periodic(const Duration(days: 1), (Timer t) {
       _getCurrentMonth();
+      _getCurrentMonthNumber;
     });
   }
 
@@ -21,6 +28,14 @@ class CurrentMonthProvider extends ChangeNotifier {
     if (thisMoment != _currentMonthName) {
       _currentMonthName = thisMoment;
       notifyListeners();
+    }
+  }
+
+  void _getCurrentMonthNumber() {
+    final int thisMoment = DateTime.now().month;
+
+    if (thisMoment != _currentMonthNumber) {
+      _currentMonthNumber = thisMoment;
     }
   }
 

@@ -315,23 +315,26 @@ class TrackerDatabaseHelper {
   }
 
   // calculates and returns the total and average time spent on a subcategory for an entire week
-  Future<Map<String, dynamic>> getWeeklyTotalAndAverage(String subcategoryName, String currentUser, String startingDate,
-      String endingDate) async {
+  Future<double> getWeeklyTotalAndAverage(String subcategoryName,
+      String currentUser, String startingDate, String endingDate) async {
     final db = await database;
 
     final results = await db.rawQuery('''
-    SELECT SUM(timeSpent) as total, AVG(timeSpent) as average
+    SELECT SUM(timeSpent) as total
     FROM subcategory
     WHERE subcategoryName = ? AND currentLoggedInUser = ? AND date BETWEEN ? AND ?;
     ''', [subcategoryName, currentUser, startingDate, endingDate]);
 
     if (results.isNotEmpty) {
       final weekTotal = results.first["total"];
-      final weekAverage = results.first["average"];
 
-      return {"weekTotal": weekTotal, "weekAverage": weekAverage};
-    }else{
-      return {"weekTotal": 0.0, "weekAverage": 0.0};
+      if (weekTotal is double) {
+        return weekTotal;
+      } else {
+        return 0.0;
+      }
+    } else {
+      return 0.0;
     }
   }
 
