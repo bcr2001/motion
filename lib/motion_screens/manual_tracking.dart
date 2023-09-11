@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:motion/main.dart';
-import 'package:motion/motion_core/mc_sqlite/sql_tracker_db.dart';
+import 'package:motion/motion_core/mc_sql_table/main_table.dart';
+import 'package:motion/motion_core/mc_sql_table/sub_table.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_date_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_time_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';

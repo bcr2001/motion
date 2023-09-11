@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:motion/motion_core/mc_sql_table/assign_table.dart';
 import 'package:motion/motion_core/mc_sqlite/sql_assigner_db.dart';
 
 // database instance
@@ -28,19 +29,6 @@ class AssignerMainProvider extends ChangeNotifier {
   Future<void> updateAssignedItems(Assigner categoryAssigner) async {
     await dbInstance.assignUpdate(categoryAssigner);
     await getAllUserItems();
-
-    notifyListeners();
-  }
-}
-
-// this provider gets all the subcategories that are active
-class ActiveAssignedProvider extends ChangeNotifier {
-  List<Assigner> _activeSubcategories = [];
-
-  List<Assigner> get activeSubcategories => _activeSubcategories;
-
-  Future<void> activeSubcategoriesList() async {
-    _activeSubcategories = await dbInstance.getAllActiveItems();
 
     notifyListeners();
   }

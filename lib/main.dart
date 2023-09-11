@@ -46,9 +46,6 @@ void main() async {
   final assignerProvider = AssignerMainProvider();
   assignerProvider.getAllUserItems();
 
-  final activeAssignerProvider = ActiveAssignedProvider();
-  activeAssignerProvider.activeSubcategoriesList();
-
   // TrackDatabaseProvider
   final trackSubcategoryDatabaseProvider = SubcategoryTrackerDatabaseProvider();
 
@@ -70,7 +67,6 @@ void main() async {
       ChangeNotifierProvider.value(value: trackMainCategoryDatabaseProvider),
       ChangeNotifierProvider.value(value: trackSubcategoryDatabaseProvider),
       ChangeNotifierProvider.value(value: assignerProvider),
-      ChangeNotifierProvider.value(value: activeAssignerProvider),
       ChangeNotifierProvider.value(value: userUidProvider),
       StreamProvider<User?>.value(
         initialData: null,

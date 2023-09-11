@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:motion/motion_core/mc_sql_table/main_table.dart';
+import 'package:motion/motion_core/mc_sql_table/sub_table.dart';
 import 'package:motion/motion_core/mc_sqlite/sql_tracker_db.dart';
 
 final TrackerDatabaseHelper trackDbInstance = TrackerDatabaseHelper();
