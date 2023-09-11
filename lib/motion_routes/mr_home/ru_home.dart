@@ -101,11 +101,7 @@ Widget subcategoryAndCurrentDayTotals() {
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         // Return a loading indicator while waiting for the data
-                        return Center(
-                          child: CircularProgressIndicator(
-                            color: lightModeContentWidget,
-                          ),
-                        );
+                        return buildShimmerProgress();
                       } else if (snapshot.hasError) {
                         // Handle any errors here
                         return Text('Error: ${snapshot.error}');
@@ -119,6 +115,7 @@ Widget subcategoryAndCurrentDayTotals() {
 
                         return ListTile(
                           title: Text(activeItems[index].subcategoryName),
+                          subtitle: Text(activeItems[index].mainCategoryName),
                           trailing: Text(
                             convertedTotalTimeSpent,
                             style: Theme.of(context).textTheme.bodySmall,
@@ -148,10 +145,8 @@ Widget subcategoryAndCurrentDayTotals() {
 
 Widget weeklySummaryView(
     {required String startingDate, required String endingDate, avgValue = 7}) {
-
   // Create a UniqueKey to control the FutureBuilder
   final uniqueKey = UniqueKey();
-
 
   return Consumer3<AssignerMainProvider, UserUidProvider,
           SubcategoryTrackerDatabaseProvider>(
@@ -174,11 +169,7 @@ Widget weeklySummaryView(
                       endingDate),
                   builder: (BuildContext context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(
-                        child: CircularProgressIndicator(
-                          color: lightModeContentWidget,
-                        ),
-                      );
+                      return buildShimmerProgressAll();
                     } else if (snapshot.hasError) {
                       return Text("Error: ${snapshot.error}");
                     } else {
