@@ -4,7 +4,6 @@ import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
-
 class TrackerDatabaseHelper {
   // Singleton instance
   static final TrackerDatabaseHelper _instance =
@@ -208,27 +207,50 @@ class TrackerDatabaseHelper {
     }
   }
 
-  // calculates and returns the total and average time spent on a subcategory for an entire week
-  Future<double> getWeeklyTotalAndAverage(String subcategoryName,
+Future<double> getMonthTotalTimeSpent(
       String currentUser, String startingDate, String endingDate) async {
     final db = await database;
 
-    final results = await db.rawQuery('''
-    SELECT SUM(timeSpent) as total
-    FROM subcategory
-    WHERE subcategoryName = ? AND currentLoggedInUser = ? AND date BETWEEN ? AND ?;
-    ''', [subcategoryName, currentUser, startingDate, endingDate]);
+    try {
+      final resultMTTS = await db.rawQuery('''
+      SELECT SUM(timeSpent) as total
+      FROM subcategory
+      WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?;
+    ''', [currentUser, startingDate, endingDate]);
 
-    if (results.isNotEmpty) {
-      final weekTotal = results.first["total"];
-
-      if (weekTotal is double) {
-        return weekTotal;
-      } else {
-        return 0.0;
+      if (resultMTTS.isNotEmpty) {
+        final totalMTTS = resultMTTS.first["total"];
+        if (totalMTTS is double) {
+          return totalMTTS;
+        }
       }
-    } else {
-      return 0.0;
+      return 0.0; // Return a default value if no data or invalid data is found.
+    } catch (e) {
+      // Handle the exception, e.g., log it or rethrow it for debugging.
+      logger.e('Error in getMonthTotalTimeSpent: $e');
+      rethrow; // Rethrow the exception for debugging or custom error handling.
+    }
+  }
+
+
+  // gets the total and average time spent of subcategories for the entire month
+  Future<List<Map<String, dynamic>>> getMonthTotalAndAverage(
+      String currentUser, String startingDate, String endingDate) async {
+    final db = await database;
+
+    try {
+      final resultMTA = await db.rawQuery('''
+      SELECT subcategoryName, SUM(timeSpent) AS total, AVG(timeSpent * 1.0) AS average
+      FROM subcategory
+      WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
+      GROUP BY subcategoryName;
+      ''', [currentUser, startingDate, endingDate]);
+
+      return resultMTA;
+    } catch (e) {
+      // Handle any database query errors, e.g., log the error and return an empty list or throw an exception.
+      logger.e('Error in getMonthTotalAndAverage: $e');
+      return [];
     }
   }
 

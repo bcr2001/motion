@@ -28,6 +28,11 @@ class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
   List<Subcategories> _currentDateSubcategories = [];
   List<Subcategories> get currentDateSubcategories => _currentDateSubcategories;
 
+  // a list of subcategory month totals and averages
+  List<Map<String, dynamic>> _monthTotalsAndAverage = [];
+  List<Map<String, dynamic>> get monthTotalsAndAverage =>
+      _monthTotalsAndAverage;
+
   // get subcategories tracked on the current date
   Future<void> retrieveCurrentDateSubcategories(
       String currentDate, String currentUser, String subcategoryName) async {
@@ -38,6 +43,18 @@ class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
     );
 
     notifyListeners();
+  }
+
+  // retrive the total and average for each subcategory for a specific month
+  Future<List<Map<String, dynamic>>> retrieveMonthTotalAndAverage(
+      String currentUser, String startingDate, String endingDate) async {
+    return await trackDbInstance.getMonthTotalAndAverage(
+        currentUser, startingDate, endingDate);
+  }
+
+  // get the entire month total for all subcategories
+  Future<double> retrieveMonthTotalTimeSpent(String currentUser, startingDate, endingDate) async {
+    return await trackDbInstance.getMonthTotalTimeSpent(currentUser, startingDate, endingDate);
   }
 
   // gets the total time spent for all subcategories (current date)
@@ -52,16 +69,6 @@ class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
       String currentDate, String currentUser, String subcategoryName) async {
     return await trackDbInstance.getTotalTimeSpentPerSubcategory(
         currentDate, currentUser, subcategoryName);
-  }
-
-  // gets the weekly total and average for specific subcategory
-  Future<double> retrieveWeeklyTotalAndAverage(
-    String subcategoryName,
-      String currentUser,
-      String startingDate,
-      String endingDate 
-  ) async {
-    return await trackDbInstance.getWeeklyTotalAndAverage(subcategoryName, currentUser, startingDate, endingDate);
   }
 
   // inserting data into the subcategory table

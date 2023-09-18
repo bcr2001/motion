@@ -84,7 +84,7 @@ class AppString {
   // HOME ROUTE
   static const String homeSubcategoryTitle = "Subcategories";
   static const String trackingWindowTitle = "Tracking Window";
-  static const String weeklySummaryTitle = "Weekly Summary";
+  static const String summaryTitle = "Summary";
   static const String weekOne = "Week One";
   static const String weekTwo = "Week Two";
   static const String weekThree = "Week Three";

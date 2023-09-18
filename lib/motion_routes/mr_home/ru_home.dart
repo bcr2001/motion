@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_date_pvd.dart';
+import 'package:motion/motion_core/motion_providers/date_pvd/current_month_provider_pvd.dart';
+import 'package:motion/motion_core/motion_providers/date_pvd/first_and_last_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/assigner_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_reusable/db_re/sub_logic.dart';
 import 'package:motion/motion_reusable/db_re/sub_ui.dart';
+import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_screens/manual_tracking.dart';
-import 'package:motion/motion_themes/mth_styling/widget_bg_color.dart';
 import 'package:provider/provider.dart';
 
 // title builder
@@ -78,6 +80,41 @@ Widget timeAccountedAndCurrentDate() {
   );
 }
 
+// total time spent for the month in all subcategories
+Widget totalMonthTimeSpent() {
+  return Consumer4<SubcategoryTrackerDatabaseProvider, UserUidProvider,
+          FirstAndLastDay, CurrentMonthProvider>(
+      builder: (context, sub, user, dayPvd, month, child) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 15, left: 10, right: 10),
+      child: FutureBuilder(
+          future: sub.retrieveMonthTotalTimeSpent(
+              user.userUid!, dayPvd.firstDay, dayPvd.lastDay),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const ShimmerWidget.rectangular(
+                  width: 120, height: 40);
+            } else if (snapshot.hasError) {
+              return const Text("Error 355 :(");
+            } else {
+              final monthTotal = snapshot.data ?? 0.0;
+
+              final convertedMonthTotal =
+                  convertMinutesToTime(monthTotal);
+
+              return Text(
+                "$convertedMonthTotal\nAccounted",
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                ),
+              );
+            }
+          }),
+    );
+  });
+}
+
 Widget subcategoryAndCurrentDayTotals() {
   return // subcategory + total time spent
       Consumer4<AssignerMainProvider, SubcategoryTrackerDatabaseProvider,
@@ -143,60 +180,44 @@ Widget subcategoryAndCurrentDayTotals() {
   );
 }
 
-Widget weeklySummaryView(
-    {required String startingDate, required String endingDate, avgValue = 7}) {
-  // Create a UniqueKey to control the FutureBuilder
-  final uniqueKey = UniqueKey();
+// Summary(subcategories and their totals and averages)
+Widget subcategoryMonthTotalsAndAverages() {
+  return Consumer3<SubcategoryTrackerDatabaseProvider, UserUidProvider,
+      FirstAndLastDay>(builder: (context, sub, user, day, child) {
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: sub.retrieveMonthTotalAndAverage(
+          user.userUid!, day.firstDay, day.lastDay),
+      builder: (BuildContext context,
+          AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return buildShimmerProgress(); // While data is loading
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}'); // If there's an error
+        } else {
+          // Data is available, you can access it using snapshot.data
+          final monthTotalsAndAverage = snapshot.data;
 
-  return Consumer3<AssignerMainProvider, UserUidProvider,
-          SubcategoryTrackerDatabaseProvider>(
-      builder: (context, active, user, sub, child) {
-    var activeWeeklyItems = active.assignerItems;
+          // Now you can build your UI based on the retrieved data
+          // For example, create a ListView to display the data
+          return ListView.builder(
+            itemCount: monthTotalsAndAverage!.length,
+            itemBuilder: (BuildContext context, int index) {
+              final item = monthTotalsAndAverage[index];
 
-    // generates list tiles of categories where
-    // isActive = 1
-    // else is returns an empty widget
-    return ListView.builder(
-        itemCount: activeWeeklyItems.length,
-        itemBuilder: (BuildContext context, index) {
-          return activeWeeklyItems[index].isActive == 1
-              ? FutureBuilder(
-                  key: uniqueKey,
-                  future: sub.retrieveWeeklyTotalAndAverage(
-                      activeWeeklyItems[index].subcategoryName,
-                      user.userUid!,
-                      startingDate,
-                      endingDate),
-                  builder: (BuildContext context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return buildShimmerProgressAll();
-                    } else if (snapshot.hasError) {
-                      return Text("Error: ${snapshot.error}");
-                    } else {
-                      double totalAndAverage = snapshot.data!;
+              final convertedTotal = convertMinutesToTime(item["total"]);
 
-                      String convertedtotalAndAverage =
-                          convertMinutesToTime(totalAndAverage);
+              final convertedAverage =
+                  convertMinutesToHoursOnly(item["average"]);
 
-                      // average
-                      String average =
-                          convertMinutesToHoursOnly(totalAndAverage / avgValue);
-
-                      return totalAndAverage > 0
-                          ? ListTile(
-                              title: Text(
-                                  activeWeeklyItems[index].subcategoryName),
-                              trailing: Text(
-                                convertedtotalAndAverage,
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                              subtitle: Text(average,
-                                  textAlign: TextAlign.left,
-                                  style: Theme.of(context).textTheme.bodySmall))
-                          : const SizedBox.shrink();
-                    }
-                  })
-              : const SizedBox.shrink();
-        });
+              return ListTile(
+                title: Text(item['subcategoryName']),
+                trailing: Text(convertedTotal),
+                subtitle: Text(convertedAverage),
+              );
+            },
+          );
+        }
+      },
+    );
   });
 }

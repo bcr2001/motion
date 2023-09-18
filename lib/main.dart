@@ -6,6 +6,7 @@ import 'package:motion/motion_core/mc_sqlite/sql_tracker_db.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_month_provider_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_time_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_year_pcd.dart';
+import 'package:motion/motion_core/motion_providers/date_pvd/first_and_last_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/firestore_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
@@ -62,6 +63,7 @@ void main() async {
 
   runApp(MultiProvider(
     providers: [
+      ChangeNotifierProvider(create: (context) => FirstAndLastDay()),
       ChangeNotifierProvider(create: (context) => CurrentYearProvider()),
       ChangeNotifierProvider(create: (context) => CurrentTimeProvider()),
       ChangeNotifierProvider.value(value: trackMainCategoryDatabaseProvider),

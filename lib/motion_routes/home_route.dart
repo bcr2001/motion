@@ -4,7 +4,7 @@ import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_pvd.dar
 import 'package:motion/motion_core/motion_providers/web_api_pvd/zen_quotes_pvd.dart';
 import 'package:motion/motion_routes/mr_home/category_direction.dart';
 import 'package:motion/motion_routes/mr_home/ru_home.dart';
-import 'package:motion/motion_routes/mr_home/sub_weekly_summary.dart';
+import 'package:motion/motion_routes/mr_home/summary.dart';
 import 'package:motion/motion_routes/mr_home/tracking_window.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:provider/provider.dart';
@@ -72,9 +72,9 @@ class MotionHomeRoute extends StatelessWidget {
               const TrackedSubcategories(),
 
               //Weekly Summary
-              cardTitle(titleName: AppString.weeklySummaryTitle),
+              cardTitle(titleName: AppString.summaryTitle),
               const MainAndSubView(
-                  subcategoryView: SubcategoryWeeklySummary(),
+                  subcategoryView: SummaryWindow(),
                   mainCategoryView:
                       Text("Main Category under construction"))
               
