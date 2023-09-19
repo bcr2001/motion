@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:motion/motion_core/mc_sql_table/main_table.dart';
 import 'package:motion/motion_core/mc_sql_table/sub_table.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
@@ -258,16 +260,23 @@ class TrackerDatabaseHelper {
 
   // gets the total and average time spent on all
   // subcategories for the entire month
-  Future<List<Map<String, dynamic>>> getMonthTotalAndAverage(
-      String currentUser, String startingDate, String endingDate) async {
+  Future<List<Map<String, dynamic>>> getMonthTotalAndAverage(String currentUser,
+      String startingDate, String endingDate, bool isSubcategory) async {
     final db = await database;
 
     try {
-      final resultMTA = await db.rawQuery('''
+      final resultMTA = isSubcategory ? await db.rawQuery('''
       SELECT subcategoryName, SUM(timeSpent) AS total, AVG(timeSpent * 1.0) AS average
       FROM subcategory
       WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
-      GROUP BY subcategoryName;
+      GROUP BY subcategoryName
+      ORDER BY total DESC;
+      ''', [currentUser, startingDate, endingDate]) : await db.rawQuery('''
+      SELECT mainCategoryName, SUM(timeSpent) AS total, AVG(timeSpent * 1.0) AS average
+      FROM subcategory
+      WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
+      GROUP BY mainCategoryName
+      ORDER BY total DESC;
       ''', [currentUser, startingDate, endingDate]);
 
       return resultMTA;

@@ -22,9 +22,8 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
   }
 }
 
-// handles database operation for the subcategory table 
+// handles database operation for the subcategory table
 class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
-  
   // a list of subcategories tracked for a specific date
   List<Subcategories> _currentDateSubcategories = [];
   List<Subcategories> get currentDateSubcategories => _currentDateSubcategories;
@@ -43,14 +42,17 @@ class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
 
   // retrive the total and average for each subcategory for a specific month
   Future<List<Map<String, dynamic>>> retrieveMonthTotalAndAverage(
-      String currentUser, String startingDate, String endingDate) async {
+      String currentUser, String startingDate, String endingDate,
+      bool isSubcategory) async {
     return await trackDbInstance.getMonthTotalAndAverage(
-        currentUser, startingDate, endingDate);
+        currentUser, startingDate, endingDate, isSubcategory);
   }
 
   // get the entire month total for all subcategories
-  Future<double> retrieveMonthTotalTimeSpent(String currentUser, startingDate, endingDate) async {
-    return await trackDbInstance.getMonthTotalTimeSpent(currentUser, startingDate, endingDate);
+  Future<double> retrieveMonthTotalTimeSpent(
+      String currentUser, startingDate, endingDate) async {
+    return await trackDbInstance.getMonthTotalTimeSpent(
+        currentUser, startingDate, endingDate);
   }
 
   // gets the total time spent for all subcategories (current date)

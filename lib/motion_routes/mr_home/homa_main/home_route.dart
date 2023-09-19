@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_month_provider_pvd.dart';
 import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_pvd.dart';
 import 'package:motion/motion_core/motion_providers/web_api_pvd/zen_quotes_pvd.dart';
-import 'package:motion/motion_routes/mr_home/category_direction.dart';
-import 'package:motion/motion_routes/mr_home/ru_home.dart';
-import 'package:motion/motion_routes/mr_home/summary.dart';
-import 'package:motion/motion_routes/mr_home/tracking_window.dart';
+import 'package:motion/motion_routes/mr_home/home_directions/category_direction.dart';
+import 'package:motion/motion_routes/mr_home/home_windows/tracking_window.dart';
+import 'package:motion/motion_routes/mr_home/home_reusable/front_home.dart';
+import 'package:motion/motion_routes/mr_home/home_windows/summary_window.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:provider/provider.dart';
 import 'package:motion/motion_routes/route_action.dart';
@@ -58,7 +58,7 @@ class MotionHomeRoute extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 15),
+        padding: const EdgeInsets.symmetric(horizontal: 10),
         child: CustomScrollView(
           slivers: [
             _buildAppBar(context),
@@ -66,7 +66,7 @@ class MotionHomeRoute extends StatelessWidget {
                 delegate: SliverChildListDelegate([
               // quote from the zenQuotes API
               quoteOfTheDay(),
-              
+
               // Tracking Window
               cardTitle(titleName: AppString.trackingWindowTitle),
               const TrackedSubcategories(),
@@ -74,10 +74,8 @@ class MotionHomeRoute extends StatelessWidget {
               //Weekly Summary
               cardTitle(titleName: AppString.summaryTitle),
               const MainAndSubView(
-                  subcategoryView: SummaryWindow(),
-                  mainCategoryView:
-                      Text("Main Category under construction"))
-              
+                  subcategoryView: SummaryWindow(isSubcatgory: true,),
+                  mainCategoryView: SummaryWindow(isSubcatgory: false))
             ]))
           ],
         ),
