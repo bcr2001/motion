@@ -14,6 +14,7 @@ ThemeModeSettings currentSelectedThemeMode(BuildContext context) {
   return selectedTheme.currentThemeMode;
 }
 
+
 // Circular progress indicator
 Future circularIndicator(context) {
   return showDialog(
@@ -29,8 +30,9 @@ Future circularIndicator(context) {
 
 // snack bar for sign in and sign out error messages
 errorSnack(context, {required errorMessage}) {
-  return ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(errorMessage, style: contentStyle(color:const Color(0xFFFF6B00)),))
-  ); 
+  return ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(
+    errorMessage,
+    style: contentStyle(color: const Color(0xFFFF6B00)),
+  )));
 }

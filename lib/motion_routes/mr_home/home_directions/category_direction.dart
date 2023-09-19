@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_pvd.dart';
+import 'package:motion/motion_reusable/general_reuseable.dart';
 
 class MainAndSubView extends StatefulWidget {
   final Widget subcategoryView;

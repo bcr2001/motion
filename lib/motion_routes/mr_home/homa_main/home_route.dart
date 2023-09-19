@@ -25,7 +25,6 @@ class MotionHomeRoute extends StatelessWidget {
               : Colors.white,
       actions: const [MotionActionButtons()],
       pinned: true,
-      floating: true,
       centerTitle: false,
       title: // current month
           Consumer<CurrentMonthProvider>(
@@ -42,7 +41,7 @@ class MotionHomeRoute extends StatelessWidget {
   // quote of the day
   Widget quoteOfTheDay() {
     return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 15),
+        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 5.0),
         child: Consumer<ZenQuoteProvider>(
           builder: (context, zenQuoteValue, child) {
             return Text(
@@ -57,28 +56,29 @@ class MotionHomeRoute extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: CustomScrollView(
-          slivers: [
-            _buildAppBar(context),
-            SliverList(
+      body: CustomScrollView(
+        slivers: [
+          _buildAppBar(context),
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+            sliver: SliverList(
+            
                 delegate: SliverChildListDelegate([
               // quote from the zenQuotes API
               quoteOfTheDay(),
-
+                
               // Tracking Window
               cardTitle(titleName: AppString.trackingWindowTitle),
               const TrackedSubcategories(),
-
+                
               //Weekly Summary
               cardTitle(titleName: AppString.summaryTitle),
               const MainAndSubView(
                   subcategoryView: SummaryWindow(isSubcatgory: true,),
                   mainCategoryView: SummaryWindow(isSubcatgory: false))
-            ]))
-          ],
-        ),
+            ])),
+          )
+        ],
       ),
     );
   }
