@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:logger/logger.dart';
-
 
 // app theme modes
-enum ThemeModeSettings { darkMode, lightMode }
+enum ThemeModeSettings {darkMode, lightMode }
 
 // theme mode provider class
 class AppThemeModeProvider extends ChangeNotifier {

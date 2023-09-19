@@ -3,7 +3,8 @@ import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
-
+// assigner database that stores the subcategories and their
+// main category names as well as whether they are active or not
 class AssignerDatabaseHelper {
   static final AssignerDatabaseHelper _instance =
       AssignerDatabaseHelper._privateConstructor();
@@ -56,7 +57,6 @@ class AssignerDatabaseHelper {
     }
   }
 
-  
   // get all items in the database
   Future<List<Assigner>> getAllItems() async {
     try {

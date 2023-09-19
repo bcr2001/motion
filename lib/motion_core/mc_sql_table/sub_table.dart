@@ -1,3 +1,4 @@
+// structure of the subcategory table 
 class Subcategories {
   int? id;
   final String date;

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+//  gets the current time
+//  this is used to update the "date_created" column
+//  of any database table that has that column
 class CurrentTimeProvider extends ChangeNotifier {
   DateTime _currentTime = DateTime.now();
 

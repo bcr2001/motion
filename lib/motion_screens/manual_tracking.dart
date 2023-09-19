@@ -176,18 +176,18 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                                   // exist in the main category table
                                   final mainCategoryExists1 =
                                       await mainCategoryExists(
-                                          date.currentData, uid.userUid!);
+                                          date.currentDate, uid.userUid!);
 
                                   logger.i(mainCategoryExists1);
 
                                   if (!mainCategoryExists1) {
                                     logger.i("Main Category is being added");
-                                    logger.i(date.currentData);
+                                    logger.i(date.currentDate);
                                     logger.i("${uid.userUid}");
                                     // Insert date and currentLoggedInUser into
                                     //the main category table
                                     final mainCategory = MainCategory(
-                                      date: date.currentData,
+                                      date: date.currentDate,
                                       currentLoggedInUser: uid.userUid!,
                                     );
 
@@ -197,7 +197,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                                   }
 
                                   final subcategory = Subcategories(
-                                      date: date.currentData,
+                                      date: date.currentDate,
                                       mainCategoryName: widget.mainCategoryName,
                                       subcategoryName: widget.subcategoryName,
                                       currentLoggedInUser: uid.userUid!,
@@ -244,20 +244,15 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
               icon: const Icon(Icons.add))
         ],
       ),
-      // allows uses to update the main category table
-      floatingActionButton: floatingActionButton(context,
-          onPressed: () {},
-          label: AppString.manualSave,
-          icon: Icons.save_rounded),
-
       body: Column(
         children: [
           Consumer3<SubcategoryTrackerDatabaseProvider, CurrentDateProvider,
               UserUidProvider>(
             builder: (context, subs, date, user, child) {
-              // Call retrieveCurrentDateSubcategories to fetch subcategories for the current date
+              // Call retrieveCurrentDateSubcategories
+              // to fetch subcategories for the current date
               subs.retrieveCurrentDateSubcategories(
-                  date.currentData, user.userUid!, widget.subcategoryName);
+                  date.currentDate, user.userUid!, widget.subcategoryName);
 
               // Access the fetched subcategories from the provider
               List<Subcategories> subsTrackedOnCurrentDay =
@@ -267,7 +262,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                   cardTitle: AppString.manualCardTitle,
                   cardListView:
                       // the time spent on a particular subcategory at a
-                      //particular time of day is displayed below
+                      // particular time of day is displayed below
                       ListView.builder(
                           shrinkWrap: true,
                           itemCount: subsTrackedOnCurrentDay.length,

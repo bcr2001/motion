@@ -1,3 +1,4 @@
+// structure of the main_category table
 class MainCategory {
   final String date;
   double education;

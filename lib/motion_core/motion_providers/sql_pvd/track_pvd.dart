@@ -5,7 +5,7 @@ import 'package:motion/motion_core/mc_sqlite/sql_tracker_db.dart';
 
 final TrackerDatabaseHelper trackDbInstance = TrackerDatabaseHelper();
 
-//MAIN CATEGORY TABLE
+//handles database operations for the MAIN CATEGORY TABLE
 class MainCategoryTrackerProvider extends ChangeNotifier {
   // insert data into the main_category table
   Future<void> insertIntoMainCategoryTable(MainCategory mainCategory) async {
@@ -22,16 +22,12 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
   }
 }
 
-// subcategory table provider
+// handles database operation for the subcategory table 
 class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
+  
   // a list of subcategories tracked for a specific date
   List<Subcategories> _currentDateSubcategories = [];
   List<Subcategories> get currentDateSubcategories => _currentDateSubcategories;
-
-  // a list of subcategory month totals and averages
-  List<Map<String, dynamic>> _monthTotalsAndAverage = [];
-  List<Map<String, dynamic>> get monthTotalsAndAverage =>
-      _monthTotalsAndAverage;
 
   // get subcategories tracked on the current date
   Future<void> retrieveCurrentDateSubcategories(

@@ -1,9 +1,9 @@
 import "dart:convert";
-
 import "package:http/http.dart" as http;
 
 // https://zenquotes.io/api/today
 // the functions gets data from the above url
+// the daily quote displayed in the home page 
 Future<String> fetchZenQuote() async {
   final request = await http.get(Uri.parse("https://zenquotes.io/api/today"));
 

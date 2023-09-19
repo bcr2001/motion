@@ -4,6 +4,10 @@ import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
+// tracker database that store two tables
+// subcategory table and main category table
+// subcategory table tracks subcategories
+// main category table tracks the aggregated subcategories
 class TrackerDatabaseHelper {
   // Singleton instance
   static final TrackerDatabaseHelper _instance =
@@ -36,6 +40,7 @@ class TrackerDatabaseHelper {
   }
 
   void _createDatabase(Database db, int version) async {
+    // creation of the main_category table
     await db.execute('''
       CREATE TABLE main_category(
         date TEXT,
@@ -48,6 +53,7 @@ class TrackerDatabaseHelper {
         PRIMARY KEY (date, currentLoggedInUser)
       )
     ''');
+    // creation of the subcategory table
     await db.execute('''
     CREATE TABLE subcategory(
       id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
@@ -60,10 +66,10 @@ class TrackerDatabaseHelper {
       FOREIGN KEY (date, currentLoggedInUser) REFERENCES main_category(date, 	currentLoggedInUser)
     )
   ''');
-    //Create a trigger to update the main_category table
-    //Calculate the sums from the subcategory table and update the main_category table
+    // a trigger to update the main_category table
+    // calculate the sums from the subcategory table
+    // and updates the main_category table depending on the aggregation
     await db.execute('''
-
       CREATE TRIGGER IF NOT EXISTS update_main_category
       AFTER INSERT ON subcategory
       BEGIN
@@ -77,6 +83,8 @@ class TrackerDatabaseHelper {
       END;
       ''');
 
+    // a trigger to update the main category table
+    // when an entry in the subcategory table is deleted
     await db.execute('''
         CREATE TRIGGER IF NOT EXISTS update_main_category_after_delete
         AFTER DELETE ON subcategory
@@ -102,6 +110,7 @@ class TrackerDatabaseHelper {
           conflictAlgorithm: ConflictAlgorithm.replace);
     } catch (e) {
       logger.e("Error: $e");
+      throw ("An Error Occured during inserting");
     }
   }
 
@@ -130,6 +139,7 @@ class TrackerDatabaseHelper {
           where: 'date = ?', whereArgs: [mainCategory.date]);
     } catch (e) {
       logger.e("Error: $e");
+      throw "Error: $e";
     }
   }
 
@@ -140,6 +150,7 @@ class TrackerDatabaseHelper {
       await db.delete('main_category', where: 'date = ?', whereArgs: [date]);
     } catch (e) {
       logger.e("Error: $e");
+      throw "Error: $e";
     }
   }
 
@@ -153,16 +164,22 @@ class TrackerDatabaseHelper {
           conflictAlgorithm: ConflictAlgorithm.replace);
     } catch (e) {
       logger.e("Error: $e");
+      throw "Error: $e";
     }
   }
 
   // get all data in the subcategories table
   Future<List<Subcategories>> getAllSubcategories() async {
-    final db = await database;
+    try {
+      final db = await database;
 
-    final allSubs = await db.query("subcategory");
+      final allSubs = await db.query("subcategory");
 
-    return allSubs.map((map) => Subcategories.fromMap(map)).toList();
+      return allSubs.map((map) => Subcategories.fromMap(map)).toList();
+    } catch (e) {
+      logger.e("Error: $e");
+      return [];
+    }
   }
 
   // gets all the subcategories depending on the current date
@@ -184,34 +201,41 @@ class TrackerDatabaseHelper {
     }
   }
 
-  // calculate and return the total time spent on all the categories for a particular date
+  // calculate and return the total time spent on
+  // all the categories for a particular date
   Future<double> getTotalTimeForCurrentDate(
       String currentDate, String currentUser) async {
-    final db = await database;
+    try {
+      final db = await database;
 
-    final result = await db.rawQuery('''
+      final result = await db.rawQuery('''
     SELECT SUM(timeSpent) as total
     FROM subcategory
     WHERE date = ? AND currentLoggedInUser = ?;
     ''', [currentDate, currentUser]);
 
-    if (result.isNotEmpty) {
-      final total = result.first["total"];
-      if (total is double) {
-        return total;
+      if (result.isNotEmpty) {
+        final total = result.first["total"];
+        if (total is double) {
+          return total;
+        } else {
+          return 0.0; // Handle the case where the result is not a double
+        }
       } else {
-        return 0.0; // Handle the case where the result is not a double
+        return 0.0; // Return 0.0 if no matching records are found
       }
-    } else {
-      return 0.0; // Return 0.0 if no matching records are found
+    } catch (e) {
+      logger.e("Error: $e");
+      rethrow;
     }
   }
 
-Future<double> getMonthTotalTimeSpent(
+  // gets the total time spent on all subcategories for an entire month
+  Future<double> getMonthTotalTimeSpent(
       String currentUser, String startingDate, String endingDate) async {
-    final db = await database;
-
     try {
+      final db = await database;
+
       final resultMTTS = await db.rawQuery('''
       SELECT SUM(timeSpent) as total
       FROM subcategory
@@ -232,8 +256,8 @@ Future<double> getMonthTotalTimeSpent(
     }
   }
 
-
-  // gets the total and average time spent of subcategories for the entire month
+  // gets the total and average time spent on all
+  // subcategories for the entire month
   Future<List<Map<String, dynamic>>> getMonthTotalAndAverage(
       String currentUser, String startingDate, String endingDate) async {
     final db = await database;
@@ -257,25 +281,30 @@ Future<double> getMonthTotalTimeSpent(
   // calculates and returns the total time spent on a particular subcategory
   Future<double> getTotalTimeSpentPerSubcategory(
       String currentDate, String currentUser, String subcategoryName) async {
-    final db = await database;
+    try {
+      final db = await database;
 
-    // returns total based on the current date, user, and subcategory name
-    final result = await db.rawQuery('''
+      // returns total based on the current date, user, and subcategory name
+      final result = await db.rawQuery('''
     SELECT SUM(timeSpent) as total_time_spent
     FROM subcategory
     WHERE date = ? AND currentLoggedInUser = ? AND subcategoryName = ?
   ''', [currentDate, currentUser, subcategoryName]);
 
-    if (result.isNotEmpty) {
-      // first row and column
-      final total = result.first['total_time_spent'];
-      if (total is double) {
-        return total;
+      if (result.isNotEmpty) {
+        // first row and column
+        final total = result.first['total_time_spent'];
+        if (total is double) {
+          return total;
+        } else {
+          return 0.0; // Handle the case where the result is not a double
+        }
       } else {
-        return 0.0; // Handle the case where the result is not a double
+        return 0.0; // Return 0.0 if no matching records are found
       }
-    } else {
-      return 0.0; // Return 0.0 if no matching records are found
+    } catch (e) {
+      logger.e("Error: $e");
+      rethrow;
     }
   }
 

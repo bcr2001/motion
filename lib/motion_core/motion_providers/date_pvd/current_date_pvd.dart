@@ -2,30 +2,37 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:intl/intl.dart';
 
+// contains functions that constantly updates
+//  the current date in the desired format
 class CurrentDateProvider extends ChangeNotifier {
-  String _currentData = DateFormat("yyyy-MM-dd").format(DateTime.now());
+  String _currentDate = DateFormat("yyyy-MM-dd").format(DateTime.now());
 
-  String get currentData => _currentData;
+  String get currentDate => _currentDate;
 
   Timer? _timer;
 
+  // clock that fires after a day to provoke
+  //  the get currentDate function to retrieve the current date
   CurrentDateProvider() {
     _timer = Timer.periodic(const Duration(days: 1), (Timer t) {
       getCurrentDate();
     });
   }
 
+  // gets the new date after a day and resets the
+  //  date stored by the _currentDate variable
   void getCurrentDate() {
     final String thisMoment = DateFormat("yyyy-MM-dd").format(DateTime.now());
 
-    if (thisMoment != _currentData) {
-      _currentData = thisMoment;
+    if (thisMoment != _currentDate) {
+      _currentDate = thisMoment;
       notifyListeners();
     }
   }
 
+  
   String getFormattedDate() {
-    final List<String> dateParts = _currentData.split('-');
+    final List<String> dateParts = _currentDate.split('-');
     if (dateParts.length != 3) {
       return "Invalid Date";
     }

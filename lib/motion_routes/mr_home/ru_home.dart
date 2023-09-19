@@ -40,7 +40,7 @@ Widget timeAccountedAndCurrentDate() {
                 // Accounted
                 FutureBuilder<double>(
                   future: sub.retrieveTotalTimeSpentAllSubs(
-                    date.currentData,
+                    date.currentDate,
                     user.userUid!,
                   ),
                   builder: (BuildContext context, snapshot) {
@@ -92,15 +92,13 @@ Widget totalMonthTimeSpent() {
               user.userUid!, dayPvd.firstDay, dayPvd.lastDay),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const ShimmerWidget.rectangular(
-                  width: 120, height: 40);
+              return const ShimmerWidget.rectangular(width: 120, height: 40);
             } else if (snapshot.hasError) {
               return const Text("Error 355 :(");
             } else {
               final monthTotal = snapshot.data ?? 0.0;
 
-              final convertedMonthTotal =
-                  convertMinutesToTime(monthTotal);
+              final convertedMonthTotal = convertMinutesToTime(monthTotal);
 
               return Text(
                 "$convertedMonthTotal\nAccounted",
@@ -132,7 +130,7 @@ Widget subcategoryAndCurrentDayTotals() {
             return activeItems[index].isActive == 1
                 ? FutureBuilder<double>(
                     future: sub.retrieveTotalTimeSpentSubSpecific(
-                        date.currentData,
+                        date.currentDate,
                         user.userUid!,
                         activeItems[index].subcategoryName),
                     builder: (context, snapshot) {

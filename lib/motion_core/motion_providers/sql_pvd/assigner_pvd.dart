@@ -5,9 +5,10 @@ import 'package:motion/motion_core/mc_sqlite/sql_assigner_db.dart';
 // database instance
 final AssignerDatabaseHelper dbInstance = AssignerDatabaseHelper();
 
+// handles the database operations for the to_assign table
 class AssignerMainProvider extends ChangeNotifier {
+  // a list of subcategories and all it's relevant information
   List<Assigner> _assignerItems = [];
-
   List<Assigner> get assignerItems => _assignerItems;
 
   // get all items in the assigner.db database

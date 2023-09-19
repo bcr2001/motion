@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+// a class that gets the current month and 
+// does formatting on said month
 class CurrentMonthProvider extends ChangeNotifier {
   // number rep of the month
   int _currentMonthNumber = DateTime.now().month;

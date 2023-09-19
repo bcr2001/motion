@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 
+
+// gets the current year 
 class CurrentYearProvider extends ChangeNotifier {
   // The current year
   int _currentYear = DateTime.now().year;

@@ -1,3 +1,4 @@
+// structure of the to_assign database table
 class Assigner {
   int? id;
   final String currentLoggedInUser;

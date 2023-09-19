@@ -118,7 +118,7 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                               subcategoryName: subcategoryController.text,
                               mainCategoryName:
                                   mainCategoryProvider.selectedValue!,
-                              dateCreated: date.currentData,
+                              dateCreated: date.currentDate,
                             ));
                             navigationKey.currentState!.pop();
                             subcategoryController.text = "";

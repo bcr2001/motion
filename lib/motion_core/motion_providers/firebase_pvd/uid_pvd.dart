@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// when a user logs in or signs up
+// this class gets and saves the useruid
 class UserUidProvider extends ChangeNotifier {
   SharedPreferences? _pref;
 

@@ -2,7 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-
+// gets the first and last day of any particular month
+//  also calculates how many day a particular month has
 class FirstAndLastDay extends ChangeNotifier {
   String _firstDay = '';
   String _lastDay = '';

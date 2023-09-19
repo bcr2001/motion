@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 
 // this class handles fetching and
 // persisting the Zen Quote of the day
-
 class ZenQuoteProvider extends ChangeNotifier {
   // todays quote
-  String _todaysQuote = "";
+  String _todaysQuote = 
+  "“Time is what we want most, but what we use worst.” - William Penn";
 
   // get todays quote
   String get todaysQuote => _todaysQuote;
