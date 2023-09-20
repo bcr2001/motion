@@ -46,9 +46,10 @@ ThemeData lightThemeData = ThemeData(
   dividerTheme: const DividerThemeData(color: Colors.black),
 
   // elevated button theme
-  elevatedButtonTheme: const ElevatedButtonThemeData(
+  elevatedButtonTheme: ElevatedButtonThemeData(
     style: ButtonStyle(
-      backgroundColor: MaterialStatePropertyAll(Colors.black)
+      elevation: const MaterialStatePropertyAll(0.0),
+      backgroundColor: MaterialStatePropertyAll(lightModeContentWidget)
     )
   ),
 

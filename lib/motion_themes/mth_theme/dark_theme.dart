@@ -42,9 +42,10 @@ ThemeData darkThemeData = ThemeData(
 
 
     // elevated button theme
-    elevatedButtonTheme: const ElevatedButtonThemeData(
+    elevatedButtonTheme:  ElevatedButtonThemeData(
         style: ButtonStyle(
-            backgroundColor: MaterialStatePropertyAll(Colors.white))),
+            elevation: const MaterialStatePropertyAll(0.0),
+            backgroundColor: MaterialStatePropertyAll(darkModeContentWidget))),
 
     // icon theme
     iconTheme: const IconThemeData(color: Colors.white),
