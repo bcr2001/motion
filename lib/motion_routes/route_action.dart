@@ -6,7 +6,6 @@ import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:motion/motion_themes/mth_styling/widget_bg_color.dart';
 
 // app bar action button
-
 class MotionActionButtons extends StatelessWidget {
   const MotionActionButtons({super.key});
 

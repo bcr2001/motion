@@ -25,13 +25,11 @@ class AuthServices {
       await _auth.signInWithEmailAndPassword(
           email: userEmail, password: userPassword);
 
-      
       if (_auth.currentUser != null) {
         final userUidProvider =
             Provider.of<UserUidProvider>(context, listen: false);
         userUidProvider.setUserUid(_auth.currentUser!.uid);
       }
-
     } on FirebaseAuthException catch (e) {
       if (e.code == "user-not-found") {
         logger.e("no user in the system!");
@@ -54,24 +52,14 @@ class AuthServices {
   // sign up users using email and password
   static signUpUser(context,
       {required String userEmailSignup,
-      required String userPasswordSignUp,
-      required String userName}) async {
+      required String userPasswordSignUp}) async {
     circularIndicator(context);
 
     try {
-      // create a new user
-      UserCredential userCredential =
-          await _auth.createUserWithEmailAndPassword(
-              email: userEmailSignup, password: userPasswordSignUp);
+      await _auth.createUserWithEmailAndPassword(
+          email: userEmailSignup, password: userPasswordSignUp);
 
-      if (userCredential.user != null) {
-        String userId = userCredential.user!.uid;
-        // add user info to firestore
-        await _addUserSignUpDetail(
-            uid: userId, userName: userName, userEmailAddress: userEmailSignup);
-      } else {
-        logger.e("Something went wrong");
-      }
+
     } on FirebaseAuthException catch (e) {
       if (e.code == "email-already-in-use") {
         logger.e("something went wrong during the sign up process $e");
@@ -82,22 +70,6 @@ class AuthServices {
       navigationKey.currentState!.pop();
     }
   }
-
-  // add user detail to firestore
-  static Future<void> _addUserSignUpDetail(
-      {required String uid,
-      required String userName,
-      required String userEmailAddress}) async {
-    try {
-      await _firestore.collection("users").doc(uid).set({
-        "user name": userName,
-        "email": userEmailAddress,
-      });
-    } catch (e) {
-      logger.e("Error: $e");
-    }
-  }
-
   // sign out user
   static void signOutUser(context) async {
     circularIndicator(context);

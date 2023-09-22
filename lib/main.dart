@@ -7,20 +7,16 @@ import 'package:motion/motion_core/motion_providers/date_pvd/current_month_provi
 import 'package:motion/motion_core/motion_providers/date_pvd/current_time_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_year_pcd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/first_and_last_pvd.dart';
-import 'package:motion/motion_core/motion_providers/firebase_pvd/firestore_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_pvd.dart';
 import 'package:motion/motion_core/motion_providers/dropDown_pvd/drop_down_pvd.dart';
-import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_user/mu_ops/auth_page.dart';
-import 'package:path/path.dart';
-
 import 'package:provider/provider.dart';
-import 'package:sqflite/sqflite.dart';
 import 'motion_core/motion_providers/date_pvd/current_date_pvd.dart';
 import 'motion_core/motion_providers/sql_pvd/assigner_pvd.dart';
 import 'motion_core/motion_providers/web_api_pvd/zen_quotes_pvd.dart';
+import 'motion_reusable/general_reuseable.dart';
 import 'motion_themes/mth_theme/dark_theme.dart';
 import 'motion_themes/mth_theme/light_theme.dart';
 
@@ -57,7 +53,7 @@ void main() async {
 
   final allMain = await databaseHelper.getAllMainCategories();
 
-  print(allMain);
+  logger.i(allMain);
 
   // await databaseHelper.deleteDb();
 
@@ -78,7 +74,6 @@ void main() async {
       ChangeNotifierProvider(create: (context) => CurrentDateProvider()),
       ChangeNotifierProvider.value(value: appThemeMode),
       ChangeNotifierProvider(create: (context) => zenQuoteProvider),
-      ChangeNotifierProvider(create: (context) => FirestoreProvider()),
       ChangeNotifierProvider(create: (context) => CurrentMonthProvider())
     ],
     child: const MainMotionApp(),

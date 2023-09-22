@@ -1,31 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:motion/motion_core/motion_providers/firebase_pvd/firestore_pvd.dart';
-import 'package:provider/provider.dart';
-
-class UserSettingsInfo extends StatelessWidget {
-  const UserSettingsInfo({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // username
-        // user name
-        Consumer<FirestoreProvider>(
-          builder: (context, username, child) {
-            return SettingsOptions(
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.edit),
-                ),
-                settingsTitle: username.userName,
-                settingsDesciption: "Change your username");
-          },
-        )
-      ],
-    );
-  }
-}
 
 // setting options list tile constructors
 class SettingsOptions extends StatelessWidget {

@@ -25,13 +25,6 @@ class FormValidator {
     return null;
   }
 
-  static String? userNameValidator(String? value) {
-    if (value == null || value.isEmpty) {
-      return AppString.emptyUserNameValidatorMessage;
-    }
-    return null;
-  }
-
   static String? subcategoryValidator(String? value) {
     if (value == null || value.isEmpty) {
       return AppString.emptySubcategoryValidatorMessage;

@@ -135,7 +135,7 @@ class _SubcategoryAndCurrentDayTotalsState
 
         // generates list tiles of categories where
         // isActive = 1
-        // else is returns an empty widget
+        // else returns an empty widget
         return Scrollbar(
           radius: const Radius.circular(10.0),
           trackVisibility: true,
@@ -145,7 +145,7 @@ class _SubcategoryAndCurrentDayTotalsState
               shrinkWrap: true,
               itemCount: activeItems.length,
               itemBuilder: (BuildContext context, index) {
-                return activeItems[index].isActive == 1
+                return (activeItems[index].isActive == 1 && activeItems[index].currentLoggedInUser == user.userUid)
                     ? FutureBuilder<double>(
                         future: sub.retrieveTotalTimeSpentSubSpecific(
                             date.currentDate,

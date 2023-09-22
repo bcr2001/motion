@@ -20,7 +20,6 @@ class _SignUpPageState extends State<SignUpPage> {
   final _signUpFormKey = GlobalKey<FormState>();
 
   // text editing controllers
-  final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _signUpEmailController = TextEditingController();
   final TextEditingController _signUpPasswordController =
       TextEditingController();
@@ -30,7 +29,6 @@ class _SignUpPageState extends State<SignUpPage> {
   // dispose controller to free up resources
   @override
   void dispose() {
-    _userNameController.dispose();
     _signUpEmailController.dispose();
     _signUpPasswordController.dispose();
     _signUpConfirmPasswordController.dispose();
@@ -57,12 +55,6 @@ class _SignUpPageState extends State<SignUpPage> {
 
                     // sign up message
                     const Text("Get started with Motion by signing up"),
-                
-                    // user name text field
-                    TextFormFieldBuilder(
-                        fieldTextEditingController: _userNameController,
-                        fieldHintText: AppString.userNameHintText,
-                        fieldValidator: FormValidator.userNameValidator),
                 
                     // email text field
                     TextFormFieldBuilder(
@@ -102,8 +94,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           AuthServices.signUpUser(context,
                               userEmailSignup: _signUpEmailController.text.trim(),
                               userPasswordSignUp:
-                                  _signUpPasswordController.text.trim(),
-                              userName: _userNameController.text.trim(),);
+                                  _signUpPasswordController.text.trim());
                         }
                         
                       },

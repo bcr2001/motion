@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:motion/main.dart';
 import 'package:motion/motion_core/mc_sql_table/assign_table.dart';
-import 'package:motion/motion_core/mc_sqlite/sql_assigner_db.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_date_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/assigner_pvd.dart';
 import 'package:motion/motion_core/motion_providers/dropDown_pvd/drop_down_pvd.dart';
-import 'package:motion/motion_reusable/db_re/sub_logic.dart';
 import 'package:motion/motion_reusable/db_re/sub_ui.dart';
+import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_reusable/mu_reusable/user_validator.dart';
+import 'package:motion/motion_routes/mr_track/track_reusable/front_track.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:motion/motion_reusable/mu_reusable/user_reusable.dart';
 import 'package:provider/provider.dart';
 
+// this is the page where users create and
+// assign subcategories to maincategories
+// and also indicate whether they are tracking
+// a particular subcategory in the home page
 class MotionTrackRoute extends StatefulWidget {
   const MotionTrackRoute({super.key});
 
@@ -59,7 +63,7 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
         ? const Icon(Icons.check_box_outline_blank_rounded)
         : const Icon(Icons.check_box_outlined);
 
-    print("current active state $activeStatus");
+    logger.i("current active state $activeStatus");
 
     return ListTile(
       title: Text(tileTitle),
@@ -250,51 +254,6 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
               );
             },
           )),
-    );
-  }
-}
-
-class MyDropdownButton extends StatefulWidget {
-  const MyDropdownButton({super.key});
-
-  @override
-  State<MyDropdownButton> createState() => _MyDropdownButtonState();
-}
-
-class _MyDropdownButtonState extends State<MyDropdownButton> {
-  List<String> listItems = [
-    "Education",
-    "Skills",
-    "Entertainment",
-    "Personal Growth",
-    "Sleep"
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<DropDownTrackProvider>(
-      builder: (context, selectedValue, child) {
-        return DropdownButton(
-          isExpanded: true,
-          elevation: 0,
-          icon: const Icon(Icons.arrow_drop_down),
-          iconSize: 28,
-          value: selectedValue.selectedValue,
-          hint: const Text(AppString.trackDropDownHintText),
-          items: listItems.map((String value) {
-            return DropdownMenuItem(
-              value: value,
-              child: Text(value),
-            );
-          }).toList(),
-          onChanged: (String? newValue) {
-            if (newValue != null) {
-              Provider.of<DropDownTrackProvider>(context, listen: false)
-                  .changeSelectedValue(newValue);
-            }
-          },
-        );
-      },
     );
   }
 }

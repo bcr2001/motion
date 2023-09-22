@@ -30,7 +30,6 @@ class AppString {
 
   static const String emailHintText = "Email";
   static const String passwordHintText = "Password";
-  static const String userNameHintText = "Username";
   static const String confirmPasswordHintText = "Confirm Password";
 
   static const String emptyEmailValidatorMessage = "please enter your email";

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_pvd.dart';
 import 'package:motion/motion_routes/mr_home/homa_main/home_route.dart';
-import 'package:motion/motion_routes/motion_route.dart';
+import 'package:motion/motion_routes/mr_track/track_main/track_route.dart';
 import 'package:motion/motion_routes/stats_route.dart';
 import 'package:provider/provider.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';

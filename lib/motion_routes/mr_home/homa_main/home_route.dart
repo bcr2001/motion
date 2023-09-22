@@ -62,19 +62,21 @@ class MotionHomeRoute extends StatelessWidget {
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 10.0),
             sliver: SliverList(
-            
                 delegate: SliverChildListDelegate([
+              
               // quote from the zenQuotes API
               quoteOfTheDay(),
-                
+
               // Tracking Window
               cardTitle(titleName: AppString.trackingWindowTitle),
               const TrackedSubcategories(),
-                
+
               //Weekly Summary
               cardTitle(titleName: AppString.summaryTitle),
               const MainAndSubView(
-                  subcategoryView: SummaryWindow(isSubcatgory: true,),
+                  subcategoryView: SummaryWindow(
+                    isSubcatgory: true,
+                  ),
                   mainCategoryView: SummaryWindow(isSubcatgory: false))
             ])),
           )
