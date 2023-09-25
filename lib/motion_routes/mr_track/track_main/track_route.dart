@@ -90,14 +90,11 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
             final userUidProvider = userUid;
             final mainCategoryProvider = mainCategory;
 
-            return AlertDialog(
-                insetPadding: EdgeInsets.zero,
-                title: const Text(AppString.newAlertDialogTitle),
-                content: Builder(builder: (BuildContext context) {
-                  return SizedBox(
-                    height: screenHeight * 0.25,
-                    width: screenWidth * 0.8,
-                    child: Form(
+            return AlertDialogConst(
+              screenHeight: screenHeight,
+              screenWidth: screenWidth,
+              alertDialogTitle: AppString.newAlertDialogTitle, 
+              alertDialogContent: Form(
                       key: _formKey,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -149,14 +146,11 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                           ),
                         ],
                       ),
-                    ),
-                  );
-                }));
+                    ),);
+                });
           },
         );
-      },
-    );
-  }
+      }
 
   @override
   Widget build(BuildContext context) {

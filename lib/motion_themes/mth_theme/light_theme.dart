@@ -8,9 +8,8 @@ ThemeData lightThemeData = ThemeData(
   ),
 
   // app bar theme
-  appBarTheme: const AppBarTheme(
-    centerTitle: true,
-  ),
+  appBarTheme:
+      const AppBarTheme(centerTitle: true),
 
   // text theme
   textTheme: TextTheme(
@@ -25,7 +24,10 @@ ThemeData lightThemeData = ThemeData(
 
   // alert dialog theme
   dialogTheme:
-      DialogTheme(titleTextStyle: TextEditingStyling.dialogTitleTextStyle),
+      DialogTheme(
+        backgroundColor: lightModeContentWidget,
+        titleTextStyle: TextEditingStyling.dialogTitleTextStyle),
+
 
   // card theme
   cardTheme: CardTheme(
@@ -47,11 +49,9 @@ ThemeData lightThemeData = ThemeData(
 
   // elevated button theme
   elevatedButtonTheme: ElevatedButtonThemeData(
-    style: ButtonStyle(
-      elevation: const MaterialStatePropertyAll(0.0),
-      backgroundColor: MaterialStatePropertyAll(lightModeContentWidget)
-    )
-  ),
+      style: ButtonStyle(
+          elevation: const MaterialStatePropertyAll(0.0),
+          backgroundColor: MaterialStatePropertyAll(lightModeContentWidget))),
 
   useMaterial3: true,
   visualDensity: VisualDensity.adaptivePlatformDensity,

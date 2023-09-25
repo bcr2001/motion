@@ -76,7 +76,7 @@ class AppString {
   static const String sleepMainCategory = "Sleep";
   static const String addItem = "Add";
   static const newAlertDialogTitle = "Create a new subcategory";
-  
+
   static const String emptySubcategoryValidatorMessage =
       "cannot create an empty subcategory";
   static const String subcategoryContainsNumberMessage =
@@ -91,7 +91,8 @@ class AppString {
   // MANUAL RECORDING ROUTE
   static const String manualAddBlock = "Add time block";
   static const String manualSave = "Save";
-  static const String manualCardTitle = "Today’s Blocks";
+  static const String blockTitle = "Today’s Blocks";
+  static const String timeCreated = "Time Created:";
 
   // HOME ROUTE
   static const String homeSubcategoryTitle = "Subcategories";

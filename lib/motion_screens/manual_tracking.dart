@@ -101,197 +101,205 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
     final screenWidth = MediaQuery.of(context).size.width;
 
     showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-            insetPadding: EdgeInsets.zero,
-            title: const Text(AppString.manualAddBlock),
-            content: Builder(builder: (BuildContext context) {
-              var subTrackerProvider =
-                  context.read<SubcategoryTrackerDatabaseProvider>();
+        context: context,
+        builder: (BuildContext context) {
+          var subTrackerProvider =
+              context.read<SubcategoryTrackerDatabaseProvider>();
 
-              return SizedBox(
-                height: screenHeight * 0.23,
-                width: screenWidth * 0.8,
-                child: Form(
-                  key: _timeFormKey,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          return AlertDialogConst(
+            screenHeight: screenHeight,
+            screenWidth: screenWidth,
+            alertDialogTitle: AppString.manualAddBlock,
+            alertDialogContent: Form(
+              key: _timeFormKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  // time component text fields displayed
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      // time component text fields displayed
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          // hour time component
-                          _titleAndTextFieldBuilder(
-                              title: "Hours",
-                              textEditingController: hourController),
+                      // hour time component
+                      _titleAndTextFieldBuilder(
+                          title: "Hours",
+                          textEditingController: hourController),
 
-                          _seperate(),
+                      _seperate(),
 
-                          // minute time component
-                          _titleAndTextFieldBuilder(
-                              title: "Minutes",
-                              textEditingController: minuteController),
+                      // minute time component
+                      _titleAndTextFieldBuilder(
+                          title: "Minutes",
+                          textEditingController: minuteController),
 
-                          _seperate(),
+                      _seperate(),
 
-                          // seconds time component
-                          _titleAndTextFieldBuilder(
-                              title: "Seconds",
-                              textEditingController: secondController)
-                        ],
-                      ),
+                      // seconds time component
+                      _titleAndTextFieldBuilder(
+                          title: "Seconds",
+                          textEditingController: secondController)
+                    ],
+                  ),
 
-                      // cancel and add button
-                      Consumer4<CurrentDateProvider, UserUidProvider,
-                          CurrentTimeProvider, MainCategoryTrackerProvider>(
-                        builder: (context, date, uid, time, mainCat, child) {
-                          return CancelAddTextButtons(
-                            firstButtonName: AppString.trackCancelTextButton,
-                            secondButtonName: AppString.trackAddTextButton,
-                            onPressedFirst: () {
-                              // exits the alart dialog and resets the text
-                              // contoller content
+                  // cancel and add button
+                  Consumer4<CurrentDateProvider, UserUidProvider,
+                      CurrentTimeProvider, MainCategoryTrackerProvider>(
+                    builder: (context, date, uid, time, mainCat, child) {
+                      return CancelAddTextButtons(
+                        firstButtonName: AppString.trackCancelTextButton,
+                        secondButtonName: AppString.trackAddTextButton,
+                        onPressedFirst: () {
+                          // exits the alart dialog and resets the text
+                          // contoller content
+                          navigationKey.currentState!.pop();
+
+                          hourController.text = "";
+                          minuteController.text = "";
+                          secondController.text = "";
+                        },
+                        onPressedSecond: () async {
+                          // adds the necessary data to the subcategory
+                          // table if validation passes
+                          if (_timeFormKey.currentState!.validate()) {
+                            _timeFormKey.currentState!.save();
+                            if (int.parse(hourController.text) > 25 ||
+                                int.parse(minuteController.text) > 59 ||
+                                int.parse(secondController.text) > 59) {
+                              errorSnack(context,
+                                  errorMessage:
+                                      "Invalid entry: keep entries within range!!");
+                              logger.i("Failed Validation");
+                            } else {
+                              logger.i("Passed Validation");
+
+                              // Check if the date and currentLoggedInUser
+                              // exist in the main category table
+                              final mainCategoryExists1 =
+                                  await mainCategoryExists(
+                                      date.currentDate, uid.userUid!);
+
+                              logger.i(mainCategoryExists1);
+
+                              if (!mainCategoryExists1) {
+                                logger.i("Main Category is being added");
+                                logger.i(date.currentDate);
+                                logger.i("${uid.userUid}");
+                                // Insert date and currentLoggedInUser into
+                                //the main category table
+                                final mainCategory = MainCategory(
+                                  date: date.currentDate,
+                                  currentLoggedInUser: uid.userUid!,
+                                );
+
+                                await mainCat
+                                    .insertIntoMainCategoryTable(mainCategory);
+                                logger.i("a new row has been inserted");
+                              }
+
+                              final subcategory = Subcategories(
+                                  date: date.currentDate,
+                                  mainCategoryName: widget.mainCategoryName,
+                                  subcategoryName: widget.subcategoryName,
+                                  currentLoggedInUser: uid.userUid!,
+                                  // timeAdder functions converts all the time components to minutes
+                                  timeSpent: timeAdder(
+                                      h: hourController.text,
+                                      m: minuteController.text,
+                                      s: secondController.text),
+                                  timeRecorded: time.formattedTime);
+
+                              subTrackerProvider
+                                  .insertIntoSubcategoryTable(subcategory);
                               navigationKey.currentState!.pop();
 
                               hourController.text = "";
                               minuteController.text = "";
                               secondController.text = "";
-                            },
-                            onPressedSecond: () async {
-                              // adds the necessary data to the subcategory
-                              // table if validation passes
-                              if (_timeFormKey.currentState!.validate()) {
-                                _timeFormKey.currentState!.save();
-                                if (int.parse(hourController.text) > 25 ||
-                                    int.parse(minuteController.text) > 59 ||
-                                    int.parse(secondController.text) > 59) {
-                                  errorSnack(context,
-                                      errorMessage:
-                                          "Invalid entry: keep entries within range!!");
-                                  logger.i("Failed Validation");
-                                } else {
-                                  logger.i("Passed Validation");
-
-                                  // Check if the date and currentLoggedInUser
-                                  // exist in the main category table
-                                  final mainCategoryExists1 =
-                                      await mainCategoryExists(
-                                          date.currentDate, uid.userUid!);
-
-                                  logger.i(mainCategoryExists1);
-
-                                  if (!mainCategoryExists1) {
-                                    logger.i("Main Category is being added");
-                                    logger.i(date.currentDate);
-                                    logger.i("${uid.userUid}");
-                                    // Insert date and currentLoggedInUser into
-                                    //the main category table
-                                    final mainCategory = MainCategory(
-                                      date: date.currentDate,
-                                      currentLoggedInUser: uid.userUid!,
-                                    );
-
-                                    await mainCat.insertIntoMainCategoryTable(
-                                        mainCategory);
-                                    logger.i("a new row has been inserted");
-                                  }
-
-                                  final subcategory = Subcategories(
-                                      date: date.currentDate,
-                                      mainCategoryName: widget.mainCategoryName,
-                                      subcategoryName: widget.subcategoryName,
-                                      currentLoggedInUser: uid.userUid!,
-                                      // timeAdder functions converts all the time components to minutes
-                                      timeSpent: timeAdder(
-                                          h: hourController.text,
-                                          m: minuteController.text,
-                                          s: secondController.text),
-                                      timeRecorded: time.formattedTime);
-
-                                  subTrackerProvider
-                                      .insertIntoSubcategoryTable(subcategory);
-                                  navigationKey.currentState!.pop();
-
-                                  hourController.text = "";
-                                  minuteController.text = "";
-                                  secondController.text = "";
-                                }
-                              }
-                            },
-                          );
+                            }
+                          }
                         },
-                      ),
-                    ],
+                      );
+                    },
                   ),
-                ),
-              );
-            }));
-      },
-    );
+                ],
+              ),
+            ),
+          );
+        });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        // the selected subcategory displayed as app bar title
-        title: Text(widget.subcategoryName),
-        centerTitle: true,
-        actions: [
-          // alert dialog to record time
-          IconButton(
-              onPressed: () => _showTimeAlertDialog(context),
-              icon: const Icon(Icons.add))
-        ],
-      ),
-      body: Column(
-        children: [
-          Consumer3<SubcategoryTrackerDatabaseProvider, CurrentDateProvider,
-              UserUidProvider>(
-            builder: (context, subs, date, user, child) {
-              // Call retrieveCurrentDateSubcategories
-              // to fetch subcategories for the current date
-              subs.retrieveCurrentDateSubcategories(
-                  date.currentDate, user.userUid!, widget.subcategoryName);
+        appBar: AppBar(
+          // the selected subcategory displayed as app bar title
+          title: Text(widget.subcategoryName),
+          centerTitle: true,
+          actions: [
+            // alert dialog to record time
+            IconButton(
+                onPressed: () => _showTimeAlertDialog(context),
+                icon: const Icon(Icons.add))
+          ],
+        ),
+        body: SingleChildScrollView(
+          child: Consumer3<
+              SubcategoryTrackerDatabaseProvider,
+              CurrentDateProvider,
+              UserUidProvider>(builder: (context, subs, date, user, child) {
+            // Call retrieveCurrentDateSubcategories
+            // to fetch subcategories for the current date
+            subs.retrieveCurrentDateSubcategories(
+                date.currentDate, user.userUid!, widget.subcategoryName);
 
-              // Access the fetched subcategories from the provider
-              List<Subcategories> subsTrackedOnCurrentDay =
-                  subs.currentDateSubcategories;
+            // Access the fetched subcategories from the provider
+            List<Subcategories> subsTrackedOnCurrentDay =
+                subs.currentDateSubcategories;
 
-              return CardConstructor(
-                  cardTitle: AppString.manualCardTitle,
-                  cardListView:
-                      // the time spent on a particular subcategory at a
-                      // particular time of day is displayed below
-                      ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: subsTrackedOnCurrentDay.length,
-                          itemBuilder: (BuildContext context, index) {
-                            return ListTile(
-                              leading: Text(
-                                  subsTrackedOnCurrentDay[index].timeRecorded,
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                  )),
-                              title: Text(
-                                  "${subsTrackedOnCurrentDay[index].timeSpent.toStringAsFixed(2)} mins"),
-                              trailing:
-                                  // deletes entry in the subcategory table
-                                  IconButton(
-                                onPressed: () {
-                                  subs.deleteSubcategoryEntry(
-                                      subsTrackedOnCurrentDay[index].id!);
-                                },
-                                icon: const Icon(Icons.delete_outlined),
-                              ),
-                            );
-                          }));
-            },
-          ),
-        ],
-      ),
-    );
+            return Container(
+              margin: const EdgeInsets.only(top: 200),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // todays blocks title
+                    const Padding(
+                      padding: EdgeInsets.only(left: 16),
+                      child: Text(
+                        AppString.blockTitle,
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600, fontSize: 19),
+                      ),
+                    ),
+
+                    // this list view generates all the time tracked
+                    // for a subcategory for a particular day
+                    ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: subsTrackedOnCurrentDay.length,
+                        itemBuilder: (BuildContext context, index) {
+                          final convertedTimeRecorded = convertMinutesToTime(
+                              subsTrackedOnCurrentDay[index].timeSpent);
+
+                          return ListTile(
+                            subtitle: Text(
+                                "${AppString.timeCreated} ${subsTrackedOnCurrentDay[index].timeRecorded}",
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                )),
+                            title: Text(convertedTimeRecorded),
+                            trailing:
+                                // deletes entry in the subcategory table
+                                IconButton(
+                              onPressed: () {
+                                subs.deleteSubcategoryEntry(
+                                    subsTrackedOnCurrentDay[index].id!);
+                              },
+                              icon: const Icon(Icons.delete_outlined),
+                            ),
+                          );
+                        })
+                  ]),
+            );
+          }),
+        ));
   }
 }
