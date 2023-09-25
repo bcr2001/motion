@@ -75,7 +75,8 @@ class AppString {
   static const String pgMainCategory = "Personal Growth";
   static const String sleepMainCategory = "Sleep";
   static const String addItem = "Add";
-  static const String alertDialogTitle = "Add a new subcategory";
+  static const newAlertDialogTitle = "Create a new subcategory";
+  
   static const String emptySubcategoryValidatorMessage =
       "cannot create an empty subcategory";
   static const String subcategoryContainsNumberMessage =
@@ -99,7 +100,4 @@ class AppString {
 
   static const String subcategoryViewButtonName = "Subcategory";
   static const String mainCategoryViewButtonName = "Main Category";
-
-  
-
 }

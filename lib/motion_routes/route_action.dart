@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:motion/motion_core/mc_firebase/firebase_services.dart';
+import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 import 'package:motion/motion_screens/settings_page.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
@@ -38,62 +39,31 @@ showAlertDialog(BuildContext context) {
           content: SizedBox(
             height: 150,
             width: dialogWidth,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // divider
-                const Padding(
-                  padding: EdgeInsets.only(right: 22, left: 22),
-                  child: Divider(),
-                ),
-
-                // log out query
-                const Padding(
-                  padding:  EdgeInsets.only(right: 22.0, left: 22),
-                  child:  Text(
+            child: Padding(
+              padding: const EdgeInsets.only(right: 22, left: 22),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // divider
+                  Divider(),
+            
+                  // log out query
+                  const Text(
                     AppString.logOutQuestion,
                   ),
-                ),
-
-                // options (cancel and log out)
-                Padding(
-                  padding: const EdgeInsets.only(right: 22, left: 22),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // cancel
-                      ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor: dialogGreyColor),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: Text(
-                            AppString.cancelTitle,
-                            style: contentStyle(
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                                fontSize: 15),
-                          )),
-
-                      // sign out
-                      ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor: blueMainColor),
-                          onPressed: () {
-                            Navigator.pop(context);
-                            AuthServices.signOutUser(context);
-                          },
-                          child: Text(AppString.logOutTitle,
-                              style: contentStyle(
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                  fontSize: 15))),
-                    ],
-                  ),
-                )
-              ],
+            
+                  // options (cancel and log out)
+                  CancelAddTextButtons(
+                      onPressedFirst: () => Navigator.of(context).pop(),
+                      onPressedSecond: () {
+                        Navigator.pop(context);
+                        AuthServices.signOutUser(context);
+                      },
+                      firstButtonName: AppString.cancelTitle,
+                      secondButtonName: AppString.logOutTitle),
+                ],
+              ),
             ),
           ),
         );

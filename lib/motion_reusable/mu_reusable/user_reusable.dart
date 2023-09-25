@@ -32,6 +32,7 @@ class TextFormFieldBuilder extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 10),
       child: TextFormField(
+        cursorColor: blueMainColor,
         maxLength: maxCharacterLen,
         buildCounter: (BuildContext context,
                 {int? currentLength, int? maxLength, bool? isFocused}) =>

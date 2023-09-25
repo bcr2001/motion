@@ -78,6 +78,7 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
   // alert dialog to create new subcategory
   void _showTrackAlertDialog(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
 
     showDialog(
       context: context,
@@ -90,51 +91,67 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
             final mainCategoryProvider = mainCategory;
 
             return AlertDialog(
-              title: const Text(AppString.alertDialogTitle),
-              content: SizedBox(
-                height: screenHeight * 0.25,
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      const MyDropdownButton(),
+                insetPadding: EdgeInsets.zero,
+                title: const Text(AppString.newAlertDialogTitle),
+                content: Builder(builder: (BuildContext context) {
+                  return SizedBox(
+                    height: screenHeight * 0.25,
+                    width: screenWidth * 0.8,
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          // divider
+                          const Divider(),
 
-                      TextFormFieldBuilder(
-                          fieldTextEditingController: subcategoryController,
-                          fieldHintText: AppString.trackTextFormFieldHintText,
-                          fieldValidator: FormValidator.subcategoryValidator),
+                          // main category drop down button
+                          const MyDropdownButton(),
 
-                      // Cancel and Add Text Buttons
-                      CancelAddTextButtons(
-                        onPressedCancel: () =>
-                            navigationKey.currentState!.pop(),
-                        onPressedAdd: () {
-                          if (_formKey.currentState!.validate()) {
-                            _formKey.currentState!.save();
-                            Provider.of<AssignerMainProvider>(context,
-                                    listen: false)
-                                .insertIntoAssignerDb(Assigner(
-                              currentLoggedInUser:
-                                  userUidProvider.userUid == null
-                                      ? "unknown"
-                                      : userUidProvider.userUid!,
-                              subcategoryName: subcategoryController.text,
-                              mainCategoryName:
-                                  mainCategoryProvider.selectedValue!,
-                              dateCreated: date.currentDate,
-                            ));
-                            navigationKey.currentState!.pop();
-                            subcategoryController.text = "";
-                            mainCategoryProvider.changeSelectedValue(null);
-                          }
-                        },
+                          Padding(
+                            padding:
+                                const EdgeInsets.only(left: 5.0, right: 5.0),
+                            child: TextFormFieldBuilder(
+                                fieldTextEditingController:
+                                    subcategoryController,
+                                fieldHintText:
+                                    AppString.trackTextFormFieldHintText,
+                                fieldValidator:
+                                    FormValidator.subcategoryValidator),
+                          ),
+
+                          // Cancel and Add Text Buttons
+                          CancelAddTextButtons(
+                            firstButtonName: AppString.trackCancelTextButton,
+                            secondButtonName: AppString.trackAddTextButton,
+                            onPressedFirst: () =>
+                                navigationKey.currentState!.pop(),
+                            onPressedSecond: () {
+                              if (_formKey.currentState!.validate()) {
+                                _formKey.currentState!.save();
+                                Provider.of<AssignerMainProvider>(context,
+                                        listen: false)
+                                    .insertIntoAssignerDb(Assigner(
+                                  currentLoggedInUser:
+                                      userUidProvider.userUid == null
+                                          ? "unknown"
+                                          : userUidProvider.userUid!,
+                                  subcategoryName: subcategoryController.text,
+                                  mainCategoryName:
+                                      mainCategoryProvider.selectedValue!,
+                                  dateCreated: date.currentDate,
+                                ));
+                                navigationKey.currentState!.pop();
+                                subcategoryController.text = "";
+                                mainCategoryProvider.changeSelectedValue(null);
+                              }
+                            },
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-              ),
-            );
+                    ),
+                  );
+                }));
           },
         );
       },

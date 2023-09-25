@@ -24,29 +24,36 @@ class _MyDropdownButtonState extends State<MyDropdownButton> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<DropDownTrackProvider>(
-      builder: (context, selectedValue, child) {
-        return DropdownButton(
-          isExpanded: true,
-          elevation: 0,
-          icon: const Icon(Icons.arrow_drop_down),
-          iconSize: 28,
-          value: selectedValue.selectedValue,
-          hint: const Text(AppString.trackDropDownHintText),
-          items: listItems.map((String value) {
-            return DropdownMenuItem(
-              value: value,
-              child: Text(value),
-            );
-          }).toList(),
-          onChanged: (String? newValue) {
-            if (newValue != null) {
-              Provider.of<DropDownTrackProvider>(context, listen: false)
-                  .changeSelectedValue(newValue);
-            }
-          },
-        );
-      },
+    return Padding(
+      padding: const EdgeInsets.only(left:20, right: 20),
+      child: Consumer<DropDownTrackProvider>(
+        builder: (context, selectedValue, child) {
+          return DropdownButton(
+            underline: const Padding(
+              padding:  EdgeInsets.only(top: 3.0),
+              child:  Divider(),
+            ),
+            isExpanded: true,
+            elevation: 0,
+            icon: const Icon(Icons.arrow_drop_down),
+            iconSize: 28,
+            value: selectedValue.selectedValue,
+            hint: const Text(AppString.trackDropDownHintText),
+            items: listItems.map((String value) {
+              return DropdownMenuItem(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+            onChanged: (String? newValue) {
+              if (newValue != null) {
+                Provider.of<DropDownTrackProvider>(context, listen: false)
+                    .changeSelectedValue(newValue);
+              }
+            },
+          );
+        },
+      ),
     );
   }
 }

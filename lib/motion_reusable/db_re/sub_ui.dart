@@ -6,11 +6,13 @@ import 'package:shimmer/shimmer.dart';
 // the add text button interracts with the database
 // the cancel text button navigates off an alert dialog
 class CancelAddTextButtons extends StatelessWidget {
-  final VoidCallback onPressedCancel;
-  final VoidCallback onPressedAdd;
+  final String firstButtonName;
+  final String secondButtonName;
+  final VoidCallback onPressedFirst;
+  final VoidCallback onPressedSecond;
 
   const CancelAddTextButtons(
-      {super.key, required this.onPressedCancel, required this.onPressedAdd});
+      {super.key, required this.onPressedFirst, required this.onPressedSecond, required this.firstButtonName, required this.secondButtonName});
 
   @override
   Widget build(BuildContext context) {
@@ -19,18 +21,18 @@ class CancelAddTextButtons extends StatelessWidget {
       children: [
         // Cancel Button
         TextButton(
-          onPressed: onPressedCancel,
+          onPressed: onPressedFirst,
           child: Text(
-            AppString.trackCancelTextButton,
+            firstButtonName,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
         ),
 
         // Add button
         TextButton(
-          onPressed: onPressedAdd,
+          onPressed: onPressedSecond,
           child: Text(
-            AppString.trackAddTextButton,
+            secondButtonName,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
         ),
@@ -110,10 +112,10 @@ Widget buildShimmerProgress() => const ListTile(
     );
 
 Widget buildShimmerProgressAll() => const ListTile(
-  title: ShimmerWidget.rectangular(width: 5, height: 20),
-  subtitle: ShimmerWidget.rectangular(width: 5, height: 10),
-  trailing: ShimmerWidget.rectangular(width: 20, height: 10),
-);
+      title: ShimmerWidget.rectangular(width: 5, height: 20),
+      subtitle: ShimmerWidget.rectangular(width: 5, height: 10),
+      trailing: ShimmerWidget.rectangular(width: 20, height: 10),
+    );
 
 class ShimmerWidget extends StatelessWidget {
   final double width;

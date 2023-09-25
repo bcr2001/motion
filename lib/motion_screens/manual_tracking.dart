@@ -148,7 +148,9 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                           CurrentTimeProvider, MainCategoryTrackerProvider>(
                         builder: (context, date, uid, time, mainCat, child) {
                           return CancelAddTextButtons(
-                            onPressedCancel: () {
+                            firstButtonName: AppString.trackCancelTextButton,
+                            secondButtonName: AppString.trackAddTextButton,
+                            onPressedFirst: () {
                               // exits the alart dialog and resets the text
                               // contoller content
                               navigationKey.currentState!.pop();
@@ -157,7 +159,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                               minuteController.text = "";
                               secondController.text = "";
                             },
-                            onPressedAdd: () async {
+                            onPressedSecond: () async {
                               // adds the necessary data to the subcategory
                               // table if validation passes
                               if (_timeFormKey.currentState!.validate()) {
