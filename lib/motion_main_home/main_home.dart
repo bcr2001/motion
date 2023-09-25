@@ -7,6 +7,8 @@ import 'package:motion/motion_routes/stats_route.dart';
 import 'package:provider/provider.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 
+import '../motion_themes/mth_app/app_strings.dart';
+
 // Scaffold and Bottom App Bar routes
 class MainMotionHome extends StatefulWidget {
   const MainMotionHome({super.key});
@@ -30,13 +32,13 @@ class _MotionHome extends State<MainMotionHome> {
     // home button
     GButton(
       icon: Icons.home_filled,
-      text: "Home",
+      text: AppString.homeNavigation,
     ),
 
     // stats button
     GButton(
       icon: Icons.bubble_chart_outlined,
-      text: "Stats",
+      text: AppString.statsNavigation,
     )
   ];
 

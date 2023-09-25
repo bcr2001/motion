@@ -4,6 +4,7 @@ import 'package:motion/motion_themes/mth_app/app_images.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:motion/motion_reusable/mu_reusable/user_reusable.dart';
 import 'package:motion/motion_reusable/mu_reusable/user_validator.dart';
+import 'package:motion/motion_user/mu_reusable/mu_reuse.dart';
 
 // sign up page when a new user wants to sign up
 class SignUpPage extends StatefulWidget {
@@ -40,74 +41,83 @@ class _SignUpPageState extends State<SignUpPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Center(
-          child: Form(
-            key: _signUpFormKey,
-            child: SingleChildScrollView(
-              // handle overflow in case the keyboard covers the fields
-              child: Padding(
-                padding: const EdgeInsetsDirectional.symmetric(horizontal: 30),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // sign up SVG,
-                    SvgImage(svgImage: AppImages.signUpImage),
+        child: Form(
+          key: _signUpFormKey,
+          child: SingleChildScrollView(
+            // handle overflow in case the keyboard covers the fields
+            child: Container(
+              margin: const EdgeInsets.only(left: 30, right: 30, top:20 ),
+              child: Column(
+                children: [
+                  // sign up SVG,
+                  SvgImage(svgImage: AppImages.signUpImage, imageAlignment: Alignment.topLeft,),
 
-                    // sign up message
-                    const Text("Get started with Motion by signing up"),
-                
-                    // email text field
-                    TextFormFieldBuilder(
-                        fieldTextEditingController: _signUpEmailController,
-                        fieldHintText: AppString.emailHintText,
-                        fieldValidator: FormValidator.emailValidator),
-                
-                    // password text field
-                    TextFormFieldBuilder(
-                      fieldTextEditingController: _signUpPasswordController,
-                      fieldHintText: AppString.passwordHintText,
-                      fieldValidator: FormValidator.passwordValidator,
+                  
+                  // sign up message
+                  const Center(
+                    child: Text(AppString.signUpWelcomeMessage, textAlign:TextAlign.center ,style: TextStyle(
+                      fontWeight: FontWeight.w600
+                    ),),
+                  ),
+
+                  // continue with google widget and or widget
+                  ContinueWithGoogleOr(
+                    onPressed: () {},
+                  ),
+
+
+                  // email text field
+                  TextFormFieldBuilder(
+                      fieldTextEditingController: _signUpEmailController,
+                      fieldHintText: AppString.emailHintText,
+                      fieldValidator: FormValidator.emailValidator),
+
+                  // password text field
+                  TextFormFieldBuilder(
+                    fieldTextEditingController: _signUpPasswordController,
+                    fieldHintText: AppString.passwordHintText,
+                    fieldValidator: FormValidator.passwordValidator,
+                    fieldObscureText: true,
+                  ),
+
+                  // confirm password text field
+                  TextFormFieldBuilder(
+                      fieldTextEditingController:
+                          _signUpConfirmPasswordController,
+                      fieldHintText: AppString.confirmPasswordHintText,
                       fieldObscureText: true,
-                    ),
-                
-                    // confirm password text field
-                    TextFormFieldBuilder(
-                        fieldTextEditingController:
-                            _signUpConfirmPasswordController,
-                        fieldHintText: AppString.confirmPasswordHintText,
-                        fieldObscureText: true,
-                        fieldValidator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return AppString.emptyConfirmPasswordValidatorMessage;
-                          } else if (value.length < 6) {
-                            return AppString.invalidPasswordValidatorMessage;
-                          } else if (value != _signUpPasswordController.text) {
-                            return AppString.confirmNotEqual;
-                          }
-                          return null;
-                        }),
-                
-                    // register button
-                    AuthPageButtons(
-                      onPressed: () {
-                        if (_signUpFormKey.currentState!.validate()) {
-                          AuthServices.signUpUser(context,
-                              userEmailSignup: _signUpEmailController.text.trim(),
-                              userPasswordSignUp:
-                                  _signUpPasswordController.text.trim());
+                      fieldValidator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return AppString
+                              .emptyConfirmPasswordValidatorMessage;
+                        } else if (value.length < 6) {
+                          return AppString.invalidPasswordValidatorMessage;
+                        } else if (value != _signUpPasswordController.text) {
+                          return AppString.confirmNotEqual;
                         }
-                        
-                      },
-                      buttonName: AppString.registerTitle,
-                    ),
-                
-                    // Sign Up Option
-                    RegSignOption(
-                        optionQuestion: AppString.alreadyMember,
-                        optionName: AppString.logInTitle,
-                        onTap: widget.toSignInPage)
-                  ],
-                ),
+                        return null;
+                      }),
+
+                  // register button
+                  AuthPageButtons(
+                    onPressed: () {
+                      if (_signUpFormKey.currentState!.validate()) {
+                        AuthServices.signUpUser(context,
+                            userEmailSignup:
+                                _signUpEmailController.text.trim(),
+                            userPasswordSignUp:
+                                _signUpPasswordController.text.trim());
+                      }
+                    },
+                    buttonName: AppString.registerTitle,
+                  ),
+
+                  // Sign Up Option
+                  RegSignOption(
+                      optionQuestion: AppString.alreadyMember,
+                      optionName: AppString.logInTitle,
+                      onTap: widget.toSignInPage)
+                ],
               ),
             ),
           ),

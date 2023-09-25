@@ -4,6 +4,7 @@ import 'package:motion/motion_themes/mth_app/app_images.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import '../../motion_reusable/mu_reusable/user_reusable.dart';
 import '../../motion_reusable/mu_reusable/user_validator.dart';
+import '../mu_reusable/mu_reuse.dart';
 
 // sign in screen when the user is signed out
 class SignInPage extends StatefulWidget {
@@ -33,67 +34,68 @@ class _SignInPageState extends State<SignInPage> {
     super.dispose();
   }
 
-  // multiple devices image
-  Widget mulitpleDevices() {
-    return Center(
-      child: AppImages.devicesImage,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Center(
-          child: Form(
-            key: _signInFormKey,
-            child: SingleChildScrollView(
-              // Add this to handle overflow in case the keyboard covers the fields
-              child: Padding(
-                padding: const EdgeInsetsDirectional.symmetric(horizontal: 30),
-                child: Column(
-                  children: [
-                    // Welcome to motion
-                    SvgImage(svgImage: AppImages.welcomeToMotionImage),
-        
-                    // Email and password TextField,
-                    // email text field
-                    TextFormFieldBuilder(
+        child: Form(
+          key: _signInFormKey,
+          child: SingleChildScrollView(
+            // Add this to handle overflow in case the keyboard covers the fields
+            child: Container(
+              padding: const EdgeInsets.only(left: 30, right: 30, top: 50),
+              child: Column(
+                children: [
+                  // Welcome to motion
+                  SvgImage(svgImage: AppImages.welcomeToMotionImage, imageAlignment: Alignment.center,),
+
+                  // welcome message
+                                    const Center(
+                    child: Text(
+                      AppString.logInWelcomeMessage,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                  // continue with google widget and or widget
+                  ContinueWithGoogleOr(
+                    onPressed: () {},
+                  ),
+            
+                  // Email and password TextField,
+                  // email text field
+                  TextFormFieldBuilder(
                       fieldTextEditingController: _signInEmailController,
                       fieldHintText: AppString.emailHintText,
                       fieldKeyboardType: TextInputType.emailAddress,
-                      fieldValidator: FormValidator.emailValidator
-                    ),
-        
-                    // password text field
-                    TextFormFieldBuilder(
+                      fieldValidator: FormValidator.emailValidator),
+            
+                  // password text field
+                  TextFormFieldBuilder(
                       fieldTextEditingController: _signInPasswordController,
                       fieldObscureText: true,
                       fieldHintText: AppString.passwordHintText,
-                      fieldValidator: FormValidator.passwordValidator
-                    ),
-                    // Log in button
-                    AuthPageButtons(buttonName: AppString.logInTitle, 
-                    onPressed: (){
-                         if (_signInFormKey.currentState!.validate()) {
-                            AuthServices.signInUser(context,
-                                userEmail: _signInEmailController.text.trim(),
-                                userPassword:
-                                    _signInPasswordController.text.trim());
-                          }
-                    }),
-        
-                    // Devices svg,
-                    mulitpleDevices(),
-        
-                    // Sign Up Option
-                    RegSignOption(
-                      onTap: widget.toSignUpPage,
-                      optionQuestion: AppString.areYouAMemeber,
-                      optionName: AppString.registerHere,
-                      )
-                  ],
-                ),
+                      fieldValidator: FormValidator.passwordValidator),
+            
+                  // Log in button
+                  AuthPageButtons(
+                      buttonName: AppString.logInTitle,
+                      onPressed: () {
+                        if (_signInFormKey.currentState!.validate()) {
+                          AuthServices.signInUser(context,
+                              userEmail: _signInEmailController.text.trim(),
+                              userPassword:
+                                  _signInPasswordController.text.trim());
+                        }
+                      }),
+            
+                  // Sign Up Option
+                  RegSignOption(
+                    onTap: widget.toSignUpPage,
+                    optionQuestion: AppString.areYouAMemeber,
+                    optionName: AppString.registerHere,
+                  )
+                ],
               ),
             ),
           ),

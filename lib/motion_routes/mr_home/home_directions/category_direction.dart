@@ -3,6 +3,8 @@ import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_pvd.dar
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_themes/mth_styling/widget_bg_color.dart';
 
+import '../../../motion_themes/mth_app/app_strings.dart';
+
 class MainAndSubView extends StatefulWidget {
   final Widget subcategoryView;
   final Widget mainCategoryView;
@@ -61,7 +63,7 @@ class _MainAndSubViewState extends State<MainAndSubView> {
           children: [
             // subcategory view button
             _viewButton(
-                buttonName: "Subcategory",
+                buttonName: AppString.subcategoryViewButtonName,
                 onPressed: () {
                   setState(() {
                     isSubcategory = true;
@@ -71,7 +73,7 @@ class _MainAndSubViewState extends State<MainAndSubView> {
 
             // main category view button
             _viewButton(
-                buttonName: "Main Category",
+                buttonName: AppString.mainCategoryViewButtonName,
                 onPressed: () {
                   setState(() {
                     isSubcategory = false;

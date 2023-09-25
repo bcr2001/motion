@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:motion/main.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
@@ -11,9 +10,6 @@ import 'package:provider/provider.dart';
 class AuthServices {
   // firebase auth instance
   static final FirebaseAuth _auth = FirebaseAuth.instance;
-
-  // firestore instance
-  static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // sign in users using email and password
   static Future<void> signInUser(context,

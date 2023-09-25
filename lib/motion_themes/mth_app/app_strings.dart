@@ -1,5 +1,9 @@
 // contains all the main app string
 class AppString {
+  // Navigation bar names
+  static const String homeNavigation = "Home";
+  static const String statsNavigation = "Stats";
+
   // App bar titles
   static const String statsRouteTitle = "Annual Overview";
   static const String motionRouteTitle = "Track";
@@ -31,6 +35,14 @@ class AppString {
   static const String emailHintText = "Email";
   static const String passwordHintText = "Password";
   static const String confirmPasswordHintText = "Confirm Password";
+
+  static const String logInWelcomeMessage =
+      "Welcome back to Motion! Log in to track your time, stay organized, and boost productivity.";
+  static const String signUpWelcomeMessage =
+      "Join Motion and unlock the power of time management. Sign up today to start tracking your time efficiently and achieving your goals";
+
+  static const String or = "Or";
+  static const String continueWithGoogle = "Continue with Google";
 
   static const String emptyEmailValidatorMessage = "please enter your email";
   static const String invalidEmailValidatorMessage = "Enter a valid email";
@@ -84,8 +96,10 @@ class AppString {
   static const String homeSubcategoryTitle = "Subcategories";
   static const String trackingWindowTitle = "Tracking Window";
   static const String summaryTitle = "Summary";
-  static const String weekOne = "Week One";
-  static const String weekTwo = "Week Two";
-  static const String weekThree = "Week Three";
-  static const String weekFour = "Week Four";
+
+  static const String subcategoryViewButtonName = "Subcategory";
+  static const String mainCategoryViewButtonName = "Main Category";
+
+  
+
 }

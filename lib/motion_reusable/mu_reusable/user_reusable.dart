@@ -16,14 +16,16 @@ class TextFormFieldBuilder extends StatelessWidget {
   final TextStyle? hintTextStyle;
   final int? maxCharacterLen;
 
-
   const TextFormFieldBuilder(
       {super.key,
       required this.fieldTextEditingController,
       required this.fieldHintText,
       this.fieldKeyboardType = TextInputType.text,
       this.fieldValidator,
-      this.fieldObscureText = false, this.border, this.hintTextStyle, this.maxCharacterLen});
+      this.fieldObscureText = false,
+      this.border,
+      this.hintTextStyle,
+      this.maxCharacterLen});
 
   @override
   Widget build(BuildContext context) {
@@ -34,18 +36,17 @@ class TextFormFieldBuilder extends StatelessWidget {
         buildCounter: (BuildContext context,
                 {int? currentLength, int? maxLength, bool? isFocused}) =>
             null,
-        style: Theme.of(context).textTheme.headlineLarge,
+        style: Theme.of(context).textTheme.bodyMedium,
         controller: fieldTextEditingController,
         keyboardType: fieldKeyboardType,
         obscureText: fieldObscureText,
         decoration: InputDecoration(
-          border: border,
-          contentPadding: const EdgeInsets.only(left: 5.0),
-          focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: blueMainColor, width: 2.0)),
-          hintText: fieldHintText,
-          hintStyle: hintTextStyle
-        ),
+            border: border,
+            contentPadding: const EdgeInsets.only(left: 5.0),
+            focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: blueMainColor, width: 2.0)),
+            hintText: fieldHintText,
+            hintStyle: hintTextStyle),
         validator: fieldValidator,
       ),
     );
@@ -65,6 +66,8 @@ class AuthPageButtons extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 25),
       child: OutlinedButton(
+          style: OutlinedButton.styleFrom(
+              side: BorderSide(color: blueMainColor, width: 2)),
           onPressed: onPressed,
           child: SizedBox(
             height: 50,
@@ -120,14 +123,15 @@ class RegSignOption extends StatelessWidget {
 // SVG IMAGE
 class SvgImage extends StatelessWidget {
   final SvgPicture svgImage;
+  final AlignmentGeometry imageAlignment;
 
-  const SvgImage({super.key, required this.svgImage});
+  const SvgImage({super.key, required this.svgImage, required this.imageAlignment});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12.0),
-      child: Align(alignment: Alignment.topLeft, child: svgImage),
+      padding: const EdgeInsets.only(bottom: 60, top: 20),
+      child: Align(alignment: imageAlignment, child: svgImage),
     );
   }
 }
