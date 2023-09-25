@@ -3,7 +3,8 @@ import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_pvd.dart';
 import 'package:motion/motion_themes/mth_app/app_images.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
-import 'package:motion/motion_themes/mth_styling/widget_bg_color.dart';
+
+import '../motion_themes/mth_styling/app_color.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
@@ -25,9 +26,10 @@ class AboutPage extends StatelessWidget {
                     : getSvgAsset("about_motion_logo.svg"),
 
                 // app name
-                Text(AppString.motionTitle,
+                const Text(AppString.motionTitle,
                     style:
-                        TextStyle(color: blueMainColor,fontWeight: FontWeight.bold, fontSize: 25)),
+                        TextStyle(color: AppColor.blueMainColor,fontWeight: FontWeight.bold, fontSize: 25)),
+                        
                 // app version
                 const Padding(
                   padding: EdgeInsets.only(top: 5, bottom: 5),

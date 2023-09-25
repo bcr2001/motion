@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
-import 'package:motion/motion_themes/mth_styling/widget_bg_color.dart';
+
+import '../../motion_themes/mth_styling/app_color.dart';
 
 // TEXT FIELD CONSTRUCTOR
 typedef StringValidator = String? Function(String? value);
@@ -32,7 +33,7 @@ class TextFormFieldBuilder extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 10),
       child: TextFormField(
-        cursorColor: blueMainColor,
+        cursorColor: AppColor.blueMainColor,
         maxLength: maxCharacterLen,
         buildCounter: (BuildContext context,
                 {int? currentLength, int? maxLength, bool? isFocused}) =>
@@ -44,8 +45,8 @@ class TextFormFieldBuilder extends StatelessWidget {
         decoration: InputDecoration(
             border: border,
             contentPadding: const EdgeInsets.only(left: 5.0),
-            focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: blueMainColor, width: 2.0)),
+            focusedBorder: const UnderlineInputBorder(
+                borderSide: BorderSide(color: AppColor.blueMainColor, width: 2.0)),
             hintText: fieldHintText,
             hintStyle: hintTextStyle),
         validator: fieldValidator,
@@ -68,7 +69,7 @@ class AuthPageButtons extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 25),
       child: OutlinedButton(
           style: OutlinedButton.styleFrom(
-              side: BorderSide(color: blueMainColor, width: 2)),
+              side: const BorderSide(color: AppColor.blueMainColor, width: 2)),
           onPressed: onPressed,
           child: SizedBox(
             height: 50,
@@ -77,7 +78,7 @@ class AuthPageButtons extends StatelessWidget {
                 child: Text(
               buttonName,
               style: contentStyle(
-                  color: blueMainColor,
+                  color: AppColor.blueMainColor,
                   fontWeight: FontWeight.w500,
                   fontSize: 18),
             )),
@@ -112,7 +113,7 @@ class RegSignOption extends StatelessWidget {
             onTap: onTap,
             child: Text(
               optionName,
-              style: contentStyle(color: blueMainColor),
+              style: contentStyle(color: AppColor.blueMainColor),
             ),
           )
         ],

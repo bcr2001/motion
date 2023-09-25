@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_pvd.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
-import 'package:motion/motion_themes/mth_styling/widget_bg_color.dart';
 import 'package:provider/provider.dart';
+
+import '../motion_themes/mth_styling/app_color.dart';
 
 // logger instance
 var logger = Logger();
@@ -19,9 +20,9 @@ Future circularIndicator(context) {
   return showDialog(
       context: context,
       builder: (context) {
-        return Center(
+        return const Center(
           child: CircularProgressIndicator(
-            color: blueMainColor,
+            color: AppColor.blueMainColor,
           ),
         );
       });

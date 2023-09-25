@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:motion/motion_themes/mth_styling/widget_bg_color.dart';
+import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import '../mth_styling/motion_text_styling.dart';
 
 ThemeData lightThemeData = ThemeData(
@@ -25,20 +25,20 @@ ThemeData lightThemeData = ThemeData(
   // alert dialog theme
   dialogTheme:
       DialogTheme(
-        backgroundColor: lightModeContentWidget,
+        backgroundColor: AppColor.lightModeContentWidget,
         titleTextStyle: TextEditingStyling.dialogTitleTextStyle),
 
 
   // card theme
-  cardTheme: CardTheme(
+  cardTheme: const CardTheme(
       elevation: 1,
-      margin: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
-      color: lightModeContentWidget),
+      margin: EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
+      color: AppColor.lightModeContentWidget),
 
   // floating action button
   floatingActionButtonTheme: FloatingActionButtonThemeData(
     elevation: 1,
-    backgroundColor: lightModeContentWidget,
+    backgroundColor: AppColor.lightModeContentWidget,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0)),
   ),
 
@@ -48,10 +48,11 @@ ThemeData lightThemeData = ThemeData(
   dividerTheme: const DividerThemeData(color: Colors.black),
 
   // elevated button theme
-  elevatedButtonTheme: ElevatedButtonThemeData(
+  elevatedButtonTheme: const ElevatedButtonThemeData(
       style: ButtonStyle(
-          elevation: const MaterialStatePropertyAll(0.0),
-          backgroundColor: MaterialStatePropertyAll(lightModeContentWidget))),
+          elevation: MaterialStatePropertyAll(0.0),
+          backgroundColor: 
+          MaterialStatePropertyAll(AppColor.lightModeContentWidget))),
 
   useMaterial3: true,
   visualDensity: VisualDensity.adaptivePlatformDensity,

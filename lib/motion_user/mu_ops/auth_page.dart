@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:motion/motion_main_home/main_home.dart';
-import 'package:motion/motion_themes/mth_styling/widget_bg_color.dart';
+import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'app_direction.dart';
 
 class AuthPage extends StatelessWidget {
@@ -13,9 +13,9 @@ class AuthPage extends StatelessWidget {
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return  Center(
+            return  const Center(
               child: CircularProgressIndicator(
-                color: blueMainColor,
+                color: AppColor.blueMainColor,
               ),
             );
           }

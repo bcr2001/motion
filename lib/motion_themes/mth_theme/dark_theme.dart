@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../mth_styling/motion_text_styling.dart';
-import '../mth_styling/widget_bg_color.dart';
+import '../mth_styling/app_color.dart';
 
 ThemeData darkThemeData = ThemeData(
   textTheme: TextTheme(
@@ -15,12 +15,12 @@ ThemeData darkThemeData = ThemeData(
       headlineLarge: TextEditingStyling.headingLarge(true),
       headlineMedium: TextEditingStyling.headingMedium(true),
       headlineSmall: TextEditingStyling.headingSmall(true)),
-  colorScheme: ColorScheme.dark(primary: darkThemeWidgetBgColor),
+  colorScheme: const ColorScheme.dark(primary: AppColor.darkThemeWidgetBgColor),
 
   // text form field
   dialogTheme: DialogTheme(
       titleTextStyle: TextEditingStyling.dialogTitleTextStyle,
-      backgroundColor: darkModeContentWidget),
+      backgroundColor: AppColor.darkModeContentWidget),
 
 
   // app bar theme
@@ -28,23 +28,23 @@ ThemeData darkThemeData = ThemeData(
       const AppBarTheme(centerTitle: true, backgroundColor: Colors.black),
 
   // card theme
-  cardTheme: CardTheme(
+  cardTheme: const CardTheme(
       elevation: 1,
-      margin: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
-      color: darkModeContentWidget),
+      margin: EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
+      color: AppColor.darkModeContentWidget),
 
   // floating action button
   floatingActionButtonTheme: FloatingActionButtonThemeData(
     elevation: 1,
-    backgroundColor: darkModeContentWidget,
+    backgroundColor: AppColor.darkModeContentWidget,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0)),
   ),
 
   // elevated button theme
-  elevatedButtonTheme: ElevatedButtonThemeData(
+  elevatedButtonTheme: const ElevatedButtonThemeData(
       style: ButtonStyle(
-          elevation: const MaterialStatePropertyAll(0.0),
-          backgroundColor: MaterialStatePropertyAll(darkModeContentWidget))),
+          elevation: MaterialStatePropertyAll(0.0),
+          backgroundColor: MaterialStatePropertyAll(AppColor.darkModeContentWidget))),
 
   // icon theme
   iconTheme: const IconThemeData(color: Colors.white),
