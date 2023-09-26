@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:motion/firebase_options.dart';
+import 'package:motion/motion_core/mc_sqlite/sql_assigner_db.dart';
 import 'package:motion/motion_core/mc_sqlite/sql_tracker_db.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_month_provider_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_time_pvd.dart';
@@ -49,9 +50,9 @@ void main() async {
   final trackMainCategoryDatabaseProvider = MainCategoryTrackerProvider();
 
   // Initialize the database helper
-  final TrackerDatabaseHelper databaseHelper = TrackerDatabaseHelper();
+  final AssignerDatabaseHelper databaseHelper = AssignerDatabaseHelper();
 
-  final allMain = await databaseHelper.getAllMainCategories();
+  final allMain = await databaseHelper.getAllItems();
 
   logger.i(allMain);
 

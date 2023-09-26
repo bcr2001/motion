@@ -26,11 +26,19 @@ class AssignerMainProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // update existing items in the assigner.db database
+  // update existing items in the to_assign table
   Future<void> updateAssignedItems(Assigner categoryAssigner) async {
     await dbInstance.assignUpdate(categoryAssigner);
     await getAllUserItems();
 
+    notifyListeners();
+  }
+
+  // delete existing items in the to_assign table
+  Future<void> deleteAssignedItems(int id) async {
+    await dbInstance.assignDelete(id);
+    await getAllUserItems();
+    
     notifyListeners();
   }
 }

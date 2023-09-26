@@ -1,5 +1,9 @@
 // contains all the main app string
 class AppString {
+  // edit page
+  static const String editPageAppBarTitle = "Edit";
+  static const String editPageDescription = "Edit the subcategories and their corresponding main categories below:";
+
   // Navigation bar names
   static const String homeNavigation = "Home";
   static const String statsNavigation = "Stats";

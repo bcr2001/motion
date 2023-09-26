@@ -41,27 +41,16 @@ class CurrentDateProvider extends ChangeNotifier {
     final int month = int.tryParse(dateParts[1]) ?? 0;
     final int day = int.tryParse(dateParts[2]) ?? 0;
 
+    // Convert the date string to a DateTime object
+    final DateTime dateTime = DateTime(year, month, day);
+
+    // Get the day of the week name using the intl package
+    final String dayOfWeekName = DateFormat('EEEE').format(dateTime);
+
+
     if (day < 1 || day > 31 || month < 1 || month > 12 || year < 1) {
       return "Invalid Date";
     }
-
-    // list of month names
-    // List of month names
-    final List<String> monthNames = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December'
-    ];
-
     // Add the appropriate suffix to the day (e.g., 1st, 2nd, 3rd, 4th, etc.)
     final String daySuffix = (day >= 11 && day <= 13)
         ? 'th'
@@ -73,7 +62,7 @@ class CurrentDateProvider extends ChangeNotifier {
                     ? 'rd'
                     : 'th';
 
-    return '${monthNames[month - 1]} $day$daySuffix $year';
+    return '$day$daySuffix $dayOfWeekName';
   }
 
   @override

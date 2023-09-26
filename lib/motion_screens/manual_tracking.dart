@@ -256,7 +256,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                 subs.currentDateSubcategories;
 
             return Container(
-              margin: const EdgeInsets.only(top: 200),
+              margin: const EdgeInsets.only(top: 160),
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

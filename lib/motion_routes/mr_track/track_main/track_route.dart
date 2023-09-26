@@ -63,8 +63,6 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
         ? const Icon(Icons.check_box_outline_blank_rounded)
         : const Icon(Icons.check_box_outlined);
 
-    logger.i("current active state $activeStatus");
-
     return ListTile(
       title: Text(tileTitle),
       trailing: IconButton(
@@ -157,7 +155,13 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(AppString.motionRouteTitle),
+        actions: const [
+          // edit pop up button
+           TrackEditPopUpMenu()
+        ],
       ),
+
+      
       // displays the alert dialog to add ne subcategories
       floatingActionButton: floatingActionButton(context,
           onPressed: () => _showTrackAlertDialog(context),
@@ -173,13 +177,6 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
 
               return ListView(
                 children: [
-                  // user ui
-                  Consumer<UserUidProvider>(
-                    builder: (context, user, child) {
-                      return Text("Current User: ${user.userUid}");
-                    },
-                  ),
-
                   // education category
                   CardConstructor(
                       cardTitle: AppString.educationMainCategory,
