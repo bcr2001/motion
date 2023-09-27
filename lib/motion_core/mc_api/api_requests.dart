@@ -3,7 +3,7 @@ import "package:http/http.dart" as http;
 
 // https://zenquotes.io/api/today
 // the functions gets data from the above url
-// the daily quote displayed in the home page 
+// the daily quote displayed in the home page
 Future<String> fetchZenQuote() async {
   final request = await http.get(Uri.parse("https://zenquotes.io/api/today"));
 
@@ -19,6 +19,6 @@ Future<String> fetchZenQuote() async {
     // return quote + author
     return '"$quote" - $author';
   } else {
-    throw Exception("Failed to get today's quote :(");
+    return "“Time is what we want most, but what we use worst.” - William Penn";
   }
 }

@@ -2,7 +2,9 @@
 class AppString {
   // edit page
   static const String editPageAppBarTitle = "Edit";
+  static const String editPageUpdateButtonName = "UPDATE";
   static const String editPageDescription = "Edit the subcategories and their corresponding main categories below:";
+  
 
   // Navigation bar names
   static const String homeNavigation = "Home";
@@ -102,6 +104,7 @@ class AppString {
   static const String homeSubcategoryTitle = "Subcategories";
   static const String trackingWindowTitle = "Tracking Window";
   static const String summaryTitle = "Summary";
+  static const String zenQuotesDefault = "“Time is what we want most, but what we use worst.” - William Penn";
 
   static const String subcategoryViewButtonName = "Subcategory";
   static const String mainCategoryViewButtonName = "Main Category";

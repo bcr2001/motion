@@ -9,7 +9,10 @@ import '../track_edit/edit_page.dart';
 // wants to select a main category to assign to
 // a particular subcategory
 class MyDropdownButton extends StatefulWidget {
-  const MyDropdownButton({super.key});
+  final bool? isUpdate;
+  final String? mainCategoryName;
+
+  const MyDropdownButton({super.key, this.isUpdate, this.mainCategoryName});
 
   @override
   State<MyDropdownButton> createState() => _MyDropdownButtonState();
@@ -40,7 +43,9 @@ class _MyDropdownButtonState extends State<MyDropdownButton> {
             icon: const Icon(Icons.arrow_drop_down),
             iconSize: 28,
             value: selectedValue.selectedValue,
-            hint: const Text(AppString.trackDropDownHintText),
+            hint: widget.isUpdate!
+                ?  Text(widget.mainCategoryName!)
+                : const Text(AppString.trackDropDownHintText),
             items: listItems.map((String value) {
               return DropdownMenuItem(
                 value: value,

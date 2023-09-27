@@ -8,7 +8,8 @@ import '../../motion_themes/mth_styling/app_color.dart';
 typedef StringValidator = String? Function(String? value);
 
 class TextFormFieldBuilder extends StatelessWidget {
-  final TextEditingController fieldTextEditingController;
+  final String? initialValue;
+  final TextEditingController? fieldTextEditingController;
   final String fieldHintText;
   final TextInputType fieldKeyboardType;
   final StringValidator? fieldValidator;
@@ -19,20 +20,21 @@ class TextFormFieldBuilder extends StatelessWidget {
 
   const TextFormFieldBuilder(
       {super.key,
-      required this.fieldTextEditingController,
+      this.fieldTextEditingController,
       required this.fieldHintText,
       this.fieldKeyboardType = TextInputType.text,
       this.fieldValidator,
       this.fieldObscureText = false,
       this.border,
       this.hintTextStyle,
-      this.maxCharacterLen});
+      this.maxCharacterLen, this.initialValue});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 10),
       child: TextFormField(
+        initialValue:initialValue,
         cursorColor: AppColor.blueMainColor,
         maxLength: maxCharacterLen,
         buildCounter: (BuildContext context,

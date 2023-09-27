@@ -39,8 +39,9 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
 
   // Define a reusable function for onPressed
   Future<void> _handleItemPressed(BuildContext context, Assigner item) async {
-    final provider = context.read<AssignerMainProvider>();
-    await provider.updateAssignedItems(
+    final updateItem = context.read<AssignerMainProvider>();
+
+    await updateItem.updateAssignedItems(
       Assigner(
         id: item.id,
         currentLoggedInUser: item.currentLoggedInUser,
@@ -82,73 +83,84 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
       context: context,
       builder: (BuildContext context) {
         return Consumer3<UserUidProvider, DropDownTrackProvider,
-            CurrentDateProvider>(
-          builder: (context, userUid, mainCategory, date, child) {
-            // Save references to the providers
-            final userUidProvider = userUid;
-            final mainCategoryProvider = mainCategory;
+                CurrentDateProvider>(
+            builder: (context, userUid, mainCategory, date, child) {
+          // Save references to the providers
+          final userUidProvider = userUid;
+          final mainCategoryProvider = mainCategory;
 
-            return AlertDialogConst(
-              screenHeight: screenHeight,
-              screenWidth: screenWidth,
-              alertDialogTitle: AppString.newAlertDialogTitle, 
-              alertDialogContent: Form(
-                      key: _formKey,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          // divider
-                          const Divider(),
+          return AlertDialogConst(
+            heightFactor: 0.30,
+            screenHeight: screenHeight,
+            screenWidth: screenWidth,
+            alertDialogTitle: AppString.newAlertDialogTitle,
+            alertDialogContent: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // divider
+                  const Divider(),
 
-                          // main category drop down button
-                          const MyDropdownButton(),
+                  // main category drop down button
+                  const MyDropdownButton(
+                    isUpdate: false,
+                  ),
 
-                          Padding(
-                            padding:
-                                const EdgeInsets.only(left: 5.0, right: 5.0),
-                            child: TextFormFieldBuilder(
-                                fieldTextEditingController:
-                                    subcategoryController,
-                                fieldHintText:
-                                    AppString.trackTextFormFieldHintText,
-                                fieldValidator:
-                                    FormValidator.subcategoryValidator),
-                          ),
+                  // subcategory name text field
+                  Padding(
+                    padding: const EdgeInsets.only(left: 5.0, right: 5.0),
+                    child: TextFormFieldBuilder(
+                        fieldTextEditingController: subcategoryController,
+                        fieldHintText: AppString.trackTextFormFieldHintText,
+                        fieldValidator: FormValidator.subcategoryValidator),
+                  ),
 
-                          // Cancel and Add Text Buttons
-                          CancelAddTextButtons(
-                            firstButtonName: AppString.trackCancelTextButton,
-                            secondButtonName: AppString.trackAddTextButton,
-                            onPressedFirst: () =>
-                                navigationKey.currentState!.pop(),
-                            onPressedSecond: () {
-                              if (_formKey.currentState!.validate()) {
-                                _formKey.currentState!.save();
-                                Provider.of<AssignerMainProvider>(context,
-                                        listen: false)
-                                    .insertIntoAssignerDb(Assigner(
-                                  currentLoggedInUser:
-                                      userUidProvider.userUid == null
-                                          ? "unknown"
-                                          : userUidProvider.userUid!,
-                                  subcategoryName: subcategoryController.text,
-                                  mainCategoryName:
-                                      mainCategoryProvider.selectedValue!,
-                                  dateCreated: date.currentDate,
-                                ));
-                                navigationKey.currentState!.pop();
-                                subcategoryController.text = "";
-                                mainCategoryProvider.changeSelectedValue(null);
-                              }
-                            },
-                          ),
-                        ],
-                      ),
-                    ),);
-                });
-          },
-        );
-      }
+                  // Cancel and Add Text Buttons
+                  CancelAddTextButtons(
+                    firstButtonName: AppString.trackCancelTextButton,
+                    secondButtonName: AppString.trackAddTextButton,
+                    onPressedFirst: () {
+                      navigationKey.currentState!.pop();
+                      mainCategoryProvider.changeSelectedValue(null);
+                    },
+                    onPressedSecond: () {
+                      if (_formKey.currentState!.validate()) {
+                        if (mainCategoryProvider.selectedValue == null) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                  "Please select a value from the drop-down."),
+                            ),
+                          );
+                        } else {
+                          _formKey.currentState!.save();
+                          Provider.of<AssignerMainProvider>(context,
+                                  listen: false)
+                              .insertIntoAssignerDb(Assigner(
+                            currentLoggedInUser: userUidProvider.userUid == null
+                                ? "unknown"
+                                : userUidProvider.userUid!,
+                            subcategoryName: subcategoryController.text,
+                            mainCategoryName:
+                                mainCategoryProvider.selectedValue!,
+                            dateCreated: date.currentDate,
+                          ));
+                          navigationKey.currentState!.pop();
+                          subcategoryController.text = "";
+                          mainCategoryProvider.changeSelectedValue(null);
+                        }
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -157,11 +169,10 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
         title: const Text(AppString.motionRouteTitle),
         actions: const [
           // edit pop up button
-           TrackEditPopUpMenu()
+          TrackEditPopUpMenu()
         ],
       ),
 
-      
       // displays the alert dialog to add ne subcategories
       floatingActionButton: floatingActionButton(context,
           onPressed: () => _showTrackAlertDialog(context),

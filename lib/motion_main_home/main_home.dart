@@ -27,19 +27,29 @@ class _MotionHome extends State<MainMotionHome> {
     MotionStatesRoute(),
   ];
 
+  GButton gButtonBuilder({required IconData gIcon, required String gText}) {
+    return GButton(
+      icon: gIcon,
+      text: gText,
+      textStyle: const  TextStyle(fontSize: 15, fontWeight: FontWeight.w600) 
+);
+  }
+
   // google nav bar button
   static const _navButtons = <GButton>[
-    // home button
+    // home button      
     GButton(
       icon: Icons.home_filled,
       text: AppString.homeNavigation,
+      textStyle: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
     ),
 
     // stats button
     GButton(
-      icon: Icons.bubble_chart_outlined,
-      text: AppString.statsNavigation,
-    )
+        icon: Icons.bubble_chart_outlined,
+        text: AppString.statsNavigation,
+        textSize: 14,
+        textStyle: TextStyle(fontSize: 15, fontWeight: FontWeight.w600))
   ];
 
   @override
@@ -92,7 +102,7 @@ class _MotionHome extends State<MainMotionHome> {
               child: GNav(
             haptic: true,
             curve: Curves.linear,
-            padding:const EdgeInsets.all(15),
+            padding: const EdgeInsets.all(15),
             duration: const Duration(milliseconds: 700),
             gap: 10.0,
             tabMargin: const EdgeInsets.all(5),

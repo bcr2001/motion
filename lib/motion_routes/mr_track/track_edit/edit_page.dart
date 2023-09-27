@@ -47,7 +47,12 @@ class TrackEditingPage extends StatelessWidget {
                                 subtitle:
                                     Text(item.mainCategoryName),
                                 trailing: TrailingEditButtons(
+                                  itemIndexDateCreated: item.dateCreated,
+                                  itemIndexIsActive: item.isActive,
+                                  itemIndexCurrentUser: item.currentLoggedInUser,
+                                  itemIndexSubcategoryName: item.subcategoryName,
                                   itemIndexId: item.id!,
+                                  itemIndexMainCategoryName: item.mainCategoryName,
                                 )
                             ): const SizedBox.shrink();
                       })

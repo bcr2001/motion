@@ -2,12 +2,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:motion/motion_core/mc_api/api_requests.dart';
 import 'package:flutter/material.dart';
 
+import '../../../motion_themes/mth_app/app_strings.dart';
+
 // this class handles fetching and
 // persisting the Zen Quote of the day
 class ZenQuoteProvider extends ChangeNotifier {
   // todays quote
-  String _todaysQuote = 
-  "“Time is what we want most, but what we use worst.” - William Penn";
+  String _todaysQuote = AppString.zenQuotesDefault;
 
   // get todays quote
   String get todaysQuote => _todaysQuote;
