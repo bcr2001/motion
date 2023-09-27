@@ -104,6 +104,8 @@ class AppString {
   static const String homeSubcategoryTitle = "Subcategories";
   static const String trackingWindowTitle = "Tracking Window";
   static const String summaryTitle = "Summary";
+  static const String accountedTitle = "Accounted";
+  static const String unAccountedTitle = "Unaccounted";
   static const String zenQuotesDefault = "“Time is what we want most, but what we use worst.” - William Penn";
 
   static const String subcategoryViewButtonName = "Subcategory";

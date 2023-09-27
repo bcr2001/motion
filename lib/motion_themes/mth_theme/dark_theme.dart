@@ -5,23 +5,22 @@ import '../mth_styling/app_color.dart';
 ThemeData darkThemeData = ThemeData(
   textTheme: TextTheme(
       // theme for the app body
-      bodyLarge: TextEditingStyling.bodyStylingLarge(true),
-      bodyMedium: TextEditingStyling.bodyStylingMedium(true),
-      bodySmall: TextEditingStyling.bodyStylingSmall(true),
+      bodyLarge: AppTextStyle.bodyStylingLarge(true),
+      bodyMedium: AppTextStyle.bodyStylingMedium(true),
+      bodySmall: AppTextStyle.bodyStylingSmall(true),
 
       // theme for manual tracking
 
       // theme for headings
-      headlineLarge: TextEditingStyling.headingLarge(true),
-      headlineMedium: TextEditingStyling.headingMedium(true),
-      headlineSmall: TextEditingStyling.headingSmall(true)),
+      headlineLarge: AppTextStyle.headingLarge(true),
+      headlineMedium: AppTextStyle.headingMedium(true),
+      headlineSmall: AppTextStyle.headingSmall(true)),
   colorScheme: const ColorScheme.dark(primary: AppColor.darkThemeWidgetBgColor),
 
   // text form field
   dialogTheme: DialogTheme(
-      titleTextStyle: TextEditingStyling.dialogTitleTextStyle,
+      titleTextStyle: AppTextStyle.dialogTitleTextStyle,
       backgroundColor: AppColor.darkModeContentWidget),
-
 
   // app bar theme
   appBarTheme:
@@ -44,7 +43,8 @@ ThemeData darkThemeData = ThemeData(
   elevatedButtonTheme: const ElevatedButtonThemeData(
       style: ButtonStyle(
           elevation: MaterialStatePropertyAll(0.0),
-          backgroundColor: MaterialStatePropertyAll(AppColor.darkModeContentWidget))),
+          backgroundColor:
+              MaterialStatePropertyAll(AppColor.darkModeContentWidget))),
 
   // icon theme
   iconTheme: const IconThemeData(color: Colors.white),

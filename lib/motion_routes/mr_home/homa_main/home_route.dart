@@ -11,6 +11,9 @@ import 'package:provider/provider.dart';
 import 'package:motion/motion_routes/route_action.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 
+import '../home_reusable/back_home.dart';
+import '../home_windows/total_acc_unacc.dart';
+
 // home route
 class MotionHomeRoute extends StatelessWidget {
   const MotionHomeRoute({super.key});
@@ -63,16 +66,19 @@ class MotionHomeRoute extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 10.0),
             sliver: SliverList(
                 delegate: SliverChildListDelegate([
-              
               // quote from the zenQuotes API
               quoteOfTheDay(),
 
+              // total accounted time and
+              //  total unaccounted time
+              const TotalAccountedAndUnaccounted(),
+
               // Tracking Window
-              cardTitle(titleName: AppString.trackingWindowTitle),
+              sectionTitle(titleName: AppString.trackingWindowTitle),
               const TrackedSubcategories(),
 
               //Weekly Summary
-              cardTitle(titleName: AppString.summaryTitle),
+              sectionTitle(titleName: AppString.summaryTitle),
               const MainAndSubView(
                   subcategoryView: SummaryWindow(
                     isSubcatgory: true,

@@ -26,10 +26,11 @@ String convertMinutesToTime(double minutes) {
   }
 }
 
-String convertMinutesToHoursOnly(double minutes) {
+// converts minutes to hours
+String convertMinutesToHoursOnly(double minutes,{bool isFirstSection = false}) {
   final hours = minutes / 60;
 
-  return "${hours.toStringAsFixed(2)}hrs/day";
+  return isFirstSection? "${hours.toStringAsFixed(2)}H" : "${hours.toStringAsFixed(2)}hrs/day";
 }
 
 // time measurement adder

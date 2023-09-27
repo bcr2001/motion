@@ -16,9 +16,21 @@ TextStyle contentStyle(
 // main dark mode color
 Color darkModeTextColor = const Color(0XFFF5F5F5);
 
-class TextEditingStyling {
+class AppTextStyle {
   // base styling
   static final TextStyle _baseStyle = GoogleFonts.openSans(fontSize: 16.5);
+
+  // account and unaccounted section style
+  static TextStyle accountAndUnaccountTextStyle() {
+    return _baseStyle.copyWith(fontSize: 22, fontWeight: FontWeight.w600);
+  }
+
+  // result title text style
+  static TextStyle resultTitleStyle(bool isUnaccounted) {
+    return _baseStyle.copyWith(
+      fontSize: 13, 
+      color: isUnaccounted? const Color(0xFFB30000) : const Color(0xFF00B300));
+  }
 
   // manual recording hint text style
   static TextStyle manualHintTextStyle() {
@@ -42,21 +54,16 @@ class TextEditingStyling {
     fontWeight: FontWeight.w700,
   );
 
-  
   // body styling (small)
   static TextStyle bodyStylingSmall(bool isDarkMode) {
     return _baseStyle.copyWith(
         color: isDarkMode ? darkModeTextColor : Colors.black, fontSize: 15);
   }
 
-
   // body styling (Medium)
   static TextStyle bodyStylingMedium(bool isDarkMode) {
     return _baseStyle.copyWith(
-      color: isDarkMode ? 
-      darkModeTextColor : Colors.black,
-      fontSize: 17
-    );
+        color: isDarkMode ? darkModeTextColor : Colors.black, fontSize: 17);
   }
 
   // body styling (large)

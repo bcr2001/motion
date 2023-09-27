@@ -20,6 +20,12 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
 
     notifyListeners();
   }
+
+  Future<double> retrieveEntireTotalMainCategoryTable(
+      String currentUser, bool isUnaccounted) async {
+    return await trackDbInstance.getEntireTotalMainCategoryTable(
+        currentUser, isUnaccounted);
+  }
 }
 
 // handles database operation for the subcategory table
@@ -42,7 +48,9 @@ class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
 
   // retrive the total and average for each subcategory for a specific month
   Future<List<Map<String, dynamic>>> retrieveMonthTotalAndAverage(
-      String currentUser, String startingDate, String endingDate,
+      String currentUser,
+      String startingDate,
+      String endingDate,
       bool isSubcategory) async {
     return await trackDbInstance.getMonthTotalAndAverage(
         currentUser, startingDate, endingDate, isSubcategory);

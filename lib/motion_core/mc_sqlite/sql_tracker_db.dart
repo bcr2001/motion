@@ -286,6 +286,43 @@ class TrackerDatabaseHelper {
     }
   }
 
+  // gets the entire total for the timeSpent column of the main_category table
+  Future<double> getEntireTotalMainCategoryTable(
+      String currentUser, bool isUnaccounted) async {
+    try {
+      final db = await database;
+
+      // if the isUnaccounted = true then the results
+      // will be for the entire unaccounted time
+      // if it's false the accounted time
+
+      final resultETMCT = isUnaccounted ? await db.rawQuery('''
+        SELECT ((COUNT(date) * 24)*60) - (COALESCE(SUM(education), 0) + COALESCE(SUM(skills), 0) + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(personalGrowth), 0) + COALESCE(SUM(sleep), 0)) AS EntireTotalResult
+        FROM main_category
+        WHERE currentLoggedInUser = ?
+        ''', [currentUser]) : await db.rawQuery('''
+        SELECT COALESCE(SUM(education), 0) + COALESCE(SUM(skills), 0) + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(personalGrowth), 0) + COALESCE(SUM(sleep), 0) AS EntireTotalResult
+        FROM main_category
+        WHERE currentLoggedInUser = ?
+        ''', [currentUser]);
+
+      if (resultETMCT.isNotEmpty) {
+        final totalETMCT = resultETMCT.first["EntireTotalResult"];
+        if (totalETMCT is double) {
+          return totalETMCT;
+        } else {
+          return 0.0;
+        }
+      } else {
+        return 0.0;
+      }
+    } catch (e) {
+      // Handle any database query errors, e.g., log the error and return an empty list or throw an exception.
+      logger.e('Error in getMonthTotalAndAverage: $e');
+      rethrow;
+    }
+  }
+
   // calculates and returns the total time spent on a particular subcategory
   Future<double> getTotalTimeSpentPerSubcategory(
       String currentDate, String currentUser, String subcategoryName) async {

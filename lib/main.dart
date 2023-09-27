@@ -50,9 +50,9 @@ void main() async {
   final trackMainCategoryDatabaseProvider = MainCategoryTrackerProvider();
 
   // Initialize the database helper
-  final AssignerDatabaseHelper databaseHelper = AssignerDatabaseHelper();
+  final TrackerDatabaseHelper databaseHelper = TrackerDatabaseHelper();
 
-  final allMain = await databaseHelper.getAllItems();
+  final allMain = await databaseHelper.getAllMainCategories();
 
   logger.i(allMain);
 

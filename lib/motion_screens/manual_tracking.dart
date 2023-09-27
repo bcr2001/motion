@@ -69,7 +69,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
               fieldTextEditingController: textEditingController,
               fieldHintText: "00",
               fieldKeyboardType: TextInputType.number,
-              hintTextStyle: TextEditingStyling.manualHintTextStyle(),
+              hintTextStyle: AppTextStyle.manualHintTextStyle(),
               fieldValidator: (value) {
                 // check whether the field is empty
                 if (value == null || value.isEmpty) {
@@ -90,7 +90,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
       padding: const EdgeInsets.only(top: 20.0),
       child: Text(
         ":",
-        style: TextEditingStyling.manualHintTextStyle(),
+        style: AppTextStyle.manualHintTextStyle(),
       ),
     );
   }

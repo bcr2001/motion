@@ -2,6 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:motion/motion_reusable/db_re/sub_logic.dart';
 import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 
+// title builder
+Widget sectionTitle({required String titleName}) {
+  return Padding(
+    padding: const EdgeInsets.only(left: 10, top: 10),
+    child: Text(
+      titleName,
+      style: const TextStyle(fontSize: 17.5, fontWeight: FontWeight.w600),
+    ),
+  );
+}
+
 // builds the ListView.builder() of either
 // main or subcategory with a scollbar
 class ScrollingListBuilder extends StatefulWidget {
@@ -59,14 +70,16 @@ class _ScrollingListBuilderState extends State<ScrollingListBuilder> {
   }
 }
 
-
 // builds the cards that are displayed in the home
 //  page for both tracking and summary windows
 class CardBuilder extends StatelessWidget {
   final Widget timeAccountedAndOthers;
   final Widget itemsToBeDisplayed;
 
-  const CardBuilder({super.key, required this.timeAccountedAndOthers, required this.itemsToBeDisplayed});
+  const CardBuilder(
+      {super.key,
+      required this.timeAccountedAndOthers,
+      required this.itemsToBeDisplayed});
 
   @override
   Widget build(BuildContext context) {

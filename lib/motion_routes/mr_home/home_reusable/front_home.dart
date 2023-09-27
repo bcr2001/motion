@@ -11,13 +11,47 @@ import 'package:motion/motion_routes/mr_home/home_reusable/back_home.dart';
 import 'package:motion/motion_screens/manual_tracking.dart';
 import 'package:provider/provider.dart';
 
-// title builder
-Widget cardTitle({required String titleName}) {
+import '../../../motion_themes/mth_styling/motion_text_styling.dart';
+
+// total all time accounted for and unaccounted for
+Widget entireTimeAccountedAndUnaccounted(
+    {required Future<dynamic> future, required String resultName, required bool isUnaccounted}) {
   return Padding(
-    padding: const EdgeInsets.only(left: 10, top: 10),
-    child: Text(
-      titleName,
-      style: const TextStyle(fontSize: 17.5, fontWeight: FontWeight.w600),
+    padding: const EdgeInsets.symmetric(vertical: 15),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        // table result (accounted/ unaccounted)
+        FutureBuilder(
+            future: future,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const ShimmerWidget.rectangular(width: 100, height: 25);
+              } else if (snapshot.hasError) {
+                return const Text("Error 355 :(");
+              } else {
+                // results for the sqlite query
+                final tableResult = snapshot.data;
+  
+                // convert the minutes to hours
+                final accountedConvertedResults =
+                    convertMinutesToHoursOnly(tableResult!, isFirstSection: true);
+  
+                // the converted result displayed in a Text widget
+                return Text(
+                  accountedConvertedResults,
+                  style: AppTextStyle.accountAndUnaccountTextStyle(),
+                  textAlign: TextAlign.center,
+                );
+              }
+            }),
+  
+        // result name (Accounted or Unaccounted)
+        Text(
+          resultName,
+          style: AppTextStyle.resultTitleStyle(isUnaccounted),
+        )
+      ],
     ),
   );
 }
@@ -145,7 +179,8 @@ class _SubcategoryAndCurrentDayTotalsState
               shrinkWrap: true,
               itemCount: activeItems.length,
               itemBuilder: (BuildContext context, index) {
-                return (activeItems[index].isActive == 1 && activeItems[index].currentLoggedInUser == user.userUid)
+                return (activeItems[index].isActive == 1 &&
+                        activeItems[index].currentLoggedInUser == user.userUid)
                     ? FutureBuilder<double>(
                         future: sub.retrieveTotalTimeSpentSubSpecific(
                             date.currentDate,
@@ -233,4 +268,3 @@ class _SubcategoryMonthTotalsAndAveragesState
     });
   }
 }
-

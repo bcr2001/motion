@@ -8,26 +8,23 @@ ThemeData lightThemeData = ThemeData(
   ),
 
   // app bar theme
-  appBarTheme:
-      const AppBarTheme(centerTitle: true),
+  appBarTheme: const AppBarTheme(centerTitle: true),
 
   // text theme
   textTheme: TextTheme(
-      bodyLarge: TextEditingStyling.bodyStylingLarge(false),
-      bodyMedium: TextEditingStyling.bodyStylingMedium(false),
-      bodySmall: TextEditingStyling.bodyStylingSmall(false),
+      bodyLarge: AppTextStyle.bodyStylingLarge(false),
+      bodyMedium: AppTextStyle.bodyStylingMedium(false),
+      bodySmall: AppTextStyle.bodyStylingSmall(false),
 
       // theme for headings
-      headlineLarge: TextEditingStyling.headingLarge(false),
-      headlineMedium: TextEditingStyling.headingMedium(false),
-      headlineSmall: TextEditingStyling.headingSmall(false)),
+      headlineLarge: AppTextStyle.headingLarge(false),
+      headlineMedium: AppTextStyle.headingMedium(false),
+      headlineSmall: AppTextStyle.headingSmall(false)),
 
   // alert dialog theme
-  dialogTheme:
-      DialogTheme(
-        backgroundColor: AppColor.lightModeContentWidget,
-        titleTextStyle: TextEditingStyling.dialogTitleTextStyle),
-
+  dialogTheme: DialogTheme(
+      backgroundColor: AppColor.lightModeContentWidget,
+      titleTextStyle: AppTextStyle.dialogTitleTextStyle),
 
   // card theme
   cardTheme: const CardTheme(
@@ -51,8 +48,8 @@ ThemeData lightThemeData = ThemeData(
   elevatedButtonTheme: const ElevatedButtonThemeData(
       style: ButtonStyle(
           elevation: MaterialStatePropertyAll(0.0),
-          backgroundColor: 
-          MaterialStatePropertyAll(AppColor.lightModeContentWidget))),
+          backgroundColor:
+              MaterialStatePropertyAll(AppColor.lightModeContentWidget))),
 
   useMaterial3: true,
   visualDensity: VisualDensity.adaptivePlatformDensity,
