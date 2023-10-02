@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:motion/firebase_options.dart';
-import 'package:motion/motion_core/mc_sqlite/sql_assigner_db.dart';
 import 'package:motion/motion_core/mc_sqlite/sql_tracker_db.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_month_provider_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_time_pvd.dart';

@@ -28,6 +28,7 @@ class AppTextStyle {
   // result title text style
   static TextStyle resultTitleStyle(bool isUnaccounted) {
     return _baseStyle.copyWith(
+      fontWeight: FontWeight.w700,
       fontSize: 13, 
       color: isUnaccounted? const Color(0xFFB30000) : const Color(0xFF00B300));
   }
