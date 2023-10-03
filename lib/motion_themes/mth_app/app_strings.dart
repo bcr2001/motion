@@ -106,7 +106,9 @@ class AppString {
   static const String summaryTitle = "Summary";
   static const String accountedTitle = "Accounted";
   static const String unAccountedTitle = "Unaccounted";
+  static const String monthlyTimeTrackingChartTitle = "Monthly Time Tracking Chart";
   static const String zenQuotesDefault = "“Time is what we want most, but what we use worst.” - William Penn";
+
 
   static const String subcategoryViewButtonName = "Subcategory";
   static const String mainCategoryViewButtonName = "Main Category";

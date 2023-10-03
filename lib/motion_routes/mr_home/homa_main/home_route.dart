@@ -12,6 +12,7 @@ import 'package:motion/motion_routes/route_action.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 
 import '../home_reusable/back_home.dart';
+import '../home_windows/month_chart.dart';
 import '../home_windows/total_acc_unacc.dart';
 
 // home route
@@ -77,13 +78,18 @@ class MotionHomeRoute extends StatelessWidget {
               sectionTitle(titleName: AppString.trackingWindowTitle),
               const TrackedSubcategories(),
 
-              //Weekly Summary
+              // Summary
               sectionTitle(titleName: AppString.summaryTitle),
               const MainAndSubView(
                   subcategoryView: SummaryWindow(
                     isSubcatgory: true,
                   ),
-                  mainCategoryView: SummaryWindow(isSubcatgory: false))
+                  mainCategoryView: SummaryWindow(isSubcatgory: false)),
+
+              // Monthly Time Tracking Chart
+              sectionTitle(titleName: AppString.monthlyTimeTrackingChartTitle),
+              const ChartPractice()
+
             ])),
           )
         ],

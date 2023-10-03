@@ -52,6 +52,8 @@ dependencies:
   firebase_storage: ^11.2.5
   google_nav_bar: ^5.0.6
   shimmer: ^3.0.0
+  fl_chart: ^0.62.0
+
 
 dev_dependencies:
   flutter_test:
@@ -69,6 +71,7 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
