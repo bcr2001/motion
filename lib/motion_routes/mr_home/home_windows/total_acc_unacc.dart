@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
-import 'package:motion/motion_reusable/db_re/sub_logic.dart';
 import 'package:provider/provider.dart';
-
 import '../../../motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
-import '../../../motion_reusable/db_re/sub_ui.dart';
 import '../../../motion_themes/mth_app/app_strings.dart';
-import '../../../motion_themes/mth_styling/motion_text_styling.dart';
-import '../home_reusable/back_home.dart';
 import '../home_reusable/front_home.dart';
 
 // accounted and unaccounted total for the entire main_category table

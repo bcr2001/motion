@@ -4,15 +4,12 @@ import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_pvd.dar
 import 'package:motion/motion_core/motion_providers/web_api_pvd/zen_quotes_pvd.dart';
 import 'package:motion/motion_routes/mr_home/home_directions/category_direction.dart';
 import 'package:motion/motion_routes/mr_home/home_windows/tracking_window.dart';
-import 'package:motion/motion_routes/mr_home/home_reusable/front_home.dart';
 import 'package:motion/motion_routes/mr_home/home_windows/summary_window.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:provider/provider.dart';
 import 'package:motion/motion_routes/route_action.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
-
 import '../home_reusable/back_home.dart';
-import '../home_windows/month_chart.dart';
 import '../home_windows/total_acc_unacc.dart';
 
 // home route
@@ -85,11 +82,6 @@ class MotionHomeRoute extends StatelessWidget {
                     isSubcatgory: true,
                   ),
                   mainCategoryView: SummaryWindow(isSubcatgory: false)),
-
-              // Monthly Time Tracking Chart
-              sectionTitle(titleName: AppString.monthlyTimeTrackingChartTitle),
-              const ChartPractice()
-
             ])),
           )
         ],

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:shimmer/shimmer.dart';
 
 // this class creates an add and a cancel text button

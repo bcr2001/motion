@@ -52,19 +52,6 @@ class _TrailingEditButtonsState extends State<TrailingEditButtons> {
     return IconButton(iconSize: 20, onPressed: onPressed, icon: iconImage);
   }
 
-  // handles update of subcategory
-  Future<void> _handleSubUpdates(BuildContext context, Assigner item) async {
-    final updateAssigner = context.read<AssignerMainProvider>();
-
-    await updateAssigner.updateAssignedItems(Assigner(
-        id: item.id,
-        currentLoggedInUser: item.currentLoggedInUser,
-        subcategoryName: item.mainCategoryName,
-        mainCategoryName: item.mainCategoryName,
-        dateCreated: item.dateCreated,
-        isActive: item.isActive));
-  }
-
   void _showUpdateAlertDialog(context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
