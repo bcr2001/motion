@@ -11,6 +11,7 @@ import 'package:motion/motion_reusable/mu_reusable/user_validator.dart';
 import 'package:motion/motion_routes/mr_track/track_reusable/front_track.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:motion/motion_reusable/mu_reusable/user_reusable.dart';
+import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:provider/provider.dart';
 
 // this is the page where users create and
@@ -62,7 +63,7 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
   }) {
     Icon iconSelected = activeStatus == 0
         ? const Icon(Icons.check_box_outline_blank_rounded)
-        : const Icon(Icons.check_box_outlined);
+        : const Icon(Icons.check_box_outlined, color: AppColor.blueMainColor,);
 
     return ListTile(
       title: Text(tileTitle),

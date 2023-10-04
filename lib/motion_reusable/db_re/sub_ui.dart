@@ -51,32 +51,30 @@ class CardConstructor extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(top: 20.0),
-      child: Card(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // card title
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0, left: 8.0),
-              child: Text(
-                cardTitle,
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // card title
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0, left: 8.0),
+            child: Text(
+              cardTitle,
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
+          ),
 
-            // title and content divider
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Divider(
-                thickness: 1.5,
-                color: Theme.of(context).dividerTheme.color,
-              ),
+          // title and content divider
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Divider(
+              thickness: 1.2,
+              color: Theme.of(context).dividerTheme.color,
             ),
+          ),
 
-            // listView widget
-            cardListView
-          ],
-        ),
+          // listView widget
+          cardListView
+        ],
       ),
     );
   }
