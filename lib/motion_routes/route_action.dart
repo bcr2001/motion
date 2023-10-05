@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:motion/motion_core/mc_firebase/firebase_services.dart';
+import 'package:motion/motion_core/mc_firebase/google_services.dart';
 import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_screens/settings_page.dart';
@@ -35,10 +36,10 @@ showAlertDialog(BuildContext context) {
         return AlertDialogConst(
           screenHeight: screenHeight,
           screenWidth: screenWidth,
-            widthFactor: 0.78,
-            heightFactor: 0.15,
-            alertDialogTitle: AppString.logOutTitle,
-            alertDialogContent: Padding(
+          widthFactor: 0.78,
+          heightFactor: 0.15,
+          alertDialogTitle: AppString.logOutTitle,
+          alertDialogContent: Padding(
             padding: const EdgeInsets.only(right: 18, left: 18),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -58,6 +59,7 @@ showAlertDialog(BuildContext context) {
                     onPressedSecond: () {
                       Navigator.pop(context);
                       AuthServices.signOutUser(context);
+                      GoogleAuthService.signOutGoogle();
                     },
                     firstButtonName: AppString.cancelTitle,
                     secondButtonName: AppString.logOutTitle),
@@ -75,27 +77,29 @@ class MainRoutePopUpMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton(
-      color: Theme.of(context).popupMenuTheme.color,
-      onSelected: (String value) {
-      if (value == AppString.logOutValue) {
-        showAlertDialog(context);
-      } else {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const SettingsPage()),
-        );
-      }
-    }, itemBuilder: (BuildContext context) {
-      return [
-        // settings
-        const PopupMenuItem(
-            value: AppString.settingsValue,
-            child: Text(AppString.settingsTitle)),
+        color: Theme.of(context).popupMenuTheme.color,
+        onSelected: (String value) {
+          if (value == AppString.logOutValue) {
+            showAlertDialog(context);
+          } else {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const SettingsPage()),
+            );
+          }
+        },
+        itemBuilder: (BuildContext context) {
+          return [
+            // settings
+            const PopupMenuItem(
+                value: AppString.settingsValue,
+                child: Text(AppString.settingsTitle)),
 
-        // logout
-        const PopupMenuItem(
-            value: AppString.logOutValue, child: Text(AppString.logOutTitle))
-      ];
-    });
+            // logout
+            const PopupMenuItem(
+                value: AppString.logOutValue,
+                child: Text(AppString.logOutTitle))
+          ];
+        });
   }
 }

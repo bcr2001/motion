@@ -11,10 +11,13 @@ class AuthServices {
   // firebase auth instance
   static final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  // sign in users using google 
+  
+
   // sign in users using email and password
   static Future<void> signInUser(context,
       {required String userEmail, required userPassword}) async {
-    // //dialog displayed during sign-in process
+    // dialog displayed during sign-in process
     circularIndicator(context);
 
     try {

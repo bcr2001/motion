@@ -6,6 +6,8 @@ import 'package:motion/motion_reusable/mu_reusable/user_reusable.dart';
 import 'package:motion/motion_reusable/mu_reusable/user_validator.dart';
 import 'package:motion/motion_user/mu_reusable/mu_reuse.dart';
 
+import '../../motion_core/mc_firebase/google_services.dart';
+
 // sign up page when a new user wants to sign up
 class SignUpPage extends StatefulWidget {
   final VoidCallback toSignInPage;
@@ -46,25 +48,30 @@ class _SignUpPageState extends State<SignUpPage> {
           child: SingleChildScrollView(
             // handle overflow in case the keyboard covers the fields
             child: Container(
-              margin: const EdgeInsets.only(left: 30, right: 30, top:20 ),
+              margin: const EdgeInsets.only(left: 30, right: 30, top: 20),
               child: Column(
                 children: [
                   // sign up SVG,
-                  SvgImage(svgImage: AppImages.signUpImage, imageAlignment: Alignment.topLeft,),
+                  SvgImage(
+                    svgImage: AppImages.signUpImage,
+                    imageAlignment: Alignment.topLeft,
+                  ),
 
-                  
                   // sign up message
                   const Center(
-                    child: Text(AppString.signUpWelcomeMessage, textAlign:TextAlign.center ,style: TextStyle(
-                      fontWeight: FontWeight.w600
-                    ),),
+                    child: Text(
+                      AppString.signUpWelcomeMessage,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
                   ),
 
                   // continue with google widget and or widget
                   ContinueWithGoogleOr(
-                    onPressed: () {},
+                    onPressed: () {
+                      GoogleAuthService.signInWithGoodle(context);
+                    },
                   ),
-
 
                   // email text field
                   TextFormFieldBuilder(
@@ -88,8 +95,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       fieldObscureText: true,
                       fieldValidator: (value) {
                         if (value == null || value.isEmpty) {
-                          return AppString
-                              .emptyConfirmPasswordValidatorMessage;
+                          return AppString.emptyConfirmPasswordValidatorMessage;
                         } else if (value.length < 6) {
                           return AppString.invalidPasswordValidatorMessage;
                         } else if (value != _signUpPasswordController.text) {
@@ -103,8 +109,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     onPressed: () {
                       if (_signUpFormKey.currentState!.validate()) {
                         AuthServices.signUpUser(context,
-                            userEmailSignup:
-                                _signUpEmailController.text.trim(),
+                            userEmailSignup: _signUpEmailController.text.trim(),
                             userPasswordSignUp:
                                 _signUpPasswordController.text.trim());
                       }

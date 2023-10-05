@@ -15,6 +15,7 @@ ThemeData darkThemeData = ThemeData(
       headlineLarge: AppTextStyle.headingLarge(true),
       headlineMedium: AppTextStyle.headingMedium(true),
       headlineSmall: AppTextStyle.headingSmall(true)),
+      
   colorScheme: const ColorScheme.dark(primary: AppColor.darkThemeWidgetBgColor),
 
   // text form field

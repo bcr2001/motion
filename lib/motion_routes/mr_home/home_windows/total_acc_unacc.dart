@@ -19,7 +19,9 @@ class TotalAccountedAndUnaccounted extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             // Accounted
-            entireTimeAccountedAndUnaccounted(future: main.retrieveEntireTotalMainCategoryTable(currentUser!, false), resultName:AppString.accountedTitle, isUnaccounted: false),
+            entireTimeAccountedAndUnaccounted(
+              future: main.retrieveEntireTotalMainCategoryTable(currentUser!, false), 
+              resultName:AppString.accountedTitle, isUnaccounted: false),
 
             // Unaccounted
             entireTimeAccountedAndUnaccounted(

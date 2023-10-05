@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:motion/motion_core/mc_firebase/firebase_services.dart';
+import 'package:motion/motion_core/mc_firebase/google_services.dart';
 import 'package:motion/motion_themes/mth_app/app_images.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import '../../motion_reusable/mu_reusable/user_reusable.dart';
@@ -47,10 +48,13 @@ class _SignInPageState extends State<SignInPage> {
               child: Column(
                 children: [
                   // Welcome to motion
-                  SvgImage(svgImage: AppImages.welcomeToMotionImage, imageAlignment: Alignment.center,),
+                  SvgImage(
+                    svgImage: AppImages.welcomeToMotionImage,
+                    imageAlignment: Alignment.center,
+                  ),
 
                   // welcome message
-                                    const Center(
+                  const Center(
                     child: Text(
                       AppString.logInWelcomeMessage,
                       textAlign: TextAlign.center,
@@ -59,9 +63,11 @@ class _SignInPageState extends State<SignInPage> {
                   ),
                   // continue with google widget and or widget
                   ContinueWithGoogleOr(
-                    onPressed: () {},
+                    onPressed: () {
+                      GoogleAuthService.signInWithGoodle(context);
+                    },
                   ),
-            
+
                   // Email and password TextField,
                   // email text field
                   TextFormFieldBuilder(
@@ -69,14 +75,14 @@ class _SignInPageState extends State<SignInPage> {
                       fieldHintText: AppString.emailHintText,
                       fieldKeyboardType: TextInputType.emailAddress,
                       fieldValidator: FormValidator.emailValidator),
-            
+
                   // password text field
                   TextFormFieldBuilder(
                       fieldTextEditingController: _signInPasswordController,
                       fieldObscureText: true,
                       fieldHintText: AppString.passwordHintText,
                       fieldValidator: FormValidator.passwordValidator),
-            
+
                   // Log in button
                   AuthPageButtons(
                       buttonName: AppString.logInTitle,
@@ -88,7 +94,7 @@ class _SignInPageState extends State<SignInPage> {
                                   _signInPasswordController.text.trim());
                         }
                       }),
-            
+
                   // Sign Up Option
                   RegSignOption(
                     onTap: widget.toSignUpPage,
