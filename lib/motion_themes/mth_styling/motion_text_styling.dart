@@ -28,9 +28,10 @@ class AppTextStyle {
   // result title text style
   static TextStyle resultTitleStyle(bool isUnaccounted) {
     return _baseStyle.copyWith(
-      fontWeight: FontWeight.w700,
-      fontSize: 13, 
-      color: isUnaccounted? const Color(0xFFB30000) : const Color(0xFF00B300));
+        fontWeight: FontWeight.w700,
+        fontSize: 13,
+        color:
+            isUnaccounted ? const Color(0xFFB30000) : const Color(0xFF00B300));
   }
 
   // manual recording hint text style
@@ -54,6 +55,14 @@ class AppTextStyle {
     fontSize: 23,
     fontWeight: FontWeight.w700,
   );
+
+  // settings page subtitle fontstyle
+  static final TextStyle settingSubtitleStyling = _baseStyle.copyWith(
+    color: const Color(0xff777777),
+    fontSize: 15
+  );
+
+  // THEME DATA FONT STYLING
 
   // body styling (small)
   static TextStyle bodyStylingSmall(bool isDarkMode) {

@@ -189,14 +189,11 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
 
               return ListView(
                 children: [
-                  // user uid
-                  Text(user!),
                   
                   // education category
                   CardConstructor(
                       cardTitle: AppString.educationMainCategory,
-                      cardListView: ListView.builder(
-                          shrinkWrap: true,
+                      cardListView: TrackListViewBuiler(
                           itemCount: items.length,
                           itemBuilder: (BuildContext context, index) {
                             return items[index].currentLoggedInUser == user &&
@@ -211,8 +208,7 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                   // // skills category
                   CardConstructor(
                       cardTitle: AppString.skillMainCategory,
-                      cardListView: ListView.builder(
-                          shrinkWrap: true,
+                      cardListView: TrackListViewBuiler(
                           itemCount: items.length,
                           itemBuilder: (BuildContext context, index) {
                             return items[index].currentLoggedInUser == user &&
@@ -227,8 +223,7 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                   // entertainment category
                   CardConstructor(
                       cardTitle: AppString.entertainmentMainCategory,
-                      cardListView: ListView.builder(
-                          shrinkWrap: true,
+                      cardListView: TrackListViewBuiler(
                           itemCount: items.length,
                           itemBuilder: (BuildContext context, index) {
                             return items[index].currentLoggedInUser == user &&
@@ -244,8 +239,7 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                   // personal growth category
                   CardConstructor(
                       cardTitle: AppString.pgMainCategory,
-                      cardListView: ListView.builder(
-                          shrinkWrap: true,
+                      cardListView: TrackListViewBuiler(
                           itemCount: items.length,
                           itemBuilder: (BuildContext context, index) {
                             return items[index].currentLoggedInUser == user &&
@@ -261,8 +255,7 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                   //sleep category
                   CardConstructor(
                       cardTitle: AppString.sleepMainCategory,
-                      cardListView: ListView.builder(
-                          shrinkWrap: true,
+                      cardListView: TrackListViewBuiler(
                           itemCount: items.length,
                           itemBuilder: (BuildContext context, index) {
                             return items[index].currentLoggedInUser == user &&

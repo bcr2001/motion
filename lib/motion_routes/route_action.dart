@@ -3,7 +3,7 @@ import 'package:motion/motion_core/mc_firebase/firebase_services.dart';
 import 'package:motion/motion_core/mc_firebase/google_services.dart';
 import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
-import 'package:motion/motion_screens/settings_page.dart';
+import 'package:motion/motion_screens/ms_settings/settings_page.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 
 // app bar action button

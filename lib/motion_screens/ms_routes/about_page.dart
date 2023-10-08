@@ -4,7 +4,7 @@ import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_pvd.dar
 import 'package:motion/motion_themes/mth_app/app_images.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 
-import '../motion_themes/mth_styling/app_color.dart';
+import '../../motion_themes/mth_styling/app_color.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
@@ -46,7 +46,7 @@ class AboutPage extends StatelessWidget {
                   ),
                 ),
 
-                // compant rights
+                // company rights
                 Expanded(
                   child: Align(
                     alignment: Alignment.bottomCenter,
@@ -54,7 +54,7 @@ class AboutPage extends StatelessWidget {
                       padding: const EdgeInsets.only(bottom: 10),
                       child: Text(
                         "2023 ${AppString.motionLLC}",
-                        style: Theme.of(context).textTheme.headlineLarge,
+                        style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ),
                   ),

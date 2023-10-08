@@ -3,7 +3,8 @@ class AppString {
   // edit page
   static const String editPageAppBarTitle = "Edit";
   static const String editPageUpdateButtonName = "UPDATE";
-  static const String editPageDescription = "Edit the subcategories and their corresponding main categories below:";
+  static const String editPageDescription = 
+  "Edit the subcategories and their corresponding main categories below:";
   
 
   // Navigation bar names
@@ -27,12 +28,17 @@ class AppString {
   static const String themeTitle = "Theme";
   static const String downloadDataTitle = "Download Personal Data";
   static const String notificationTitle = "Notification";
+  static const String importDataTitle = "Import Data";
   static const String aboutMotionTitle = "About Motion";
 
-  static const String downloadDataDescription = "Download all data collected";
-  static const String notificationDescription = "Customize your notifications";
+  static const String downloadDataDescription = 
+  "Download all your personal data.";
+  static const String notificationDescription = 
+   "Personalize your notification settings.";
+  static const String importDataDescription = 
+  "Bring your data into Motion.";
   static const String aboutMotionDescription =
-      "Get to know what Motion is all about";
+      "Discover the essence of Motion.";
 
   // sign in/ sign out page
   static const String logInTitle = "Log In";
@@ -43,7 +49,7 @@ class AppString {
   static const String confirmPasswordHintText = "Confirm Password";
 
   static const String logInWelcomeMessage =
-      "Welcome back to Motion! Log in to track your time, stay organized, and boost productivity.";
+      "Welcome back to Motion! Log in to track your time, stay organized, and boost productivity";
   static const String signUpWelcomeMessage =
       "Join Motion and unlock the power of time management. Sign up today to start tracking your time efficiently and achieving your goals";
 
@@ -73,6 +79,21 @@ class AppString {
   static const String appDescription =
       "Motion offers a user-friendly and effective solution for tracking and analyzing time, providing tools for seamless data collection, visual representation, and comprehensive reporting.";
   static const String motionLLC = "MOTION LLC. ALL RIGHTS RESERVED";
+
+  // IMPORT DATA PAGE
+  static const String importAssignerTitle = "Import Assigner DB";
+  static const String importTrackerTitle = "Import Tracker DB";
+  static const String learnMoreTitle = "Learn More";
+
+  static const String importAssignerDescription = "To import a database structured in the Motion to_assign table format, please click the button below.";
+  static const String importTrackerDescription = "To import a database structured in the Motion main_category and subcategory table format, please click the button below";
+  static const String learnMoreDescription = "Interested in learning more about the Motion table and the structure of the database? Click here to find out more.";
+
+  static const String importAssignerButtonName = "DB Assign";
+  static const String importTrackerButtonName = "DB Tracker";
+  static const String learnMoreButtonName = "BTS";
+
+
 
   // TRACK (MOTION) PAGE
   static const String educationMainCategory = "Education";

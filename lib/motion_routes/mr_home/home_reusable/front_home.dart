@@ -8,14 +8,17 @@ import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_reusable/db_re/sub_logic.dart';
 import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 import 'package:motion/motion_routes/mr_home/home_reusable/back_home.dart';
-import 'package:motion/motion_screens/manual_tracking.dart';
+import 'package:motion/motion_screens/ms_routes/manual_tracking.dart';
 import 'package:provider/provider.dart';
 
+import '../../../motion_reusable/general_reuseable.dart';
 import '../../../motion_themes/mth_styling/motion_text_styling.dart';
 
 // total all time accounted for and unaccounted for
 Widget entireTimeAccountedAndUnaccounted(
-    {required Future<dynamic> future, required String resultName, required bool isUnaccounted}) {
+    {required Future<dynamic> future,
+    required String resultName,
+    required bool isUnaccounted}) {
   return Padding(
     padding: const EdgeInsets.symmetric(vertical: 15),
     child: Column(
@@ -32,11 +35,12 @@ Widget entireTimeAccountedAndUnaccounted(
               } else {
                 // results for the sqlite query
                 final tableResult = snapshot.data;
-  
+
                 // convert the minutes to hours
-                final accountedConvertedResults =
-                    convertMinutesToHoursOnly(tableResult!, isFirstSection: true);
-  
+                final accountedConvertedResults = convertMinutesToHoursOnly(
+                    tableResult!,
+                    isFirstSection: true);
+
                 // the converted result displayed in a Text widget
                 return Text(
                   accountedConvertedResults,
@@ -45,7 +49,7 @@ Widget entireTimeAccountedAndUnaccounted(
                 );
               }
             }),
-  
+
         // result name (Accounted or Unaccounted)
         Text(
           resultName,
@@ -175,6 +179,7 @@ class _SubcategoryAndCurrentDayTotalsState
           trackVisibility: true,
           controller: _scrollController,
           child: ListView.builder(
+              padding: EdgeInsets.zero,
               controller: _scrollController,
               shrinkWrap: true,
               itemCount: activeItems.length,
@@ -197,11 +202,11 @@ class _SubcategoryAndCurrentDayTotalsState
                           } else {
                             // Data is available, use it to build the ListTile
                             final totalTimeSpentSub = snapshot.data ?? 0.0;
-
+        
                             // convert total
                             final convertedTotalTimeSpent =
                                 convertMinutesToTime(totalTimeSpentSub);
-
+        
                             return ListTile(
                               title: Text(activeItems[index].subcategoryName),
                               subtitle:
@@ -256,6 +261,7 @@ class _SubcategoryMonthTotalsAndAveragesState
   Widget build(BuildContext context) {
     return Consumer3<SubcategoryTrackerDatabaseProvider, UserUidProvider,
         FirstAndLastDay>(builder: (context, sub, user, day, child) {
+      logger.i(day.firstDay);
       return widget.isSubcategory
           ? ScrollingListBuilder(
               future: sub.retrieveMonthTotalAndAverage(

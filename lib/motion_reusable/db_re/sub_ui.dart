@@ -11,7 +11,11 @@ class CancelAddTextButtons extends StatelessWidget {
   final VoidCallback onPressedSecond;
 
   const CancelAddTextButtons(
-      {super.key, required this.onPressedFirst, required this.onPressedSecond, required this.firstButtonName, required this.secondButtonName});
+      {super.key,
+      required this.onPressedFirst,
+      required this.onPressedSecond,
+      required this.firstButtonName,
+      required this.secondButtonName});
 
   @override
   Widget build(BuildContext context) {
@@ -77,6 +81,23 @@ class CardConstructor extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+// List view builder
+class TrackListViewBuiler extends StatelessWidget {
+  final int? itemCount;
+  final Widget? Function(BuildContext, int) itemBuilder;
+
+  const TrackListViewBuiler({super.key, this.itemCount, required this.itemBuilder});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      physics: const NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
+      itemCount: itemCount,
+      itemBuilder: itemBuilder);
   }
 }
 

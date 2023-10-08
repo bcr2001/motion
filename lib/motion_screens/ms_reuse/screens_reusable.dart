@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 
 // setting options list tile constructors
 class SettingsOptions extends StatelessWidget {
@@ -25,7 +26,7 @@ class SettingsOptions extends StatelessWidget {
         ),
         subtitle: Text(
           settingsDesciption,
-          style: Theme.of(context).textTheme.bodyMedium,
+          style: AppTextStyle.settingSubtitleStyling,
         ),
         trailing: trailing,
       ),

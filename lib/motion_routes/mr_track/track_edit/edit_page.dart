@@ -34,6 +34,7 @@ class TrackEditingPage extends StatelessWidget {
                   // all the items in the to_assign table
                   // for a particular user
                   ListView.builder(
+                    physics: const NeverScrollableScrollPhysics(),
                       itemCount: assignedItems.length,
                       shrinkWrap: true,
                       itemBuilder: (BuildContext context, index) {
@@ -42,6 +43,7 @@ class TrackEditingPage extends StatelessWidget {
                         return assignedItems[index].currentLoggedInUser ==
                                 currentUser
                             ? ListTile(
+                                leading: Text((index+1).toString()),
                                 title:
                                     Text(item.subcategoryName),
                                 subtitle:

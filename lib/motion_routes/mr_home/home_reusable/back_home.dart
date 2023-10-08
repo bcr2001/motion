@@ -48,6 +48,7 @@ class _ScrollingListBuilderState extends State<ScrollingListBuilder> {
                 radius: const Radius.circular(10.0),
                 trackVisibility: true,
                 child: ListView.builder(
+                    padding: EdgeInsets.zero,
                     controller: _scrollController,
                     itemCount: monthTotalsAndAverage!.length,
                     itemBuilder: (BuildContext context, index) {
@@ -86,24 +87,21 @@ class CardBuilder extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 15.0),
-      height: screenHeight * 0.35,
+      margin: const EdgeInsets.only(bottom: 25.0),
+      height: screenHeight * 0.40,
       child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // time accounted
-              timeAccountedAndOthers,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // time accounted
+            timeAccountedAndOthers,
 
-              // database results
-              SizedBox(
-                height: screenHeight * 0.2,
-                child: itemsToBeDisplayed,
-              )
-            ],
-          ),
+            // database results
+            SizedBox(
+              height: screenHeight * 0.25,
+              child: itemsToBeDisplayed,
+            )
+          ],
         ),
       ),
     );
