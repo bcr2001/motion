@@ -41,7 +41,7 @@ errorSnack(context, {required errorMessage}) {
 class AlertDialogConst extends StatelessWidget {
   final double screenHeight;
   final double screenWidth;
-  final double heightFactor;
+  final double? heightFactor;
   final double? widthFactor;
   final String alertDialogTitle;
   final Widget alertDialogContent;
@@ -64,7 +64,7 @@ class AlertDialogConst extends StatelessWidget {
       title: Text(alertDialogTitle),
       content: Builder(builder: (BuildContext context) {
         return SizedBox(
-          height: screenHeight * heightFactor,
+          height: screenHeight * heightFactor!,
           width: screenWidth * widthFactor!,
           child: alertDialogContent,
         );

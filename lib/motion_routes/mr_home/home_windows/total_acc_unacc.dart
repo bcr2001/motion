@@ -16,8 +16,6 @@ class TotalAccountedAndUnaccounted extends StatelessWidget {
       builder: (context, user, main, child) {
         final currentUser = user.userUid;
 
-        logger.i(currentUser);
-
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

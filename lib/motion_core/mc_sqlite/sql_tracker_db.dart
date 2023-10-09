@@ -309,7 +309,6 @@ class TrackerDatabaseHelper {
       if (resultETMCT.isNotEmpty) {
         final totalETMCT = resultETMCT.first["EntireTotalResult"];
         if (totalETMCT is double) {
-          logger.i("It was a double so something was give");
           return totalETMCT;
         } else {
           logger.e("Something went wrong");

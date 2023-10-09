@@ -5,6 +5,7 @@ class Assigner {
   final String subcategoryName;
   final String mainCategoryName;
   int isActive;
+  int isArchive; // New property for isArchive
   final String dateCreated;
 
   Assigner({
@@ -14,6 +15,7 @@ class Assigner {
     required this.mainCategoryName,
     required this.dateCreated,
     this.isActive = 0,
+    this.isArchive = 0, // Initialize isArchive with a default value
   });
   // (0 == false while 1 == true)
 
@@ -24,6 +26,7 @@ class Assigner {
         subcategoryName: map["subcategoryName"],
         mainCategoryName: map["mainCategoryName"],
         isActive: map["isActive"],
+        isArchive: map["isArchive"], // Read isArchive from the map
         dateCreated: map["dateCreated"]);
   }
 
@@ -33,12 +36,13 @@ class Assigner {
       "subcategoryName": subcategoryName,
       "mainCategoryName": mainCategoryName,
       "isActive": isActive,
+      "isArchive": isArchive, // Include isArchive in the map
       "dateCreated": dateCreated
     };
   }
 
   @override
   String toString() {
-    return 'CategoryAssigner{id: $id,currentLoggedInUser: $currentLoggedInUser ,subcategoryName: $subcategoryName, mainCategoryName: $mainCategoryName, isActive: $isActive,dateCreated: $dateCreated}';
+    return 'Assigner{id: $id, currentLoggedInUser: $currentLoggedInUser, subcategoryName: $subcategoryName, mainCategoryName: $mainCategoryName, isActive: $isActive, isArchive: $isArchive, dateCreated: $dateCreated}';
   }
 }

@@ -3,6 +3,7 @@ import 'package:motion/main.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/assigner_pvd.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_routes/mr_track/track_reusable/front_track.dart';
+import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:provider/provider.dart';
 
 import '../../../motion_core/mc_sql_table/assign_table.dart';
@@ -19,6 +20,7 @@ class TrailingEditButtons extends StatefulWidget {
   final String itemIndexMainCategoryName;
   final String itemIndexCurrentUser;
   final String itemIndexDateCreated;
+  final int itemIndexIsArchive;
   final int itemIndexIsActive;
 
   const TrailingEditButtons(
@@ -28,7 +30,8 @@ class TrailingEditButtons extends StatefulWidget {
       required this.itemIndexMainCategoryName,
       required this.itemIndexCurrentUser,
       required this.itemIndexDateCreated,
-      required this.itemIndexIsActive});
+      required this.itemIndexIsActive,
+      required this.itemIndexIsArchive});
 
   @override
   State<TrailingEditButtons> createState() => _TrailingEditButtonsState();
@@ -48,8 +51,21 @@ class _TrailingEditButtonsState extends State<TrailingEditButtons> {
 
   // icon button builder
   IconButton _buildIcon(
-      {required VoidCallback onPressed, required Icon iconImage}) {
-    return IconButton(iconSize: 20, onPressed: onPressed, icon: iconImage);
+      {required VoidCallback onPressed,
+      required Icon iconImage,
+      bool isArchive = false,
+      int archiveStatus = 0}) {
+    Icon iconSelectedArchive = archiveStatus == 0
+        ? const Icon(Icons.archive_outlined)
+        : const Icon(
+            Icons.archive_outlined,
+            color: AppColor.blueMainColor,
+          );
+
+    return isArchive
+        ? IconButton(
+            iconSize: 20, onPressed: onPressed, icon: iconSelectedArchive)
+        : IconButton(iconSize: 20, onPressed: onPressed, icon: iconImage);
   }
 
   void _showUpdateAlertDialog(context) {
@@ -131,10 +147,50 @@ class _TrailingEditButtonsState extends State<TrailingEditButtons> {
         });
   }
 
+  void _showDeleteAlertDialog(context, {required id}) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialogConst(
+              heightFactor: 0.15,
+              screenHeight: screenHeight,
+              screenWidth: screenWidth * 0.75,
+              alertDialogTitle:
+                  "${AppString.deleteTitle} ${widget.itemIndexSubcategoryName}",
+              alertDialogContent: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // divider
+                  const Divider(),
+
+                  // alert dialog message
+                  Text(
+                      "Are you sure you want to delete ${widget.itemIndexSubcategoryName}?"),
+
+                  // buttons
+                  CancelAddTextButtons(
+                      onPressedFirst: () {
+                        navigationKey.currentState!.pop();
+                      },
+                      onPressedSecond: () {
+                        final deleteItem = context.read<AssignerMainProvider>();
+
+                        deleteItem.deleteAssignedItems(id);
+
+                        navigationKey.currentState!.pop();
+                      },
+                      firstButtonName: AppString.cancelTitle,
+                      secondButtonName: AppString.deleteTitle)
+                ],
+              ));
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final deleteItem = context.read<AssignerMainProvider>();
-
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -143,9 +199,30 @@ class _TrailingEditButtonsState extends State<TrailingEditButtons> {
             onPressed: () => _showUpdateAlertDialog(context),
             iconImage: const Icon(Icons.edit)),
 
+        // archive icon
+
+        _buildIcon(
+            isArchive: true,
+            archiveStatus: widget.itemIndexIsArchive,
+            onPressed: () {
+              final archiveItem = context.read<AssignerMainProvider>();
+
+              archiveItem.updateAssignedItems(Assigner(
+                  id: widget.itemIndexId,
+                  currentLoggedInUser: widget.itemIndexCurrentUser,
+                  subcategoryName: widget.itemIndexSubcategoryName,
+                  mainCategoryName: widget.itemIndexMainCategoryName,
+                  dateCreated: widget.itemIndexDateCreated,
+                  isActive: widget.itemIndexIsActive,
+                  isArchive: widget.itemIndexIsArchive == 0 ? 1 : 0));
+            },
+            iconImage: const Icon(Icons.archive_outlined)),
+
         // delete icon
         _buildIcon(
-            onPressed: () => deleteItem.deleteAssignedItems(widget.itemIndexId),
+            onPressed: () {
+              _showDeleteAlertDialog(context, id: widget.itemIndexId);
+            },
             iconImage: const Icon(Icons.delete_outline))
       ],
     );

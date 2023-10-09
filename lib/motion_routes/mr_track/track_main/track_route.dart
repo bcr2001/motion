@@ -198,6 +198,7 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                           itemBuilder: (BuildContext context, index) {
                             return items[index].currentLoggedInUser == user &&
                                     items[index].mainCategoryName == "Education"
+                                    && items[index].isArchive == 0
                                 ? _listTileBuilder(
                                     activeStatus: items[index].isActive,
                                     tileTitle: items[index].subcategoryName,
@@ -213,6 +214,7 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                           itemBuilder: (BuildContext context, index) {
                             return items[index].currentLoggedInUser == user &&
                                     items[index].mainCategoryName == "Skills"
+                                    && items[index].isArchive == 0
                                 ? _listTileBuilder(
                                     activeStatus: items[index].isActive,
                                     tileTitle: items[index].subcategoryName,
@@ -229,6 +231,7 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                             return items[index].currentLoggedInUser == user &&
                                     items[index].mainCategoryName ==
                                         "Entertainment"
+                                        && items[index].isArchive == 0
                                 ? _listTileBuilder(
                                     activeStatus: items[index].isActive,
                                     tileTitle: items[index].subcategoryName,
@@ -245,6 +248,7 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                             return items[index].currentLoggedInUser == user &&
                                     items[index].mainCategoryName ==
                                         "Personal Growth"
+                                        && items[index].isArchive == 0
                                 ? _listTileBuilder(
                                     activeStatus: items[index].isActive,
                                     tileTitle: items[index].subcategoryName,
@@ -260,6 +264,7 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                           itemBuilder: (BuildContext context, index) {
                             return items[index].currentLoggedInUser == user &&
                                     items[index].mainCategoryName == "Sleep"
+                                    && items[index].isArchive == 0
                                 ? _listTileBuilder(
                                     activeStatus: items[index].isActive,
                                     tileTitle: items[index].subcategoryName,

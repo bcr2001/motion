@@ -29,7 +29,7 @@ class AssignerDatabaseHelper {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, "assigner.db");
 
-    return await openDatabase(path, version: 4, onCreate: _onCreate);
+    return await openDatabase(path, version: 6, onCreate: _onCreate, onUpgrade: _onUpgrade);
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -40,9 +40,18 @@ class AssignerDatabaseHelper {
         subcategoryName TEXT,
         mainCategoryName TEXT,
         isActive INTEGER,
+        isArchive INTEGER DEFAULT 0,
         dateCreated TEXT
       )
     """);
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (newVersion > oldVersion) {
+      // Add the new column 'isArchive' to the table
+      await db.execute(
+          "ALTER TABLE to_assign ADD COLUMN isArchive INTEGER DEFAULT 0");
+    }
   }
 
   // insert data into the to_assign table

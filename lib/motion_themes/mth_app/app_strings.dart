@@ -2,9 +2,11 @@
 class AppString {
   // edit page
   static const String editPageAppBarTitle = "Edit";
+  static const String deleteTitle = "Delete";
   static const String editPageUpdateButtonName = "UPDATE";
   static const String editPageDescription = 
   "Edit the subcategories and their corresponding main categories below:";
+
   
 
   // Navigation bar names

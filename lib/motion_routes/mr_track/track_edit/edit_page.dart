@@ -55,6 +55,7 @@ class TrackEditingPage extends StatelessWidget {
                                   itemIndexSubcategoryName: item.subcategoryName,
                                   itemIndexId: item.id!,
                                   itemIndexMainCategoryName: item.mainCategoryName,
+                                  itemIndexIsArchive: item.isArchive,
                                 )
                             ): const SizedBox.shrink();
                       })
