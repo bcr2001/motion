@@ -105,7 +105,7 @@ final GlobalKey<NavigatorState> navigationKey = GlobalKey<NavigatorState>();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Load CSV data from files
+  // // Load CSV data from files
   // final mainCategoryCsvString =
   //     await loadCsvFromAssets('data/main_category.csv');
   // final subcategoryCsvString = await loadCsvFromAssets('data/subcategory.csv');

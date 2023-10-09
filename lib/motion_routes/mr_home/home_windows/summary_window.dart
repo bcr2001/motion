@@ -9,6 +9,12 @@ class SummaryWindow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CardBuilder(timeAccountedAndOthers:totalMonthTimeSpent() , itemsToBeDisplayed: isSubcatgory ?const SubcategoryMonthTotalsAndAverages(isSubcategory: true): const SubcategoryMonthTotalsAndAverages(isSubcategory: false) );
+    return CardBuilder(
+      itemsToBeDisplayed: isSubcatgory
+          ? const SubcategoryMonthTotalsAndAverages(isSubcategory: true)
+          : const SubcategoryMonthTotalsAndAverages(isSubcategory: false),
+      timeAccountedAndOthers: null,
+      sizedBoxHeight: 0.37,
+    );
   }
 }

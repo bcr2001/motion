@@ -4,6 +4,7 @@ import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
 
 import '../../../motion_themes/mth_app/app_strings.dart';
+import '../home_reusable/front_home.dart';
 
 class MainAndSubView extends StatefulWidget {
   final Widget subcategoryView;
@@ -82,6 +83,9 @@ class _MainAndSubViewState extends State<MainAndSubView> {
                 ),
           ],
         ),
+
+        // total time accounted
+        totalMonthTimeSpent(),
 
         // views that is being toggled between
         isSubcategory ? widget.subcategoryView : widget.mainCategoryView

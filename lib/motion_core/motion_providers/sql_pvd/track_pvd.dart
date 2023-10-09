@@ -28,8 +28,8 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
     double theEntireTotal = await trackDbInstance
         .getEntireTotalMainCategoryTable(currentUser, isUnaccounted);
 
-    logger.i(theEntireTotal);
-    logger.i(currentUser);
+    logger.i("Entire Total: $theEntireTotal");
+
 
     return theEntireTotal;
   }

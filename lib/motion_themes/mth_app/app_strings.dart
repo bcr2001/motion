@@ -17,12 +17,14 @@ class AppString {
   static const String logOutTitle = "Log out";
   static const String cancelTitle = "Cancel";
   static const String settingsTitle = "Settings";
+  static const String tipsTitle = "Tips";
 
   static const String logOutQuestion = "Are you sure you want to log out?";
 
   // popup menu button values
   static const String logOutValue = "logout";
   static const String settingsValue = "setting";
+  static const String tipsValue = "tips";
 
   // settings page
   static const String themeTitle = "Theme";

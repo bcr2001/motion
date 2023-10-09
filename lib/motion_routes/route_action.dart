@@ -4,6 +4,7 @@ import 'package:motion/motion_core/mc_firebase/google_services.dart';
 import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_screens/ms_settings/settings_page.dart';
+import 'package:motion/motion_screens/ms_tips/tips_page.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 
 // app bar action button
@@ -74,13 +75,33 @@ showAlertDialog(BuildContext context) {
 class MainRoutePopUpMenu extends StatelessWidget {
   const MainRoutePopUpMenu({super.key});
 
+  // popup menu item builder
+  PopupMenuItem _popUpItemBuilder(
+      {required String itemName, required String value}) {
+    return PopupMenuItem(
+        value: value,
+        child: Container(
+          width: 100,
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
+          child: Text(itemName),
+        ));
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton(
+        padding: EdgeInsets.zero,
         color: Theme.of(context).popupMenuTheme.color,
-        onSelected: (String value) {
+        onSelected: (dynamic value) {
+          // Change the parameter type to dynamic
           if (value == AppString.logOutValue) {
             showAlertDialog(context);
+          } else if (value == AppString.tipsValue) {
+            Navigator.push(
+              context, 
+              MaterialPageRoute(
+                builder: (BuildContext context)=>const TipsPage())
+            );
           } else {
             Navigator.push(
               context,
@@ -90,15 +111,18 @@ class MainRoutePopUpMenu extends StatelessWidget {
         },
         itemBuilder: (BuildContext context) {
           return [
+            // Tips
+            _popUpItemBuilder(
+                value: AppString.tipsValue, itemName: AppString.tipsTitle),
+
             // settings
-            const PopupMenuItem(
-                value: AppString.settingsValue,
-                child: Text(AppString.settingsTitle)),
+            _popUpItemBuilder(
+                itemName: AppString.settingsTitle,
+                value: AppString.settingsValue),
 
             // logout
-            const PopupMenuItem(
-                value: AppString.logOutValue,
-                child: Text(AppString.logOutTitle))
+            _popUpItemBuilder(
+                itemName: AppString.logOutTitle, value: AppString.logOutValue)
           ];
         });
   }

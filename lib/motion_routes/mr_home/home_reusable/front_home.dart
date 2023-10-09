@@ -261,7 +261,6 @@ class _SubcategoryMonthTotalsAndAveragesState
   Widget build(BuildContext context) {
     return Consumer3<SubcategoryTrackerDatabaseProvider, UserUidProvider,
         FirstAndLastDay>(builder: (context, sub, user, day, child) {
-      logger.i(day.firstDay);
       return widget.isSubcategory
           ? ScrollingListBuilder(
               future: sub.retrieveMonthTotalAndAverage(

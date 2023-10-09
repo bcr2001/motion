@@ -4,7 +4,6 @@ import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:provider/provider.dart';
 import '../ms_routes/about_page.dart';
 import '../ms_reuse/screens_reusable.dart';
-import '../ms_routes/import_page.dart';
 
 // settings page
 class SettingsPage extends StatelessWidget {
@@ -42,20 +41,7 @@ class SettingsPage extends StatelessWidget {
               settingsTitle: AppString.notificationTitle,
               settingsDesciption: AppString.notificationDescription,
             ),
-
-            // import file
-            SettingsOptions(
-              null,
-              settingsTitle: AppString.importDataTitle,
-              settingsDesciption: AppString.importDataDescription,
-              onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (BuildContext context) => const ImportDataRoute()));
-              },
-            ),
-
+            
             // about motion
             SettingsOptions(
               null,

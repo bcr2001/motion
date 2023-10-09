@@ -74,13 +74,14 @@ class _ScrollingListBuilderState extends State<ScrollingListBuilder> {
 // builds the cards that are displayed in the home
 //  page for both tracking and summary windows
 class CardBuilder extends StatelessWidget {
-  final Widget timeAccountedAndOthers;
+  final Widget? timeAccountedAndOthers;
   final Widget itemsToBeDisplayed;
+  final double sizedBoxHeight;
 
   const CardBuilder(
       {super.key,
       required this.timeAccountedAndOthers,
-      required this.itemsToBeDisplayed});
+      required this.itemsToBeDisplayed, this.sizedBoxHeight = 0.25});
 
   @override
   Widget build(BuildContext context) {
@@ -94,11 +95,11 @@ class CardBuilder extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // time accounted
-            timeAccountedAndOthers,
+            timeAccountedAndOthers ?? const SizedBox.shrink(),
 
             // database results
             SizedBox(
-              height: screenHeight * 0.25,
+              height: screenHeight * sizedBoxHeight,
               child: itemsToBeDisplayed,
             )
           ],
