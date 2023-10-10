@@ -1,13 +1,23 @@
 // contains all the main app string
 class AppString {
+  // MOTION CORE
+  // default quote
+  static const String defaultAppQuote =
+      "“Time is what we want most, but what we use worst.” - William Penn";
+  // mc_firebase
+  static const String firebaseUserNotFoundError = "User no found";
+  static const String firebaseIncorrectPassword = "Incorrect password";
+  static const String firebaseSomethingWentWrong = "Something went wrong on our side :(";
+  static const String firebaseEmailInUse = "The email you provided is already in use";
+  static const String firebaseUnableToSignOut = "Unable to sign out";
+  static const String firebaseGoogleSignInError = "Check your internet connection and try again...";
+
   // edit page
   static const String editPageAppBarTitle = "Edit";
   static const String deleteTitle = "Delete";
   static const String editPageUpdateButtonName = "UPDATE";
-  static const String editPageDescription = 
-  "Edit the subcategories and their corresponding main categories below:";
-
-  
+  static const String editPageDescription =
+      "Edit the subcategories and their corresponding main categories below:";
 
   // Navigation bar names
   static const String homeNavigation = "Home";
@@ -35,12 +45,11 @@ class AppString {
   static const String importDataTitle = "Import Data";
   static const String aboutMotionTitle = "About Motion";
 
-  static const String downloadDataDescription = 
-  "Download all your personal data.";
-  static const String notificationDescription = 
-   "Personalize your notification settings.";
-  static const String importDataDescription = 
-  "Bring your data into Motion.";
+  static const String downloadDataDescription =
+      "Download all your personal data.";
+  static const String notificationDescription =
+      "Personalize your notification settings.";
+  static const String importDataDescription = "Bring your data into Motion.";
   static const String aboutMotionDescription =
       "Discover the essence of Motion.";
 
@@ -84,28 +93,16 @@ class AppString {
       "Motion offers a user-friendly and effective solution for tracking and analyzing time, providing tools for seamless data collection, visual representation, and comprehensive reporting.";
   static const String motionLLC = "MOTION LLC. ALL RIGHTS RESERVED";
 
-  // IMPORT DATA PAGE
-  static const String importAssignerTitle = "Import Assigner DB";
-  static const String importTrackerTitle = "Import Tracker DB";
-  static const String learnMoreTitle = "Learn More";
-
-  static const String importAssignerDescription = "To import a database structured in the Motion to_assign table format, please click the button below.";
-  static const String importTrackerDescription = "To import a database structured in the Motion main_category and subcategory table format, please click the button below";
-  static const String learnMoreDescription = "Interested in learning more about the Motion table and the structure of the database? Click here to find out more.";
-
-  static const String importAssignerButtonName = "DB Assign";
-  static const String importTrackerButtonName = "DB Tracker";
-  static const String learnMoreButtonName = "BTS";
-
-
-
   // TRACK (MOTION) PAGE
   static const String educationMainCategory = "Education";
   static const String skillMainCategory = "Skills";
   static const String entertainmentMainCategory = "Entertainment";
   static const String pgMainCategory = "Personal Growth";
   static const String sleepMainCategory = "Sleep";
+
+
   static const String addItem = "Add";
+  static const String unknown = "unknown";
   static const newAlertDialogTitle = "Create a new subcategory";
 
   static const String emptySubcategoryValidatorMessage =
@@ -118,6 +115,7 @@ class AppString {
   static const String trackCancelTextButton = "CANCEL";
   static const String trackAddTextButton = "ADD";
   static const String trackDropDownHintText = "Select a Main Category";
+  static const String trackMainCategoryNotSelectedError = "Please select a value from the drop-down.";
 
   // MANUAL RECORDING ROUTE
   static const String manualAddBlock = "Add time block";
@@ -131,9 +129,10 @@ class AppString {
   static const String summaryTitle = "Summary";
   static const String accountedTitle = "Accounted";
   static const String unAccountedTitle = "Unaccounted";
-  static const String monthlyTimeTrackingChartTitle = "Monthly Time Tracking Chart";
-  static const String zenQuotesDefault = "“Time is what we want most, but what we use worst.” - William Penn";
-
+  static const String monthlyTimeTrackingChartTitle =
+      "Monthly Time Tracking Chart";
+  static const String zenQuotesDefault =
+      "“Time is what we want most, but what we use worst.” - William Penn";
 
   static const String subcategoryViewButtonName = "Subcategory";
   static const String mainCategoryViewButtonName = "Main Category";

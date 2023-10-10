@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:motion/motion_routes/mr_home/home_reusable/back_home.dart';
 import 'package:motion/motion_routes/mr_home/home_reusable/front_home.dart';
 
+
+// Where the summary for the month is displayed
+// button toggles (Subcategory and Category)
+// total time accounted for the current month 
 class SummaryWindow extends StatelessWidget {
   final bool isSubcatgory;
 

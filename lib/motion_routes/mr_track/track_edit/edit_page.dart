@@ -6,6 +6,8 @@ import 'package:provider/provider.dart';
 import '../../../motion_themes/mth_app/app_strings.dart';
 import 'edit_reusable.dart';
 
+// allows user to change the subcategory names, it's main category assignment
+// and whether to archive a subcategory
 class TrackEditingPage extends StatelessWidget {
   const TrackEditingPage({super.key});
 
@@ -25,7 +27,7 @@ class TrackEditingPage extends StatelessWidget {
 
               return Column(
                 children: [
-                  // what the edit page is
+                  // what the edit page is (an explanation)
                   const Text(
                     AppString.editPageDescription,
                     style: TextStyle(fontSize: 15),
@@ -34,31 +36,40 @@ class TrackEditingPage extends StatelessWidget {
                   // all the items in the to_assign table
                   // for a particular user
                   ListView.builder(
-                    physics: const NeverScrollableScrollPhysics(),
+                      // Disable scrolling in the ListView
+                      physics: const NeverScrollableScrollPhysics(),
                       itemCount: assignedItems.length,
                       shrinkWrap: true,
                       itemBuilder: (BuildContext context, index) {
+                        // Get the item at the current index
                         final item = assignedItems[index];
 
+                        // Check if the current user is the owner of the item
                         return assignedItems[index].currentLoggedInUser ==
                                 currentUser
                             ? ListTile(
-                                leading: Text((index+1).toString()),
-                                title:
-                                    Text(item.subcategoryName),
-                                subtitle:
-                                    Text(item.mainCategoryName),
+                                // Display the index (starting from 1) as a leading number
+                                leading: Text((index + 1).toString()),
+                                title: Text(item.subcategoryName),
+                                subtitle: Text(item.mainCategoryName),
                                 trailing: TrailingEditButtons(
+                                  // Pass item details to the TrailingEditButtons widget
                                   itemIndexDateCreated: item.dateCreated,
                                   itemIndexIsActive: item.isActive,
-                                  itemIndexCurrentUser: item.currentLoggedInUser,
-                                  itemIndexSubcategoryName: item.subcategoryName,
+                                  itemIndexCurrentUser:
+                                      item.currentLoggedInUser,
+                                  itemIndexSubcategoryName:
+                                      item.subcategoryName,
                                   itemIndexId: item.id!,
-                                  itemIndexMainCategoryName: item.mainCategoryName,
+                                  itemIndexMainCategoryName:
+                                      item.mainCategoryName,
                                   itemIndexIsArchive: item.isArchive,
-                                )
-                            ): const SizedBox.shrink();
+                                ),
+                              )
+                            // If the current user is not the owner, hide the item
+                            : const SizedBox.shrink();
                       })
+
                 ],
               );
             },

@@ -33,13 +33,14 @@ class ManualTimeRecordingRoute extends StatefulWidget {
 class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
   final _timeFormKey = GlobalKey<FormState>();
 
-  // hours: minutes: seconds text editing contollers
+  // Text editing controllers for hours, minutes, and seconds input fields
   TextEditingController hourController = TextEditingController();
   TextEditingController minuteController = TextEditingController();
   TextEditingController secondController = TextEditingController();
 
   @override
   void dispose() {
+    // Dispose of the text editing controllers to prevent memory leaks
     hourController.dispose();
     minuteController.dispose();
     secondController.dispose();

@@ -34,7 +34,10 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
 
   @override
   void dispose() {
+    // Dispose of the subcategoryController to release any resources.
     subcategoryController.dispose();
+
+    // Call the dispose method of the superclass to perform any additional cleanup.
     super.dispose();
   }
 
@@ -44,34 +47,40 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
 
     await updateItem.updateAssignedItems(
       Assigner(
-        id: item.id,
-        currentLoggedInUser: item.currentLoggedInUser,
-        subcategoryName: item.subcategoryName,
-        mainCategoryName: item.mainCategoryName,
-        dateCreated: item.dateCreated,
-        isActive: item.isActive == 0 ? 1 : 0,
-      ),
+          id: item.id,
+          currentLoggedInUser: item.currentLoggedInUser,
+          subcategoryName: item.subcategoryName,
+          mainCategoryName: item.mainCategoryName,
+          dateCreated: item.dateCreated,
+          isActive: item.isActive == 0 ? 1 : 0,
+          isArchive: item.isArchive),
     );
   }
 
   // list tile
-  // Usage of the _handleItemPressed function
   ListTile _listTileBuilder({
-    required String tileTitle,
-    required int activeStatus,
-    required Assigner item, // Pass the Assigner item here
+    required String tileTitle, // The title text for the ListTile
+    required int activeStatus, // The active status, typically 0 or 1
+    required Assigner item, // The Assigner item associated with the ListTile
   }) {
+    // Determine the icon based on the activeStatus
     Icon iconSelected = activeStatus == 0
-        ? const Icon(Icons.check_box_outline_blank_rounded)
-        : const Icon(Icons.check_box_outlined, color: AppColor.blueMainColor,);
+        ? const Icon(Icons.check_box_outline_blank_rounded) // Inactive icon
+        : const Icon(
+            Icons.check_box_outlined,
+            color: AppColor.blueMainColor, // Active icon with custom color
+          );
 
+    // Create a ListTile with the specified title, and active status icon
     return ListTile(
-      title: Text(tileTitle),
+      title: Text(tileTitle), // Display the provided title text
       trailing: IconButton(
-          onPressed: () async {
-            await _handleItemPressed(context, item);
-          },
-          icon: iconSelected),
+        onPressed: () async {
+          // Handle item press, potentially passing the associated item
+          await _handleItemPressed(context, item);
+        },
+        icon: iconSelected, // Display the determined icon
+      ),
     );
   }
 
@@ -128,10 +137,10 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                     onPressedSecond: () {
                       if (_formKey.currentState!.validate()) {
                         if (mainCategoryProvider.selectedValue == null) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
+                          ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text(
-                                  "Please select a value from the drop-down."),
+                                  AppString.trackMainCategoryNotSelectedError),
                             ),
                           );
                         } else {
@@ -140,7 +149,7 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                                   listen: false)
                               .insertIntoAssignerDb(Assigner(
                             currentLoggedInUser: userUidProvider.userUid == null
-                                ? "unknown"
+                                ? AppString.unknown
                                 : userUidProvider.userUid!,
                             subcategoryName: subcategoryController.text,
                             mainCategoryName:
@@ -189,9 +198,9 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
 
               return ListView(
                 children: [
-                  // user uid 
+                  // user uid
                   Text(user!),
-                  
+
                   // education category
                   CardConstructor(
                       cardTitle: AppString.educationMainCategory,
@@ -199,8 +208,9 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                           itemCount: items.length,
                           itemBuilder: (BuildContext context, index) {
                             return items[index].currentLoggedInUser == user &&
-                                    items[index].mainCategoryName == "Education"
-                                    && items[index].isArchive == 0
+                                    items[index].mainCategoryName ==
+                                        AppString.educationMainCategory &&
+                                    items[index].isArchive == 0
                                 ? _listTileBuilder(
                                     activeStatus: items[index].isActive,
                                     tileTitle: items[index].subcategoryName,
@@ -215,8 +225,8 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                           itemCount: items.length,
                           itemBuilder: (BuildContext context, index) {
                             return items[index].currentLoggedInUser == user &&
-                                    items[index].mainCategoryName == "Skills"
-                                    && items[index].isArchive == 0
+                                    items[index].mainCategoryName == AppString.skillMainCategory &&
+                                    items[index].isArchive == 0
                                 ? _listTileBuilder(
                                     activeStatus: items[index].isActive,
                                     tileTitle: items[index].subcategoryName,
@@ -232,8 +242,8 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                           itemBuilder: (BuildContext context, index) {
                             return items[index].currentLoggedInUser == user &&
                                     items[index].mainCategoryName ==
-                                        "Entertainment"
-                                        && items[index].isArchive == 0
+                                        AppString.entertainmentMainCategory &&
+                                    items[index].isArchive == 0
                                 ? _listTileBuilder(
                                     activeStatus: items[index].isActive,
                                     tileTitle: items[index].subcategoryName,
@@ -249,8 +259,8 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                           itemBuilder: (BuildContext context, index) {
                             return items[index].currentLoggedInUser == user &&
                                     items[index].mainCategoryName ==
-                                        "Personal Growth"
-                                        && items[index].isArchive == 0
+                                        AppString.pgMainCategory &&
+                                    items[index].isArchive == 0
                                 ? _listTileBuilder(
                                     activeStatus: items[index].isActive,
                                     tileTitle: items[index].subcategoryName,
@@ -265,8 +275,8 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                           itemCount: items.length,
                           itemBuilder: (BuildContext context, index) {
                             return items[index].currentLoggedInUser == user &&
-                                    items[index].mainCategoryName == "Sleep"
-                                    && items[index].isArchive == 0
+                                    items[index].mainCategoryName == AppString.sleepMainCategory &&
+                                    items[index].isArchive == 0
                                 ? _listTileBuilder(
                                     activeStatus: items[index].isActive,
                                     tileTitle: items[index].subcategoryName,

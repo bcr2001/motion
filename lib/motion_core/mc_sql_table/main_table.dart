@@ -1,20 +1,20 @@
-// structure of the main_category table
+// Structure of the 'main_category' table
 class MainCategory {
-  final String date;
-  double education;
-  double skills;
-  double entertainment;
-  double personalGrowth;
-  double sleep;
-  String currentLoggedInUser;
+  final String date; // Date associated with the record
+  double education; // Amount of time spent on education
+  double skills; // Amount of time spent on skills development
+  double entertainment; // Amount of time spent on entertainment
+  double personalGrowth; // Amount of time spent on personal growth
+  double sleep; // Amount of time spent on sleep
+  String currentLoggedInUser; // User associated with the record
 
   MainCategory({
     required this.date,
-    this.education = 0.0,
-    this.skills = 0.0,
-    this.entertainment = 0.0,
-    this.personalGrowth = 0.0,
-    this.sleep = 0.0,
+    this.education = 0.0, // Default value for education
+    this.skills = 0.0, // Default value for skills
+    this.entertainment = 0.0, // Default value for entertainment
+    this.personalGrowth = 0.0, // Default value for personal growth
+    this.sleep = 0.0, // Default value for sleep
     required this.currentLoggedInUser,
   });
 

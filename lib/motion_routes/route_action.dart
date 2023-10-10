@@ -54,16 +54,25 @@ showAlertDialog(BuildContext context) {
                   AppString.logOutQuestion,
                 ),
 
-                // options (cancel and log out)
+                // Custom widget for displaying two buttons: cancel and log out
                 CancelAddTextButtons(
-                    onPressedFirst: () => Navigator.of(context).pop(),
-                    onPressedSecond: () {
-                      Navigator.pop(context);
-                      AuthServices.signOutUser(context);
-                      GoogleAuthService.signOutGoogle();
-                    },
-                    firstButtonName: AppString.cancelTitle,
-                    secondButtonName: AppString.logOutTitle),
+                  // Callback function when the "Cancel" button is pressed
+                  onPressedFirst: () => Navigator.of(context).pop(),
+
+                  // Callback function when the "Log Out" button is pressed
+                  onPressedSecond: () {
+                    Navigator.pop(context); // Close the dialog or screen
+                    AuthServices.signOutUser(context); // Sign out the user
+                    GoogleAuthService
+                        .signOutGoogle(); // Sign out from Google (assuming it's a Google sign-in)
+                  },
+
+                  // Text displayed on the "Cancel" button
+                  firstButtonName: AppString.cancelTitle,
+
+                  // Text displayed on the "Log Out" button
+                  secondButtonName: AppString.logOutTitle,
+                )
               ],
             ),
           ),
@@ -98,10 +107,9 @@ class MainRoutePopUpMenu extends StatelessWidget {
             showAlertDialog(context);
           } else if (value == AppString.tipsValue) {
             Navigator.push(
-              context, 
-              MaterialPageRoute(
-                builder: (BuildContext context)=>const TipsPage())
-            );
+                context,
+                MaterialPageRoute(
+                    builder: (BuildContext context) => const TipsPage()));
           } else {
             Navigator.push(
               context,

@@ -5,7 +5,6 @@ import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_routes/mr_track/track_reusable/front_track.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:provider/provider.dart';
-
 import '../../../motion_core/mc_sql_table/assign_table.dart';
 import '../../../motion_core/motion_providers/dropDown_pvd/drop_down_pvd.dart';
 import '../../../motion_reusable/db_re/sub_ui.dart';
@@ -69,124 +68,138 @@ class _TrailingEditButtonsState extends State<TrailingEditButtons> {
   }
 
   void _showUpdateAlertDialog(context) {
+    // Get screen dimensions
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
+    // Show the update alert dialog
     showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialogConst(
-              screenHeight: screenHeight,
-              screenWidth: screenWidth,
-              alertDialogTitle: "Update ${widget.itemIndexSubcategoryName}",
-              alertDialogContent: Form(
-                key: _editFormKey,
-                child: Consumer<DropDownTrackProvider>(
-                    builder: (context, maincat, child) {
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // divider
-                      const Divider(),
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialogConst(
+          screenHeight: screenHeight,
+          screenWidth: screenWidth,
+          alertDialogTitle:
+              "Update ${widget.itemIndexSubcategoryName}", // Set the title of the dialog
+          alertDialogContent: Form(
+            key: _editFormKey, // Form with a GlobalKey for validation
+            child: Consumer<DropDownTrackProvider>(
+              builder: (context, maincat, child) {
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Divider
+                    const Divider(),
 
-                      // update drop down
-                      MyDropdownButton(
-                        isUpdate: true,
-                        mainCategoryName: widget.itemIndexMainCategoryName,
+                    // Update drop-down
+                    MyDropdownButton(
+                      isUpdate: true,
+                      mainCategoryName: widget.itemIndexMainCategoryName,
+                    ),
+
+                    // Subcategory name text field
+                    Padding(
+                      padding: const EdgeInsets.only(left: 5.0, right: 5.0),
+                      child: TextFormFieldBuilder(
+                        fieldTextEditingController: _editTextController,
+                        fieldHintText: widget.itemIndexSubcategoryName,
+                        fieldValidator: FormValidator.subcategoryValidator,
                       ),
+                    ),
 
-                      // subcategory name text field
-                      Padding(
-                        padding: const EdgeInsets.only(left: 5.0, right: 5.0),
-                        child: TextFormFieldBuilder(
-                            fieldTextEditingController: _editTextController,
-                            fieldHintText: widget.itemIndexSubcategoryName,
-                            fieldValidator: FormValidator.subcategoryValidator),
-                      ),
+                    // Cancel and update buttons
+                    CancelAddTextButtons(
+                      firstButtonName: AppString.trackCancelTextButton,
+                      secondButtonName: AppString.editPageUpdateButtonName,
+                      onPressedFirst: () {
+                        // Close the dialog and reset selected value
+                        navigationKey.currentState!.pop();
+                        maincat.changeSelectedValue(null);
+                      },
+                      onPressedSecond: () {
+                        var updateItem = context.read<AssignerMainProvider>();
 
-                      // cancel and update buttons
-                      CancelAddTextButtons(
-                        firstButtonName: AppString.trackCancelTextButton,
-                        secondButtonName: AppString.editPageUpdateButtonName,
-                        onPressedFirst: () {
-                          navigationKey.currentState!.pop();
+                        if (_editFormKey.currentState!.validate()) {
+                          if (maincat.selectedValue == null) {
+                            // Show a snackbar if no value is selected
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                    "Please select a value from the drop-down."),
+                              ),
+                            );
+                          } else {
+                            // Update the assigned item and close the dialog
+                            updateItem.updateAssignedItems(Assigner(
+                              id: widget.itemIndexId,
+                              currentLoggedInUser: widget.itemIndexCurrentUser,
+                              subcategoryName: _editTextController.text,
+                              mainCategoryName: maincat.selectedValue!,
+                              dateCreated: widget.itemIndexDateCreated,
+                              isActive: widget.itemIndexIsActive,
+                            ));
 
-                          maincat.changeSelectedValue(null);
-                        },
-                        onPressedSecond: () {
-                          var updateItem = context.read<AssignerMainProvider>();
-
-                          if (_editFormKey.currentState!.validate()) {
-                            if (maincat.selectedValue == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                      "Please select a value from the drop-down."),
-                                ),
-                              );
-                            } else {
-                              updateItem.updateAssignedItems(Assigner(
-                                  id: widget.itemIndexId,
-                                  currentLoggedInUser:
-                                      widget.itemIndexCurrentUser,
-                                  subcategoryName: _editTextController.text,
-                                  mainCategoryName: maincat.selectedValue!,
-                                  dateCreated: widget.itemIndexDateCreated,
-                                  isActive: widget.itemIndexIsActive));
-
-                              navigationKey.currentState!.pop();
-                              maincat.changeSelectedValue(null);
-                            }
+                            navigationKey.currentState!.pop();
+                            maincat.changeSelectedValue(null);
                           }
-                        },
-                      )
-                    ],
-                  );
-                }),
-              ));
-        });
+                        }
+                      },
+                    )
+                  ],
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
   }
 
   void _showDeleteAlertDialog(context, {required id}) {
+    // Get screen dimensions
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
+    // Show the delete alert dialog
     showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialogConst(
-              heightFactor: 0.15,
-              screenHeight: screenHeight,
-              screenWidth: screenWidth * 0.75,
-              alertDialogTitle:
-                  "${AppString.deleteTitle} ${widget.itemIndexSubcategoryName}",
-              alertDialogContent: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // divider
-                  const Divider(),
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialogConst(
+          heightFactor: 0.15,
+          screenHeight: screenHeight,
+          screenWidth: screenWidth * 0.75,
+          alertDialogTitle:
+              "${AppString.deleteTitle} ${widget.itemIndexSubcategoryName}", // Set the title of the dialog
+          alertDialogContent: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Divider
+              const Divider(),
 
-                  // alert dialog message
-                  Text(
-                      "Are you sure you want to delete ${widget.itemIndexSubcategoryName}?"),
+              // Alert dialog message
+              Text(
+                  "Are you sure you want to delete ${widget.itemIndexSubcategoryName}?"),
 
-                  // buttons
-                  CancelAddTextButtons(
-                      onPressedFirst: () {
-                        navigationKey.currentState!.pop();
-                      },
-                      onPressedSecond: () {
-                        final deleteItem = context.read<AssignerMainProvider>();
-
-                        deleteItem.deleteAssignedItems(id);
-
-                        navigationKey.currentState!.pop();
-                      },
-                      firstButtonName: AppString.cancelTitle,
-                      secondButtonName: AppString.deleteTitle)
-                ],
-              ));
-        });
+              // Buttons
+              CancelAddTextButtons(
+                onPressedFirst: () {
+                  // Close the dialog
+                  navigationKey.currentState!.pop();
+                },
+                onPressedSecond: () {
+                  // Delete the assigned item and close the dialog
+                  final deleteItem = context.read<AssignerMainProvider>();
+                  deleteItem.deleteAssignedItems(id);
+                  navigationKey.currentState!.pop();
+                },
+                firstButtonName: AppString.cancelTitle,
+                secondButtonName: AppString.deleteTitle,
+              )
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override

@@ -6,7 +6,6 @@ import 'package:motion/motion_routes/mr_track/track_main/track_route.dart';
 import 'package:motion/motion_routes/stats_route.dart';
 import 'package:provider/provider.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
-
 import '../motion_themes/mth_app/app_strings.dart';
 
 // Scaffold and Bottom App Bar routes
@@ -27,17 +26,17 @@ class _MotionHome extends State<MainMotionHome> {
     MotionStatesRoute(),
   ];
 
+  // Helper function to build Google Nav Bar buttons
   GButton gButtonBuilder({required IconData gIcon, required String gText}) {
     return GButton(
-      icon: gIcon,
-      text: gText,
-      textStyle: const  TextStyle(fontSize: 15, fontWeight: FontWeight.w600) 
-);
+        icon: gIcon,
+        text: gText,
+        textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600));
   }
 
   // google nav bar button
   static const _navButtons = <GButton>[
-    // home button      
+    // home button
     GButton(
       icon: Icons.home_filled,
       text: AppString.homeNavigation,
@@ -74,6 +73,7 @@ class _MotionHome extends State<MainMotionHome> {
                 elevation: 0,
                 shape: const CircleBorder(),
                 child:
+                    // different svg images depending on the theme mode (dark/light)
                     themeValue.currentThemeMode == ThemeModeSettings.lightMode
                         ? SvgPicture.asset(
                             "assets/images/motion_icons/motion_logo_white.svg",
@@ -86,6 +86,8 @@ class _MotionHome extends State<MainMotionHome> {
                             width: 30,
                           ),
                 onPressed: () {
+                  // navigates to the Track route where users can create and
+                  // assign subcategories to their respective main categories
                   Navigator.push(
                       context,
                       MaterialPageRoute(

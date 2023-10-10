@@ -11,16 +11,15 @@ class CurrentDateProvider extends ChangeNotifier {
 
   Timer? _timer;
 
-  // clock that fires after a day to provoke
-  //  the get currentDate function to retrieve the current date
+  // Constructor that initializes the timer to update the current date daily.
   CurrentDateProvider() {
     _timer = Timer.periodic(const Duration(days: 1), (Timer t) {
       getCurrentDate();
     });
   }
 
-  // gets the new date after a day and resets the
-  //  date stored by the _currentDate variable
+  // Method to get the new date after a day and reset the
+  // date stored by the _currentDate variable.
   void getCurrentDate() {
     final String thisMoment = DateFormat("yyyy-MM-dd").format(DateTime.now());
 
@@ -30,7 +29,7 @@ class CurrentDateProvider extends ChangeNotifier {
     }
   }
 
-  
+  // Method to format the date with the day of the week and suffix.
   String getFormattedDate() {
     final List<String> dateParts = _currentDate.split('-');
     if (dateParts.length != 3) {

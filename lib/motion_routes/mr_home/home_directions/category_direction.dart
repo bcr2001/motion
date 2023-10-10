@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_pvd.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
-
 import '../../../motion_themes/mth_app/app_strings.dart';
 import '../home_reusable/front_home.dart';
 
+// For the Summary Window where users can switch between subcategory
+// or main category summaries for the current month
 class MainAndSubView extends StatefulWidget {
   final Widget subcategoryView;
   final Widget mainCategoryView;
@@ -62,7 +63,7 @@ class _MainAndSubViewState extends State<MainAndSubView> {
       children: [
         Row(
           children: [
-            // subcategory view button
+            // subcategory view button (subcategory summary)
             _viewButton(
                 buttonName: AppString.subcategoryViewButtonName,
                 onPressed: () {
@@ -72,7 +73,7 @@ class _MainAndSubViewState extends State<MainAndSubView> {
                 },
                 isActive: isSubcategory),
 
-            // main category view button
+            // main category view button (main category summary)
             _viewButton(
                 buttonName: AppString.mainCategoryViewButtonName,
                 onPressed: () {
@@ -84,10 +85,11 @@ class _MainAndSubViewState extends State<MainAndSubView> {
           ],
         ),
 
-        // total time accounted
+        // total time accounted for the entire current month
         totalMonthTimeSpent(),
 
-        // views that is being toggled between
+        // views that is being toggled between 
+        // (subcategory summary or main category summary)
         isSubcategory ? widget.subcategoryView : widget.mainCategoryView
       ],
     );

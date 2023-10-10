@@ -2,10 +2,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-// a class that gets the current month and 
-// does formatting on said month
+// A class that gets the current month and performs formatting on the month.
 class CurrentMonthProvider extends ChangeNotifier {
-  // number rep of the month
+  // Number representation of the month.
   int _currentMonthNumber = DateTime.now().month;
 
   int get currentMonthNumber => _currentMonthNumber;
@@ -17,6 +16,7 @@ class CurrentMonthProvider extends ChangeNotifier {
 
   Timer? _timer;
 
+   // Constructor that initializes the timer to update the current month daily.
   CurrentMonthProvider() {
     _timer = Timer.periodic(const Duration(days: 1), (Timer t) {
       _getCurrentMonth();
@@ -24,6 +24,7 @@ class CurrentMonthProvider extends ChangeNotifier {
     });
   }
 
+  // Method to get the current month name and update it if it changes.
   void _getCurrentMonth() {
     final String thisMoment = DateFormat.MMMM().format(DateTime.now());
 
@@ -33,6 +34,7 @@ class CurrentMonthProvider extends ChangeNotifier {
     }
   }
 
+  // Method to get the current month number and update it if it changes.
   void _getCurrentMonthNumber() {
     final int thisMoment = DateTime.now().month;
 
@@ -43,7 +45,7 @@ class CurrentMonthProvider extends ChangeNotifier {
 
   @override
   void dispose() {
-    _timer?.cancel();
+    _timer?.cancel(); // Cancel the timer when disposing of the provider.
     super.dispose();
   }
 }

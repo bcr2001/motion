@@ -80,7 +80,7 @@ class TrackEditPopUpMenu extends StatelessWidget {
                 builder: (BuildContext context) => const TrackEditingPage()));
       },
       itemBuilder: (context) {
-        return [const PopupMenuItem(value: "edit", child: Text("Edit"))];
+        return [const PopupMenuItem(value: "edit", child: Text(AppString.editPageAppBarTitle))];
       },
     );
   }

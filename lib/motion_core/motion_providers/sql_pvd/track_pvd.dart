@@ -3,8 +3,6 @@ import 'package:motion/motion_core/mc_sql_table/main_table.dart';
 import 'package:motion/motion_core/mc_sql_table/sub_table.dart';
 import 'package:motion/motion_core/mc_sqlite/sql_tracker_db.dart';
 
-import '../../../motion_reusable/general_reuseable.dart';
-
 final TrackerDatabaseHelper trackDbInstance = TrackerDatabaseHelper();
 
 //handles database operations for the MAIN CATEGORY TABLE
@@ -23,6 +21,7 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Retrieve the entire total from the main category table.
   Future<double> retrieveEntireTotalMainCategoryTable(
       String currentUser, bool isUnaccounted) async {
     double theEntireTotal = await trackDbInstance

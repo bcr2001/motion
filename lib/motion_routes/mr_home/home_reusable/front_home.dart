@@ -10,8 +10,6 @@ import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 import 'package:motion/motion_routes/mr_home/home_reusable/back_home.dart';
 import 'package:motion/motion_screens/ms_routes/manual_tracking.dart';
 import 'package:provider/provider.dart';
-
-import '../../../motion_reusable/general_reuseable.dart';
 import '../../../motion_themes/mth_styling/motion_text_styling.dart';
 
 // total all time accounted for and unaccounted for
@@ -36,14 +34,10 @@ Widget entireTimeAccountedAndUnaccounted(
                 // results for the sqlite query
                 final tableResult = snapshot.data;
 
-                logger.i("Table Results: $tableResult");
-
                 // convert the minutes to hours
                 final accountedConvertedResults = convertMinutesToHoursOnly(
                     tableResult!,
                     isFirstSection: true);
-
-                logger.i("Converted Results: $accountedConvertedResults");
 
                 // the converted result displayed in a Text widget
                 return Text(

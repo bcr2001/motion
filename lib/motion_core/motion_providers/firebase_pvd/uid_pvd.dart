@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// when a user logs in or signs up
-// this class gets and saves the useruid
+// A class responsible for managing the user's UID and saving it to SharedPreferences.
 class UserUidProvider extends ChangeNotifier {
   SharedPreferences? _pref;
 
@@ -13,6 +12,7 @@ class UserUidProvider extends ChangeNotifier {
     initializeUidSharedPreferences();
   }
 
+  // Initialize SharedPreferences for UID storage.
   Future<void> initializeUidSharedPreferences() async {
     _pref = await SharedPreferences.getInstance();
     _loadSavedUid();
@@ -22,6 +22,7 @@ class UserUidProvider extends ChangeNotifier {
 
   String? get userUid => _userUid;
 
+  // Set the user's UID, save it to SharedPreferences, and notify listeners.
   void setUserUid(String uid) {
     _userUid = uid;
 
@@ -30,6 +31,7 @@ class UserUidProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Load the saved UID from SharedPreferences.
   Future<void> _loadSavedUid() async {
     final savedUid = _pref?.getString(uidKey);
     if (savedUid != null) {

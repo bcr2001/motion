@@ -1,25 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 
-// setting options list tile constructors
+// Custom widget for setting options list tiles
 class SettingsOptions extends StatelessWidget {
-  final String settingsTitle;
-  final String settingsDesciption;
-  final VoidCallback? onTap;
-  final IconButton? trailing;
+  final String settingsTitle; // Title of the setting option
+  final String settingsDesciption; // Description or additional info
+  final VoidCallback? onTap; // Callback function when the tile is tapped
+  final IconButton? trailing; // Widget to display at the end of the tile
 
-  const SettingsOptions(this.trailing,
-      {super.key,
-      required this.settingsTitle,
-      required this.settingsDesciption,
-      this.onTap});
+  // Constructor for the SettingsOptions widget
+  const SettingsOptions(
+    this.trailing, {
+    super.key,
+    required this.settingsTitle,
+    required this.settingsDesciption,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: ListTile(
-        onTap: onTap,
+        onTap: onTap, // Assign the onTap callback when the tile is tapped
         title: Text(
           settingsTitle,
           style: Theme.of(context).textTheme.headlineSmall,
@@ -28,7 +31,7 @@ class SettingsOptions extends StatelessWidget {
           settingsDesciption,
           style: AppTextStyle.settingSubtitleStyling,
         ),
-        trailing: trailing,
+        trailing: trailing, // Assign the trailing widget
       ),
     );
   }

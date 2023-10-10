@@ -1,12 +1,13 @@
-// structure of the subcategory table 
+// Structure of the 'subcategories' table
 class Subcategories {
-  int? id;
-  final String date;
-  final String mainCategoryName;
-  final String subcategoryName;
-  final String timeRecorded;
-  double timeSpent;
-  final String currentLoggedInUser;
+  int? id; // Unique identifier for the subcategory
+  final String date; // Date associated with the record
+  final String mainCategoryName; // Name of the main category
+  final String subcategoryName; // Name of the subcategory
+  final String timeRecorded; // Timestamp of when the time was recorded
+  double timeSpent; // Amount of time spent in the subcategory
+  final String currentLoggedInUser; // User associated with the record
+
 
   Subcategories({
     this.id,
