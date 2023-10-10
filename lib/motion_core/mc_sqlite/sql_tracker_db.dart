@@ -155,6 +155,17 @@ class TrackerDatabaseHelper {
     }
   }
 
+  // Future<void> updateCurrentUser() async {
+  //   final db = await database;
+
+  //   await db.rawQuery(
+  //     '''
+  //     UPDATE main_category
+  //     SET currentLoggedInUser = 'hhANBj74wiclvfuDLGfuDlFZgJ62'
+  //     '''
+  //   );
+  // }
+
 // CRUD operations for Subcategories
 
   // insert new rows into the subcategory category table

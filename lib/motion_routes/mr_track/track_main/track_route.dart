@@ -189,6 +189,8 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
 
               return ListView(
                 children: [
+                  // user uid 
+                  Text(user!),
                   
                   // education category
                   CardConstructor(

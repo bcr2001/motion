@@ -36,10 +36,14 @@ Widget entireTimeAccountedAndUnaccounted(
                 // results for the sqlite query
                 final tableResult = snapshot.data;
 
+                logger.i("Table Results: $tableResult");
+
                 // convert the minutes to hours
                 final accountedConvertedResults = convertMinutesToHoursOnly(
                     tableResult!,
                     isFirstSection: true);
+
+                logger.i("Converted Results: $accountedConvertedResults");
 
                 // the converted result displayed in a Text widget
                 return Text(
@@ -185,8 +189,9 @@ class _SubcategoryAndCurrentDayTotalsState
               itemCount: activeItems.length,
               itemBuilder: (BuildContext context, index) {
                 return (activeItems[index].isActive == 1 &&
-                        activeItems[index].currentLoggedInUser == user.userUid
-                        && activeItems[index].isArchive == 0)
+                        activeItems[index].currentLoggedInUser ==
+                            user.userUid &&
+                        activeItems[index].isArchive == 0)
                     ? FutureBuilder<double>(
                         future: sub.retrieveTotalTimeSpentSubSpecific(
                             date.currentDate,
@@ -203,11 +208,11 @@ class _SubcategoryAndCurrentDayTotalsState
                           } else {
                             // Data is available, use it to build the ListTile
                             final totalTimeSpentSub = snapshot.data ?? 0.0;
-        
+
                             // convert total
                             final convertedTotalTimeSpent =
                                 convertMinutesToTime(totalTimeSpentSub);
-        
+
                             return ListTile(
                               title: Text(activeItems[index].subcategoryName),
                               subtitle:
