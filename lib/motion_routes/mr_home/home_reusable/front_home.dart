@@ -185,7 +185,8 @@ class _SubcategoryAndCurrentDayTotalsState
               itemCount: activeItems.length,
               itemBuilder: (BuildContext context, index) {
                 return (activeItems[index].isActive == 1 &&
-                        activeItems[index].currentLoggedInUser == user.userUid)
+                        activeItems[index].currentLoggedInUser == user.userUid
+                        && activeItems[index].isArchive == 0)
                     ? FutureBuilder<double>(
                         future: sub.retrieveTotalTimeSpentSubSpecific(
                             date.currentDate,

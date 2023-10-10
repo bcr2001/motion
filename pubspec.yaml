@@ -54,7 +54,6 @@ dependencies:
   shimmer: ^3.0.0
   fl_chart: ^0.62.0
   google_sign_in: ^6.1.5
-  file_picker: ^5.3.1
   path_provider: ^2.1.1
   csv: ^5.0.2
 

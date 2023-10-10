@@ -2,6 +2,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:motion/motion_core/mc_api/api_requests.dart';
 import 'package:flutter/material.dart';
 
+import '../../../motion_reusable/general_reuseable.dart';
 import '../../../motion_themes/mth_app/app_strings.dart';
 
 // this class handles fetching and
@@ -43,7 +44,9 @@ class ZenQuoteProvider extends ChangeNotifier {
       // notifty listeners of changes
       notifyListeners();
     } catch (e) {
-      _todaysQuote = "Error $e";
+      logger.e("Error: $e");
+      _todaysQuote =
+          "“Time is what we want most, but what we use worst.” - William Penn";
       notifyListeners();
     }
   }
