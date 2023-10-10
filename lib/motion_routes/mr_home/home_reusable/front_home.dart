@@ -10,6 +10,7 @@ import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 import 'package:motion/motion_routes/mr_home/home_reusable/back_home.dart';
 import 'package:motion/motion_screens/ms_routes/manual_tracking.dart';
 import 'package:provider/provider.dart';
+import '../../../motion_reusable/general_reuseable.dart';
 import '../../../motion_themes/mth_styling/motion_text_styling.dart';
 
 // total all time accounted for and unaccounted for
@@ -35,15 +36,34 @@ Widget entireTimeAccountedAndUnaccounted(
                 final tableResult = snapshot.data;
 
                 // convert the minutes to hours
-                final accountedConvertedResults = convertMinutesToHoursOnly(
-                    tableResult!,
-                    isFirstSection: true);
+                final accountedConvertedResultsHours =
+                    convertMinutesToHoursOnly(tableResult!,
+                        isFirstSection: true);
 
-                // the converted result displayed in a Text widget
-                return Text(
-                  accountedConvertedResults,
-                  style: AppTextStyle.accountAndUnaccountTextStyle(),
-                  textAlign: TextAlign.center,
+                // convert hours to days
+                final accountedConvertedResultsDays =
+                    convertHoursToDays(tableResult);
+
+                logger.i(accountedConvertedResultsDays);
+
+                // display both the total hours and number of days
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    // number of days
+                    Text(
+                      accountedConvertedResultsDays,
+                      textAlign: TextAlign.right,
+                      style: AppTextStyle.resultTitleStyle(isUnaccounted),
+                    ),
+
+                    // total number of hours
+                    Text(
+                      accountedConvertedResultsHours,
+                      style: AppTextStyle.accountAndUnaccountTextStyle(),
+                      textAlign: TextAlign.center,
+                    )
+                  ],
                 );
               }
             }),

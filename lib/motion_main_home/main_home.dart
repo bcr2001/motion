@@ -105,7 +105,7 @@ class _MotionHome extends State<MainMotionHome> {
             haptic: true,
             curve: Curves.linear,
             padding: const EdgeInsets.all(15),
-            duration: const Duration(milliseconds: 700),
+            duration: const Duration(milliseconds: 500),
             gap: 10.0,
             tabMargin: const EdgeInsets.all(5),
             selectedIndex: currentIndex,
