@@ -18,6 +18,8 @@ class AppString {
   static const String editPageUpdateButtonName = "UPDATE";
   static const String editPageDescription =
       "Edit the subcategories and their corresponding main categories below:";
+  static const String editPageUpdateError =
+      "Please select a value from the drop-down.";
 
   // Navigation bar names
   static const String homeNavigation = "Home";
@@ -106,7 +108,7 @@ class AppString {
   static const newAlertDialogTitle = "Create a new subcategory";
 
   static const String emptySubcategoryValidatorMessage =
-      "cannot create an empty subcategory";
+      "empty subcategory";
   static const String subcategoryContainsNumberMessage =
       "a subcategory name cannot contain numbers";
   static const String subcategoryContainsSpacesMessage =

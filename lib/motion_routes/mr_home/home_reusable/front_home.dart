@@ -11,7 +11,6 @@ import 'package:motion/motion_routes/mr_home/home_reusable/back_home.dart';
 import 'package:motion/motion_screens/ms_routes/manual_tracking.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:provider/provider.dart';
-import '../../../motion_reusable/general_reuseable.dart';
 import '../../../motion_themes/mth_styling/motion_text_styling.dart';
 
 // total all time accounted for and unaccounted for
@@ -99,8 +98,6 @@ Widget numberOfDaysMainCategory() {
             // the reult from the database
             // if empy the default value is 0
             final totalNumberOfDays = snapshot.data ?? 0;
-
-            logger.i(totalNumberOfDays);
 
             // a text widget to display it on the screen
             return Padding(

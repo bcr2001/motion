@@ -67,6 +67,9 @@ class _TrailingEditButtonsState extends State<TrailingEditButtons> {
         : IconButton(iconSize: 20, onPressed: onPressed, icon: iconImage);
   }
 
+  // this alert dialog is rendered when the user
+  // clickes on the edit icon button in the trailing
+  // part of the list tile
   void _showUpdateAlertDialog(context) {
     // Get screen dimensions
     final screenHeight = MediaQuery.of(context).size.height;
@@ -77,6 +80,7 @@ class _TrailingEditButtonsState extends State<TrailingEditButtons> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialogConst(
+          heightFactor: 0.28,
           screenHeight: screenHeight,
           screenWidth: screenWidth,
           alertDialogTitle:
@@ -122,12 +126,9 @@ class _TrailingEditButtonsState extends State<TrailingEditButtons> {
                         if (_editFormKey.currentState!.validate()) {
                           if (maincat.selectedValue == null) {
                             // Show a snackbar if no value is selected
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                    "Please select a value from the drop-down."),
-                              ),
-                            );
+                            snackBarMessage(context,
+                                requiresColor: true,
+                                errorMessage: AppString.editPageUpdateError);
                           } else {
                             // Update the assigned item and close the dialog
                             updateItem.updateAssignedItems(Assigner(
@@ -155,7 +156,11 @@ class _TrailingEditButtonsState extends State<TrailingEditButtons> {
     );
   }
 
-  void _showDeleteAlertDialog(context, {required id}) {
+  // this alert dialog is a confirmation for whether the
+  // user want to delete a subcategory when the delete
+  // icon in the trailing part of the list tile is clicked
+  void _showDeleteAlertDialog(context,
+      {required id, required subcategoryName}) {
     // Get screen dimensions
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
@@ -190,6 +195,11 @@ class _TrailingEditButtonsState extends State<TrailingEditButtons> {
                   // Delete the assigned item and close the dialog
                   final deleteItem = context.read<AssignerMainProvider>();
                   deleteItem.deleteAssignedItems(id);
+
+                  snackBarMessage(
+                    context, 
+                    errorMessage: "$subcategoryName has been deleted");
+
                   navigationKey.currentState!.pop();
                 },
                 firstButtonName: AppString.cancelTitle,
@@ -218,6 +228,7 @@ class _TrailingEditButtonsState extends State<TrailingEditButtons> {
             isArchive: true,
             archiveStatus: widget.itemIndexIsArchive,
             onPressed: () {
+
               final archiveItem = context.read<AssignerMainProvider>();
 
               archiveItem.updateAssignedItems(Assigner(
@@ -234,7 +245,9 @@ class _TrailingEditButtonsState extends State<TrailingEditButtons> {
         // delete icon
         _buildIcon(
             onPressed: () {
-              _showDeleteAlertDialog(context, id: widget.itemIndexId);
+              _showDeleteAlertDialog(context,
+                  id: widget.itemIndexId,
+                  subcategoryName: widget.itemIndexSubcategoryName);
             },
             iconImage: const Icon(Icons.delete_outline))
       ],

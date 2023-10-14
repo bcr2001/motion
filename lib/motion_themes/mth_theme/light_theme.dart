@@ -50,8 +50,16 @@ ThemeData lightThemeData = ThemeData(
           elevation: MaterialStatePropertyAll(0.0),
           backgroundColor:
               MaterialStatePropertyAll(AppColor.lightModeContentWidget))),
+  
+  // snakbar theme (dark mode)
+  snackBarTheme: const SnackBarThemeData(
+    contentTextStyle: TextStyle(
+      fontSize: 14,
+    )
+  ),
 
   useMaterial3: true,
   visualDensity: VisualDensity.adaptivePlatformDensity,
   brightness: Brightness.light,
+
 );

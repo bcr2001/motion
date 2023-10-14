@@ -134,7 +134,7 @@ class TrackerDatabaseHelper {
         }
       }
     } catch (e) {
-      print("Error querying the database: $e");
+      logger.e("Error querying the database: $e");
     }
 
     return 0; // Return 0 if there's an error or no result.

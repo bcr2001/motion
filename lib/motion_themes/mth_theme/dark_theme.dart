@@ -54,4 +54,11 @@ ThemeData darkThemeData = ThemeData(
   useMaterial3: true,
   visualDensity: VisualDensity.adaptivePlatformDensity,
   brightness: Brightness.dark,
+
+  // snakbar theme (dark mode)
+  snackBarTheme: const SnackBarThemeData(
+    contentTextStyle: TextStyle(
+      fontSize: 14,
+    )
+  )
 );

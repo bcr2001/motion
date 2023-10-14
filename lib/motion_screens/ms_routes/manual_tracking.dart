@@ -165,7 +165,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                             if (int.parse(hourController.text) > 25 ||
                                 int.parse(minuteController.text) > 59 ||
                                 int.parse(secondController.text) > 59) {
-                              errorSnack(context,
+                              snackBarMessage(context,
                                   errorMessage:
                                       "Invalid entry: keep entries within range!!");
                               logger.i("Failed Validation");

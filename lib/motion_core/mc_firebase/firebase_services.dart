@@ -36,21 +36,25 @@ class AuthServices {
         logger.e("no user in the system!");
 
         // Display an error message using a snack bar.
-        errorSnack(context, errorMessage: AppString.firebaseUserNotFoundError);
-
+        snackBarMessage(context,
+            requiresColor: true,
+            errorMessage: AppString.firebaseUserNotFoundError);
       } else if (e.code == "wrong-password") {
         // Handle the case of an incorrect password.
 
         logger.e("Incorrect password");
 
-         // Display an error message using a snack bar.
-        errorSnack(context, errorMessage: AppString.firebaseIncorrectPassword);
+        // Display an error message using a snack bar.
+        snackBarMessage(context,
+            requiresColor: true,
+            errorMessage: AppString.firebaseIncorrectPassword);
       } else {
         // Handle other FirebaseAuth exceptions.
         logger.e("something went wrong during the sign in process");
 
-         // Display an error message using a snack bar.
-        errorSnack(context,
+        // Display an error message using a snack bar.
+        snackBarMessage(context,
+          requiresColor: true,
             errorMessage: AppString.firebaseSomethingWentWrong);
       }
     } finally {
@@ -63,7 +67,6 @@ class AuthServices {
   static signUpUser(context,
       {required String userEmailSignup,
       required String userPasswordSignUp}) async {
-
     // Display a circular loading indicator during sign-up.
     circularIndicator(context);
 
@@ -76,8 +79,9 @@ class AuthServices {
         // Handle the case where the email is already in use.
         logger.e("something went wrong during the sign up process $e");
         // Display an error message using a snack bar.
-        errorSnack(context,
-            errorMessage: AppString.firebaseEmailInUse);
+        snackBarMessage(context,
+        requiresColor: true,
+        errorMessage: AppString.firebaseEmailInUse);
       }
     } finally {
       // Dispose of the circular loading indicator upon sign-up completion.
@@ -91,7 +95,7 @@ class AuthServices {
     circularIndicator(context);
 
     try {
-       // Sign the user out.
+      // Sign the user out.
       await _auth.signOut();
     } on FirebaseAuthException catch (e) {
       // Handle errors during sign-out.
@@ -99,7 +103,10 @@ class AuthServices {
       logger.e("unable to sign out $e");
 
       // Display an error message using a snack bar.
-      errorSnack(context, errorMessage: AppString.firebaseUnableToSignOut);
+      snackBarMessage(
+        context,
+        requiresColor: true,
+      errorMessage: AppString.firebaseUnableToSignOut);
     } finally {
       // Dispose of the circular loading indicator upon sign-out completion.
       navigationKey.currentState!.pop();

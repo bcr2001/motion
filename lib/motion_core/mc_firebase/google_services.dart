@@ -42,8 +42,10 @@ class GoogleAuthService {
       // Log and rethrow any errors that occur during the process
       logger.e("Error: $e");
 
-       // Display an error message using a snack bar.
-      errorSnack(context, errorMessage: AppString.firebaseGoogleSignInError);
+      // Display an error message using a snack bar.
+      snackBarMessage(context,
+          requiresColor: true,
+          errorMessage: AppString.firebaseGoogleSignInError);
 
       rethrow;
     } finally {

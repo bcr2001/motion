@@ -137,12 +137,9 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                     onPressedSecond: () {
                       if (_formKey.currentState!.validate()) {
                         if (mainCategoryProvider.selectedValue == null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                  AppString.trackMainCategoryNotSelectedError),
-                            ),
-                          );
+                          snackBarMessage(context,
+                              errorMessage:
+                                  AppString.trackMainCategoryNotSelectedError);
                         } else {
                           _formKey.currentState!.save();
                           Provider.of<AssignerMainProvider>(context,
@@ -156,9 +153,14 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                                 mainCategoryProvider.selectedValue!,
                             dateCreated: date.currentDate,
                           ));
+                          snackBarMessage(context,
+                              errorMessage:
+                                  "${subcategoryController.text}added to the ${mainCategoryProvider.selectedValue} Category");
+                                  
                           navigationKey.currentState!.pop();
                           subcategoryController.text = "";
                           mainCategoryProvider.changeSelectedValue(null);
+
                         }
                       }
                     },
@@ -225,7 +227,8 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                           itemCount: items.length,
                           itemBuilder: (BuildContext context, index) {
                             return items[index].currentLoggedInUser == user &&
-                                    items[index].mainCategoryName == AppString.skillMainCategory &&
+                                    items[index].mainCategoryName ==
+                                        AppString.skillMainCategory &&
                                     items[index].isArchive == 0
                                 ? _listTileBuilder(
                                     activeStatus: items[index].isActive,
@@ -275,7 +278,8 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                           itemCount: items.length,
                           itemBuilder: (BuildContext context, index) {
                             return items[index].currentLoggedInUser == user &&
-                                    items[index].mainCategoryName == AppString.sleepMainCategory &&
+                                    items[index].mainCategoryName ==
+                                        AppString.sleepMainCategory &&
                                     items[index].isArchive == 0
                                 ? _listTileBuilder(
                                     activeStatus: items[index].isActive,

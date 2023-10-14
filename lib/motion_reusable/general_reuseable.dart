@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_pvd.dart';
-import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:provider/provider.dart';
 
 import '../motion_themes/mth_styling/app_color.dart';
@@ -29,14 +28,20 @@ Future circularIndicator(context) {
 }
 
 // snack bar for sign in and sign out error messages
-errorSnack(context, {required errorMessage}) {
+snackBarMessage(BuildContext context, {required String errorMessage, bool requiresColor = false}) {
+  final snackBarTheme = Theme.of(context).snackBarTheme;
+
   return ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      backgroundColor: const Color(0xFF000000),
-      content: Text(
-    errorMessage,
-    style: contentStyle(color: const Color(0xFFFF6B00)),
-    
-  )));
+    backgroundColor: snackBarTheme.backgroundColor,
+    content: Text(
+      errorMessage,
+      style: requiresColor? const TextStyle(
+        color: Colors.red,
+        fontSize: 14
+      ) 
+      :snackBarTheme.contentTextStyle, // Use the contentTextStyle from the theme.
+    ),
+  ));
 }
 
 // alart dialog
@@ -53,7 +58,9 @@ class AlertDialogConst extends StatelessWidget {
       required this.alertDialogTitle,
       required this.alertDialogContent,
       this.heightFactor = 0.23,
-      this.widthFactor = 0.80, required this.screenHeight, required this.screenWidth});
+      this.widthFactor = 0.80,
+      required this.screenHeight,
+      required this.screenWidth});
 
   @override
   Widget build(BuildContext context) {
