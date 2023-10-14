@@ -29,6 +29,13 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
 
     return theEntireTotal;
   }
+
+  // retrieve the total number of days in the main_category table
+  Future<int> retrievedNumberOfDays(String currentUser) async {
+    int numberOfDays = await trackDbInstance.getNumberOfDays(currentUser);
+
+    return numberOfDays;
+  }
 }
 
 // handles database operation for the subcategory table

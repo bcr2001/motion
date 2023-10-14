@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:motion/motion_routes/route_action.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import '../home_reusable/back_home.dart';
+import '../home_reusable/front_home.dart';
 import '../home_windows/total_acc_unacc.dart';
 
 // home route
@@ -64,6 +65,10 @@ class MotionHomeRoute extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 10.0),
             sliver: SliverList(
                 delegate: SliverChildListDelegate([
+              // total number of days in the main_category table
+              numberOfDaysMainCategory(),
+
+              
               // quote from the zenQuotes API
               quoteOfTheDay(),
 

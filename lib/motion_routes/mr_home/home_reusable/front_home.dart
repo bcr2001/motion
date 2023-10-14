@@ -9,7 +9,9 @@ import 'package:motion/motion_reusable/db_re/sub_logic.dart';
 import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 import 'package:motion/motion_routes/mr_home/home_reusable/back_home.dart';
 import 'package:motion/motion_screens/ms_routes/manual_tracking.dart';
+import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:provider/provider.dart';
+import '../../../motion_reusable/general_reuseable.dart';
 import '../../../motion_themes/mth_styling/motion_text_styling.dart';
 
 // total all time accounted for and unaccounted for
@@ -73,6 +75,48 @@ Widget entireTimeAccountedAndUnaccounted(
       ],
     ),
   );
+}
+
+// returns the number of days in the main_category table
+Widget numberOfDaysMainCategory() {
+  // main enables access to the SQL query to get the number of days
+  // user provider allows us to get the currently logged in user
+  return Consumer2<MainCategoryTrackerProvider, UserUidProvider>(
+      builder: (context, main, user, child) {
+    // firebase user uid
+    final userUid = user.userUid;
+
+    return FutureBuilder(
+        future: main.retrievedNumberOfDays(userUid!),
+        builder: (BuildContext context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            // shimmer effect is displayed while the data is being loaded
+            return const ShimmerWidget.rectangular(width: 20, height: 20);
+          } else if (snapshot.hasError) {
+            // if the result has an error the error message is shown
+            return Text('Error: ${snapshot.error}');
+          } else {
+            // the reult from the database
+            // if empy the default value is 0
+            final totalNumberOfDays = snapshot.data ?? 0;
+
+            logger.i(totalNumberOfDays);
+
+            // a text widget to display it on the screen
+            return Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Text(
+                "Day: $totalNumberOfDays",
+                style: const TextStyle(
+                  color: AppColor.blueMainColor,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600
+                ),
+              ),
+            );
+          }
+        });
+  });
 }
 
 // returns the total time accounted for the current date

@@ -115,6 +115,32 @@ class TrackerDatabaseHelper {
     }
   }
 
+  // count the number of days in the main_category table
+ Future<int> getNumberOfDays(String currentUser) async {
+    final db = await database;
+
+    try {
+      final resultGNOD = await db.rawQuery('''
+      SELECT COUNT(date) AS NumberOfDays
+      FROM main_category
+      WHERE currentLoggedInUser = ?
+    ''', [currentUser]);
+
+      if (resultGNOD.isNotEmpty) {
+        final numberOfDays = resultGNOD.first["NumberOfDays"];
+
+        if (numberOfDays is int) {
+          return numberOfDays;
+        }
+      }
+    } catch (e) {
+      print("Error querying the database: $e");
+    }
+
+    return 0; // Return 0 if there's an error or no result.
+  }
+
+
   // gets all the entries added to the main category table
   Future<List<MainCategory>> getAllMainCategories() async {
     try {
