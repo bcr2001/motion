@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
@@ -27,14 +28,15 @@ class TextFormFieldBuilder extends StatelessWidget {
       this.fieldObscureText = false,
       this.border,
       this.hintTextStyle,
-      this.maxCharacterLen, this.initialValue});
+      this.maxCharacterLen,
+      this.initialValue});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 10),
       child: TextFormField(
-        initialValue:initialValue,
+        initialValue: initialValue,
         cursorColor: AppColor.blueMainColor,
         maxLength: maxCharacterLen,
         buildCounter: (BuildContext context,
@@ -48,7 +50,8 @@ class TextFormFieldBuilder extends StatelessWidget {
             border: border,
             contentPadding: const EdgeInsets.only(left: 5.0),
             focusedBorder: const UnderlineInputBorder(
-                borderSide: BorderSide(color: AppColor.blueMainColor, width: 2.0)),
+                borderSide:
+                    BorderSide(color: AppColor.blueMainColor, width: 2.0)),
             hintText: fieldHintText,
             hintStyle: hintTextStyle),
         validator: fieldValidator,
@@ -90,35 +93,35 @@ class AuthPageButtons extends StatelessWidget {
 }
 
 // REGISTER HERE OR LOG IN OPTION
-class RegSignOption extends StatelessWidget {
-  final String optionQuestion;
-  final String optionName;
-  final VoidCallback onTap;
+class RegSignOption2 extends StatelessWidget {
+  final String regMessage;
+  final String regTextSpan;
+  final VoidCallback regAction;
 
-  const RegSignOption(
+  const RegSignOption2(
       {super.key,
-      required this.optionQuestion,
-      required this.optionName,
-      required this.onTap});
+      required this.regMessage,
+      required this.regTextSpan,
+      required this.regAction});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 30),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            optionQuestion,
-          ),
-          GestureDetector(
-            onTap: onTap,
-            child: Text(
-              optionName,
-              style: contentStyle(color: AppColor.blueMainColor),
-            ),
-          )
-        ],
+      child: RichText(
+        text: TextSpan(
+            text: regMessage,
+            style: DefaultTextStyle.of(context).style,
+            children: [
+              // clickable text
+              TextSpan(
+                  text: regTextSpan,
+                  style: const TextStyle(color: AppColor.blueMainColor),
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () {
+                      regAction();
+                    })
+            ]),
       ),
     );
   }
@@ -129,7 +132,8 @@ class SvgImage extends StatelessWidget {
   final SvgPicture svgImage;
   final AlignmentGeometry imageAlignment;
 
-  const SvgImage({super.key, required this.svgImage, required this.imageAlignment});
+  const SvgImage(
+      {super.key, required this.svgImage, required this.imageAlignment});
 
   @override
   Widget build(BuildContext context) {

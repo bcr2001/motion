@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../motion_reusable/general_reuseable.dart';
 
 // contains functions that constantly updates
 //  the current date in the desired format
@@ -16,6 +19,25 @@ class CurrentDateProvider extends ChangeNotifier {
     _timer = Timer.periodic(const Duration(days: 1), (Timer t) {
       getCurrentDate();
     });
+
+    // Check if a new date should be fetched on app startup
+    _checkAndUpdateDate();
+  }
+
+  Future<void> _checkAndUpdateDate() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String lastUpdate = prefs.getString('lastUpdate') ?? '';
+
+    final String today = DateFormat("yyyy-MM-dd").format(DateTime.now());
+
+    if (lastUpdate != today) {
+      _currentDate = today;
+      prefs.setString('lastUpdate', today);
+      logger.i("New date gotten");
+      notifyListeners();
+    } else {
+      logger.i("The current date is alright");
+    }
   }
 
   // Method to get the new date after a day and reset the
@@ -45,7 +67,6 @@ class CurrentDateProvider extends ChangeNotifier {
 
     // Get the day of the week name using the intl package
     final String dayOfWeekName = DateFormat('EEEE').format(dateTime);
-
 
     if (day < 1 || day > 31 || month < 1 || month > 12 || year < 1) {
       return "Invalid Date";

@@ -10,7 +10,6 @@ import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 import 'package:motion/motion_routes/mr_home/home_reusable/back_home.dart';
 import 'package:motion/motion_screens/ms_routes/manual_tracking.dart';
 import 'package:provider/provider.dart';
-import '../../../motion_reusable/general_reuseable.dart';
 import '../../../motion_themes/mth_styling/motion_text_styling.dart';
 
 // total all time accounted for and unaccounted for
@@ -43,8 +42,6 @@ Widget entireTimeAccountedAndUnaccounted(
                 // convert hours to days
                 final accountedConvertedResultsDays =
                     convertHoursToDays(tableResult);
-
-                logger.i(accountedConvertedResultsDays);
 
                 // display both the total hours and number of days
                 return Column(

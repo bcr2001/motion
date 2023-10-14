@@ -117,11 +117,10 @@ class _SignUpPageState extends State<SignUpPage> {
                     buttonName: AppString.registerTitle,
                   ),
 
-                  // Sign Up Option
-                  RegSignOption(
-                      optionQuestion: AppString.alreadyMember,
-                      optionName: AppString.logInTitle,
-                      onTap: widget.toSignInPage)
+                  // Sign In Option
+                  RegSignOption2(regMessage: AppString.alreadyMember, 
+                  regTextSpan: AppString.logInTitle, 
+                  regAction: widget.toSignInPage)
                 ],
               ),
             ),
