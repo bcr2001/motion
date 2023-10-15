@@ -181,6 +181,9 @@ class TrackerDatabaseHelper {
     }
   }
 
+  // get the top 3 main category excluding the sleep category
+  
+
   // Future<void> updateCurrentUser() async {
   //   final db = await database;
 
@@ -361,7 +364,7 @@ class TrackerDatabaseHelper {
     }
   }
 
-  // calculates and returns the total time spent on a particular subcategory
+  // calculates and return the total time spent on a particular subcategory
   Future<double> getTotalTimeSpentPerSubcategory(
       String currentDate, String currentUser, String subcategoryName) async {
     try {
@@ -390,6 +393,9 @@ class TrackerDatabaseHelper {
       rethrow;
     }
   }
+
+  // get the top three subcategories excluding sleep
+  
 
   // updates existing subcategory categories rows
   Future<void> updateSubcategory(Subcategories subcategory) async {

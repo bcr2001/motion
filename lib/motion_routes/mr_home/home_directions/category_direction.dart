@@ -84,10 +84,7 @@ class _MainAndSubViewState extends State<MainAndSubView> {
                 ),
           ],
         ),
-
-        // total time accounted for the entire current month
-        totalMonthTimeSpent(),
-
+        
         // views that is being toggled between 
         // (subcategory summary or main category summary)
         isSubcategory ? widget.subcategoryView : widget.mainCategoryView
