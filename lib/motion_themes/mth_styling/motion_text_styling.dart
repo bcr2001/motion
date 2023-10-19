@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:motion/motion_themes/mth_styling/app_color.dart';
 
 // content text style (with color options)
 TextStyle contentStyle(
@@ -31,7 +32,7 @@ class AppTextStyle {
         fontWeight: FontWeight.w700,
         fontSize: 13,
         color:
-            isUnaccounted ? const Color(0xFFB30000) : const Color(0xFF00B300));
+            isUnaccounted ? AppColor.unAccountedColor : AppColor.accountedColor);
   }
 
   // manual recording hint text style

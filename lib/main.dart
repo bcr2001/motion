@@ -24,7 +24,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize the database helper
-  // final TrackerDatabaseHelper databaseHelper = TrackerDatabaseHelper();
+  // final TrackerDatabaseHelper databaseHelper = 
+  // TrackerDatabaseHelper();
   // final dbHelper = AssignerDatabaseHelper();
 
   // databaseHelper.updateCurrentUser();

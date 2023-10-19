@@ -30,6 +30,34 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
     return theEntireTotal;
   }
 
+  // retrieve the current month entire acounted and unaccounted totals
+  Future<double> retrieveEntireMonthlyTotalMainCategoryTable(
+    String currentUser,
+    String firstDay,
+    String lastDay,
+    bool isUnaccounted,
+  ) async {
+    double entireMonthTotal =
+        await trackDbInstance.getEntireMonthlyTotalMainCategoryTable(
+            currentUser, firstDay, lastDay, isUnaccounted);
+
+    return entireMonthTotal;
+  }
+
+  // retrieve just the unaccounted total for the month
+  Future<double> accountedMonthTotal(String currentUser, String firstDay,
+      String lastDay, bool isUnaccounted) async {
+    return await trackDbInstance.getEntireMonthlyTotalMainCategoryTable(
+        currentUser, firstDay, lastDay, isUnaccounted);
+  }
+
+  // get a table for both accounted and unaccounted values
+  Future<List<Map<String, dynamic>>> retrieveMonthAccountUnaccountTable(
+      String currentUser, firstDay, lastDay) async {
+    return await trackDbInstance.getMonthAccountUnaccountTable(
+        currentUser, firstDay, lastDay);
+  }
+
   // retrieve the total number of days in the main_category table
   Future<int> retrievedNumberOfDays(String currentUser) async {
     int numberOfDays = await trackDbInstance.getNumberOfDays(currentUser);

@@ -50,7 +50,7 @@ String convertHoursToDays(double minutes) {
 
   return days == 1
       ? "${days.toStringAsFixed(2)} day"
-      : "${days.toStringAsFixed(2)} day";
+      : "${days.toStringAsFixed(2)} days";
 }
 
 // time measurement adder

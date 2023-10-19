@@ -116,7 +116,7 @@ class TrackerDatabaseHelper {
   }
 
   // count the number of days in the main_category table
- Future<int> getNumberOfDays(String currentUser) async {
+  Future<int> getNumberOfDays(String currentUser) async {
     final db = await database;
 
     try {
@@ -140,7 +140,6 @@ class TrackerDatabaseHelper {
     return 0; // Return 0 if there's an error or no result.
   }
 
-
   // gets all the entries added to the main category table
   Future<List<MainCategory>> getAllMainCategories() async {
     try {
@@ -152,6 +151,100 @@ class TrackerDatabaseHelper {
       ''');
 
       return allMainCats.map((map) => MainCategory.fromMap(map)).toList();
+    } catch (e) {
+      logger.e("Error: $e");
+      return [];
+    }
+  }
+
+  // gets the entire total for the timeSpent column of the main_category table
+  Future<double> getEntireTotalMainCategoryTable(
+      String currentUser, bool isUnaccounted) async {
+    try {
+      final db = await database;
+
+      // if the isUnaccounted = true then the results
+      // will be for the entire unaccounted time
+      // if it's false the accounted time
+
+      final resultETMCT = isUnaccounted ? await db.rawQuery('''
+        SELECT ((COUNT(date) * 24)*60) - (COALESCE(SUM(education), 0) + COALESCE(SUM(skills), 0) + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(personalGrowth), 0) + COALESCE(SUM(sleep), 0)) AS EntireTotalResult
+        FROM main_category
+        WHERE currentLoggedInUser = ?
+        ''', [currentUser]) : await db.rawQuery('''
+        SELECT COALESCE(SUM(education), 0) + COALESCE(SUM(skills), 0) + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(personalGrowth), 0) + COALESCE(SUM(sleep), 0) AS EntireTotalResult
+        FROM main_category
+        WHERE currentLoggedInUser = ?
+        ''', [currentUser]);
+
+      if (resultETMCT.isNotEmpty) {
+        final totalETMCT = resultETMCT.first["EntireTotalResult"];
+        if (totalETMCT is double) {
+          return totalETMCT;
+        } else {
+          logger.e("Something went wrong");
+          return 0.0;
+        }
+      } else {
+        return 0.0;
+      }
+    } catch (e) {
+      // Handle any database query errors, e.g., log the error and return an empty list or throw an exception.
+      logger.e('Error in getMonthTotalAndAverage: $e');
+      rethrow;
+    }
+  }
+
+  // get the monthly entire main category total
+  Future<double> getEntireMonthlyTotalMainCategoryTable(
+    String currentUser,
+    String firstDay,
+    String lastDay,
+    bool isUnaccounted,
+  ) async {
+    try {
+      final db = await database;
+
+      final resultEMTMC = isUnaccounted ? await db.rawQuery('''
+        SELECT ((COUNT(date) * 24)*60) - (COALESCE(SUM(education), 0) + COALESCE(SUM(skills), 0) + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(personalGrowth), 0) + COALESCE(SUM(sleep), 0)) AS EntireTotalResult
+        FROM main_category
+        WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
+            ''', [currentUser, firstDay, lastDay]) : await db.rawQuery('''
+        SELECT COALESCE(SUM(education), 0) + COALESCE(SUM(skills), 0) + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(personalGrowth), 0) + COALESCE(SUM(sleep), 0) AS EntireTotalResult
+        FROM main_category
+        WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
+            ''', [currentUser, firstDay, lastDay]);
+
+      if (resultEMTMC.isNotEmpty) {
+        final totalEMTMC = resultEMTMC.first["EntireTotalResult"];
+        if (totalEMTMC is double) {
+          return totalEMTMC;
+        } else {
+          logger.e("Something went wrong: $totalEMTMC");
+          return 0.0;
+        }
+      } else {
+        return 0.0;
+      }
+    } catch (e) {
+      logger.e("Error: $e");
+      return 0.0;
+    }
+  }
+
+  // get a table for both accounted and unaccounted values
+  Future<List<Map<String, dynamic>>> getMonthAccountUnaccountTable(
+      String currentUser, firstDay, lastDay) async {
+    try {
+      final db = await database;
+
+      final resultMAT = await db.rawQuery('''
+        SELECT COALESCE(SUM(education), 0) + COALESCE(SUM(skills), 0) + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(personalGrowth), 0) + COALESCE(SUM(sleep), 0) AS Accounted, ((COUNT(date) * 24)*60) - (COALESCE(SUM(education), 0) + COALESCE(SUM(skills), 0) + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(personalGrowth), 0) + COALESCE(SUM(sleep), 0)) AS Unaccounted
+        FROM main_category
+        WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
+        ''', [currentUser, firstDay, lastDay]);
+
+      return resultMAT;
     } catch (e) {
       logger.e("Error: $e");
       return [];
@@ -182,7 +275,6 @@ class TrackerDatabaseHelper {
   }
 
   // get the top 3 main category excluding the sleep category
-  
 
   // Future<void> updateCurrentUser() async {
   //   final db = await database;
@@ -326,44 +418,6 @@ class TrackerDatabaseHelper {
     }
   }
 
-  // gets the entire total for the timeSpent column of the main_category table
-  Future<double> getEntireTotalMainCategoryTable(
-      String currentUser, bool isUnaccounted) async {
-    try {
-      final db = await database;
-
-      // if the isUnaccounted = true then the results
-      // will be for the entire unaccounted time
-      // if it's false the accounted time
-
-      final resultETMCT = isUnaccounted ? await db.rawQuery('''
-        SELECT ((COUNT(date) * 24)*60) - (COALESCE(SUM(education), 0) + COALESCE(SUM(skills), 0) + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(personalGrowth), 0) + COALESCE(SUM(sleep), 0)) AS EntireTotalResult
-        FROM main_category
-        WHERE currentLoggedInUser = ?
-        ''', [currentUser]) : await db.rawQuery('''
-        SELECT COALESCE(SUM(education), 0) + COALESCE(SUM(skills), 0) + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(personalGrowth), 0) + COALESCE(SUM(sleep), 0) AS EntireTotalResult
-        FROM main_category
-        WHERE currentLoggedInUser = ?
-        ''', [currentUser]);
-
-      if (resultETMCT.isNotEmpty) {
-        final totalETMCT = resultETMCT.first["EntireTotalResult"];
-        if (totalETMCT is double) {
-          return totalETMCT;
-        } else {
-          logger.e("Something went wrong");
-          return 0.0;
-        }
-      } else {
-        return 0.0;
-      }
-    } catch (e) {
-      // Handle any database query errors, e.g., log the error and return an empty list or throw an exception.
-      logger.e('Error in getMonthTotalAndAverage: $e');
-      rethrow;
-    }
-  }
-
   // calculates and return the total time spent on a particular subcategory
   Future<double> getTotalTimeSpentPerSubcategory(
       String currentDate, String currentUser, String subcategoryName) async {
@@ -395,7 +449,6 @@ class TrackerDatabaseHelper {
   }
 
   // get the top three subcategories excluding sleep
-  
 
   // updates existing subcategory categories rows
   Future<void> updateSubcategory(Subcategories subcategory) async {
