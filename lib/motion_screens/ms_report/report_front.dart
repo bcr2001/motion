@@ -10,98 +10,123 @@ import '../../motion_themes/mth_styling/app_color.dart';
 import '../../motion_themes/mth_styling/motion_text_styling.dart';
 import 'report_back.dart';
 
-// displays the most tracked main and subcategories
+// display the most tracked and least tracked main category
 class MostAndLeastTrackedMaincategorySection extends StatelessWidget {
   const MostAndLeastTrackedMaincategorySection({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-          padding: const EdgeInsets.only(top: 10, bottom: 14),
-          child: Consumer3<FirstAndLastDay, UserUidProvider,
-              MainCategoryTrackerProvider>(
-            builder: (context, day, user, main, child) {
-              // first and last day of the month
-              String firstDayOfMonth = day.firstDay;
-              String lastDayOfMonth = day.lastDay;
-              String currentLoggedInUser = user.userUid!;
+    return MLTitleAndCard(
+        mlTitle: AppString.mainCategoryViewButtonName,
+        cardContent: Card(
+          child: Padding(
+              padding: const EdgeInsets.only(top: 10, bottom: 14),
+              child: Consumer3<FirstAndLastDay, UserUidProvider,
+                  MainCategoryTrackerProvider>(
+                builder: (context, day, user, main, child) {
+                  // first and last day of the month
+                  String firstDayOfMonth = day.firstDay;
+                  String lastDayOfMonth = day.lastDay;
 
-              int numberOfDaysInCurrentMonth = day.days;
+                  // currently logged in user
+                  String currentLoggedInUser = user.userUid!;
 
-              logger.i("Number of Days: $numberOfDaysInCurrentMonth");
+                  // the number of days in the current month
+                  // used to get the average hours per day 
+                  int numberOfDaysInCurrentMonth = day.days;
 
-              return Row(
-                children: [
-                  // most tracked main category
-                  MostAndLeastTrackedResult(
-                      sectionTitle: AppString.mostTrackedTitle,
-                      numberOfDaysInMonth: numberOfDaysInCurrentMonth,
-                      future: main.retrieveMostAndLeastTrackedMainCategory(
-                          firstDay: firstDayOfMonth,
-                          lastDay: lastDayOfMonth,
-                          currentUser: currentLoggedInUser,
-                          isMost: true)),
 
-                  // least tracked main category
-                  MostAndLeastTrackedResult(
-                      sectionTitle: AppString.leastTrackedTitle,
-                      numberOfDaysInMonth: numberOfDaysInCurrentMonth,
-                      future: main.retrieveMostAndLeastTrackedMainCategory(
-                          firstDay: firstDayOfMonth,
-                          lastDay: lastDayOfMonth,
-                          currentUser: currentLoggedInUser,
-                          isMost: false)),
-                ],
-              );
-            },
-          )),
-    );
+                  return Row(
+                    children: [
+                      // most tracked main category
+                      MostAndLeastTrackedResult(
+                          resultIcon: Icons.line_axis,
+                          resultIconColor: Colors.green,
+                          sectionTitle: AppString.mostTrackedTitle,
+                          numberOfDaysInMonth: numberOfDaysInCurrentMonth,
+                          future: main.retrieveMostAndLeastTrackedMainCategory(
+                              firstDay: firstDayOfMonth,
+                              lastDay: lastDayOfMonth,
+                              currentUser: currentLoggedInUser,
+                              isMost: true)),
+
+                      // least tracked main category
+                      MostAndLeastTrackedResult(
+                          resultIcon: Icons.line_axis,
+                          resultIconColor: Colors.red,
+                          sectionTitle: AppString.leastTrackedTitle,
+                          numberOfDaysInMonth: numberOfDaysInCurrentMonth,
+                          future: main.retrieveMostAndLeastTrackedMainCategory(
+                              firstDay: firstDayOfMonth,
+                              lastDay: lastDayOfMonth,
+                              currentUser: currentLoggedInUser,
+                              isMost: false)),
+                    ],
+                  );
+                },
+              )),
+        ));
   }
 }
 
-// class MostAndLeastTrackedSubcategorySection extends StatelessWidget {
-//   const MostAndLeastTrackedSubcategorySection({super.key});
+// the subcategory that was most and least tracked
+// is displayed by the class below
+class MostAndLeastTrackedSubcategorySection extends StatelessWidget {
+  const MostAndLeastTrackedSubcategorySection({super.key});
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return Card(
-//       child: Padding(
-//           padding: const EdgeInsets.only(top: 10, bottom: 14),
-//           child: Consumer3<FirstAndLastDay, UserUidProvider,
-//               MainCategoryTrackerProvider>(
-//             builder: (context, day, user, main, child) {
-//               // first and last day of the month
-//               String firstDayOfMonth = day.firstDay;
-//               String lastDayOfMonth = day.lastDay;
-//               String currentLoggedInUser = user.userUid!;
+  @override
+  Widget build(BuildContext context) {
+    return  MLTitleAndCard(
+        mlTitle: AppString.subcategoryViewButtonName, cardContent: Card(
+          child: Padding(
+              padding: const EdgeInsets.only(top: 10, bottom: 14),
+              child: Consumer3<FirstAndLastDay, UserUidProvider,
+                  SubcategoryTrackerDatabaseProvider>(
+                builder: (context, day, user, sub, child) {
 
-//               return Row(
-//                 children: [
-//                   // most tracked subcategory
-//                   MostAndLeastTrackedResult(
-//                       sectionTitle: AppString.mostTrackedTitle,
-//                       future: main.retrieveMostAndLeastTrackedMainCategory(
-//                           firstDay: firstDayOfMonth,
-//                           lastDay: lastDayOfMonth,
-//                           currentUser: currentLoggedInUser,
-//                           isMost: true)),
+                  // first and last day of the month
+                  String firstDayOfMonth = day.firstDay;
+                  String lastDayOfMonth = day.lastDay;
 
-//                   // least tracked subcategory
-//                   MostAndLeastTrackedResult(
-//                       sectionTitle: AppString.leastTrackedTitle,
-//                       future: main.retrieveMostAndLeastTrackedMainCategory(
-//                           firstDay: firstDayOfMonth,
-//                           lastDay: lastDayOfMonth,
-//                           currentUser: currentLoggedInUser,
-//                           isMost: false)),
-//                 ],
-//               );
-//             },
-//           )),
-//     );
-//   }
-// }
+                  // currently logged in user
+                  String currentLoggedInUser = user.userUid!;
+                  
+                  // number of days in the current month
+                  int numberOfDaysInCurrentMonth = day.days;
+
+
+                  return Row(
+                    children: [
+                      // most tracked subcategory
+                      MostAndLeastTrackedResult(
+                          resultIcon: Icons.line_axis,
+                          resultIconColor: Colors.green,
+                          sectionTitle: AppString.mostTrackedTitle,
+                          numberOfDaysInMonth: numberOfDaysInCurrentMonth,
+                          future: sub.retrieveMostAndLeastTrackedSubcategory(
+                              firstDay: firstDayOfMonth,
+                              lastDay: lastDayOfMonth,
+                              currentUser: currentLoggedInUser,
+                              isMost: true)),
+
+                      // least tracked subcategory
+                      MostAndLeastTrackedResult(
+                          resultIcon: Icons.line_axis,
+                          resultIconColor: Colors.red,
+                          sectionTitle: AppString.leastTrackedTitle,
+                          numberOfDaysInMonth: numberOfDaysInCurrentMonth,
+                          future: sub.retrieveMostAndLeastTrackedSubcategory(
+                              firstDay: firstDayOfMonth,
+                              lastDay: lastDayOfMonth,
+                              currentUser: currentLoggedInUser,
+                              isMost: false)),
+                    ],
+                  );
+                },
+              )),
+        ));
+  }
+}
 
 // custom widget that returns a pie chart
 // and their data value distribution
@@ -198,10 +223,15 @@ class InfoAboutSleep extends StatelessWidget {
       padding: const EdgeInsets.all(8.0),
       child: Row(
         children: const [
-          Icon(Icons.info_outline),
+          Padding(
+            padding: EdgeInsets.only(right: 8.0),
+            child: Icon(Icons.info_outline),
+          ),
+
+          // information about the state of the sleep category
           Flexible(
             child: Text(
-              "The amount of time you spend sleeping is not considered when determining the most and least time tracked.",
+              AppString.informationAboutSleep,
               style: TextStyle(fontSize: 10),
             ),
           )
@@ -210,53 +240,3 @@ class InfoAboutSleep extends StatelessWidget {
     );
   }
 }
-
-// Row(
-//                 children: [
-//                   Column(
-//                     children: const [
-//                       // Most Tracked Main Category
-//                       MostAndLeastTrackedBuilder(
-//                         title: AppString.mostTrackedMainTitle,
-//                         totalHours: "107.39",
-//                         averageHours: "3.5hrs/day",
-//                         subcategoryName: "SM/Anime/MM",
-//                         iconDirection: Icons.arrow_circle_up_outlined,
-//                         iconColor: AppColor.mostTrackedBorderColor,
-//                       ),
-
-//                       // Least Tracked Main Category
-//                       MostAndLeastTrackedBuilder(
-//                         title: AppString.leastTrackedMainTitle,
-//                         totalHours: "107.39",
-//                         averageHours: "3.5hrs/day",
-//                         subcategoryName: "SM/Anime/MM",
-//                         iconDirection: Icons.arrow_circle_down_outlined,
-//                         iconColor: Colors.red,
-//                       ),
-//                     ],
-//                   ),
-
-//                   // Most Tracked Main Category
-//                   Column(
-//                     children: const [
-//                       MostAndLeastTrackedBuilder(
-//                           title: AppString.mostTrackedSubcategoryTitle,
-//                           totalHours: "107.39",
-//                           averageHours: "3.5hrs/day",
-//                           subcategoryName: "SM/Anime/MM",
-//                           iconDirection: Icons.arrow_circle_down_outlined,
-//                           iconColor: AppColor.mostTrackedBorderColor),
-
-//                       // Least Tracked Main Category
-//                       MostAndLeastTrackedBuilder(
-//                           title: AppString.leastTrackedSubcategoryTitle,
-//                           totalHours: "107.39",
-//                           averageHours: "3.5hrs/day",
-//                           subcategoryName: "SM/Anime/MM",
-//                           iconDirection: Icons.arrow_circle_down_outlined,
-//                           iconColor: Colors.red),
-//                     ],
-//                   ),
-//                 ],
-//               );

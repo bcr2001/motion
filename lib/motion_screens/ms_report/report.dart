@@ -6,6 +6,8 @@ import '../../motion_themes/mth_app/app_strings.dart';
 import 'report_front.dart';
 
 //the data summary for the entire current month
+// this page contains, charts and summary information
+// related to the current month
 class MonthlyReportPage extends StatelessWidget {
   const MonthlyReportPage({super.key});
 
@@ -13,35 +15,47 @@ class MonthlyReportPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          // get the current month name from the CurrentMonthProvider
+          // class
           title: Consumer<CurrentMonthProvider>(
             builder: (context, month, child) {
               final currentMonth = month.currentMonthName;
-              return Text("$currentMonth Report");
+              return Text("$currentMonth ${AppString.reportTitle}");
             },
           ),
         ),
         body: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
             children: [
-              // PIE CHART SECTION
 
               // Pie Chart Data Title
               sectionTitle(titleName: AppString.accountedVsUnaccounterTitle),
-
+              // pie chart for the accounted and unaccounted distribution
               const PieChartAndValues(),
 
               // MOST TRACKED AND LEAST TRACKED SECTION
 
-              // section title
+              // section title (Most and Least Tracked)
               sectionTitle(titleName: AppString.mostAndLeastTrackedTitle),
 
-              // main category section 
+              // main category section
+              // the summary of the most tracked and least tracked 
+              // main categories
               const MostAndLeastTrackedMaincategorySection(),
 
-              // subcategory section
-
               // section information
-              const InfoAboutSleep()
+              // info about why the sleep category is not included in the 
+              const InfoAboutSleep(),
+
+              // subcategory section
+              // the summary of the most tracked and least tracked
+              // main categories
+              const MostAndLeastTrackedSubcategorySection(),
+
+
+              // Pie chart for the main category distribution for the 
+              // current month
+              sectionTitle(titleName:AppString.mainCategoryDistributionTitle )
             ]));
   }
 }

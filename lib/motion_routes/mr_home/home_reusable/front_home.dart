@@ -106,7 +106,6 @@ Widget numberOfDaysMainCategory() {
               child: Text(
                 "Day: $totalNumberOfDays",
                 style: const TextStyle(
-                  color: AppColor.dayColor,
                   fontSize: 13,
                   fontWeight: FontWeight.w600
                 ),

@@ -64,7 +64,8 @@ class TrackerDatabaseHelper {
       timeRecorded TEXT,
       timeSpent REAL,
       currentLoggedInUser TEXT,
-      FOREIGN KEY (date, currentLoggedInUser) REFERENCES main_category(date, 	currentLoggedInUser)
+      FOREIGN KEY (date, currentLoggedInUser) 
+      REFERENCES main_category(date, 	currentLoggedInUser)
     )
   ''');
     // a trigger to update the main_category table
@@ -75,11 +76,21 @@ class TrackerDatabaseHelper {
       AFTER INSERT ON subcategory
       BEGIN
         UPDATE main_category
-        SET education = (SELECT SUM(timeSpent) FROM subcategory WHERE mainCategoryName = 'Education' AND date = NEW.date AND currentLoggedInUser = NEW.currentLoggedInUser),
-            skills = (SELECT SUM(timeSpent) FROM subcategory WHERE mainCategoryName = 'Skills' AND date = NEW.date AND currentLoggedInUser = NEW.currentLoggedInUser),
-            entertainment = (SELECT SUM(timeSpent) FROM subcategory WHERE mainCategoryName = 'Entertainment' AND date = NEW.date AND currentLoggedInUser = NEW.currentLoggedInUser),
-            personalGrowth = (SELECT SUM(timeSpent) FROM subcategory WHERE mainCategoryName = 'Personal Growth' AND date = NEW.date AND currentLoggedInUser = NEW.currentLoggedInUser),
-            sleep = (SELECT SUM(timeSpent) FROM subcategory WHERE mainCategoryName = 'Sleep' AND date = NEW.date AND currentLoggedInUser = NEW.currentLoggedInUser)
+        SET education = (SELECT SUM(timeSpent) FROM subcategory WHERE 
+        mainCategoryName = 'Education' AND date = NEW.date AND 
+        currentLoggedInUser = NEW.currentLoggedInUser),
+            skills = (SELECT SUM(timeSpent) FROM subcategory 
+            WHERE mainCategoryName = 'Skills' AND date = NEW.date AND 
+            currentLoggedInUser = NEW.currentLoggedInUser),
+            entertainment = (SELECT SUM(timeSpent) FROM subcategory 
+            WHERE mainCategoryName = 'Entertainment' AND date = NEW.date 
+            AND currentLoggedInUser = NEW.currentLoggedInUser),
+            personalGrowth = (SELECT SUM(timeSpent) FROM subcategory WHERE 
+            mainCategoryName = 'Personal Growth' AND date = NEW.date AND 
+            currentLoggedInUser = NEW.currentLoggedInUser),
+            sleep = (SELECT SUM(timeSpent) FROM subcategory WHERE 
+            mainCategoryName = 'Sleep' AND date = NEW.date AND 
+            currentLoggedInUser = NEW.currentLoggedInUser)
         WHERE date = NEW.date AND currentLoggedInUser = NEW.currentLoggedInUser;
       END;
       ''');
@@ -91,12 +102,23 @@ class TrackerDatabaseHelper {
         AFTER DELETE ON subcategory
         BEGIN
           UPDATE main_category
-          SET education = (SELECT SUM(timeSpent) FROM subcategory WHERE mainCategoryName = 'Education' AND date = OLD.date AND currentLoggedInUser = OLD.currentLoggedInUser),
-              skills = (SELECT SUM(timeSpent) FROM subcategory WHERE mainCategoryName = 'Skills' AND date = OLD.date AND currentLoggedInUser = OLD.currentLoggedInUser),
-              entertainment = (SELECT SUM(timeSpent) FROM subcategory WHERE mainCategoryName = 'Entertainment' AND date = OLD.date AND currentLoggedInUser = OLD.currentLoggedInUser),
-              personalGrowth = (SELECT SUM(timeSpent) FROM subcategory WHERE mainCategoryName = 'Personal Growth' AND date = OLD.date AND currentLoggedInUser = OLD.currentLoggedInUser),
-              sleep = (SELECT SUM(timeSpent) FROM subcategory WHERE mainCategoryName = 'Sleep' AND date = OLD.date AND currentLoggedInUser = OLD.currentLoggedInUser)
-          WHERE date = OLD.date AND currentLoggedInUser = OLD.currentLoggedInUser;
+          SET education = (SELECT SUM(timeSpent) FROM subcategory WHERE 
+          mainCategoryName = 'Education' AND date = OLD.date AND 
+          currentLoggedInUser = OLD.currentLoggedInUser),
+              skills = (SELECT SUM(timeSpent) FROM subcategory WHERE 
+              mainCategoryName = 'Skills' AND date = OLD.date AND 
+              currentLoggedInUser = OLD.currentLoggedInUser),
+              entertainment = (SELECT SUM(timeSpent) FROM subcategory WHERE 
+              mainCategoryName = 'Entertainment' AND date = OLD.date AND 
+              currentLoggedInUser = OLD.currentLoggedInUser),
+              personalGrowth = (SELECT SUM(timeSpent) FROM subcategory WHERE 
+              mainCategoryName = 'Personal Growth' AND date = OLD.date AND 
+              currentLoggedInUser = OLD.currentLoggedInUser),
+              sleep = (SELECT SUM(timeSpent) FROM subcategory WHERE 
+              mainCategoryName = 'Sleep' AND date = OLD.date AND 
+              currentLoggedInUser = OLD.currentLoggedInUser)
+          WHERE date = OLD.date AND 
+          currentLoggedInUser = OLD.currentLoggedInUser;
         END;
         ''');
   }
@@ -168,11 +190,16 @@ class TrackerDatabaseHelper {
       // if it's false the accounted time
 
       final resultETMCT = isUnaccounted ? await db.rawQuery('''
-        SELECT ((COUNT(date) * 24)*60) - (COALESCE(SUM(education), 0) + COALESCE(SUM(skills), 0) + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(personalGrowth), 0) + COALESCE(SUM(sleep), 0)) AS EntireTotalResult
+        SELECT ((COUNT(date) * 24)*60) - (COALESCE(SUM(education), 0) 
+        + COALESCE(SUM(skills), 0) + COALESCE(SUM(entertainment), 0) + 
+        COALESCE(SUM(personalGrowth), 0) + COALESCE(SUM(sleep), 0)) 
+        AS EntireTotalResult
         FROM main_category
         WHERE currentLoggedInUser = ?
         ''', [currentUser]) : await db.rawQuery('''
-        SELECT COALESCE(SUM(education), 0) + COALESCE(SUM(skills), 0) + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(personalGrowth), 0) + COALESCE(SUM(sleep), 0) AS EntireTotalResult
+        SELECT COALESCE(SUM(education), 0) + COALESCE(SUM(skills), 0) 
+        + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(personalGrowth), 0) 
+        + COALESCE(SUM(sleep), 0) AS EntireTotalResult
         FROM main_category
         WHERE currentLoggedInUser = ?
         ''', [currentUser]);
@@ -189,7 +216,8 @@ class TrackerDatabaseHelper {
         return 0.0;
       }
     } catch (e) {
-      // Handle any database query errors, e.g., log the error and return an empty list or throw an exception.
+      // Handle any database query errors, e.g., log the error 
+      //and return an empty list or throw an exception.
       logger.e('Error in getMonthTotalAndAverage: $e');
       rethrow;
     }
@@ -206,11 +234,16 @@ class TrackerDatabaseHelper {
       final db = await database;
 
       final resultEMTMC = isUnaccounted ? await db.rawQuery('''
-        SELECT ((COUNT(date) * 24)*60) - (COALESCE(SUM(education), 0) + COALESCE(SUM(skills), 0) + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(personalGrowth), 0) + COALESCE(SUM(sleep), 0)) AS EntireTotalResult
+        SELECT ((COUNT(date) * 24)*60) - (COALESCE(SUM(education), 0) 
+        + COALESCE(SUM(skills), 0) + COALESCE(SUM(entertainment), 0) 
+        + COALESCE(SUM(personalGrowth), 0) + COALESCE(SUM(sleep), 0)) 
+        AS EntireTotalResult
         FROM main_category
         WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
             ''', [currentUser, firstDay, lastDay]) : await db.rawQuery('''
-        SELECT COALESCE(SUM(education), 0) + COALESCE(SUM(skills), 0) + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(personalGrowth), 0) + COALESCE(SUM(sleep), 0) AS EntireTotalResult
+        SELECT COALESCE(SUM(education), 0) + COALESCE(SUM(skills), 0) 
+        + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(personalGrowth), 0)
+        + COALESCE(SUM(sleep), 0) AS EntireTotalResult
         FROM main_category
         WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
             ''', [currentUser, firstDay, lastDay]);
@@ -239,7 +272,12 @@ class TrackerDatabaseHelper {
       final db = await database;
 
       final resultMAT = await db.rawQuery('''
-        SELECT COALESCE(SUM(education), 0) + COALESCE(SUM(skills), 0) + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(personalGrowth), 0) + COALESCE(SUM(sleep), 0) AS Accounted, ((COUNT(date) * 24)*60) - (COALESCE(SUM(education), 0) + COALESCE(SUM(skills), 0) + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(personalGrowth), 0) + COALESCE(SUM(sleep), 0)) AS Unaccounted
+        SELECT COALESCE(SUM(education), 0) + COALESCE(SUM(skills), 0)
+        + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(personalGrowth), 0)
+        + COALESCE(SUM(sleep), 0) AS Accounted, ((COUNT(date) * 24)*60)
+         - (COALESCE(SUM(education), 0) + COALESCE(SUM(skills), 0) 
+         + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(personalGrowth), 0)
+         + COALESCE(SUM(sleep), 0)) AS Unaccounted
         FROM main_category
         WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
         ''', [currentUser, firstDay, lastDay]);
@@ -259,24 +297,39 @@ class TrackerDatabaseHelper {
       required bool isMost}) async {
     try {
       final db = await database;
-      
+
       // if isMost is true then the result returned will be
       // for the most tracked main category if isMost is false
       // then the least tracked main category is returned
       final resultMLTMC = isMost ? await db.rawQuery(''' 
         SELECT 
         CASE
-            WHEN SUM(education) >= SUM(skills) AND SUM(education) >= SUM(entertainment) AND SUM(education) >= SUM(personalGrowth) THEN 'Education'
-            WHEN SUM(skills) >= SUM(education) AND SUM(skills) >= SUM(entertainment) AND SUM(skills) >= SUM(personalGrowth) THEN 'Skills'
-            WHEN SUM(entertainment) >= SUM(education) AND SUM(entertainment) >= SUM(skills) AND SUM(entertainment) >= SUM(personalGrowth) THEN 'Entertainment'
-            WHEN SUM(personalGrowth) >= SUM(education) AND SUM(personalGrowth) >= SUM(skills) AND SUM(personalGrowth) >= SUM(entertainment) THEN 'Personal Growth'
+            WHEN SUM(education) >= SUM(skills) AND SUM(education) >= 
+            SUM(entertainment) AND SUM(education) >= SUM(personalGrowth) 
+            THEN 'Education'
+            WHEN SUM(skills) >= SUM(education) AND SUM(skills) >=
+             SUM(entertainment) AND SUM(skills) >= SUM(personalGrowth) 
+             THEN 'Skills' WHEN SUM(entertainment) >= SUM(education) AND 
+             SUM(entertainment) >= SUM(skills) AND 
+             SUM(entertainment) >= SUM(personalGrowth) THEN 'Entertainment'
+            WHEN SUM(personalGrowth) >= SUM(education) AND 
+            SUM(personalGrowth) >= SUM(skills) AND 
+            SUM(personalGrowth) >= SUM(entertainment) THEN 'Personal Growth'
             ELSE 'Sleep'
         END AS result_tracked_category,
         CASE
-            WHEN SUM(education) >= SUM(skills) AND SUM(education) >= SUM(entertainment) AND SUM(education) >= SUM(personalGrowth) THEN SUM(education)
-            WHEN SUM(skills) >= SUM(education) AND SUM(skills) >= SUM(entertainment) AND SUM(skills) >= SUM(personalGrowth) THEN SUM(skills)
-            WHEN SUM(entertainment) >= SUM(education) AND SUM(entertainment) >= SUM(skills) AND SUM(entertainment) >= SUM(personalGrowth) THEN SUM(entertainment)
-            WHEN SUM(personalGrowth) >= SUM(education) AND SUM(personalGrowth) >= SUM(skills) AND SUM(personalGrowth) >= SUM(entertainment) THEN SUM(personalGrowth)
+            WHEN SUM(education) >= SUM(skills) AND
+             SUM(education) >= SUM(entertainment) AND 
+             SUM(education) >= SUM(personalGrowth) THEN SUM(education)
+            WHEN SUM(skills) >= SUM(education) AND 
+            SUM(skills) >= SUM(entertainment) AND
+             SUM(skills) >= SUM(personalGrowth) THEN SUM(skills)
+            WHEN SUM(entertainment) >= SUM(education) AND
+             SUM(entertainment) >= SUM(skills) AND
+            SUM(entertainment) >= SUM(personalGrowth) THEN SUM(entertainment)
+            WHEN SUM(personalGrowth) >= SUM(education) AND
+             SUM(personalGrowth) >= SUM(skills) AND
+              SUM(personalGrowth) >= SUM(entertainment) THEN SUM(personalGrowth)
             ELSE SUM(sleep)
         END AS time_spent
         FROM main_category
@@ -284,17 +337,33 @@ class TrackerDatabaseHelper {
       ''', [currentUser, firstDay, lastDay]) : await db.rawQuery('''
         SELECT 
         CASE
-            WHEN SUM(education) <= SUM(skills) AND SUM(education) <= SUM(entertainment) AND SUM(education) <= SUM(personalGrowth) THEN 'Education'
-            WHEN SUM(skills) <= SUM(education) AND SUM(skills) <= SUM(entertainment) AND SUM(skills) <= SUM(personalGrowth) THEN 'Skills'
-            WHEN SUM(entertainment) <= SUM(education) AND SUM(entertainment) <= SUM(skills) AND SUM(entertainment) <= SUM(personalGrowth) THEN 'Entertainment'
-            WHEN SUM(personalGrowth) <= SUM(education) AND SUM(personalGrowth) <= SUM(skills) AND SUM(personalGrowth) <= SUM(entertainment) THEN 'personalGrowth'
+            WHEN SUM(education) <= SUM(skills) AND
+             SUM(education) <= SUM(entertainment) AND
+             SUM(education) <= SUM(personalGrowth) THEN 'Education'
+            WHEN SUM(skills) <= SUM(education) AND
+             SUM(skills) <= SUM(entertainment) AND
+            SUM(skills) <= SUM(personalGrowth) THEN 'Skills'
+            WHEN SUM(entertainment) <= SUM(education) AND
+            SUM(entertainment) <= SUM(skills) AND
+            SUM(entertainment) <= SUM(personalGrowth) THEN 'Entertainment'
+            WHEN SUM(personalGrowth) <= SUM(education) AND
+            SUM(personalGrowth) <= SUM(skills) AND
+             SUM(personalGrowth) <= SUM(entertainment) THEN 'Personal Growth'
             ELSE 'Sleep'
         END AS result_tracked_category,
         CASE
-            WHEN SUM(education) <= SUM(skills) AND SUM(education) <= SUM(entertainment) AND SUM(education) <= SUM(personalGrowth) THEN SUM(education)
-            WHEN SUM(skills) <= SUM(education) AND SUM(skills) <= SUM(entertainment) AND SUM(skills) <= SUM(personalGrowth) THEN SUM(skills)
-            WHEN SUM(entertainment) <= SUM(education) AND SUM(entertainment) <= SUM(skills) AND SUM(entertainment) <= SUM(personalGrowth) THEN SUM(entertainment)
-            WHEN SUM(personalGrowth) <= SUM(education) AND SUM(personalGrowth) <= SUM(skills) AND SUM(personalGrowth) <= SUM(entertainment) THEN SUM(personalGrowth)
+            WHEN SUM(education) <= SUM(skills) AND
+            SUM(education) <= SUM(entertainment) AND
+            SUM(education) <= SUM(personalGrowth) THEN SUM(education)
+            WHEN SUM(skills) <= SUM(education) AND
+            SUM(skills) <= SUM(entertainment) AND
+            SUM(skills) <= SUM(personalGrowth) THEN SUM(skills)
+            WHEN SUM(entertainment) <= SUM(education) AND
+            SUM(entertainment) <= SUM(skills) AND
+            SUM(entertainment) <= SUM(personalGrowth) THEN SUM(entertainment)
+            WHEN SUM(personalGrowth) <= SUM(education) AND
+            SUM(personalGrowth) <= SUM(skills) AND
+            SUM(personalGrowth) <= SUM(entertainment) THEN SUM(personalGrowth)
             ELSE SUM(sleep)
         END AS time_spent
         FROM main_category
@@ -302,7 +371,6 @@ class TrackerDatabaseHelper {
           ''', [currentUser, firstDay, lastDay]);
 
       return resultMLTMC;
-
     } catch (e) {
       logger.e("Error: $e");
       return [];
@@ -455,13 +523,15 @@ class TrackerDatabaseHelper {
 
     try {
       final resultMTA = isSubcategory ? await db.rawQuery('''
-      SELECT subcategoryName, SUM(timeSpent) AS total, AVG(timeSpent * 1.0) AS average
+      SELECT subcategoryName, SUM(timeSpent) AS total, 
+      AVG(timeSpent * 1.0) AS average
       FROM subcategory
       WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
       GROUP BY subcategoryName
       ORDER BY total DESC;
       ''', [currentUser, startingDate, endingDate]) : await db.rawQuery('''
-      SELECT mainCategoryName, SUM(timeSpent) AS total, AVG(timeSpent * 1.0) AS average
+      SELECT mainCategoryName, SUM(timeSpent) AS total, 
+      AVG(timeSpent * 1.0) AS average
       FROM subcategory
       WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
       GROUP BY mainCategoryName
@@ -470,13 +540,14 @@ class TrackerDatabaseHelper {
 
       return resultMTA;
     } catch (e) {
-      // Handle any database query errors, e.g., log the error and return an empty list or throw an exception.
+      // Handle any database query errors, e.g., log 
+      //the error and return an empty list or throw an exception.
       logger.e('Error in getMonthTotalAndAverage: $e');
       return [];
     }
   }
 
-  // calculates and return the total time spent on a particular subcategory
+  // calculates and returns the total time spent on a particular subcategory
   Future<double> getTotalTimeSpentPerSubcategory(
       String currentDate, String currentUser, String subcategoryName) async {
     try {
@@ -506,7 +577,44 @@ class TrackerDatabaseHelper {
     }
   }
 
-  // get the top three subcategories excluding sleep
+  // get the least and most tracked subcategory
+  Future<List<Map<String, dynamic>>> getMostAndLeastTrackedSubcategory(
+      {required String firstDay,
+      required String lastDay,
+      required String currentUser,
+      required bool isMost}) async {
+    try {
+      final db = await database;
+
+      //
+      final resultMLTS = isMost ? await db.rawQuery('''
+      SELECT subcategoryName AS result_tracked_category, 
+      SUM(timeSpent) AS time_spent
+      FROM subcategory 
+      WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ? 
+      AND mainCategoryName != 'Sleep'
+      GROUP BY result_tracked_category
+      ORDER BY time_spent DESC
+      LIMIT 1;
+      ''', [currentUser, firstDay, lastDay]) : await db.rawQuery('''
+      SELECT subcategoryName AS result_tracked_category, 
+      SUM(timeSpent) AS time_spent
+      FROM subcategory 
+      WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ? 
+      AND mainCategoryName != 'Sleep'
+      GROUP BY result_tracked_category
+      ORDER BY time_spent ASC
+      LIMIT 1;
+        ''', [currentUser, firstDay, lastDay]);
+
+      logger.i(resultMLTS);
+
+      return resultMLTS;
+    } catch (e) {
+      logger.e("Error: $e");
+      return [];
+    }
+  }
 
   // updates existing subcategory categories rows
   Future<void> updateSubcategory(Subcategories subcategory) async {

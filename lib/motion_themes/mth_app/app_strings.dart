@@ -144,12 +144,19 @@ class AppString {
   static const String mainCategoryViewButtonName = "Main Category";
 
   // Report Page
+
+  static const String reportTitle = "Report";
   static const String accountedVsUnaccounterTitle = "Accounted vs Unaccounted";
   static const String mostTrackedMainTitle = "Most Tracked\nMain Category";
   static const String leastTrackedMainTitle = "Least Tracked\nMain Category";
   static const String mostTrackedTitle = "Most Tracked";
   static const String leastTrackedTitle = "Least Tracked";
-
   static const String mostAndLeastTrackedTitle = "Most and Least Tracked";
+  static const String mainCategoryDistributionTitle =
+      "Main Category Distribution";
+
+  static const String informationAboutSleep = 
+  "The amount of time you spend sleeping is not considered when determining the most and least time tracked.";
+
 
 }

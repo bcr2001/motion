@@ -158,7 +158,7 @@ class MostAndLeastTrackedBuilder extends StatelessWidget {
               Icon(
                 iconDirection,
                 color: iconColor,
-                size: 30,
+                size: 45,
               ),
 
               // totalHours and averageHours
@@ -203,6 +203,8 @@ class MostAndLeastTrackedBuilder extends StatelessWidget {
 class MostAndLeastTrackedResult extends StatelessWidget {
   final String sectionTitle;
   final int numberOfDaysInMonth;
+  final IconData resultIcon;
+  final Color resultIconColor;
 
   final Future<List<Map<String, dynamic>>> future;
 
@@ -210,7 +212,9 @@ class MostAndLeastTrackedResult extends StatelessWidget {
       {super.key,
       required this.future,
       required this.sectionTitle,
-      required this.numberOfDaysInMonth});
+      required this.numberOfDaysInMonth,
+      required this.resultIcon,
+      required this.resultIconColor});
 
   @override
   Widget build(BuildContext context) {
@@ -245,40 +249,47 @@ class MostAndLeastTrackedResult extends StatelessWidget {
                 totalHours: resultTimeSpent.toStringAsFixed(2),
                 averageHours: "${resultAverage.toStringAsFixed(2)}hr/day",
                 subcategoryName: resultTitle,
-                iconDirection: Icons.abc,
-                iconColor: Colors.green);
+                iconDirection: resultIcon,
+                iconColor: resultIconColor);
           }
         });
   }
 }
 
 // A card that contains both most and least tracked
-//  main or subcategory
-class CardForMostAndLeast extends StatelessWidget {
-  final String sectionTitle;
-  final List<Widget> cardContent;
+// main or subcategory
+class MLTitleAndCard extends StatelessWidget {
+  final String mlTitle;
+  final Card cardContent;
 
-  const CardForMostAndLeast(
-      {super.key, required this.sectionTitle, required this.cardContent});
+  const MLTitleAndCard(
+      {super.key, required this.mlTitle, required this.cardContent});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // what's being displayed title'
-        Text(sectionTitle),
 
-        // Card that containes the most and least tracked data
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 10, bottom: 10),
-            child: Row(
-              children: cardContent,
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // title (main category or subcategory)
+          Padding(
+            padding: const EdgeInsets.only(left: 10.0),
+            child: Text(
+              mlTitle,
+              style: AppTextStyle.categoryTitleTextStyle(),
             ),
           ),
-        )
-      ],
+    
+          // card content
+          SizedBox(
+            height: screenHeight*0.24,
+            child: cardContent)
+        ],
+      ),
     );
   }
 }

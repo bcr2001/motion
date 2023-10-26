@@ -27,6 +27,15 @@ class AppTextStyle {
         fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white);
   }
 
+  // report page most and least tracked title style
+  static TextStyle categoryTitleTextStyle() {
+    return _baseStyle.copyWith(
+      fontSize: 14,
+      fontWeight: FontWeight.w600,
+      color: AppColor.blueMainColor
+    );
+  }
+
   // account and unaccounted section style
   static TextStyle accountAndUnaccountTextStyle(bool isUnaccounted) {
     return _baseStyle.copyWith(
