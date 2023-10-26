@@ -162,13 +162,37 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                           // table if validation passes
                           if (_timeFormKey.currentState!.validate()) {
                             _timeFormKey.currentState!.save();
-                            if (int.parse(hourController.text) > 25 ||
-                                int.parse(minuteController.text) > 59 ||
-                                int.parse(secondController.text) > 59) {
+
+                            // checks whether the text the user passes into the
+                            // text fields are indeed values and not strings
+                            if (hourController.text.contains('.') ||
+                                minuteController.text.contains('.') ||
+                                secondController.text.contains('.') ||
+                                hourController.text.contains('-') ||
+                                minuteController.text.contains('-') ||
+                                secondController.text.contains('-')) {
+                              // if either texts contains "." or "-" then
+                              // the error message below will pop up
                               snackBarMessage(context,
                                   errorMessage:
-                                      "Invalid entry: keep entries within range!!");
+                                      AppString.manualInvalidValueError,
+                                  requiresColor: true);
+
+                              logger.e("Invald use of a dot");
+                            }
+                            // checks whether the values entered fall within
+                            // a specific range, if not then an error message
+                            // will be displayed
+                            else if (int.parse(hourController.text) > 25 ||
+                                int.parse(minuteController.text) > 59 ||
+                                int.parse(secondController.text) > 59) {
+                              // snack bar that alerts the user when the
+                              // entries are out of range
+                              snackBarMessage(context,
+                                  errorMessage: AppString.manualRangeValueError,
+                                  requiresColor: true);
                               logger.i("Failed Validation");
+                              
                             } else {
                               logger.i("Passed Validation");
 
@@ -274,6 +298,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                     // this list view generates all the time tracked
                     // for a subcategory for a particular day
                     ListView.builder(
+                        physics: const NeverScrollableScrollPhysics(),
                         shrinkWrap: true,
                         itemCount: subsTrackedOnCurrentDay.length,
                         itemBuilder: (BuildContext context, index) {

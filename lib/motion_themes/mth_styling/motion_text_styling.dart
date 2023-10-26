@@ -21,9 +21,40 @@ class AppTextStyle {
   // base styling
   static final TextStyle _baseStyle = GoogleFonts.openSans(fontSize: 16.5);
 
+  // pie chart text styling
+  static TextStyle pieChartTextStyling() {
+    return _baseStyle.copyWith(
+        fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white);
+  }
+
   // account and unaccounted section style
-  static TextStyle accountAndUnaccountTextStyle() {
-    return _baseStyle.copyWith(fontSize: 22, fontWeight: FontWeight.w600);
+  static TextStyle accountAndUnaccountTextStyle(bool isUnaccounted) {
+    return _baseStyle.copyWith(
+        fontSize: 22,
+        fontWeight: FontWeight.w600,
+        color: isUnaccounted
+            ? AppColor.unAccountedColor
+            : AppColor.accountedColor);
+  }
+
+  // account and unaccounted section style
+  static TextStyle accountRegularAndUnaccountTextStyle() {
+    return _baseStyle.copyWith(
+      fontSize: 22,
+      fontWeight: FontWeight.w600,
+    );
+  }
+
+  // most and least tracked style (totalHours)
+  static TextStyle mostAndLestTextStyleTotalHours() {
+    return _baseStyle.copyWith(fontSize: 28, fontWeight: FontWeight.bold);
+  }
+
+  // most and least tacked style (avergaeHours)
+  static TextStyle mostAndLestTextStyleAverageHours() {
+    return _baseStyle.copyWith(
+      fontSize: 11,
+    );
   }
 
   // result title text style
@@ -31,8 +62,14 @@ class AppTextStyle {
     return _baseStyle.copyWith(
         fontWeight: FontWeight.w700,
         fontSize: 13,
-        color:
-            isUnaccounted ? AppColor.unAccountedColor : AppColor.accountedColor);
+        color: isUnaccounted
+            ? AppColor.unAccountedColor
+            : AppColor.accountedColor);
+  }
+
+  // result text style regular
+  static TextStyle resultRegularTitleStyle() {
+    return _baseStyle.copyWith(fontWeight: FontWeight.w700, fontSize: 13);
   }
 
   // manual recording hint text style
@@ -58,10 +95,8 @@ class AppTextStyle {
   );
 
   // settings page subtitle fontstyle
-  static final TextStyle settingSubtitleStyling = _baseStyle.copyWith(
-    color: const Color(0xff777777),
-    fontSize: 15
-  );
+  static final TextStyle settingSubtitleStyling =
+      _baseStyle.copyWith(color: const Color(0xff777777), fontSize: 15);
 
   // THEME DATA FONT STYLING
 

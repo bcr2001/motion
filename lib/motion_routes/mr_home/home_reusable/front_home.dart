@@ -17,7 +17,8 @@ import '../../../motion_themes/mth_styling/motion_text_styling.dart';
 Widget entireTimeAccountedAndUnaccounted(
     {required Future<dynamic> future,
     required String resultName,
-    required bool isUnaccounted}) {
+    required TextStyle dayStyle,
+    required TextStyle hoursStyle}) {
   return Padding(
     padding: const EdgeInsets.symmetric(vertical: 15),
     child: Column(
@@ -52,13 +53,13 @@ Widget entireTimeAccountedAndUnaccounted(
                     Text(
                       accountedConvertedResultsDays,
                       textAlign: TextAlign.right,
-                      style: AppTextStyle.resultTitleStyle(isUnaccounted),
+                      style: dayStyle,
                     ),
 
                     // total number of hours
                     Text(
                       accountedConvertedResultsHours,
-                      style: AppTextStyle.accountAndUnaccountTextStyle(),
+                      style: hoursStyle,
                       textAlign: TextAlign.center,
                     )
                   ],
@@ -69,7 +70,7 @@ Widget entireTimeAccountedAndUnaccounted(
         // result name (Accounted or Unaccounted)
         Text(
           resultName,
-          style: AppTextStyle.resultTitleStyle(isUnaccounted),
+          style: dayStyle,
         )
       ],
     ),
@@ -105,7 +106,7 @@ Widget numberOfDaysMainCategory() {
               child: Text(
                 "Day: $totalNumberOfDays",
                 style: const TextStyle(
-                  color: AppColor.blueMainColor,
+                  color: AppColor.dayColor,
                   fontSize: 13,
                   fontWeight: FontWeight.w600
                 ),

@@ -5,7 +5,7 @@ import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 // title builder
 Widget sectionTitle({required String titleName}) {
   return Padding(
-    padding: const EdgeInsets.only(left: 10, top: 10),
+    padding: const EdgeInsets.only(left: 10, top: 10, bottom: 5),
     child: Text(
       titleName,
       style: const TextStyle(fontSize: 17.5, fontWeight: FontWeight.w600),

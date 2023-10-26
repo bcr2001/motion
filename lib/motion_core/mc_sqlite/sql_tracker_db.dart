@@ -251,6 +251,64 @@ class TrackerDatabaseHelper {
     }
   }
 
+  // get the most and least tracked main category
+  Future<List<Map<String, dynamic>>> getMostAndLeastTrackedMainCategory(
+      {required String firstDay,
+      required String lastDay,
+      required String currentUser,
+      required bool isMost}) async {
+    try {
+      final db = await database;
+      
+      // if isMost is true then the result returned will be
+      // for the most tracked main category if isMost is false
+      // then the least tracked main category is returned
+      final resultMLTMC = isMost ? await db.rawQuery(''' 
+        SELECT 
+        CASE
+            WHEN SUM(education) >= SUM(skills) AND SUM(education) >= SUM(entertainment) AND SUM(education) >= SUM(personalGrowth) THEN 'Education'
+            WHEN SUM(skills) >= SUM(education) AND SUM(skills) >= SUM(entertainment) AND SUM(skills) >= SUM(personalGrowth) THEN 'Skills'
+            WHEN SUM(entertainment) >= SUM(education) AND SUM(entertainment) >= SUM(skills) AND SUM(entertainment) >= SUM(personalGrowth) THEN 'Entertainment'
+            WHEN SUM(personalGrowth) >= SUM(education) AND SUM(personalGrowth) >= SUM(skills) AND SUM(personalGrowth) >= SUM(entertainment) THEN 'Personal Growth'
+            ELSE 'Sleep'
+        END AS result_tracked_category,
+        CASE
+            WHEN SUM(education) >= SUM(skills) AND SUM(education) >= SUM(entertainment) AND SUM(education) >= SUM(personalGrowth) THEN SUM(education)
+            WHEN SUM(skills) >= SUM(education) AND SUM(skills) >= SUM(entertainment) AND SUM(skills) >= SUM(personalGrowth) THEN SUM(skills)
+            WHEN SUM(entertainment) >= SUM(education) AND SUM(entertainment) >= SUM(skills) AND SUM(entertainment) >= SUM(personalGrowth) THEN SUM(entertainment)
+            WHEN SUM(personalGrowth) >= SUM(education) AND SUM(personalGrowth) >= SUM(skills) AND SUM(personalGrowth) >= SUM(entertainment) THEN SUM(personalGrowth)
+            ELSE SUM(sleep)
+        END AS time_spent
+        FROM main_category
+        WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
+      ''', [currentUser, firstDay, lastDay]) : await db.rawQuery('''
+        SELECT 
+        CASE
+            WHEN SUM(education) <= SUM(skills) AND SUM(education) <= SUM(entertainment) AND SUM(education) <= SUM(personalGrowth) THEN 'Education'
+            WHEN SUM(skills) <= SUM(education) AND SUM(skills) <= SUM(entertainment) AND SUM(skills) <= SUM(personalGrowth) THEN 'Skills'
+            WHEN SUM(entertainment) <= SUM(education) AND SUM(entertainment) <= SUM(skills) AND SUM(entertainment) <= SUM(personalGrowth) THEN 'Entertainment'
+            WHEN SUM(personalGrowth) <= SUM(education) AND SUM(personalGrowth) <= SUM(skills) AND SUM(personalGrowth) <= SUM(entertainment) THEN 'personalGrowth'
+            ELSE 'Sleep'
+        END AS result_tracked_category,
+        CASE
+            WHEN SUM(education) <= SUM(skills) AND SUM(education) <= SUM(entertainment) AND SUM(education) <= SUM(personalGrowth) THEN SUM(education)
+            WHEN SUM(skills) <= SUM(education) AND SUM(skills) <= SUM(entertainment) AND SUM(skills) <= SUM(personalGrowth) THEN SUM(skills)
+            WHEN SUM(entertainment) <= SUM(education) AND SUM(entertainment) <= SUM(skills) AND SUM(entertainment) <= SUM(personalGrowth) THEN SUM(entertainment)
+            WHEN SUM(personalGrowth) <= SUM(education) AND SUM(personalGrowth) <= SUM(skills) AND SUM(personalGrowth) <= SUM(entertainment) THEN SUM(personalGrowth)
+            ELSE SUM(sleep)
+        END AS time_spent
+        FROM main_category
+        WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
+          ''', [currentUser, firstDay, lastDay]);
+
+      return resultMLTMC;
+
+    } catch (e) {
+      logger.e("Error: $e");
+      return [];
+    }
+  }
+
   // updates existing main categories rows
   Future<void> updateMainCategory(MainCategory mainCategory) async {
     try {

@@ -64,6 +64,22 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
 
     return numberOfDays;
   }
+
+  // retrieve the most tracked and least tracked main category
+  Future<List<Map<String, dynamic>>> retrieveMostAndLeastTrackedMainCategory(
+      {required String firstDay,
+      required String lastDay,
+      required String currentUser,
+      required bool isMost}) async {
+    List<Map<String, dynamic>> result =
+        await trackDbInstance.getMostAndLeastTrackedMainCategory(
+            firstDay: firstDay,
+            lastDay: lastDay,
+            currentUser: currentUser,
+            isMost: isMost);
+
+    return result;
+  }
 }
 
 // handles database operation for the subcategory table
@@ -108,7 +124,7 @@ class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
         currentDate, currentUser);
   }
 
-  // get the total time spent for s specific subcategory
+  // get the total time spent for a specific subcategory
   Future<double> retrieveTotalTimeSpentSubSpecific(
       String currentDate, String currentUser, String subcategoryName) async {
     return await trackDbInstance.getTotalTimeSpentPerSubcategory(

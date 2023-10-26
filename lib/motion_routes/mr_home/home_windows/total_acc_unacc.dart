@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
+import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:provider/provider.dart';
 import '../../../motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import '../../../motion_themes/mth_app/app_strings.dart';
 import '../home_reusable/front_home.dart';
 
 // accounted and unaccounted total for the entire main_category table
-// second section of the home page 
+// second section of the home page
 class TotalAccountedAndUnaccounted extends StatelessWidget {
   const TotalAccountedAndUnaccounted({super.key});
 
@@ -24,14 +25,16 @@ class TotalAccountedAndUnaccounted extends StatelessWidget {
                 future: main.retrieveEntireTotalMainCategoryTable(
                     currentUser!, false),
                 resultName: AppString.accountedTitle,
-                isUnaccounted: false),
+                dayStyle: AppTextStyle.resultTitleStyle(false),
+                hoursStyle: AppTextStyle.accountRegularAndUnaccountTextStyle()),
 
             // Unaccounted total
             entireTimeAccountedAndUnaccounted(
                 future: main.retrieveEntireTotalMainCategoryTable(
                     currentUser, true),
                 resultName: AppString.unAccountedTitle,
-                isUnaccounted: true)
+                dayStyle: AppTextStyle.resultTitleStyle(true),
+                hoursStyle: AppTextStyle.accountRegularAndUnaccountTextStyle())
           ],
         );
       },

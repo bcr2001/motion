@@ -7,10 +7,13 @@ class AppString {
   // mc_firebase
   static const String firebaseUserNotFoundError = "User no found";
   static const String firebaseIncorrectPassword = "Incorrect password";
-  static const String firebaseSomethingWentWrong = "Something went wrong on our side :(";
-  static const String firebaseEmailInUse = "The email you provided is already in use";
+  static const String firebaseSomethingWentWrong =
+      "Something went wrong on our side :(";
+  static const String firebaseEmailInUse =
+      "The email you provided is already in use";
   static const String firebaseUnableToSignOut = "Unable to sign out";
-  static const String firebaseGoogleSignInError = "Check your internet connection and try again...";
+  static const String firebaseGoogleSignInError =
+      "Check your internet connection and try again...";
 
   // edit page
   static const String editPageAppBarTitle = "Edit";
@@ -102,13 +105,11 @@ class AppString {
   static const String pgMainCategory = "Personal Growth";
   static const String sleepMainCategory = "Sleep";
 
-
   static const String addItem = "Add";
   static const String unknown = "unknown";
   static const newAlertDialogTitle = "Create a new subcategory";
 
-  static const String emptySubcategoryValidatorMessage =
-      "empty subcategory";
+  static const String emptySubcategoryValidatorMessage = "empty subcategory";
   static const String subcategoryContainsNumberMessage =
       "a subcategory name cannot contain numbers";
   static const String subcategoryContainsSpacesMessage =
@@ -117,13 +118,16 @@ class AppString {
   static const String trackCancelTextButton = "CANCEL";
   static const String trackAddTextButton = "ADD";
   static const String trackDropDownHintText = "Select a Main Category";
-  static const String trackMainCategoryNotSelectedError = "Please select a value from the drop-down.";
+  static const String trackMainCategoryNotSelectedError =
+      "Please select a value from the drop-down.";
 
   // MANUAL RECORDING ROUTE
   static const String manualAddBlock = "Add time block";
   static const String manualSave = "Save";
   static const String blockTitle = "Today’s Blocks";
   static const String timeCreated = "Time Created:";
+  static const String manualInvalidValueError = "Please enter valid values";
+  static const String manualRangeValueError = "Keep entries within range!!";
 
   // HOME ROUTE
   static const String homeSubcategoryTitle = "Subcategories";
@@ -138,4 +142,14 @@ class AppString {
 
   static const String subcategoryViewButtonName = "Subcategory";
   static const String mainCategoryViewButtonName = "Main Category";
+
+  // Report Page
+  static const String accountedVsUnaccounterTitle = "Accounted vs Unaccounted";
+  static const String mostTrackedMainTitle = "Most Tracked\nMain Category";
+  static const String leastTrackedMainTitle = "Least Tracked\nMain Category";
+  static const String mostTrackedTitle = "Most Tracked";
+  static const String leastTrackedTitle = "Least Tracked";
+
+  static const String mostAndLeastTrackedTitle = "Most and Least Tracked";
+
 }
