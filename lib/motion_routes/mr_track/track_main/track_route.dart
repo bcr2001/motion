@@ -156,11 +156,10 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                           snackBarMessage(context,
                               errorMessage:
                                   "${subcategoryController.text}added to the ${mainCategoryProvider.selectedValue} Category");
-                                  
+
                           navigationKey.currentState!.pop();
                           subcategoryController.text = "";
                           mainCategoryProvider.changeSelectedValue(null);
-
                         }
                       }
                     },
@@ -256,13 +255,13 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
 
                   // personal growth category
                   CardConstructor(
-                      cardTitle: AppString.pgMainCategory,
+                      cardTitle: AppString.personalGrowthMainCategory,
                       cardListView: TrackListViewBuiler(
                           itemCount: items.length,
                           itemBuilder: (BuildContext context, index) {
                             return items[index].currentLoggedInUser == user &&
                                     items[index].mainCategoryName ==
-                                        AppString.pgMainCategory &&
+                                        AppString.personalGrowthMainCategory &&
                                     items[index].isArchive == 0
                                 ? _listTileBuilder(
                                     activeStatus: items[index].isActive,

@@ -7,6 +7,8 @@ import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:provider/provider.dart';
 import '../../motion_reusable/db_re/sub_ui.dart';
+import '../../motion_reusable/general_reuseable.dart';
+import '../../motion_themes/mth_app/app_images.dart';
 
 // A custom widget for displaying a pie chart representing accounted and unaccounted data.
 class AccountedUnaccountedReportPieChart extends StatelessWidget {
@@ -23,50 +25,135 @@ class AccountedUnaccountedReportPieChart extends StatelessWidget {
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               // Loading state: Show a shimmer effect while data is being loaded.
-              return const ShimmerWidget.rectangular(width: 100, height: 25);
+              return const ShimmerWidget.rectangular(width: 100, height: 100);
             } else if (snapshot.hasError) {
               // Error state: Display an error message if there's an issue with data retrieval.
               return const Text("Error 355 :(");
             } else {
-              // Data loaded state: Calculate pie chart values and display it.
-              List<Map<String, dynamic>> totalAccountUnaccountedMap =
-                  snapshot.data ?? [];
+              if (snapshot.hasData &&
+                  snapshot.data != null &&
+                  snapshot.data!.isNotEmpty) {
+                // Data loaded state: Calculate pie chart values and display it.
+                List<Map<String, dynamic>> totalAccountUnaccountedMap =
+                    snapshot.data ?? [];
 
-              // gets and converts the accounted data to hours
-              double accounted =
-                  (totalAccountUnaccountedMap[0]["Accounted"] / 60);
 
-              // gets and converts the unaccounted data to hours
-              double unAccounted =
-                  (totalAccountUnaccountedMap[0]["Unaccounted"] / 60);
+                // gets and converts the accounted data to hours
+                double accounted =
+                    (totalAccountUnaccountedMap[0]["Accounted"] / 60);
 
-              // total between accounted and unaccounted values
-              double total = accounted + unAccounted;
+                // gets and converts the unaccounted data to hours
+                double unAccounted =
+                    (totalAccountUnaccountedMap[0]["Unaccounted"] / 60);
 
-              // converting both the accounted and unaccounted values to double
-              double accountedDouble =
-                  double.parse(((accounted / total) * 100).toStringAsFixed(1));
-              double unAccountedDouble = double.parse(
-                  ((unAccounted / total) * 100).toStringAsFixed(1));
+                // total between accounted and unaccounted values
+                double total = accounted + unAccounted;
 
-              return PieChartBuilder(sections: [
-                // Accounted proportion
-                PieChartSectionData(
-                    titleStyle: AppTextStyle.pieChartTextStyling(),
-                    title: "$accountedDouble%",
-                    value: accountedDouble,
-                    color: AppColor.accountedColor),
+                // converting both the accounted and unaccounted values to double
+                double accountedDouble = double.parse(
+                    ((accounted / total) * 100).toStringAsFixed(1));
+                double unAccountedDouble = double.parse(
+                    ((unAccounted / total) * 100).toStringAsFixed(1));
 
-                // Unaccounted proportion
-                PieChartSectionData(
-                    titleStyle: AppTextStyle.pieChartTextStyling(),
-                    title: "$unAccountedDouble%",
-                    value: unAccountedDouble,
-                    color: AppColor.unAccountedColor),
-              ]);
+                return PieChartBuilder(sections: [
+                  // Accounted proportion
+                  PieChartSectionData(
+                      titleStyle: AppTextStyle.pieChartTextStyling(),
+                      title: "$accountedDouble%",
+                      value: accountedDouble,
+                      color: AppColor.accountedColor),
+
+                  // Unaccounted proportion
+                  PieChartSectionData(
+                      titleStyle: AppTextStyle.pieChartTextStyling(),
+                      title: "$unAccountedDouble%",
+                      value: unAccountedDouble,
+                      color: AppColor.unAccountedColor),
+                ]);
+              } else {
+                return const Text("");
+              }
             }
           });
     });
+  }
+}
+
+// displays the Main category Distribution pie chart
+class MainCategoryDistributionPieChart extends StatelessWidget {
+  const MainCategoryDistributionPieChart({super.key});
+
+  Color _getCategoryColor(int index) {
+    switch (index) {
+      case 0:
+        return AppColor.educationPieChartColor;
+      case 1:
+        return AppColor.entertainmentPieChartColor;
+      case 2:
+        return AppColor.personalGrowthPieChartColor;
+      case 3:
+        return AppColor.skillsPieChartColor;
+      case 4:
+        return AppColor.sleepPieChartColor;
+      default:
+        return Colors.grey; // Default color for other categories
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer3<UserUidProvider, FirstAndLastDay,
+        MainCategoryTrackerProvider>(
+      builder: (context, user, day, main, child) {
+        return FutureBuilder(
+          future: main.retrieveMainTotalTimeSpentSpecificDates(
+            currentUser: user.userUid!,
+            firstDay: day.firstDay,
+            lastDay: day.lastDay,
+          ),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              // Loading state: Show a shimmer effect while data is being loaded.
+              return const ShimmerWidget.rectangular(width: 100, height: 100);
+            } else if (snapshot.hasError) {
+              // Error state: Display an error message if there's an issue with data retrieval.
+              return const Text("Error: Unable to retrieve data.");
+            } else {
+              List<Map<String, dynamic>> mainTotalResults = snapshot.data ?? [];
+
+              logger.i(mainTotalResults);
+
+              double totalMainCategoryValues =
+                  mainTotalResults.fold(0.0, (prev, element) {
+                return prev + (element["totalTimeSpent"] ?? 0.0);
+              });
+
+              List<PieChartSectionData> sections = [];
+
+              for (int i = 0; i < mainTotalResults.length; i++) {
+                final totalTimeSpent =
+                    mainTotalResults[i]["totalTimeSpent"] ?? 0.0;
+                double categoryValue =
+                    totalTimeSpent / totalMainCategoryValues * 100;
+                String formattedValue = categoryValue.toStringAsFixed(1);
+
+                sections.add(
+                  PieChartSectionData(
+                    titleStyle: AppTextStyle.pieChartTextStyling(),
+                    title: "$formattedValue%",
+                    value: categoryValue,
+                    color: _getCategoryColor(
+                        i), // Define this function to get category colors
+                  ),
+                );
+              }
+
+              return PieChartBuilder(sections: sections);
+            }
+          },
+        );
+      },
+    );
   }
 }
 
@@ -208,51 +295,69 @@ class MostAndLeastTrackedResult extends StatelessWidget {
 
   final Future<List<Map<String, dynamic>>> future;
 
-  const MostAndLeastTrackedResult(
-      {super.key,
-      required this.future,
-      required this.sectionTitle,
-      required this.numberOfDaysInMonth,
-      required this.resultIcon,
-      required this.resultIconColor});
+  const MostAndLeastTrackedResult({
+    super.key,
+    required this.future,
+    required this.sectionTitle,
+    required this.numberOfDaysInMonth,
+    required this.resultIcon,
+    required this.resultIconColor,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-        future: future,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            // while the data is loading, a shimmer
-            // effect is shown
-            return const ShimmerWidget.rectangular(
-              height: 50,
-              width: 50,
-            );
-          } else if (snapshot.hasError) {
-            return Text('Error: ${snapshot.error}');
-          } else {
-            // data is available, snapshot.data
-            // to get the results
-            List<Map<String, dynamic>>? mostLeastResults = snapshot.data;
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: future,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          // While the data is loading, a shimmer effect is shown
+          return const ShimmerWidget.rectangular(
+            height: 50,
+            width: 50,
+          );
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        } else {
+          // Data is available, snapshot.data to get the results
+          if (snapshot.hasData &&
+              snapshot.data != null &&
+              snapshot.data!.isNotEmpty) {
+            List<Map<String, dynamic>> mostLeastResults = snapshot.data!;
 
-            // get category name for either least or most tracked
-            final resultTitle = mostLeastResults![0]["result_tracked_category"];
+            // Get category name for either least or most tracked
+            final resultTitle =
+                mostLeastResults[0]["result_tracked_category"] ?? 'N/A';
 
-            // get the value result of the time spent
-            double resultTimeSpent = mostLeastResults[0]["time_spent"] / 60;
+            // Get the value result of the time spent
+            double resultTimeSpent =
+                (mostLeastResults[0]["time_spent"] ?? 0) / 60;
 
-            // get the average of the result
+            // Get the average of the result
             double resultAverage = resultTimeSpent / numberOfDaysInMonth;
 
             return MostAndLeastTrackedBuilder(
-                title: sectionTitle,
-                totalHours: resultTimeSpent.toStringAsFixed(2),
-                averageHours: "${resultAverage.toStringAsFixed(2)}hr/day",
-                subcategoryName: resultTitle,
-                iconDirection: resultIcon,
-                iconColor: resultIconColor);
+              title: sectionTitle,
+              totalHours: resultTimeSpent.toStringAsFixed(2),
+              averageHours: "${resultAverage.toStringAsFixed(2)}hr/day",
+              subcategoryName: resultTitle,
+              iconDirection: resultIcon,
+              iconColor: resultIconColor,
+            );
+          } else {
+            // Handle case where data is empty or null
+            return MostAndLeastTrackedBuilder(
+              title: sectionTitle,
+              totalHours: "0.0",
+              averageHours: "0.0hr/day",
+              subcategoryName: "TBD",
+              iconDirection: resultIcon,
+              iconColor: resultIconColor,
+            );
+            ;
           }
-        });
+        }
+      },
+    );
   }
 }
 
@@ -267,7 +372,6 @@ class MLTitleAndCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Padding(
@@ -283,13 +387,21 @@ class MLTitleAndCard extends StatelessWidget {
               style: AppTextStyle.categoryTitleTextStyle(),
             ),
           ),
-    
+
           // card content
-          SizedBox(
-            height: screenHeight*0.24,
-            child: cardContent)
+          SizedBox(height: screenHeight * 0.24, child: cardContent)
         ],
       ),
     );
   }
+}
+
+// pie chart color palette
+Widget chartColorPalette({required Color color}) {
+  return Container(
+    height: 10,
+    width: 20,
+    decoration:
+        BoxDecoration(color: color, borderRadius: BorderRadius.circular(10)),
+  );
 }

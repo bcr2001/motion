@@ -25,7 +25,7 @@ class TotalAccountedAndUnaccounted extends StatelessWidget {
                 future: main.retrieveEntireTotalMainCategoryTable(
                     currentUser!, false),
                 resultName: AppString.accountedTitle,
-                dayStyle: AppTextStyle.resultTitleStyle(false),
+                dayStyle: AppTextStyle.resultTitleStyleHome(false),
                 hoursStyle: AppTextStyle.accountRegularAndUnaccountTextStyle()),
 
             // Unaccounted total
@@ -33,7 +33,7 @@ class TotalAccountedAndUnaccounted extends StatelessWidget {
                 future: main.retrieveEntireTotalMainCategoryTable(
                     currentUser, true),
                 resultName: AppString.unAccountedTitle,
-                dayStyle: AppTextStyle.resultTitleStyle(true),
+                dayStyle: AppTextStyle.resultTitleStyleHome(true),
                 hoursStyle: AppTextStyle.accountRegularAndUnaccountTextStyle())
           ],
         );

@@ -216,7 +216,7 @@ class TrackerDatabaseHelper {
         return 0.0;
       }
     } catch (e) {
-      // Handle any database query errors, e.g., log the error 
+      // Handle any database query errors, e.g., log the error
       //and return an empty list or throw an exception.
       logger.e('Error in getMonthTotalAndAverage: $e');
       rethrow;
@@ -283,6 +283,7 @@ class TrackerDatabaseHelper {
         ''', [currentUser, firstDay, lastDay]);
 
       return resultMAT;
+      
     } catch (e) {
       logger.e("Error: $e");
       return [];
@@ -301,78 +302,52 @@ class TrackerDatabaseHelper {
       // if isMost is true then the result returned will be
       // for the most tracked main category if isMost is false
       // then the least tracked main category is returned
-      final resultMLTMC = isMost ? await db.rawQuery(''' 
-        SELECT 
-        CASE
-            WHEN SUM(education) >= SUM(skills) AND SUM(education) >= 
-            SUM(entertainment) AND SUM(education) >= SUM(personalGrowth) 
-            THEN 'Education'
-            WHEN SUM(skills) >= SUM(education) AND SUM(skills) >=
-             SUM(entertainment) AND SUM(skills) >= SUM(personalGrowth) 
-             THEN 'Skills' WHEN SUM(entertainment) >= SUM(education) AND 
-             SUM(entertainment) >= SUM(skills) AND 
-             SUM(entertainment) >= SUM(personalGrowth) THEN 'Entertainment'
-            WHEN SUM(personalGrowth) >= SUM(education) AND 
-            SUM(personalGrowth) >= SUM(skills) AND 
-            SUM(personalGrowth) >= SUM(entertainment) THEN 'Personal Growth'
-            ELSE 'Sleep'
-        END AS result_tracked_category,
-        CASE
-            WHEN SUM(education) >= SUM(skills) AND
-             SUM(education) >= SUM(entertainment) AND 
-             SUM(education) >= SUM(personalGrowth) THEN SUM(education)
-            WHEN SUM(skills) >= SUM(education) AND 
-            SUM(skills) >= SUM(entertainment) AND
-             SUM(skills) >= SUM(personalGrowth) THEN SUM(skills)
-            WHEN SUM(entertainment) >= SUM(education) AND
-             SUM(entertainment) >= SUM(skills) AND
-            SUM(entertainment) >= SUM(personalGrowth) THEN SUM(entertainment)
-            WHEN SUM(personalGrowth) >= SUM(education) AND
-             SUM(personalGrowth) >= SUM(skills) AND
-              SUM(personalGrowth) >= SUM(entertainment) THEN SUM(personalGrowth)
-            ELSE SUM(sleep)
-        END AS time_spent
-        FROM main_category
-        WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
+      final resultMLTMC = isMost ? await db.rawQuery('''
+      SELECT mainCategoryName AS result_tracked_category, SUM(timeSpent) AS time_spent
+      FROM subcategory
+      WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
+      GROUP BY mainCategoryName
+      ORDER BY time_spent DESC
+      LIMIT 1
       ''', [currentUser, firstDay, lastDay]) : await db.rawQuery('''
-        SELECT 
-        CASE
-            WHEN SUM(education) <= SUM(skills) AND
-             SUM(education) <= SUM(entertainment) AND
-             SUM(education) <= SUM(personalGrowth) THEN 'Education'
-            WHEN SUM(skills) <= SUM(education) AND
-             SUM(skills) <= SUM(entertainment) AND
-            SUM(skills) <= SUM(personalGrowth) THEN 'Skills'
-            WHEN SUM(entertainment) <= SUM(education) AND
-            SUM(entertainment) <= SUM(skills) AND
-            SUM(entertainment) <= SUM(personalGrowth) THEN 'Entertainment'
-            WHEN SUM(personalGrowth) <= SUM(education) AND
-            SUM(personalGrowth) <= SUM(skills) AND
-             SUM(personalGrowth) <= SUM(entertainment) THEN 'Personal Growth'
-            ELSE 'Sleep'
-        END AS result_tracked_category,
-        CASE
-            WHEN SUM(education) <= SUM(skills) AND
-            SUM(education) <= SUM(entertainment) AND
-            SUM(education) <= SUM(personalGrowth) THEN SUM(education)
-            WHEN SUM(skills) <= SUM(education) AND
-            SUM(skills) <= SUM(entertainment) AND
-            SUM(skills) <= SUM(personalGrowth) THEN SUM(skills)
-            WHEN SUM(entertainment) <= SUM(education) AND
-            SUM(entertainment) <= SUM(skills) AND
-            SUM(entertainment) <= SUM(personalGrowth) THEN SUM(entertainment)
-            WHEN SUM(personalGrowth) <= SUM(education) AND
-            SUM(personalGrowth) <= SUM(skills) AND
-            SUM(personalGrowth) <= SUM(entertainment) THEN SUM(personalGrowth)
-            ELSE SUM(sleep)
-        END AS time_spent
-        FROM main_category
-        WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
+      SELECT mainCategoryName AS result_tracked_category, SUM(timeSpent) AS time_spent
+      FROM subcategory
+      WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
+      GROUP BY mainCategoryName
+      ORDER BY time_spent ASC
+      LIMIT 1
           ''', [currentUser, firstDay, lastDay]);
 
       return resultMLTMC;
     } catch (e) {
       logger.e("Error: $e");
+      return [];
+    }
+  }
+
+  // get the total time time spent for the main categorys
+  // during a specified period of time
+  Future<List<Map<String, dynamic>>> getMainTotalTimeSpentSpecificDates(
+      {required String currentUser,
+      required String firstDay,
+      required String lastDay}) async {
+    try {
+      final db = await database;
+
+      // returns a list of Map objects for the main categories
+      // together with their totals for the specified dates.
+      final resultMTTSSD = await db.rawQuery('''
+        SELECT mainCategoryName, SUM(timeSpent)/60 AS totalTimeSpent
+        FROM subcategory
+        WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
+        GROUP BY mainCategoryName
+        ''', [currentUser, firstDay, lastDay]);
+
+      return resultMTTSSD;
+    } catch (e) {
+      // if there is an error, an empty list is returned
+      // and the error is logged to the console
+      logger.i("Error: $e");
       return [];
     }
   }
@@ -540,7 +515,7 @@ class TrackerDatabaseHelper {
 
       return resultMTA;
     } catch (e) {
-      // Handle any database query errors, e.g., log 
+      // Handle any database query errors, e.g., log
       //the error and return an empty list or throw an exception.
       logger.e('Error in getMonthTotalAndAverage: $e');
       return [];
@@ -578,6 +553,8 @@ class TrackerDatabaseHelper {
   }
 
   // get the least and most tracked subcategory
+  // the subcategory name and total time spent
+  // during the defined period of time
   Future<List<Map<String, dynamic>>> getMostAndLeastTrackedSubcategory(
       {required String firstDay,
       required String lastDay,
@@ -606,8 +583,6 @@ class TrackerDatabaseHelper {
       ORDER BY time_spent ASC
       LIMIT 1;
         ''', [currentUser, firstDay, lastDay]);
-
-      logger.i(resultMLTS);
 
       return resultMLTS;
     } catch (e) {

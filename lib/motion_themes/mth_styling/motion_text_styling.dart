@@ -21,19 +21,29 @@ class AppTextStyle {
   // base styling
   static final TextStyle _baseStyle = GoogleFonts.openSans(fontSize: 16.5);
 
+  // zen quote text styling
+  static TextStyle quoteTextStyle() {
+    return _baseStyle.copyWith(
+      fontSize: 13
+    );
+  }
+
   // pie chart text styling
   static TextStyle pieChartTextStyling() {
-    return _baseStyle.copyWith(
-        fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white);
+    return _baseStyle.copyWith(fontSize: 12.5, fontWeight: FontWeight.w600);
+  }
+
+  // legend text style
+  static TextStyle legendTextStyling() {
+    return _baseStyle.copyWith(fontSize: 14);
   }
 
   // report page most and least tracked title style
   static TextStyle categoryTitleTextStyle() {
     return _baseStyle.copyWith(
-      fontSize: 14,
-      fontWeight: FontWeight.w600,
-      color: AppColor.blueMainColor
-    );
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        color: AppColor.blueMainColor);
   }
 
   // account and unaccounted section style
@@ -74,6 +84,16 @@ class AppTextStyle {
         color: isUnaccounted
             ? AppColor.unAccountedColor
             : AppColor.accountedColor);
+  }
+
+  // result title text style (home)
+  static TextStyle resultTitleStyleHome(bool isUnaccounted) {
+    return _baseStyle.copyWith(
+        fontWeight: FontWeight.w700,
+        fontSize: 13,
+        color: isUnaccounted
+            ? Colors.red
+            : Colors.green);
   }
 
   // result text style regular

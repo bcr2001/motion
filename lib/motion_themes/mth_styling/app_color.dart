@@ -2,14 +2,26 @@ import 'package:flutter/material.dart';
 
 // contains all the colors used through out the app
 class AppColor {
-  // day color (Home page: section 1)
-  static const Color dayColor = Color(0xFFFF8E2B);
-
-  // unaccounted color
+  // unaccounted pie section color
   static const Color unAccountedColor = Color(0xFF00ECC2);
 
-  // accounted color
+  // accounted pie section color
   static const Color accountedColor = Color(0xFF0191B4);
+
+  // sleep color
+  static const Color sleepPieChartColor = Colors.blueGrey;
+
+  // education color
+  static const Color educationPieChartColor = Color(0xFFA3E062);
+
+  // skills color
+  static const Color skillsPieChartColor = Color(0xFF9BA9B4);
+
+  // entertainment color
+  static const Color entertainmentPieChartColor = Color(0xFF287094);
+  
+  // personal growth color
+  static const Color personalGrowthPieChartColor = Color(0xFF37AA85);
 
   // most tracked color
   static const Color mostTrackedBorderColor = Color(0XFF52D726);

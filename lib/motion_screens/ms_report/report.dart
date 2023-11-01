@@ -5,7 +5,7 @@ import '../../motion_routes/mr_home/home_reusable/back_home.dart';
 import '../../motion_themes/mth_app/app_strings.dart';
 import 'report_front.dart';
 
-//the data summary for the entire current month
+// the data summary for the entire current month
 // this page contains, charts and summary information
 // related to the current month
 class MonthlyReportPage extends StatelessWidget {
@@ -15,8 +15,8 @@ class MonthlyReportPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          // get the current month name from the CurrentMonthProvider
-          // class
+          // get the current month name from the 
+          // CurrentMonthProvider class
           title: Consumer<CurrentMonthProvider>(
             builder: (context, month, child) {
               final currentMonth = month.currentMonthName;
@@ -27,11 +27,10 @@ class MonthlyReportPage extends StatelessWidget {
         body: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
             children: [
-
               // Pie Chart Data Title
               sectionTitle(titleName: AppString.accountedVsUnaccounterTitle),
               // pie chart for the accounted and unaccounted distribution
-              const PieChartAndValues(),
+              const PieChartAndValuesAccountedAndUnaccounted(),
 
               // MOST TRACKED AND LEAST TRACKED SECTION
 
@@ -39,12 +38,13 @@ class MonthlyReportPage extends StatelessWidget {
               sectionTitle(titleName: AppString.mostAndLeastTrackedTitle),
 
               // main category section
-              // the summary of the most tracked and least tracked 
+              // the summary of the most tracked and least tracked
               // main categories
               const MostAndLeastTrackedMaincategorySection(),
 
               // section information
-              // info about why the sleep category is not included in the 
+              // info about why the sleep category is not included in the
+              // most and least tracked
               const InfoAboutSleep(),
 
               // subcategory section
@@ -52,10 +52,14 @@ class MonthlyReportPage extends StatelessWidget {
               // main categories
               const MostAndLeastTrackedSubcategorySection(),
 
+              // Pie chart for the main category 
+              //distribution for the current month
+              sectionTitle(titleName: AppString.mainCategoryDistributionTitle),
 
-              // Pie chart for the main category distribution for the 
-              // current month
-              sectionTitle(titleName:AppString.mainCategoryDistributionTitle )
+              const PieChartDataMainCategoryDistribution()
+
+              // Subcategory Distribution 
+              
             ]));
   }
 }

@@ -30,7 +30,7 @@ void main() async {
 
   // databaseHelper.updateCurrentUser();
 
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform); 
 
   // AppThemeModeProvider Instance
   final appThemeMode = AppThemeModeProvider();

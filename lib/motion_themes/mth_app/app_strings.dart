@@ -102,7 +102,7 @@ class AppString {
   static const String educationMainCategory = "Education";
   static const String skillMainCategory = "Skills";
   static const String entertainmentMainCategory = "Entertainment";
-  static const String pgMainCategory = "Personal Growth";
+  static const String personalGrowthMainCategory = "Personal Growth";
   static const String sleepMainCategory = "Sleep";
 
   static const String addItem = "Add";
@@ -155,8 +155,6 @@ class AppString {
   static const String mainCategoryDistributionTitle =
       "Main Category Distribution";
 
-  static const String informationAboutSleep = 
-  "The amount of time you spend sleeping is not considered when determining the most and least time tracked.";
-
-
+  static const String informationAboutSleep =
+      "The amount of time you spend sleeping is not considered when determining the most and least time tracked.";
 }

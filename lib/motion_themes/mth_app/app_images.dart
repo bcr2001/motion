@@ -15,15 +15,21 @@ class AppImages {
   // default pfp
   static final defaultPfp = getAssetImage("motion_pfp.jpg");
 
-  static final continueWithGoogleImage = getAssetImage("google_1.png",30, 30);
+  // google icon
+  static final continueWithGoogleImage = getAssetImage("google_1.png", 30, 30);
+
+  // no data available yet
+  static final noDataAvailableYet = getAssetImage("dark-data.png", 150,150);
 }
 
 // png images
 Image getAssetImage(String imageName, [double? height, double? width]) {
   const String imagesFileLocation = "assets/images/motion_icons/";
-  return Image.asset("$imagesFileLocation$imageName",
-  height: height,
-  width: width,);
+  return Image.asset(
+    "$imagesFileLocation$imageName",
+    height: height,
+    width: width,
+  );
 }
 
 // svg images

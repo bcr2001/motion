@@ -6,6 +6,7 @@ import 'package:motion/motion_routes/mr_home/home_directions/category_direction.
 import 'package:motion/motion_routes/mr_home/home_windows/tracking_window.dart';
 import 'package:motion/motion_routes/mr_home/home_windows/summary_window.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
+import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:provider/provider.dart';
 import 'package:motion/motion_routes/route_action.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
@@ -49,7 +50,7 @@ class MotionHomeRoute extends StatelessWidget {
             return Text(
               zenQuoteValue.todaysQuote,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodySmall,
+              style: AppTextStyle.quoteTextStyle(),
             );
           },
         ));

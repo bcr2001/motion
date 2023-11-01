@@ -32,9 +32,8 @@ class MostAndLeastTrackedMaincategorySection extends StatelessWidget {
                   String currentLoggedInUser = user.userUid!;
 
                   // the number of days in the current month
-                  // used to get the average hours per day 
+                  // used to get the average hours per day
                   int numberOfDaysInCurrentMonth = day.days;
-
 
                   return Row(
                     children: [
@@ -76,24 +75,23 @@ class MostAndLeastTrackedSubcategorySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  MLTitleAndCard(
-        mlTitle: AppString.subcategoryViewButtonName, cardContent: Card(
+    return MLTitleAndCard(
+        mlTitle: AppString.subcategoryViewButtonName,
+        cardContent: Card(
           child: Padding(
               padding: const EdgeInsets.only(top: 10, bottom: 14),
               child: Consumer3<FirstAndLastDay, UserUidProvider,
                   SubcategoryTrackerDatabaseProvider>(
                 builder: (context, day, user, sub, child) {
-
                   // first and last day of the month
                   String firstDayOfMonth = day.firstDay;
                   String lastDayOfMonth = day.lastDay;
 
                   // currently logged in user
                   String currentLoggedInUser = user.userUid!;
-                  
+
                   // number of days in the current month
                   int numberOfDaysInCurrentMonth = day.days;
-
 
                   return Row(
                     children: [
@@ -130,18 +128,8 @@ class MostAndLeastTrackedSubcategorySection extends StatelessWidget {
 
 // custom widget that returns a pie chart
 // and their data value distribution
-class PieChartAndValues extends StatelessWidget {
-  const PieChartAndValues({super.key});
-
-  // pie chart color palette
-  Widget _chartColorPalette({required Color color}) {
-    return Container(
-      height: 14,
-      width: 29,
-      decoration:
-          BoxDecoration(color: color, borderRadius: BorderRadius.circular(10)),
-    );
-  }
+class PieChartAndValuesAccountedAndUnaccounted extends StatelessWidget {
+  const PieChartAndValuesAccountedAndUnaccounted({super.key});
 
   // displays the pie chart color palette in a column
   Widget _columnPieChartColorPalette() {
@@ -151,10 +139,10 @@ class PieChartAndValues extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // accounted color palette
-          _chartColorPalette(color: AppColor.accountedColor),
+          chartColorPalette(color: AppColor.accountedColor),
 
           // unaccounted color palette
-          _chartColorPalette(color: AppColor.unAccountedColor)
+          chartColorPalette(color: AppColor.unAccountedColor)
         ],
       ),
     );
@@ -208,6 +196,71 @@ class PieChartAndValues extends StatelessWidget {
         ),
       );
     });
+  }
+}
+
+// Main Category Distribution Pie Chart and legend
+class PieChartDataMainCategoryDistribution extends StatelessWidget {
+  const PieChartDataMainCategoryDistribution({super.key});
+
+  // main category distribution legend
+  Widget _mainCategoryPieChartLegend(
+      {required Color color, required String mainCategoryName}) {
+    return Row(
+      children: [
+        // legend color
+        chartColorPalette(color: color),
+
+        // main category name
+        Padding(
+          padding: const EdgeInsets.only(left: 5.0),
+          child: Text(
+            mainCategoryName, 
+            style: AppTextStyle.legendTextStyling(),),
+        )
+      ],
+    );
+  }
+
+  // legend rows
+  Widget legendRows() {
+    return SizedBox(
+      height: 150,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          // sleep
+          _mainCategoryPieChartLegend(color: AppColor.sleepPieChartColor, 
+          mainCategoryName: AppString.sleepMainCategory),
+    
+          // education
+          _mainCategoryPieChartLegend(color: AppColor.educationPieChartColor, mainCategoryName: AppString.educationMainCategory),
+    
+          // skills
+          _mainCategoryPieChartLegend(color: AppColor.skillsPieChartColor, mainCategoryName: AppString.skillMainCategory),
+    
+          // entertainment
+          _mainCategoryPieChartLegend(color: AppColor.entertainmentPieChartColor, mainCategoryName: AppString.entertainmentMainCategory),
+    
+          // personal growth
+          _mainCategoryPieChartLegend(color: AppColor.personalGrowthPieChartColor, mainCategoryName: AppString.personalGrowthMainCategory)
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        // main category pie chart distribution
+        const MainCategoryDistributionPieChart(),
+
+        legendRows()
+      ],
+    );
   }
 }
 
