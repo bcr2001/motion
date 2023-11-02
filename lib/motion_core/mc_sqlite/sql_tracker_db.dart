@@ -305,7 +305,8 @@ class TrackerDatabaseHelper {
       final resultMLTMC = isMost ? await db.rawQuery('''
       SELECT mainCategoryName AS result_tracked_category, SUM(timeSpent) AS time_spent
       FROM subcategory
-      WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
+      WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ? AND 
+      mainCategoryName != 'Sleep'
       GROUP BY mainCategoryName
       ORDER BY time_spent DESC
       LIMIT 1
@@ -563,7 +564,7 @@ class TrackerDatabaseHelper {
     try {
       final db = await database;
 
-      //
+      //currentUserget
       final resultMLTS = isMost ? await db.rawQuery('''
       SELECT subcategoryName AS result_tracked_category, 
       SUM(timeSpent) AS time_spent

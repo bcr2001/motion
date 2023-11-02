@@ -1,9 +1,11 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_month_provider_pvd.dart';
 import 'package:provider/provider.dart';
 import '../../motion_routes/mr_home/home_reusable/back_home.dart';
 import '../../motion_themes/mth_app/app_strings.dart';
 import 'report_front.dart';
+import 'package:flutter_charts/flutter_charts.dart';
 
 // the data summary for the entire current month
 // this page contains, charts and summary information
@@ -15,7 +17,7 @@ class MonthlyReportPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          // get the current month name from the 
+          // get the current month name from the
           // CurrentMonthProvider class
           title: Consumer<CurrentMonthProvider>(
             builder: (context, month, child) {
@@ -52,14 +54,17 @@ class MonthlyReportPage extends StatelessWidget {
               // main categories
               const MostAndLeastTrackedSubcategorySection(),
 
-              // Pie chart for the main category 
+              // Pie chart for the main category
               //distribution for the current month
               sectionTitle(titleName: AppString.mainCategoryDistributionTitle),
 
-              const PieChartDataMainCategoryDistribution()
+              const PieChartDataMainCategoryDistribution(),
 
-              // Subcategory Distribution 
-              
+              // Highest Tracked time per subcategory section
+              sectionTitle(titleName: AppString.highestTrackedTimeTitle),
+              // information about this section
+              const InfoAboutHightesTrackedTime()
+
             ]));
   }
 }

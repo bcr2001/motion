@@ -8,7 +8,6 @@ import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:provider/provider.dart';
 import '../../motion_reusable/db_re/sub_ui.dart';
 import '../../motion_reusable/general_reuseable.dart';
-import '../../motion_themes/mth_app/app_images.dart';
 
 // A custom widget for displaying a pie chart representing accounted and unaccounted data.
 class AccountedUnaccountedReportPieChart extends StatelessWidget {
@@ -36,7 +35,6 @@ class AccountedUnaccountedReportPieChart extends StatelessWidget {
                 // Data loaded state: Calculate pie chart values and display it.
                 List<Map<String, dynamic>> totalAccountUnaccountedMap =
                     snapshot.data ?? [];
-
 
                 // gets and converts the accounted data to hours
                 double accounted =
@@ -174,6 +172,7 @@ class PieChartBuilder extends StatelessWidget {
       child: PieChart(
         PieChartData(
           sections: sections, // Data sections for the pie chart
+          startDegreeOffset: 45,
         ),
       ),
     );
@@ -404,4 +403,34 @@ Widget chartColorPalette({required Color color}) {
     decoration:
         BoxDecoration(color: color, borderRadius: BorderRadius.circular(10)),
   );
+}
+
+// information to the user
+class InfoToTheUser extends StatelessWidget {
+  final String sectionInformation;
+
+  const InfoToTheUser({super.key, required this.sectionInformation});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        children: [
+          // info icon
+          const Padding(
+            padding: EdgeInsets.only(right: 8.0),
+            child: Icon(Icons.info_outline),
+          ),
+
+          // information about the specific section
+          Flexible(
+            child: Text(sectionInformation,
+              style: AppTextStyle.informationTextStyle(),
+            ),
+          )
+        ],
+      ),
+    );
+  }
 }

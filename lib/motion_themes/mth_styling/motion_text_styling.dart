@@ -23,14 +23,12 @@ class AppTextStyle {
 
   // zen quote text styling
   static TextStyle quoteTextStyle() {
-    return _baseStyle.copyWith(
-      fontSize: 13
-    );
+    return _baseStyle.copyWith(fontSize: 13);
   }
 
   // pie chart text styling
   static TextStyle pieChartTextStyling() {
-    return _baseStyle.copyWith(fontSize: 12.5, fontWeight: FontWeight.w600);
+    return _baseStyle.copyWith(fontSize: 12, fontWeight: FontWeight.w600);
   }
 
   // legend text style
@@ -44,6 +42,11 @@ class AppTextStyle {
         fontSize: 14,
         fontWeight: FontWeight.w600,
         color: AppColor.blueMainColor);
+  }
+
+  // section information text style
+  static TextStyle informationTextStyle() {
+    return _baseStyle.copyWith(fontSize: 10);
   }
 
   // account and unaccounted section style
@@ -91,9 +94,7 @@ class AppTextStyle {
     return _baseStyle.copyWith(
         fontWeight: FontWeight.w700,
         fontSize: 13,
-        color: isUnaccounted
-            ? Colors.red
-            : Colors.green);
+        color: isUnaccounted ? Colors.red : Colors.green);
   }
 
   // result text style regular

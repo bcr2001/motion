@@ -215,8 +215,9 @@ class PieChartDataMainCategoryDistribution extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(left: 5.0),
           child: Text(
-            mainCategoryName, 
-            style: AppTextStyle.legendTextStyling(),),
+            mainCategoryName,
+            style: AppTextStyle.legendTextStyling(),
+          ),
         )
       ],
     );
@@ -231,20 +232,29 @@ class PieChartDataMainCategoryDistribution extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           // sleep
-          _mainCategoryPieChartLegend(color: AppColor.sleepPieChartColor, 
-          mainCategoryName: AppString.sleepMainCategory),
-    
+          _mainCategoryPieChartLegend(
+              color: AppColor.sleepPieChartColor,
+              mainCategoryName: AppString.sleepMainCategory),
+
           // education
-          _mainCategoryPieChartLegend(color: AppColor.educationPieChartColor, mainCategoryName: AppString.educationMainCategory),
-    
+          _mainCategoryPieChartLegend(
+              color: AppColor.educationPieChartColor,
+              mainCategoryName: AppString.educationMainCategory),
+
           // skills
-          _mainCategoryPieChartLegend(color: AppColor.skillsPieChartColor, mainCategoryName: AppString.skillMainCategory),
-    
+          _mainCategoryPieChartLegend(
+              color: AppColor.skillsPieChartColor,
+              mainCategoryName: AppString.skillMainCategory),
+
           // entertainment
-          _mainCategoryPieChartLegend(color: AppColor.entertainmentPieChartColor, mainCategoryName: AppString.entertainmentMainCategory),
-    
+          _mainCategoryPieChartLegend(
+              color: AppColor.entertainmentPieChartColor,
+              mainCategoryName: AppString.entertainmentMainCategory),
+
           // personal growth
-          _mainCategoryPieChartLegend(color: AppColor.personalGrowthPieChartColor, mainCategoryName: AppString.personalGrowthMainCategory)
+          _mainCategoryPieChartLegend(
+              color: AppColor.personalGrowthPieChartColor,
+              mainCategoryName: AppString.personalGrowthMainCategory)
         ],
       ),
     );
@@ -252,14 +262,19 @@ class PieChartDataMainCategoryDistribution extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        // main category pie chart distribution
-        const MainCategoryDistributionPieChart(),
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        vertical: 25,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          // main category pie chart distribution
+          const MainCategoryDistributionPieChart(),
 
-        legendRows()
-      ],
+          legendRows()
+        ],
+      ),
     );
   }
 }
@@ -272,24 +287,19 @@ class InfoAboutSleep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        children: const [
-          Padding(
-            padding: EdgeInsets.only(right: 8.0),
-            child: Icon(Icons.info_outline),
-          ),
+    return const InfoToTheUser(
+        sectionInformation: AppString.informationAboutSleep);
+  }
+}
 
-          // information about the state of the sleep category
-          Flexible(
-            child: Text(
-              AppString.informationAboutSleep,
-              style: TextStyle(fontSize: 10),
-            ),
-          )
-        ],
-      ),
-    );
+// info to the user about the highest tracked
+// time per subcategory section
+class InfoAboutHightesTrackedTime extends StatelessWidget {
+  const InfoAboutHightesTrackedTime();
+
+  @override
+  Widget build(BuildContext context) {
+    return const InfoToTheUser(
+        sectionInformation: AppString.informationAboutHighestTrackedTime);
   }
 }

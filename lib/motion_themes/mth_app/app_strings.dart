@@ -154,7 +154,11 @@ class AppString {
   static const String mostAndLeastTrackedTitle = "Most and Least Tracked";
   static const String mainCategoryDistributionTitle =
       "Main Category Distribution";
+  static const String highestTrackedTimeTitle =
+      "Highest Tracked Time Per Subcategory";
 
   static const String informationAboutSleep =
       "The amount of time you spend sleeping is not considered when determining the most and least time tracked.";
+  static const String informationAboutHighestTrackedTime =
+      "During the month, these are the highest durations you have spent on specific subcategories, along with the dates they were recorded.";
 }
