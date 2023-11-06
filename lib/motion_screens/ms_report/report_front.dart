@@ -295,7 +295,7 @@ class InfoAboutSleep extends StatelessWidget {
 // info to the user about the highest tracked
 // time per subcategory section
 class InfoAboutHightesTrackedTime extends StatelessWidget {
-  const InfoAboutHightesTrackedTime();
+  const InfoAboutHightesTrackedTime({super.key});
 
   @override
   Widget build(BuildContext context) {

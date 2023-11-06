@@ -157,6 +157,16 @@ class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
         isMost: isMost);
   }
 
+  // get the highest time tracked for a subcategory
+  Future<List<Map<String, dynamic>>> retrieveHighestTrackedTimePerSubcategory(
+      {required String currentUser,
+      required String firstDay,
+      required String lastDay}) async {
+        
+    return await trackDbInstance.getHighestTrackedTimePerSubcategory(
+        currentUser: currentUser, firstDay: firstDay, lastDay: lastDay);
+  }
+
   // inserting data into the subcategory table
   Future<void> insertIntoSubcategoryTable(Subcategories subcategories) async {
     await trackDbInstance.insertSubcategory(subcategories);

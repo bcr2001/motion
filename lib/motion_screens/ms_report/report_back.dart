@@ -9,7 +9,8 @@ import 'package:provider/provider.dart';
 import '../../motion_reusable/db_re/sub_ui.dart';
 import '../../motion_reusable/general_reuseable.dart';
 
-// A custom widget for displaying a pie chart representing accounted and unaccounted data.
+// A custom widget for displaying a pie chart 
+//representing accounted and unaccounted data.
 class AccountedUnaccountedReportPieChart extends StatelessWidget {
   const AccountedUnaccountedReportPieChart({super.key});
 
@@ -118,8 +119,6 @@ class MainCategoryDistributionPieChart extends StatelessWidget {
               return const Text("Error: Unable to retrieve data.");
             } else {
               List<Map<String, dynamic>> mainTotalResults = snapshot.data ?? [];
-
-              logger.i(mainTotalResults);
 
               double totalMainCategoryValues =
                   mainTotalResults.fold(0.0, (prev, element) {
@@ -231,8 +230,7 @@ class MostAndLeastTrackedBuilder extends StatelessWidget {
             padding: const EdgeInsets.all(10.0),
             child: Text(
               title,
-              style:
-                  const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
+              style: AppTextStyle.topAndBottomTextStyle(),
             ),
           ),
 
@@ -264,8 +262,7 @@ class MostAndLeastTrackedBuilder extends StatelessWidget {
                   child: Text(
                     subcategoryName,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
-                        fontSize: 13, fontWeight: FontWeight.w600),
+                    style: AppTextStyle.topAndBottomTextStyle(),
                   ),
                 )),
           ),
@@ -324,7 +321,7 @@ class MostAndLeastTrackedResult extends StatelessWidget {
             List<Map<String, dynamic>> mostLeastResults = snapshot.data!;
 
             // Get category name for either least or most tracked
-            final resultTitle =
+            final String resultTitle =
                 mostLeastResults[0]["result_tracked_category"] ?? 'N/A';
 
             // Get the value result of the time spent
@@ -425,12 +422,137 @@ class InfoToTheUser extends StatelessWidget {
 
           // information about the specific section
           Flexible(
-            child: Text(sectionInformation,
+            child: Text(
+              sectionInformation,
               style: AppTextStyle.informationTextStyle(),
             ),
           )
         ],
       ),
     );
+  }
+}
+
+// highest tracked time per subcategory section element builder
+// it shows the subcategory name, time spent on the subcategory
+// and the date the subcategory total was tracked
+class HighestTrackedSectionElement extends StatelessWidget {
+  final String subcategoryName;
+  final String timeSpent;
+  final String date;
+
+  const HighestTrackedSectionElement(
+      {super.key,
+      required this.subcategoryName,
+      required this.timeSpent,
+      required this.date});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 130,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          // subcategory name
+          Text(subcategoryName, style: AppTextStyle.topAndBottomTextStyle()),
+
+          // total time tracked
+          Text(
+            "$timeSpent H",
+            style: AppTextStyle.mostAndLestTextStyleTotalHours(),
+          ),
+
+          // date recorded
+          Text(
+            date,
+            style: AppTextStyle.topAndBottomTextStyle(),
+          ),
+
+          // blue divider
+          const SizedBox(
+            width: 105,
+            child: Divider(
+              thickness: 2.0,
+              color: AppColor.blueMainColor,
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+// a grid of highest tracked subcategories
+class GridHighestTrackedSubcategory extends StatelessWidget {
+  const GridHighestTrackedSubcategory({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer3<FirstAndLastDay, UserUidProvider,
+            SubcategoryTrackerDatabaseProvider>(
+        builder: (context, day, user, sub, child) {
+      // first and last day of a particular month
+      final firstDayOfMonth = day.firstDay;
+      final lastDayOfMonth = day.lastDay;
+
+      // current logged in user
+      final currentLoggedInUser = user.userUid!;
+
+      return FutureBuilder(
+          future: sub.retrieveHighestTrackedTimePerSubcategory(
+              currentUser: currentLoggedInUser,
+              firstDay: firstDayOfMonth,
+              lastDay: lastDayOfMonth),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              // While the data is loading, a shimmer effect is shown
+              return const ShimmerWidget.rectangular(
+                height: 200,
+                width: 200,
+              );
+            } else if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            } else {
+              // Data is available, snapshot.data to get the results
+              if (snapshot.hasData &&
+                  snapshot.data != null &&
+                  snapshot.data!.isNotEmpty) {
+                // a list of the database query result
+                List<Map<String, dynamic>> highestResults = snapshot.data!;
+
+                logger.i(highestResults);
+
+                return GridView.builder(
+                    shrinkWrap: true,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 3,
+                            crossAxisSpacing: 10.0,
+                            mainAxisSpacing: 10.0),
+                    itemCount: highestResults.length,
+                    itemBuilder: (BuildContext context, index) {
+                      // element subcategory name
+                      final String elementSubName =
+                          highestResults[index]["subcategoryName"];
+
+                      // element total time spent
+                      final double elementTimeSpent =
+                          highestResults[index]["timeSpent"];
+
+                      // element date
+                      final String elementDate = highestResults[index]["date"];
+
+                      return HighestTrackedSectionElement(
+                          subcategoryName: elementSubName,
+                          timeSpent: elementTimeSpent.toStringAsFixed(2),
+                          date: elementDate);
+                    });
+              } else {
+                return const Center(child: Text("No Data Yet"));
+              }
+            }
+          });
+    });
   }
 }

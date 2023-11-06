@@ -1,11 +1,10 @@
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_month_provider_pvd.dart';
+import 'package:motion/motion_screens/ms_report/report_back.dart';
 import 'package:provider/provider.dart';
 import '../../motion_routes/mr_home/home_reusable/back_home.dart';
 import '../../motion_themes/mth_app/app_strings.dart';
 import 'report_front.dart';
-import 'package:flutter_charts/flutter_charts.dart';
 
 // the data summary for the entire current month
 // this page contains, charts and summary information
@@ -63,7 +62,9 @@ class MonthlyReportPage extends StatelessWidget {
               // Highest Tracked time per subcategory section
               sectionTitle(titleName: AppString.highestTrackedTimeTitle),
               // information about this section
-              const InfoAboutHightesTrackedTime()
+              const InfoAboutHightesTrackedTime(),
+
+              const GridHighestTrackedSubcategory()
 
             ]));
   }

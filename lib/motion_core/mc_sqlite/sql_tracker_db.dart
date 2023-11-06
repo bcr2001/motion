@@ -283,7 +283,6 @@ class TrackerDatabaseHelper {
         ''', [currentUser, firstDay, lastDay]);
 
       return resultMAT;
-      
     } catch (e) {
       logger.e("Error: $e");
       return [];
@@ -389,7 +388,7 @@ class TrackerDatabaseHelper {
   //   );
   // }
 
-// CRUD operations for Subcategories
+// CRUD OPERATION FOR SUBCATEGORY TABLE
 
   // insert new rows into the subcategory category table
   Future<void> insertSubcategory(Subcategories subcategory) async {
@@ -586,6 +585,43 @@ class TrackerDatabaseHelper {
         ''', [currentUser, firstDay, lastDay]);
 
       return resultMLTS;
+    } catch (e) {
+      logger.e("Error: $e");
+      return [];
+    }
+  }
+
+  // get the highest time tracked for a subcategory for a particular
+  // period of time
+  Future<List<Map<String, dynamic>>> getHighestTrackedTimePerSubcategory(
+      {required String currentUser,
+      required String firstDay,
+      required String lastDay}) async {
+    try {
+      final db = await database;
+
+      // the result from the comman table expression
+      final resultHTTPS = await db.rawQuery('''
+        WITH RankedData AS (
+            SELECT 
+                date,
+                subcategoryName,
+                timeSpent/60 AS timeSpent,
+                ROW_NUMBER() OVER (PARTITION BY subcategoryName ORDER BY timeSpent DESC) AS rk
+            FROM subcategory
+            WHERE currentLoggedInUser = ? 
+            AND date BETWEEN ? AND ? AND timeSpent > 0
+        )
+        SELECT 
+            date,
+            subcategoryName,
+            timeSpent
+        FROM RankedData
+        WHERE rk = 1
+        ORDER BY date, timeSpent DESC;
+        ''', [currentUser, firstDay, lastDay]);
+
+      return resultHTTPS;
     } catch (e) {
       logger.e("Error: $e");
       return [];

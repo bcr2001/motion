@@ -69,7 +69,7 @@ class AppTextStyle {
 
   // most and least tracked style (totalHours)
   static TextStyle mostAndLestTextStyleTotalHours() {
-    return _baseStyle.copyWith(fontSize: 28, fontWeight: FontWeight.bold);
+    return _baseStyle.copyWith(fontSize: 24, fontWeight: FontWeight.bold);
   }
 
   // most and least tacked style (avergaeHours)
@@ -87,6 +87,11 @@ class AppTextStyle {
         color: isUnaccounted
             ? AppColor.unAccountedColor
             : AppColor.accountedColor);
+  }
+
+  // top and bottom information text style
+  static TextStyle topAndBottomTextStyle() {
+    return _baseStyle.copyWith(fontSize: 12, fontWeight: FontWeight.w500);
   }
 
   // result title text style (home)
