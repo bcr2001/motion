@@ -29,7 +29,8 @@ class AssignerDatabaseHelper {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, "assigner.db");
 
-    return await openDatabase(path, version: 6, onCreate: _onCreate, onUpgrade: _onUpgrade);
+    return await openDatabase(path,
+        version: 6, onCreate: _onCreate, onUpgrade: _onUpgrade);
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -91,6 +92,34 @@ class AssignerDatabaseHelper {
       return activeItems.map((map) => Assigner.fromAssignerMap(map)).toList();
     } catch (e) {
       logger.e("Error: $e");
+      return [];
+    }
+  }
+
+  // check whether the table is empty or whether 
+  // there are no subcategories being tracked
+  Future<List<Map<String, dynamic>>> isTableEmptyOrNotBeingTracked(
+    {
+      required String currentUser
+    }
+  ) 
+  async {
+    try {
+      final db = await database;
+
+      final resultITEONBT = await db.rawQuery('''
+        SELECT 
+            CASE 
+                WHEN COUNT(*) > 0 THEN 'False'
+                ELSE 'True'
+            END AS AllAreZero
+        FROM to_assign
+        WHERE isActive <> 0 AND currentLoggedInUser = ?;
+        ''', [currentUser]);
+
+      return resultITEONBT;
+    } catch (e) {
+      logger.i("ERROR: $e");
       return [];
     }
   }

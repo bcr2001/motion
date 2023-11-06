@@ -12,6 +12,9 @@ class AppImages {
   static final signUpGraphics = getSvgAsset("sign_up_graphics.svg");
   static final signUpPfpDefaultImage = getAssetImage("default_pfp.png");
 
+  // track list empty svg
+  static final trackListEmpty = getSvgAsset("trackInfoSVG.svg");
+
   // default pfp
   static final defaultPfp = getAssetImage("motion_pfp.jpg");
 
@@ -19,7 +22,10 @@ class AppImages {
   static final continueWithGoogleImage = getAssetImage("google_1.png", 30, 30);
 
   // no data available yet
-  static final noDataAvailableYet = getAssetImage("dark-data.png", 150,150);
+  static final noDataAvailableYet = getAssetImage("question.png", 140,140);
+
+  // no data available yet
+  static final noTrackListAvailable = getAssetImage("trackInfo.png", 200,200);
 }
 
 // png images

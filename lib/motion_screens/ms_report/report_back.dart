@@ -3,13 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/first_and_last_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
+import 'package:motion/motion_themes/mth_app/app_images.dart';
+import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:provider/provider.dart';
 import '../../motion_reusable/db_re/sub_ui.dart';
 import '../../motion_reusable/general_reuseable.dart';
 
-// A custom widget for displaying a pie chart 
+// A custom widget for displaying a pie chart
 //representing accounted and unaccounted data.
 class AccountedUnaccountedReportPieChart extends StatelessWidget {
   const AccountedUnaccountedReportPieChart({super.key});
@@ -30,9 +32,8 @@ class AccountedUnaccountedReportPieChart extends StatelessWidget {
               // Error state: Display an error message if there's an issue with data retrieval.
               return const Text("Error 355 :(");
             } else {
-              if (snapshot.hasData &&
-                  snapshot.data != null &&
-                  snapshot.data!.isNotEmpty) {
+
+              if (snapshot.data != null && snapshot.data!.isNotEmpty) {
                 // Data loaded state: Calculate pie chart values and display it.
                 List<Map<String, dynamic>> totalAccountUnaccountedMap =
                     snapshot.data ?? [];
@@ -54,23 +55,29 @@ class AccountedUnaccountedReportPieChart extends StatelessWidget {
                 double unAccountedDouble = double.parse(
                     ((unAccounted / total) * 100).toStringAsFixed(1));
 
-                return PieChartBuilder(sections: [
-                  // Accounted proportion
-                  PieChartSectionData(
-                      titleStyle: AppTextStyle.pieChartTextStyling(),
-                      title: "$accountedDouble%",
-                      value: accountedDouble,
-                      color: AppColor.accountedColor),
+                if(accounted == 0 && unAccounted == 0 ){
+                   return AppImages.noDataAvailableYet;
+                }else{
+                  return PieChartBuilder(sections: [
+                    // Accounted proportion
+                    PieChartSectionData(
+                        titleStyle: AppTextStyle.pieChartTextStyling(),
+                        title: "$accountedDouble%",
+                        value: accountedDouble,
+                        color: AppColor.accountedColor),
 
-                  // Unaccounted proportion
-                  PieChartSectionData(
-                      titleStyle: AppTextStyle.pieChartTextStyling(),
-                      title: "$unAccountedDouble%",
-                      value: unAccountedDouble,
-                      color: AppColor.unAccountedColor),
-                ]);
+                    // Unaccounted proportion
+                    PieChartSectionData(
+                        titleStyle: AppTextStyle.pieChartTextStyling(),
+                        title: "$unAccountedDouble%",
+                        value: unAccountedDouble,
+                        color: AppColor.unAccountedColor),
+                  ]); 
+                }
+
+                
               } else {
-                return const Text("");
+                return AppImages.noDataAvailableYet;
               }
             }
           });
@@ -118,34 +125,41 @@ class MainCategoryDistributionPieChart extends StatelessWidget {
               // Error state: Display an error message if there's an issue with data retrieval.
               return const Text("Error: Unable to retrieve data.");
             } else {
-              List<Map<String, dynamic>> mainTotalResults = snapshot.data ?? [];
+              if (snapshot.hasData &&
+                  snapshot.data != null &&
+                  snapshot.data!.isNotEmpty) {
+                List<Map<String, dynamic>> mainTotalResults =
+                    snapshot.data ?? [];
 
-              double totalMainCategoryValues =
-                  mainTotalResults.fold(0.0, (prev, element) {
-                return prev + (element["totalTimeSpent"] ?? 0.0);
-              });
+                double totalMainCategoryValues =
+                    mainTotalResults.fold(0.0, (prev, element) {
+                  return prev + (element["totalTimeSpent"] ?? 0.0);
+                });
 
-              List<PieChartSectionData> sections = [];
+                List<PieChartSectionData> sections = [];
 
-              for (int i = 0; i < mainTotalResults.length; i++) {
-                final totalTimeSpent =
-                    mainTotalResults[i]["totalTimeSpent"] ?? 0.0;
-                double categoryValue =
-                    totalTimeSpent / totalMainCategoryValues * 100;
-                String formattedValue = categoryValue.toStringAsFixed(1);
+                for (int i = 0; i < mainTotalResults.length; i++) {
+                  final totalTimeSpent =
+                      mainTotalResults[i]["totalTimeSpent"] ?? 0.0;
+                  double categoryValue =
+                      totalTimeSpent / totalMainCategoryValues * 100;
+                  String formattedValue = categoryValue.toStringAsFixed(1);
 
-                sections.add(
-                  PieChartSectionData(
-                    titleStyle: AppTextStyle.pieChartTextStyling(),
-                    title: "$formattedValue%",
-                    value: categoryValue,
-                    color: _getCategoryColor(
-                        i), // Define this function to get category colors
-                  ),
-                );
+                  sections.add(
+                    PieChartSectionData(
+                      titleStyle: AppTextStyle.pieChartTextStyling(),
+                      title: "$formattedValue%",
+                      value: categoryValue,
+                      color: _getCategoryColor(
+                          i), // Define this function to get category colors
+                    ),
+                  );
+                }
+
+                return PieChartBuilder(sections: sections);
+              } else {
+                return AppImages.noDataAvailableYet;
               }
-
-              return PieChartBuilder(sections: sections);
             }
           },
         );
@@ -156,25 +170,34 @@ class MainCategoryDistributionPieChart extends StatelessWidget {
 
 // A custom widget for displaying a pie chart using the FL Chart library.
 class PieChartBuilder extends StatelessWidget {
-  // List of data sections for the pie chart.
   final List<PieChartSectionData>? sections;
 
-  // Constructor for the PieChartBuilder class.
-  // It requires a list of PieChartSectionData to build the pie chart.
   const PieChartBuilder({super.key, required this.sections});
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 200, // Width of the widget
-      height: 200, // Height of the widget
-      child: PieChart(
-        PieChartData(
-          sections: sections, // Data sections for the pie chart
-          startDegreeOffset: 45,
+    if (sections != null && sections!.isNotEmpty) {
+      final cleanSections = sections!
+          .where((section) => !section.value.isNaN && section.value! > 0)
+          .toList();
+
+      if (cleanSections.isEmpty) {
+        return const SizedBox.shrink();
+      }
+
+      return SizedBox(
+        width: 200,
+        height: 200,
+        child: PieChart(
+          PieChartData(
+            sections: cleanSections,
+            startDegreeOffset: 45,
+          ),
         ),
-      ),
-    );
+      );
+    } else {
+      return const SizedBox.shrink();
+    }
   }
 }
 
@@ -484,6 +507,8 @@ class HighestTrackedSectionElement extends StatelessWidget {
 }
 
 // a grid of highest tracked subcategories
+// each subcategiry that is being tracked in the course of the month
+// has it's max, the class below displays the max of these subcategories
 class GridHighestTrackedSubcategory extends StatelessWidget {
   const GridHighestTrackedSubcategory({super.key});
 
@@ -521,8 +546,6 @@ class GridHighestTrackedSubcategory extends StatelessWidget {
                 // a list of the database query result
                 List<Map<String, dynamic>> highestResults = snapshot.data!;
 
-                logger.i(highestResults);
-
                 return GridView.builder(
                     shrinkWrap: true,
                     gridDelegate:
@@ -549,7 +572,34 @@ class GridHighestTrackedSubcategory extends StatelessWidget {
                           date: elementDate);
                     });
               } else {
-                return const Center(child: Text("No Data Yet"));
+                // when the database table is empty and there is no data to be
+                // displayed, then the placeholder grid below is shown
+                return GridView(
+                  shrinkWrap: true,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      crossAxisSpacing: 10.0,
+                      mainAxisSpacing: 10.0),
+                  children: const [
+                    // first place holder: Subcategory 1
+                    HighestTrackedSectionElement(
+                        subcategoryName: AppString.subcategory1,
+                        timeSpent: AppString.hoursTimeSpentHolder,
+                        date: AppString.firstDayOfTrackingEver),
+
+                    // first place holder: Subcategory 2
+                    HighestTrackedSectionElement(
+                        subcategoryName: AppString.subcategory2,
+                        timeSpent: AppString.hoursTimeSpentHolder,
+                        date: AppString.firstDayOfTrackingEver),
+
+                    // first place holder: Subcategory 3
+                    HighestTrackedSectionElement(
+                        subcategoryName: AppString.subcategory3,
+                        timeSpent: AppString.hoursTimeSpentHolder,
+                        date: AppString.firstDayOfTrackingEver),
+                  ],
+                );
               }
             }
           });

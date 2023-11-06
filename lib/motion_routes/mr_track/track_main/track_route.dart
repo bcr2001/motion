@@ -196,11 +196,9 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
             builder: (context, assignedList, userUiD, child) {
               var items = assignedList.assignerItems;
               var user = userUiD.userUid;
-
+              
               return ListView(
                 children: [
-                  // user uid
-                  Text(user!),
 
                   // education category
                   CardConstructor(

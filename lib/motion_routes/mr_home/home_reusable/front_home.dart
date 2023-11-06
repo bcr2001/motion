@@ -105,10 +105,8 @@ Widget numberOfDaysMainCategory() {
               padding: const EdgeInsets.only(left: 8.0),
               child: Text(
                 "Day: $totalNumberOfDays",
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600
-                ),
+                style:
+                    const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
               ),
             );
           }
@@ -329,5 +327,32 @@ class _SubcategoryMonthTotalsAndAveragesState
                   user.userUid!, day.firstDay, day.lastDay, false),
               columnName: "mainCategoryName");
     });
+  }
+}
+
+// information displayed in the home page when
+// there is no data in the database tables
+class InfoAboutHomePageSections extends StatelessWidget {
+  final String infoText;
+  
+  const InfoAboutHomePageSections({super.key, required this.infoText});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+
+      color: const Color(0xFF00B0F0),
+      child: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Row(
+          children: [
+            // info icon
+      
+            // info text
+            Flexible(child: Text(infoText, style: AppTextStyle.infoTextStyle(),))
+          ],
+        ),
+      ),
+    );
   }
 }

@@ -21,6 +21,13 @@ class AppTextStyle {
   // base styling
   static final TextStyle _baseStyle = GoogleFonts.openSans(fontSize: 16.5);
 
+  // home page tracking window information text style
+  static TextStyle infoTextStyle() {
+    return _baseStyle.copyWith(
+      fontSize: 15
+    );
+  }
+
   // zen quote text styling
   static TextStyle quoteTextStyle() {
     return _baseStyle.copyWith(fontSize: 13);
@@ -72,7 +79,7 @@ class AppTextStyle {
     return _baseStyle.copyWith(fontSize: 24, fontWeight: FontWeight.bold);
   }
 
-  // most and least tacked style (avergaeHours)
+  // most and least tracked style (avergaeHours)
   static TextStyle mostAndLestTextStyleAverageHours() {
     return _baseStyle.copyWith(
       fontSize: 11,
@@ -99,7 +106,7 @@ class AppTextStyle {
     return _baseStyle.copyWith(
         fontWeight: FontWeight.w700,
         fontSize: 13,
-        color: isUnaccounted ? Colors.red : Colors.green);
+        color: isUnaccounted ? const Color(0xFFD30000) : Colors.green);
   }
 
   // result text style regular

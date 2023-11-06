@@ -18,6 +18,14 @@ class AssignerMainProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // check whether the table is empty or whether
+  // there are no subcategories being tracked
+  Future<List<Map<String, dynamic>>> retrieveIsTableEmptyOrNotBeingTracked(
+      {required currentUser}) async {
+    return await dbInstance.isTableEmptyOrNotBeingTracked(
+        currentUser: currentUser);
+  }
+
   // insert items into the assigner.db database
   Future<void> insertIntoAssignerDb(Assigner categoryAssigner) async {
     await dbInstance.assignInsert(categoryAssigner);
@@ -38,7 +46,7 @@ class AssignerMainProvider extends ChangeNotifier {
   Future<void> deleteAssignedItems(int id) async {
     await dbInstance.assignDelete(id);
     await getAllUserItems();
-    
+
     notifyListeners();
   }
 }

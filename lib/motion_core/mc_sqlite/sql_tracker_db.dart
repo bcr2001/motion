@@ -209,7 +209,7 @@ class TrackerDatabaseHelper {
         if (totalETMCT is double) {
           return totalETMCT;
         } else {
-          logger.e("Something went wrong");
+          logger.i("No data so a 0.0 is being returned");
           return 0.0;
         }
       } else {
@@ -253,7 +253,7 @@ class TrackerDatabaseHelper {
         if (totalEMTMC is double) {
           return totalEMTMC;
         } else {
-          logger.e("Something went wrong: $totalEMTMC");
+          logger.i("No data available : $totalEMTMC");
           return 0.0;
         }
       } else {

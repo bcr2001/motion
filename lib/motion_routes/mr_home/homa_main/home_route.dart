@@ -44,7 +44,7 @@ class MotionHomeRoute extends StatelessWidget {
   // quote of the day
   Widget quoteOfTheDay() {
     return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 5.0),
+        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 3.8),
         child: Consumer<ZenQuoteProvider>(
           builder: (context, zenQuoteValue, child) {
             return Text(
@@ -69,7 +69,6 @@ class MotionHomeRoute extends StatelessWidget {
               // total number of days in the main_category table
               numberOfDaysMainCategory(),
 
-              
               // quote from the zenQuotes API
               quoteOfTheDay(),
 
