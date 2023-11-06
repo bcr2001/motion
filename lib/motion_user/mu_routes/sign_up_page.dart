@@ -52,9 +52,9 @@ class _SignUpPageState extends State<SignUpPage> {
               child: Column(
                 children: [
                   // sign up SVG,
-                  SvgImage(
-                    svgImage: AppImages.signUpImage,
-                    imageAlignment: Alignment.topLeft,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 60),
+                    child: AppImages.signUpGraphics,
                   ),
 
                   // sign up message

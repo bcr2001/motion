@@ -3,9 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 class AppImages {
   // sign-in page images
-  static final formlessShapeImage = getSvgAsset("sign_in_graphics.png");
   static final welcomeToMotionImage = getSvgAsset("sign_in_graphics.svg");
-  static SvgPicture devicesImage = getSvgAsset("devices.svg");
 
   // sign-up page images
   static final signUpImage = getSvgAsset("sign_up_graphics1.svg");
