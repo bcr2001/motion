@@ -265,6 +265,36 @@ class TrackerDatabaseHelper {
     }
   }
 
+  // get accounted time and unaccounted time for everyday
+  // for a particular week
+  Future<List<Map<String, dynamic>>>
+      getAWeekOfAccountedAndAccountedData({
+        required String currentUser,
+        required String firstDatePeriod,
+        required String lastDatePeriod
+      }) async {
+    try {
+      final db = await database;
+
+      final resultAWAAD = await db.rawQuery(
+        '''
+        SELECT 
+            date, 
+            (COALESCE(education, 0) + COALESCE(skills, 0) + COALESCE(entertainment, 0) + COALESCE(personalGrowth, 0) + COALESCE(sleep, 0))/60 AS Accounted, 
+            24 - (COALESCE(education, 0) + COALESCE(skills, 0) + COALESCE(entertainment, 0) + COALESCE(personalGrowth, 0) + COALESCE(sleep, 0))/60 AS Unaccounted
+        FROM main_category
+        WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
+        ORDER BY date;
+        ''', [currentUser, firstDatePeriod, lastDatePeriod]
+      );
+
+      return resultAWAAD;
+    } catch (e) {
+      logger.e("Error: $e");
+      return [];
+    }
+  }
+
   // get a table for both accounted and unaccounted values
   Future<List<Map<String, dynamic>>> getMonthAccountUnaccountTable(
       String currentUser, firstDay, lastDay) async {
@@ -325,7 +355,7 @@ class TrackerDatabaseHelper {
     }
   }
 
-  // get the total time time spent for the main categorys
+  // get the total time time spent for the main category
   // during a specified period of time
   Future<List<Map<String, dynamic>>> getMainTotalTimeSpentSpecificDates(
       {required String currentUser,

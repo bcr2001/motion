@@ -9,7 +9,6 @@ import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:provider/provider.dart';
 import '../../motion_reusable/db_re/sub_ui.dart';
-import '../../motion_reusable/general_reuseable.dart';
 
 // A custom widget for displaying a pie chart
 //representing accounted and unaccounted data.
@@ -32,7 +31,6 @@ class AccountedUnaccountedReportPieChart extends StatelessWidget {
               // Error state: Display an error message if there's an issue with data retrieval.
               return const Text("Error 355 :(");
             } else {
-
               if (snapshot.data != null && snapshot.data!.isNotEmpty) {
                 // Data loaded state: Calculate pie chart values and display it.
                 List<Map<String, dynamic>> totalAccountUnaccountedMap =
@@ -55,9 +53,9 @@ class AccountedUnaccountedReportPieChart extends StatelessWidget {
                 double unAccountedDouble = double.parse(
                     ((unAccounted / total) * 100).toStringAsFixed(1));
 
-                if(accounted == 0 && unAccounted == 0 ){
-                   return AppImages.noDataAvailableYet;
-                }else{
+                if (accounted == 0 && unAccounted == 0) {
+                  return AppImages.noDataAvailableYet;
+                } else {
                   return PieChartBuilder(sections: [
                     // Accounted proportion
                     PieChartSectionData(
@@ -72,10 +70,8 @@ class AccountedUnaccountedReportPieChart extends StatelessWidget {
                         title: "$unAccountedDouble%",
                         value: unAccountedDouble,
                         color: AppColor.unAccountedColor),
-                  ]); 
+                  ]);
                 }
-
-                
               } else {
                 return AppImages.noDataAvailableYet;
               }
@@ -178,7 +174,7 @@ class PieChartBuilder extends StatelessWidget {
   Widget build(BuildContext context) {
     if (sections != null && sections!.isNotEmpty) {
       final cleanSections = sections!
-          .where((section) => !section.value.isNaN && section.value! > 0)
+          .where((section) => !section.value.isNaN && section.value > 0)
           .toList();
 
       if (cleanSections.isEmpty) {

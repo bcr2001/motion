@@ -38,8 +38,6 @@ class TrackedSubcategories extends StatelessWidget {
 
               final String queryResultBool = snapshotData![0]["AllAreZero"];
 
-              logger.i(queryResultBool);
-
               if (queryResultBool == "True") {
                 return AppImages.trackListEmpty;
               } else {

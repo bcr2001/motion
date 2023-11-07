@@ -6,11 +6,14 @@ import 'package:motion/motion_core/motion_providers/date_pvd/current_month_provi
 import 'package:motion/motion_core/motion_providers/date_pvd/current_time_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_year_pcd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/first_and_last_pvd.dart';
+import 'package:motion/motion_core/motion_providers/date_pvd/seven_days_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_pvd.dart';
 import 'package:motion/motion_core/motion_providers/dropDown_pvd/drop_down_pvd.dart';
+import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_user/mu_ops/auth_page.dart';
+import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 import 'motion_core/motion_providers/date_pvd/current_date_pvd.dart';
 import 'motion_core/motion_providers/sql_pvd/assigner_pvd.dart';
@@ -24,13 +27,13 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize the database helper
-  // final TrackerDatabaseHelper databaseHelper0 = 
+  // final TrackerDatabaseHelper databaseHelper0 =
   // TrackerDatabaseHelper();
   // final dbHelper = AssignerDatabaseHelper();
 
   // databaseHelper.updateCurrentUser();
 
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform); 
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // AppThemeModeProvider Instance
   final appThemeMode = AppThemeModeProvider();
@@ -62,6 +65,8 @@ void main() async {
 
   runApp(MultiProvider(
     providers: [
+      ChangeNotifierProvider(
+          create: (context) => FirstAndLastWithSevenDaysDiff()),
       ChangeNotifierProvider(create: (context) => FirstAndLastDay()),
       ChangeNotifierProvider(create: (context) => CurrentYearProvider()),
       ChangeNotifierProvider(create: (context) => CurrentTimeProvider()),

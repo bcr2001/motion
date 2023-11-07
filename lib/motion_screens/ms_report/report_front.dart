@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:motion/motion_core/motion_providers/date_pvd/seven_days_pvd.dart';
+import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
+import 'package:motion/motion_themes/mth_app/app_images.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:provider/provider.dart';
 import '../../motion_core/motion_providers/date_pvd/first_and_last_pvd.dart';
@@ -301,5 +304,54 @@ class InfoAboutHightesTrackedTime extends StatelessWidget {
   Widget build(BuildContext context) {
     return const InfoToTheUser(
         sectionInformation: AppString.informationAboutHighestTrackedTime);
+  }
+}
+
+// grouped bar chart for the distribution of accounted
+// and unaccounted time during the course of the week
+class GroupedBarChartOfAccountedAndUnaccountedTime extends StatelessWidget {
+  const GroupedBarChartOfAccountedAndUnaccountedTime({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer3<FirstAndLastWithSevenDaysDiff, UserUidProvider,
+            MainCategoryTrackerProvider>(
+        builder: (context, week, user, main, child) {
+      // current logged in user
+      final String currentUser = user.userUid!;
+
+      // first and last date of the week
+      final String firstDayOfWeek = week.firstDay;
+      final String lastDayOfWeek = week.lastDay;
+
+      return FutureBuilder(
+          future: main.retrieveAWeekOfAccountedAndAccountedData(
+              currentUser: currentUser,
+              firstDatePeriod: firstDayOfWeek,
+              lastDatePeriod: lastDayOfWeek),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              // While the data is loading, a shimmer effect is shown
+              return const ShimmerWidget.rectangular(
+                height: 50,
+                width: 50,
+              );
+            } else if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            } else {
+              // if there is data available then the
+              // grouped chart is shown, otherwise
+              // an empty widget is rendered on the screen
+              if (snapshot.hasData &&
+                  snapshot.data != null &&
+                  snapshot.data!.isNotEmpty) {
+                logger.i(snapshot.data);
+                return  AppImages.chartNoData;
+              } else {
+                return const SizedBox.shrink();
+              }
+            }
+          });
+    });
   }
 }

@@ -13,6 +13,9 @@ class AppImages {
   // track list empty svg
   static final trackListEmpty = getSvgAsset("trackInfoSVG.svg");
 
+  // report page no distribution data
+   static final chartNoData = getSvgAsset("chartNotAvailable.svg");
+
   // default pfp
   static final defaultPfp = getAssetImage("motion_pfp.jpg");
 

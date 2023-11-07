@@ -93,6 +93,18 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
 
     return resultMT;
   }
+
+  // accounted time and unaccounted time for everyday
+  // for a particular week
+  Future<List<Map<String, dynamic>>> retrieveAWeekOfAccountedAndAccountedData(
+      {required String currentUser,
+      required String firstDatePeriod,
+      required String lastDatePeriod}) async {
+    return await trackDbInstance.getAWeekOfAccountedAndAccountedData(
+        currentUser: currentUser,
+        firstDatePeriod: firstDatePeriod,
+        lastDatePeriod: lastDatePeriod);
+  }
 }
 
 // handles database operation for the subcategory table
@@ -162,7 +174,6 @@ class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
       {required String currentUser,
       required String firstDay,
       required String lastDay}) async {
-        
     return await trackDbInstance.getHighestTrackedTimePerSubcategory(
         currentUser: currentUser, firstDay: firstDay, lastDay: lastDay);
   }

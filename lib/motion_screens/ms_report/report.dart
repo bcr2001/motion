@@ -33,6 +33,10 @@ class MonthlyReportPage extends StatelessWidget {
               // pie chart for the accounted and unaccounted distribution
               const PieChartAndValuesAccountedAndUnaccounted(),
 
+              // Week distribution of accounted and unaccounted
+              const GroupedBarChartOfAccountedAndUnaccountedTime(),
+
+
               // MOST TRACKED AND LEAST TRACKED SECTION
 
               // section title (Most and Least Tracked)
