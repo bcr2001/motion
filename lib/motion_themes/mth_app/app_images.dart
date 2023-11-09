@@ -14,7 +14,14 @@ class AppImages {
   static final trackListEmpty = getSvgAsset("trackInfoSVG.svg");
 
   // report page no distribution data
-   static final chartNoData = getSvgAsset("chartNotAvailable.svg");
+  static final chartNoData = getSvgAsset("chartNotAvailable.svg");
+
+  // image displayed when the maincategory table is completely
+  // empty. This is mostly when the user first starts using the app
+  static final noAnalysisGallary = getSvgAsset("analysisSVG.svg");
+
+  // image displayed when the maincategory table is completely
+  // empty. This is mostly when the user first starts using the app
 
   // default pfp
   static final defaultPfp = getAssetImage("motion_pfp.jpg");
@@ -23,10 +30,10 @@ class AppImages {
   static final continueWithGoogleImage = getAssetImage("google_1.png", 30, 30);
 
   // no data available yet
-  static final noDataAvailableYet = getAssetImage("question.png", 140,140);
+  static final noDataAvailableYet = getAssetImage("question.png", 140, 140);
 
   // no data available yet
-  static final noTrackListAvailable = getAssetImage("trackInfo.png", 200,200);
+  static final noTrackListAvailable = getAssetImage("trackInfo.png", 200, 200);
 }
 
 // png images

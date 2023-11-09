@@ -21,11 +21,17 @@ class AppTextStyle {
   // base styling
   static final TextStyle _baseStyle = GoogleFonts.openSans(fontSize: 16.5);
 
+  // stats page accounted and unaccounted gallary style
+  static TextStyle accountedAndUnaccountedGallaryStyle() {
+    return _baseStyle.copyWith(
+      fontWeight: FontWeight.w600,
+      fontSize: 14.5
+    );
+  }
+
   // home page tracking window information text style
   static TextStyle infoTextStyle() {
-    return _baseStyle.copyWith(
-      fontSize: 15
-    );
+    return _baseStyle.copyWith(fontSize: 15);
   }
 
   // zen quote text styling

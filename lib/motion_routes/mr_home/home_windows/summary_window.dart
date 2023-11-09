@@ -7,6 +7,7 @@ import 'package:motion/motion_routes/mr_home/home_reusable/back_home.dart';
 import 'package:motion/motion_routes/mr_home/home_reusable/front_home.dart';
 import 'package:motion/motion_screens/ms_report/report_back.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
+import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:provider/provider.dart';
 
 // Where the summary for the month is displayed
@@ -38,9 +39,10 @@ class SummaryWindow extends StatelessWidget {
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               // While the data is loading, a shimmer effect is shown
-              return const ShimmerWidget.rectangular(
-                height: 200,
-                width: 200,
+              return const Center(
+                child: CircularProgressIndicator(
+                  color: AppColor.blueMainColor,
+                ),
               );
             } else if (snapshot.hasError) {
               return Text('Error: ${snapshot.error}');
@@ -48,7 +50,8 @@ class SummaryWindow extends StatelessWidget {
               final snapshotData = snapshot.data;
 
               if (snapshotData! <= 0) {
-                return const InfoToTheUser(sectionInformation: AppString.infoAboutSummaryWindow);
+                return const InfoToTheUser(
+                    sectionInformation: AppString.infoAboutSummaryWindow);
               } else {
                 return CardBuilder(
                   itemsToBeDisplayed: isSubcatgory

@@ -143,7 +143,8 @@ class AppString {
   static const String subcategoryViewButtonName = "Subcategory";
   static const String mainCategoryViewButtonName = "Main Category";
 
-  static const String infoAboutSummaryWindow = "Information on time tracked within the tracking window will be summarized and showcased here. You can switch between Subcategory Summary and Main Category Summary. This summary pertains to the ongoing month.";
+  static const String infoAboutSummaryWindow =
+      "Information on time tracked within the tracking window will be summarized and showcased here. You can switch between Subcategory Summary and Main Category Summary. This summary pertains to the ongoing month.";
 
   // Report Page
 
@@ -164,18 +165,14 @@ class AppString {
   static const String informationAboutHighestTrackedTime =
       "During the month, these are the highest durations you have spent on specific subcategories, along with the dates they were recorded.";
 
-  static const String subcategory1 =
-      "Subcategory 1";
-  static const String subcategory2 =
-      "Subcategory 2";
-  static const String subcategory3 =
-      "Subcategory 3";
+  static const String subcategory1 = "Subcategory 1";
+  static const String subcategory2 = "Subcategory 2";
+  static const String subcategory3 = "Subcategory 3";
 
-  static const String hoursTimeSpentHolder =
-      "0.00";
-  static const String firstDayOfTrackingEver =
-      "01/07/2021";
+  static const String hoursTimeSpentHolder = "0.00";
+  static const String firstDayOfTrackingEver = "01/07/2021";
 
-  
-  
+  // STATS ROUTE
+  static const String infoAboutAnnualOverviewEmpty =
+      "Initiate the tracking process to generate and display your comprehensive yearly summary here..";
 }
