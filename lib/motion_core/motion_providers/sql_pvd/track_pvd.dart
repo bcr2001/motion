@@ -105,6 +105,14 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
         firstDatePeriod: firstDatePeriod,
         lastDatePeriod: lastDatePeriod);
   }
+
+  // get the accounted and unaccounted totals broken down by year
+  Future<List<Map<String, dynamic>>>
+      retrieveAccountedAndUnaccountedBrokenByYears(
+          {required String currentUser}) async {
+    return await trackDbInstance.getAccountedAndUnaccountedBrokenByYears(
+        currentUser: currentUser);
+  }
 }
 
 // handles database operation for the subcategory table

@@ -25,7 +25,7 @@ class AppTextStyle {
   static TextStyle accountedAndUnaccountedGallaryStyle() {
     return _baseStyle.copyWith(
       fontWeight: FontWeight.w600,
-      fontSize: 14.5
+      fontSize: 14
     );
   }
 

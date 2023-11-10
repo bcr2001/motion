@@ -41,13 +41,15 @@ class MotionStatesRoute extends StatelessWidget {
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     // While the data is loading, a shimmer effect is shown
-                    return const Center(child: CircularProgressIndicator(color: AppColor.blueMainColor,),);
+                    return const Center(
+                      child: CircularProgressIndicator(
+                        color: AppColor.blueMainColor,
+                      ),
+                    );
                   } else if (snapshot.hasError) {
                     return Text('Error: ${snapshot.error}');
                   } else {
                     final snapshotData = snapshot.data;
-
-                    logger.i(snapshot);
 
                     if (snapshotData! <= 0) {
                       return Column(
@@ -63,11 +65,73 @@ class MotionStatesRoute extends StatelessWidget {
                         ],
                       );
                     } else {
-                      return Text("It didn't work? ");
+                      // if data is available, the the analysis gallaries are displayed
+                      return const AnalysisGallery();
                     }
                   }
                 });
           },
         ));
+  }
+}
+
+// a generated grid view for yearly gallery
+class AnalysisGallery extends StatelessWidget {
+  const AnalysisGallery({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer2<UserUidProvider, MainCategoryTrackerProvider>(
+        builder: (context, user, main, child) {
+      // current user uid
+      final String currentUser = user.userUid!;
+
+      // returns a grid view of yearly break down gallaries
+      return FutureBuilder(
+          future: main.retrieveAccountedAndUnaccountedBrokenByYears(
+              currentUser: currentUser),
+          builder: ((context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              // Loading state: Show a shimmer effect while data is being loaded.
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            } else if (snapshot.hasError) {
+              // Error state: Display an error message if there's an issue with data retrieval.
+              return const Text("Error 355 :(");
+            } else {
+              final dataResults = snapshot.data!;
+
+              logger.i(dataResults);
+
+              return GridView.builder(
+                  shrinkWrap: true,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2),
+                  itemCount: dataResults.length,
+                  itemBuilder: (context, index) {
+                    // accounted total for the year
+                    final double accountedYearTotal =
+                        dataResults[index]["Accounted"];
+
+                    // unaccounted total for the year
+                    final double unaccountedYearTotal =
+                        dataResults[index]["Unaccounted"];
+
+                    // year
+                    final String year = dataResults[index]["Year"];
+
+                    return AnnualGallaryBuilder(
+                        accountedTotal: accountedYearTotal.toStringAsFixed(2),
+                        unaccountedTotal:
+                            unaccountedYearTotal.toStringAsFixed(2),
+                        gallaryYear: year,
+                        onTap: () {
+                          logger.i("$year clicked");
+                        });
+                  });
+            }
+          }));
+    });
   }
 }

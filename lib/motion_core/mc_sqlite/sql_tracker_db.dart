@@ -223,6 +223,37 @@ class TrackerDatabaseHelper {
     }
   }
 
+  // get the accounted and unaccounted totals broken down by year
+  Future<List<Map<String, dynamic>>> getAccountedAndUnaccountedBrokenByYears(
+      {required String currentUser}) async {
+    try {
+      final db = await database;
+      
+      // this query returns a table of accounted and unaccounte
+      // totals grouped by the year
+      final resultAAUBBY = await db.rawQuery(
+        '''
+        SELECT  (COALESCE(SUM(education), 0) + COALESCE(SUM(skills), 0)
+                + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(personalGrowth), 0)
+                + COALESCE(SUM(sleep), 0))/60 AS Accounted,
+                (((COUNT(date) * 24)*60) - (COALESCE(SUM(education), 0)
+                + COALESCE(SUM(skills), 0) + COALESCE(SUM(entertainment), 0)
+                + COALESCE(SUM(personalGrowth), 0) + COALESCE(SUM(sleep), 0)))/60
+                AS Unaccounted,
+                strftime('%Y', date) AS Year
+        FROM main_category
+        WHERE currentLoggedInUser = ?
+        GROUP BY Year
+        ''', [currentUser]);
+
+
+      return resultAAUBBY;
+    } catch (e) {
+      logger.e("Error: $e");
+      return [];
+    }
+  }
+
   // get the monthly entire main category total
   Future<double> getEntireMonthlyTotalMainCategoryTable(
     String currentUser,
@@ -267,17 +298,14 @@ class TrackerDatabaseHelper {
 
   // get accounted time and unaccounted time for everyday
   // for a particular week
-  Future<List<Map<String, dynamic>>>
-      getAWeekOfAccountedAndAccountedData({
-        required String currentUser,
-        required String firstDatePeriod,
-        required String lastDatePeriod
-      }) async {
+  Future<List<Map<String, dynamic>>> getAWeekOfAccountedAndAccountedData(
+      {required String currentUser,
+      required String firstDatePeriod,
+      required String lastDatePeriod}) async {
     try {
       final db = await database;
 
-      final resultAWAAD = await db.rawQuery(
-        '''
+      final resultAWAAD = await db.rawQuery('''
         SELECT 
             date, 
             (COALESCE(education, 0) + COALESCE(skills, 0) + COALESCE(entertainment, 0) + COALESCE(personalGrowth, 0) + COALESCE(sleep, 0))/60 AS Accounted, 
@@ -285,8 +313,7 @@ class TrackerDatabaseHelper {
         FROM main_category
         WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
         ORDER BY date;
-        ''', [currentUser, firstDatePeriod, lastDatePeriod]
-      );
+        ''', [currentUser, firstDatePeriod, lastDatePeriod]);
 
       return resultAWAAD;
     } catch (e) {
