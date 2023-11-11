@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/first_and_last_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
+import 'package:motion/motion_screens/ms_report/report_front.dart';
 import 'package:motion/motion_themes/mth_app/app_images.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
@@ -54,7 +55,7 @@ class AccountedUnaccountedReportPieChart extends StatelessWidget {
                     ((unAccounted / total) * 100).toStringAsFixed(1));
 
                 if (accounted == 0 && unAccounted == 0) {
-                  return AppImages.noDataAvailableYet;
+                  return const InfoAboutNoData();
                 } else {
                   return PieChartBuilder(sections: [
                     // Accounted proportion
@@ -73,7 +74,7 @@ class AccountedUnaccountedReportPieChart extends StatelessWidget {
                   ]);
                 }
               } else {
-                return AppImages.noDataAvailableYet;
+                return const InfoAboutNoData();
               }
             }
           });
@@ -154,7 +155,7 @@ class MainCategoryDistributionPieChart extends StatelessWidget {
 
                 return PieChartBuilder(sections: sections);
               } else {
-                return AppImages.noDataAvailableYet;
+                return const InfoAboutNoData();
               }
             }
           },
@@ -435,7 +436,7 @@ class InfoToTheUser extends StatelessWidget {
         children: [
           // info icon
           const Padding(
-            padding: EdgeInsets.only(right: 8.0),
+            padding: EdgeInsets.only(right: 2.0),
             child: Icon(Icons.info_outline),
           ),
 
@@ -468,36 +469,33 @@ class HighestTrackedSectionElement extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 130,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          // subcategory name
-          Text(subcategoryName, style: AppTextStyle.topAndBottomTextStyle()),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        // subcategory name
+        Text(subcategoryName, style: AppTextStyle.topAndBottomTextStyle()),
 
-          // total time tracked
-          Text(
-            "$timeSpent H",
-            style: AppTextStyle.mostAndLestTextStyleTotalHours(),
+        // total time tracked
+        Text(
+          "$timeSpent H",
+          style: AppTextStyle.mostAndLestTextStyleTotalHours(),
+        ),
+
+        // date recorded
+        Text(
+          date,
+          style: AppTextStyle.topAndBottomTextStyle(),
+        ),
+
+        // blue divider
+        const SizedBox(
+          width: 105,
+          child: Divider(
+            thickness: 2.0,
+            color: AppColor.blueMainColor,
           ),
-
-          // date recorded
-          Text(
-            date,
-            style: AppTextStyle.topAndBottomTextStyle(),
-          ),
-
-          // blue divider
-          const SizedBox(
-            width: 105,
-            child: Divider(
-              thickness: 2.0,
-              color: AppColor.blueMainColor,
-            ),
-          )
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -570,12 +568,8 @@ class GridHighestTrackedSubcategory extends StatelessWidget {
               } else {
                 // when the database table is empty and there is no data to be
                 // displayed, then the placeholder grid below is shown
-                return GridView(
-                  shrinkWrap: true,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      crossAxisSpacing: 10.0,
-                      mainAxisSpacing: 10.0),
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: const [
                     // first place holder: Subcategory 1
                     HighestTrackedSectionElement(

@@ -307,6 +307,42 @@ class InfoAboutHightesTrackedTime extends StatelessWidget {
   }
 }
 
+// info about no data in the database
+class InfoAboutNoData extends StatelessWidget {
+  const InfoAboutNoData({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // no data image
+        AppImages.noDataAvailableYet,
+
+        // information about what the image illustrates
+        Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              // info icon
+              const Padding(
+                padding: EdgeInsets.only(right: 2.0),
+                child: Icon(Icons.info_outline),
+              ),
+        
+              // information about the specific section
+              Text(
+                AppString.informationAboutNoData,
+                style: AppTextStyle.informationTextStyle(),
+              )
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 // grouped bar chart for the distribution of accounted
 // and unaccounted time during the course of the week
 class GroupedBarChartOfAccountedAndUnaccountedTime extends StatelessWidget {
@@ -346,7 +382,7 @@ class GroupedBarChartOfAccountedAndUnaccountedTime extends StatelessWidget {
                   snapshot.data != null &&
                   snapshot.data!.isNotEmpty) {
                 logger.i(snapshot.data);
-                return  AppImages.chartNoData;
+                return AppImages.chartNoData;
               } else {
                 return const SizedBox.shrink();
               }

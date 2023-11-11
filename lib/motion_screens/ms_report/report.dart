@@ -28,6 +28,7 @@ class MonthlyReportPage extends StatelessWidget {
         body: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
             children: [
+              // SECTION 1:
               // Pie Chart Data Title
               sectionTitle(titleName: AppString.accountedVsUnaccounterTitle),
               // pie chart for the accounted and unaccounted distribution
@@ -36,7 +37,8 @@ class MonthlyReportPage extends StatelessWidget {
               // Week distribution of accounted and unaccounted
               const GroupedBarChartOfAccountedAndUnaccountedTime(),
 
-
+              
+              // SECTION 2:
               // MOST TRACKED AND LEAST TRACKED SECTION
 
               // section title (Most and Least Tracked)
@@ -56,13 +58,17 @@ class MonthlyReportPage extends StatelessWidget {
               // the summary of the most tracked and least tracked
               // main categories
               const MostAndLeastTrackedSubcategorySection(),
+              
 
+              // SECTION 3:
               // Pie chart for the main category
               //distribution for the current month
               sectionTitle(titleName: AppString.mainCategoryDistributionTitle),
 
               const PieChartDataMainCategoryDistribution(),
 
+
+              // SECTION 4:
               // Highest Tracked time per subcategory section
               sectionTitle(titleName: AppString.highestTrackedTimeTitle),
               // information about this section

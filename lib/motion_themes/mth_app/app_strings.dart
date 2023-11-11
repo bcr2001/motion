@@ -164,6 +164,8 @@ class AppString {
       "The amount of time you spend sleeping is not considered when determining the most and least time tracked.";
   static const String informationAboutHighestTrackedTime =
       "During the month, these are the highest durations you have spent on specific subcategories, along with the dates they were recorded.";
+  static const String informationAboutNoData =
+      "No data";
 
   static const String subcategory1 = "Subcategory 1";
   static const String subcategory2 = "Subcategory 2";
@@ -175,4 +177,6 @@ class AppString {
   // STATS ROUTE
   static const String infoAboutAnnualOverviewEmpty =
       "Initiate the tracking process to generate and display your comprehensive yearly summary here..";
+  static const String infoAboutGalleys =
+      "To access the summary and analysis for a specific year, click on that year.";
 }

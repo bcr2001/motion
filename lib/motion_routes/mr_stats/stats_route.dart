@@ -5,6 +5,7 @@ import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_routes/mr_stats/stats_back.dart';
+import 'package:motion/motion_routes/mr_stats/stats_front.dart';
 import 'package:motion/motion_routes/route_action.dart';
 import 'package:motion/motion_screens/ms_report/report_back.dart';
 import 'package:motion/motion_themes/mth_app/app_images.dart';
@@ -104,32 +105,61 @@ class AnalysisGallery extends StatelessWidget {
 
               logger.i(dataResults);
 
-              return GridView.builder(
-                  shrinkWrap: true,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2),
-                  itemCount: dataResults.length,
-                  itemBuilder: (context, index) {
-                    // accounted total for the year
-                    final double accountedYearTotal =
-                        dataResults[index]["Accounted"];
+              return Column(
+                children: [
 
-                    // unaccounted total for the year
-                    final double unaccountedYearTotal =
-                        dataResults[index]["Unaccounted"];
+                  GridView.builder(
+                      shrinkWrap: true,
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          mainAxisExtent: 250,
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 5,
+                          mainAxisSpacing: 5),
+                      itemCount: dataResults.length,
+                      itemBuilder: (context, index) {
+                        // accounted total for the year in hours
+                        final double accountedYearTotal =
+                            dataResults[index]["Accounted"];
 
-                    // year
-                    final String year = dataResults[index]["Year"];
+                        // accounted total for the year in days
+                        final double accountedDaysTotal = accountedYearTotal / 24;
 
-                    return AnnualGallaryBuilder(
-                        accountedTotal: accountedYearTotal.toStringAsFixed(2),
-                        unaccountedTotal:
-                            unaccountedYearTotal.toStringAsFixed(2),
-                        gallaryYear: year,
-                        onTap: () {
-                          logger.i("$year clicked");
-                        });
-                  });
+                        // unaccounted total for the year in hours
+                        final double unaccountedYearTotal =
+                            dataResults[index]["Unaccounted"];
+
+                        // unaccounted total for the years in days
+                        final double unaccountedDaysTotal =
+                            unaccountedYearTotal / 24;
+
+                        // year
+                        final String year = dataResults[index]["Year"];
+
+                        return AnnualGallaryBuilder(
+                          accountedTotalHours:
+                              accountedYearTotal.toStringAsFixed(2),
+                          unaccountedTotalHours:
+                              unaccountedYearTotal.toStringAsFixed(2),
+                          gallaryYear: year,
+                          onTap: () {
+                            logger.i("$year clicked");
+                            Navigator.push(context,
+                                MaterialPageRoute(builder: (BuildContext context) {
+                              return YearsWorthOfSummaryStatitics(
+                                year: year,
+                              );
+                            }));
+                          },
+                          accountedTotalDays: accountedDaysTotal.toStringAsFixed(2),
+                          unaccountedTotalDays:
+                              unaccountedDaysTotal.toStringAsFixed(2),
+                        );
+                      }),
+                                        // info to the user'
+                  const InfoToTheUser(
+                      sectionInformation: AppString.infoAboutGalleys),
+                ],
+              );
             }
           }));
     });

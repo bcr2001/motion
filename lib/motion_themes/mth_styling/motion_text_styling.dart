@@ -25,7 +25,15 @@ class AppTextStyle {
   static TextStyle accountedAndUnaccountedGallaryStyle() {
     return _baseStyle.copyWith(
       fontWeight: FontWeight.w600,
-      fontSize: 14
+      fontSize: 14.5
+    );
+  }
+
+  // stats page accounted and unaccounted gallary style
+  static TextStyle overviewDataValueTextStyle() {
+    return _baseStyle.copyWith(
+      fontWeight: FontWeight.w500,
+      fontSize: 13
     );
   }
 
