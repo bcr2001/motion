@@ -10,9 +10,33 @@ Widget sectionTitle({required String titleName}) {
     padding: const EdgeInsets.only(left: 10, top: 10, bottom: 10),
     child: Text(
       titleName,
-      style: const TextStyle(fontSize: 17.5, fontWeight: FontWeight.w600),
+      style: AppTextStyle.sectionTitleTextStyle(),
     ),
   );
+}
+
+// special title
+Widget specialSectionTitle({required String mainTitleName, required String elevatedTitleName}) {
+  return Padding(
+    padding: const EdgeInsets.only(left: 10, top: 10, bottom: 10),
+    child: Row(
+      children: [
+        // main title
+        Text(
+          mainTitleName,
+          style: AppTextStyle.sectionTitleTextStyle(),
+        ),
+
+        // elevated title name
+        Padding(
+          padding: const EdgeInsets.only(bottom: 10.0, left: 5.0),
+          child: Text(
+            elevatedTitleName,
+            style: AppTextStyle.specialSectionTitleTextStyle(),
+            ),
+        )
+      ],
+    ), );
 }
 
 // builds the ListView.builder() of either
@@ -68,11 +92,14 @@ class _ScrollingListBuilderState extends State<ScrollingListBuilder> {
                           convertedTotal,
                           textAlign: TextAlign.center,
                           style: const TextStyle(
-                            color: Colors.green,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14
-                          ),),
-                        subtitle: Text(convertedAverage,style: AppTextStyle.subtitleLTStyle(),),
+                              color: Colors.green,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14),
+                        ),
+                        subtitle: Text(
+                          convertedAverage,
+                          style: AppTextStyle.subtitleLTStyle(),
+                        ),
                       );
                     }));
           }
@@ -90,7 +117,8 @@ class CardBuilder extends StatelessWidget {
   const CardBuilder(
       {super.key,
       required this.timeAccountedAndOthers,
-      required this.itemsToBeDisplayed, this.sizedBoxHeight = 0.25});
+      required this.itemsToBeDisplayed,
+      this.sizedBoxHeight = 0.25});
 
   @override
   Widget build(BuildContext context) {

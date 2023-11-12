@@ -21,6 +21,23 @@ class AppTextStyle {
   // BASE STYLE
   static final TextStyle _baseStyle = GoogleFonts.openSans(fontSize: 16.5);
 
+  // section title style (main title)
+  static sectionTitleTextStyle() {
+    return _baseStyle.copyWith(
+      fontSize: 18,
+      fontWeight: FontWeight.w600
+    );
+  }
+
+  // section title style (main title)
+  static specialSectionTitleTextStyle() {
+    return _baseStyle.copyWith(
+      fontSize: 14,
+      fontWeight: FontWeight.w600,
+      color: Colors.blueGrey
+    );
+  }
+
   // stats page accounted and unaccounted gallary style
   static TextStyle accountedAndUnaccountedGallaryStyle() {
     return _baseStyle.copyWith(fontWeight: FontWeight.w600, fontSize: 14.5);

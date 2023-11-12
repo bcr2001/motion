@@ -71,20 +71,36 @@ class MonthlyReportPage extends StatelessWidget {
                   builder: (context, user, day, main, child) {
                 // user uid
                 final String currentUser = user.userUid!;
-                return  PieChartDataMainCategoryDistribution(
-                  future: main.retrieveMainTotalTimeSpentSpecificDates(currentUser: currentUser,
-                  firstDay: day.firstDay,
-                  lastDay: day.lastDay),
+                return PieChartDataMainCategoryDistribution(
+                  future: main.retrieveMainTotalTimeSpentSpecificDates(
+                      currentUser: currentUser,
+                      firstDay: day.firstDay,
+                      lastDay: day.lastDay),
                 );
               }),
 
               // SECTION 4:
               // Highest Tracked time per subcategory section
-              sectionTitle(titleName: AppString.highestTrackedTimeTitle),
+              specialSectionTitle(
+                mainTitleName: AppString.highestTrackedTimeTitleMain,
+                elevatedTitleName: AppString.highestTrackedTimeTitleSpecial,
+              ),
               // information about this section
               const InfoAboutHightesTrackedTime(),
 
-              const GridHighestTrackedSubcategory()
+              Consumer3<FirstAndLastDay, UserUidProvider,
+                      SubcategoryTrackerDatabaseProvider>(
+                  builder: (context, day, user, sub, child) {
+                // current logged in user
+                final String currentUserUid = user.userUid!;
+
+                return GridHighestTrackedSubcategory(
+                  future: sub.retrieveHighestTrackedTimePerSubcategory(
+                      currentUser: currentUserUid,
+                      firstDay: day.firstDay,
+                      lastDay: day.lastDay),
+                );
+              })
             ]));
   }
 }

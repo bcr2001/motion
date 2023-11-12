@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/first_and_last_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
+import 'package:motion/motion_reusable/db_re/sub_logic.dart';
+import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_screens/ms_report/report_front.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
@@ -83,11 +85,9 @@ class AccountedUnaccountedReportPieChart extends StatelessWidget {
 
 // displays the Main category Distribution pie chart
 class MainCategoryDistributionPieChart extends StatelessWidget {
-
   final Future<List<Map<String, dynamic>>?> future;
 
-  const MainCategoryDistributionPieChart(
-      {super.key, required this.future});
+  const MainCategoryDistributionPieChart({super.key, required this.future});
 
   Color _getCategoryColor(int index) {
     switch (index) {
@@ -466,11 +466,15 @@ class HighestTrackedSectionElement extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         // subcategory name
-        Text(subcategoryName, style: AppTextStyle.topAndBottomTextStyle()),
+        Text(
+          subcategoryName,
+          style: AppTextStyle.topAndBottomTextStyle(),
+          textAlign: TextAlign.center,
+        ),
 
         // total time tracked
         Text(
-          "$timeSpent H",
+          timeSpent,
           style: AppTextStyle.mostAndLestTextStyleTotalHours(),
         ),
 
@@ -497,95 +501,95 @@ class HighestTrackedSectionElement extends StatelessWidget {
 // each subcategiry that is being tracked in the course of the month
 // has it's max, the class below displays the max of these subcategories
 class GridHighestTrackedSubcategory extends StatelessWidget {
-  const GridHighestTrackedSubcategory({super.key});
+  final Future<List<Map<String, dynamic>>> future;
+
+  const GridHighestTrackedSubcategory({super.key, required this.future});
 
   @override
   Widget build(BuildContext context) {
-    return Consumer3<FirstAndLastDay, UserUidProvider,
-            SubcategoryTrackerDatabaseProvider>(
-        builder: (context, day, user, sub, child) {
-      // first and last day of a particular month
-      final firstDayOfMonth = day.firstDay;
-      final lastDayOfMonth = day.lastDay;
+    // get the screen height of the device
+    final screenHeight = MediaQuery.of(context).size.height;
 
-      // current logged in user
-      final currentLoggedInUser = user.userUid!;
+    return FutureBuilder(
+        future: future,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            // While the data is loading, a shimmer effect is shown
+            return const ShimmerWidget.rectangular(
+              height: 200,
+              width: 200,
+            );
+          } else if (snapshot.hasError) {
+            return Text('Error: ${snapshot.error}');
+          } else {
+            // Data is available, snapshot.data to get the results
+            if (snapshot.hasData &&
+                snapshot.data != null &&
+                snapshot.data!.isNotEmpty) {
+              // a list of the database query result
+              List<Map<String, dynamic>> highestResults = snapshot.data!;
 
-      return FutureBuilder(
-          future: sub.retrieveHighestTrackedTimePerSubcategory(
-              currentUser: currentLoggedInUser,
-              firstDay: firstDayOfMonth,
-              lastDay: lastDayOfMonth),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              // While the data is loading, a shimmer effect is shown
-              return const ShimmerWidget.rectangular(
-                height: 200,
-                width: 200,
+              return Container(
+                margin: const EdgeInsets.only(bottom: 25.0),
+                height: screenHeight * 0.45,
+                child: Card(
+                  child: GridView.builder(
+                      shrinkWrap: true,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              crossAxisSpacing: 10.0,
+                              mainAxisSpacing: 10.0),
+                      itemCount: highestResults.length,
+                      itemBuilder: (BuildContext context, index) {
+                        // element subcategory name
+                        final String elementSubName =
+                            highestResults[index]["subcategoryName"];
+
+                        // element total time spent
+                        final String elementTimeSpent = convertHoursToTimeGrid(
+                            highestResults[index]["timeSpent"]);
+
+                        logger.i("Returned $elementTimeSpent");
+
+                        // element date
+                        final String elementDate =
+                            highestResults[index]["date"];
+
+                        return HighestTrackedSectionElement(
+                            subcategoryName: elementSubName,
+                            timeSpent: elementTimeSpent,
+                            date: elementDate);
+                      }),
+                ),
               );
-            } else if (snapshot.hasError) {
-              return Text('Error: ${snapshot.error}');
             } else {
-              // Data is available, snapshot.data to get the results
-              if (snapshot.hasData &&
-                  snapshot.data != null &&
-                  snapshot.data!.isNotEmpty) {
-                // a list of the database query result
-                List<Map<String, dynamic>> highestResults = snapshot.data!;
+              // when the database table is empty and there is no data to be
+              // displayed, then the placeholder grid below is shown
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: const [
+                  // first place holder: Subcategory 1
+                  HighestTrackedSectionElement(
+                      subcategoryName: AppString.subcategory1,
+                      timeSpent: AppString.hoursTimeSpentHolder,
+                      date: AppString.firstDayOfTrackingEver),
 
-                return GridView.builder(
-                    shrinkWrap: true,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            crossAxisSpacing: 10.0,
-                            mainAxisSpacing: 10.0),
-                    itemCount: highestResults.length,
-                    itemBuilder: (BuildContext context, index) {
-                      // element subcategory name
-                      final String elementSubName =
-                          highestResults[index]["subcategoryName"];
+                  // first place holder: Subcategory 2
+                  HighestTrackedSectionElement(
+                      subcategoryName: AppString.subcategory2,
+                      timeSpent: AppString.hoursTimeSpentHolder,
+                      date: AppString.firstDayOfTrackingEver),
 
-                      // element total time spent
-                      final double elementTimeSpent =
-                          highestResults[index]["timeSpent"];
-
-                      // element date
-                      final String elementDate = highestResults[index]["date"];
-
-                      return HighestTrackedSectionElement(
-                          subcategoryName: elementSubName,
-                          timeSpent: elementTimeSpent.toStringAsFixed(2),
-                          date: elementDate);
-                    });
-              } else {
-                // when the database table is empty and there is no data to be
-                // displayed, then the placeholder grid below is shown
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: const [
-                    // first place holder: Subcategory 1
-                    HighestTrackedSectionElement(
-                        subcategoryName: AppString.subcategory1,
-                        timeSpent: AppString.hoursTimeSpentHolder,
-                        date: AppString.firstDayOfTrackingEver),
-
-                    // first place holder: Subcategory 2
-                    HighestTrackedSectionElement(
-                        subcategoryName: AppString.subcategory2,
-                        timeSpent: AppString.hoursTimeSpentHolder,
-                        date: AppString.firstDayOfTrackingEver),
-
-                    // first place holder: Subcategory 3
-                    HighestTrackedSectionElement(
-                        subcategoryName: AppString.subcategory3,
-                        timeSpent: AppString.hoursTimeSpentHolder,
-                        date: AppString.firstDayOfTrackingEver),
-                  ],
-                );
-              }
+                  // first place holder: Subcategory 3
+                  HighestTrackedSectionElement(
+                      subcategoryName: AppString.subcategory3,
+                      timeSpent: AppString.hoursTimeSpentHolder,
+                      date: AppString.firstDayOfTrackingEver),
+                ],
+              );
             }
-          });
-    });
+          }
+        });
   }
 }

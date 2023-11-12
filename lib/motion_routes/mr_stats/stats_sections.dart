@@ -117,7 +117,7 @@ class YearMainCategoryOveriew extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // get the screen heigh of the device
+    // get the screen height of the device
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Consumer2<UserUidProvider, SubcategoryTrackerDatabaseProvider>(
@@ -221,5 +221,27 @@ class AYearInSummaryPieChartDistribution extends StatelessWidget {
         );
       }),
     );
+  }
+}
+
+// highest time tracked per subcategory
+// for the entire
+class YearHighestTrackedTimePerSubcategory extends StatelessWidget {
+  final String year;
+  
+  const YearHighestTrackedTimePerSubcategory({super.key, required this.year});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer2<UserUidProvider, SubcategoryTrackerDatabaseProvider>(
+        builder: (context, user, sub, child) {
+      final String currentUserUid = user.userUid!;
+
+      return GridHighestTrackedSubcategory(
+          future: sub.retrieveHighestTrackedTimePerSubcategory(
+              currentUser: currentUserUid,
+              firstDay: "$year-01-01",
+              lastDay: "$year-12-31"));
+    });
   }
 }

@@ -1,5 +1,4 @@
 // minutes to respective time components
-import 'package:flutter/material.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:sqflite/sqflite.dart';
@@ -28,6 +27,16 @@ String convertMinutesToTime(double minutes) {
     } else {
       return combinedResult;
     }
+  }
+}
+
+String convertHoursToTimeGrid(double hours) {
+  if (hours < 1) {
+    double convertedHour = hours * 60;
+
+    return "${convertedHour.toStringAsFixed(1)}M";
+  } else {
+    return "${hours.toStringAsFixed(2)}H";
   }
 }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:motion/motion_routes/mr_home/home_reusable/back_home.dart';
 import 'package:motion/motion_routes/mr_stats/stats_back.dart';
 import 'package:motion/motion_routes/mr_stats/stats_sections.dart';
+import 'package:motion/motion_screens/ms_report/report_back.dart';
 import 'package:motion/motion_themes/mth_app/app_images.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 
@@ -70,8 +71,21 @@ class YearsWorthOfSummaryStatitics extends StatelessWidget {
 
           // SECTION 3: A YEAR IN SLICES
           sectionTitle(titleName: AppString.aYearInSlicesTitle),
+          // a pie chart that shows the distribution of main
+          // category elements
+          AYearInSummaryPieChartDistribution(year: year,),
 
-          AYearInSummaryPieChartDistribution(year: year,)
+
+          // SECTION 4: HIGHEST TRACKED TIME PER SUBCATEGORY
+
+          // section title
+          specialSectionTitle(mainTitleName: AppString.highestTrackedTimeTitleMain, elevatedTitleName: AppString.highestTrackedTimeTitleSpecial),
+          // information to the user regarding this section
+          const InfoToTheUser(sectionInformation: AppString.infoAboutHighestTimeTracked),
+
+
+
+          YearHighestTrackedTimePerSubcategory(year: year,)
 
         ],
       ),

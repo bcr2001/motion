@@ -147,7 +147,6 @@ class AppString {
       "Information on time tracked within the tracking window will be summarized and showcased here. You can switch between Subcategory Summary and Main Category Summary. This summary pertains to the ongoing month.";
 
   // Report Page
-
   static const String reportTitle = "Report";
   static const String accountedVsUnaccounterTitle = "Accounted vs Unaccounted";
   static const String mostTrackedMainTitle = "Most Tracked\nMain Category";
@@ -157,8 +156,10 @@ class AppString {
   static const String mostAndLeastTrackedTitle = "Most and Least Tracked";
   static const String mainCategoryDistributionTitle =
       "Main Category Distribution";
-  static const String highestTrackedTimeTitle =
-      "Highest Tracked Time Per Subcategory";
+  static const String highestTrackedTimeTitleMain =
+      "Highest Tracked Time";
+  static const String highestTrackedTimeTitleSpecial =
+      "Per Subcategory";
 
   static const String informationAboutSleep =
       "The amount of time you spend sleeping is not considered when determining the most and least time tracked.";
@@ -185,5 +186,7 @@ class AppString {
       "Initiate the tracking process to generate and display your comprehensive yearly summary here..";
   static const String infoAboutGalleys =
       "To access the summary and analysis for a specific year, click on that year.";
+  static const String infoAboutHighestTimeTracked =
+      "Below are the highest recorded durations for each subcategory, along with the respective dates during which they were logged over the course of the year.";
 
 }
