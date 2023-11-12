@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
@@ -84,6 +85,104 @@ class AnnualGallaryBuilder extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+// yearly accounted and unaccounted totals
+class YearTotalsAccountedUnaccountedBuilder extends StatelessWidget {
+  final String accountedDays;
+  final String accountedHours;
+  final String unaccountedDays;
+  final String unaccountedHours;
+
+  const YearTotalsAccountedUnaccountedBuilder(
+      {super.key,
+      required this.accountedDays,
+      required this.accountedHours,
+      required this.unaccountedDays,
+      required this.unaccountedHours});
+
+  // function that builds out the accounted and unaccounted
+  // sections
+  Widget _onePieceData(
+      {required String sectionName,
+      required String sectionDays,
+      required String sectionHours,
+      required TextStyle sectionDataValueStyle,
+      required Color lineChartIconColor}) {
+    return SizedBox(
+      height: 120,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          // section title
+          Text(
+            sectionName,
+            style: AppTextStyle.accountedAndUnaccountedGallaryStyle(),
+          ),
+    
+          // days
+
+          Row(
+            children: [
+              Icon(
+                Icons.line_axis_rounded,
+                size: 30,
+                color: lineChartIconColor,),
+              Column(
+                children: [
+                  Text(
+                    "$sectionDays days",
+                    style: sectionDataValueStyle,
+                  ),
+    
+                  // hours
+                  Text(
+                    "$sectionHours hours",
+                    style: sectionDataValueStyle,
+                  ),
+                ],
+              ),
+            ],
+          ),
+    
+          // section divider
+          const SizedBox(
+            width: 100,
+            child: Divider(
+              thickness: 2,
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(10.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // accounted with data
+          _onePieceData(
+              sectionName: AppString.totalAccountedTitle,
+              sectionDays: accountedDays,
+              sectionHours: accountedHours,
+              sectionDataValueStyle: AppTextStyle.pieChartTextStyling(),
+              lineChartIconColor: Colors.green),
+
+          // unaccounted with data
+          _onePieceData(
+              sectionName: AppString.totalUnaccountedTitle,
+              sectionDays: unaccountedDays,
+              sectionHours: unaccountedHours,
+              sectionDataValueStyle: AppTextStyle.pieChartTextStyling(),
+              lineChartIconColor: Colors.red),
+        ],
       ),
     );
   }

@@ -3,7 +3,6 @@ import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_pvd.dar
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import '../../../motion_themes/mth_app/app_strings.dart';
-import '../home_reusable/front_home.dart';
 
 // For the Summary Window where users can switch between subcategory
 // or main category summaries for the current month

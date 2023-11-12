@@ -175,8 +175,15 @@ class AppString {
   static const String firstDayOfTrackingEver = "01/07/2021";
 
   // STATS ROUTE
+  static const String totalAccountedTitle = "Total Accounted";
+  static const String totalUnaccountedTitle = "Total Unaccounted";
+  static const String mainCategoryOverview = "Main Category Overview";
+  static const String aYearInSlicesTitle = "A Year in Slices";
+
+
   static const String infoAboutAnnualOverviewEmpty =
       "Initiate the tracking process to generate and display your comprehensive yearly summary here..";
   static const String infoAboutGalleys =
       "To access the summary and analysis for a specific year, click on that year.";
+
 }

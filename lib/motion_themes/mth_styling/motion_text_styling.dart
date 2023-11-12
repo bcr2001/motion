@@ -18,23 +18,27 @@ TextStyle contentStyle(
 Color darkModeTextColor = const Color(0XFFF5F5F5);
 
 class AppTextStyle {
-  // base styling
+  // BASE STYLE
   static final TextStyle _baseStyle = GoogleFonts.openSans(fontSize: 16.5);
 
   // stats page accounted and unaccounted gallary style
   static TextStyle accountedAndUnaccountedGallaryStyle() {
-    return _baseStyle.copyWith(
-      fontWeight: FontWeight.w600,
-      fontSize: 14.5
-    );
+    return _baseStyle.copyWith(fontWeight: FontWeight.w600, fontSize: 14.5);
   }
 
   // stats page accounted and unaccounted gallary style
   static TextStyle overviewDataValueTextStyle() {
-    return _baseStyle.copyWith(
-      fontWeight: FontWeight.w500,
-      fontSize: 13
-    );
+    return _baseStyle.copyWith(fontWeight: FontWeight.w500, fontSize: 13);
+  }
+
+  // home page subtitle list tile style
+  static TextStyle subtitleLTStyle() {
+    return _baseStyle.copyWith(fontSize: 14, fontWeight: FontWeight.w500);
+  }
+
+  // home page subtitle list tile style
+  static TextStyle leadingTextLTStyle() {
+    return _baseStyle.copyWith(fontSize: 16, fontWeight: FontWeight.w500);
   }
 
   // home page tracking window information text style
@@ -54,7 +58,7 @@ class AppTextStyle {
 
   // legend text style
   static TextStyle legendTextStyling() {
-    return _baseStyle.copyWith(fontSize: 14);
+    return _baseStyle.copyWith(fontSize: 14, fontWeight: FontWeight.w500);
   }
 
   // report page most and least tracked title style

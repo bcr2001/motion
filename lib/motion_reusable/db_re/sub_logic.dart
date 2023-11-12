@@ -1,4 +1,5 @@
 // minutes to respective time components
+import 'package:flutter/material.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:sqflite/sqflite.dart';
@@ -41,6 +42,16 @@ String convertMinutesToHoursOnly(double minutes,
   return isFirstSection
       ? "${hours.toStringAsFixed(2)}H"
       : "${hours.toStringAsFixed(2)}hrs/day";
+}
+
+// converts minutes to per month
+String convertMinutesToHoursMonth(double minutes) {
+  // isFirstSection checks whether we are formatting time for regular time
+  // distibution or for the accounted/ unaccounted section that appears in the
+  // home page just under the daily quotes section
+  final hours = minutes / 60;
+
+  return "${hours.toStringAsFixed(1)}h/day";
 }
 
 // convert hours to days

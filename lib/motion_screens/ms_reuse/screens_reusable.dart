@@ -25,7 +25,7 @@ class SettingsOptions extends StatelessWidget {
         onTap: onTap, // Assign the onTap callback when the tile is tapped
         title: Text(
           settingsTitle,
-          style: Theme.of(context).textTheme.headlineSmall,
+          style: AppTextStyle.leadingTextLTStyle(),
         ),
         subtitle: Text(
           settingsDesciption,

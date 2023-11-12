@@ -204,7 +204,10 @@ class PieChartAndValuesAccountedAndUnaccounted extends StatelessWidget {
 
 // Main Category Distribution Pie Chart and legend
 class PieChartDataMainCategoryDistribution extends StatelessWidget {
-  const PieChartDataMainCategoryDistribution({super.key});
+
+  final Future<List<Map<String, dynamic>>?> future;
+  
+  const PieChartDataMainCategoryDistribution({super.key, required this.future});
 
   // main category distribution legend
   Widget _mainCategoryPieChartLegend(
@@ -273,7 +276,9 @@ class PieChartDataMainCategoryDistribution extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           // main category pie chart distribution
-          const MainCategoryDistributionPieChart(),
+          MainCategoryDistributionPieChart(
+              future:future,
+            ),
 
           legendRows()
         ],
@@ -329,7 +334,7 @@ class InfoAboutNoData extends StatelessWidget {
                 padding: EdgeInsets.only(right: 2.0),
                 child: Icon(Icons.info_outline),
               ),
-        
+
               // information about the specific section
               Text(
                 AppString.informationAboutNoData,

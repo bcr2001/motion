@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_month_provider_pvd.dart';
+import 'package:motion/motion_core/motion_providers/date_pvd/first_and_last_pvd.dart';
+import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
+import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_screens/ms_report/report_back.dart';
 import 'package:provider/provider.dart';
 import '../../motion_routes/mr_home/home_reusable/back_home.dart';
@@ -37,7 +40,6 @@ class MonthlyReportPage extends StatelessWidget {
               // Week distribution of accounted and unaccounted
               const GroupedBarChartOfAccountedAndUnaccountedTime(),
 
-              
               // SECTION 2:
               // MOST TRACKED AND LEAST TRACKED SECTION
 
@@ -58,15 +60,23 @@ class MonthlyReportPage extends StatelessWidget {
               // the summary of the most tracked and least tracked
               // main categories
               const MostAndLeastTrackedSubcategorySection(),
-              
 
               // SECTION 3:
               // Pie chart for the main category
               //distribution for the current month
               sectionTitle(titleName: AppString.mainCategoryDistributionTitle),
 
-              const PieChartDataMainCategoryDistribution(),
-
+              Consumer3<UserUidProvider, FirstAndLastDay,
+                      MainCategoryTrackerProvider>(
+                  builder: (context, user, day, main, child) {
+                // user uid
+                final String currentUser = user.userUid!;
+                return  PieChartDataMainCategoryDistribution(
+                  future: main.retrieveMainTotalTimeSpentSpecificDates(currentUser: currentUser,
+                  firstDay: day.firstDay,
+                  lastDay: day.lastDay),
+                );
+              }),
 
               // SECTION 4:
               // Highest Tracked time per subcategory section
@@ -75,7 +85,6 @@ class MonthlyReportPage extends StatelessWidget {
               const InfoAboutHightesTrackedTime(),
 
               const GridHighestTrackedSubcategory()
-
             ]));
   }
 }

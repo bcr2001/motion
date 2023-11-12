@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:motion/motion_reusable/db_re/sub_logic.dart';
 import 'package:motion/motion_reusable/db_re/sub_ui.dart';
+import 'package:motion/motion_themes/mth_styling/app_color.dart';
+import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 
 // title builder
 Widget sectionTitle({required String titleName}) {
@@ -62,8 +64,15 @@ class _ScrollingListBuilderState extends State<ScrollingListBuilder> {
 
                       return ListTile(
                         title: Text(item[widget.columnName]),
-                        trailing: Text(convertedTotal),
-                        subtitle: Text(convertedAverage),
+                        trailing: Text(
+                          convertedTotal,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Colors.green,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14
+                          ),),
+                        subtitle: Text(convertedAverage,style: AppTextStyle.subtitleLTStyle(),),
                       );
                     }));
           }

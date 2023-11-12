@@ -409,6 +409,7 @@ class TrackerDatabaseHelper {
     }
   }
 
+
   // updates existing main categories rows
   Future<void> updateMainCategory(MainCategory mainCategory) async {
     try {

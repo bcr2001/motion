@@ -4,7 +4,6 @@ import 'package:motion/motion_core/motion_providers/date_pvd/first_and_last_pvd.
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_screens/ms_report/report_front.dart';
-import 'package:motion/motion_themes/mth_app/app_images.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
@@ -84,7 +83,11 @@ class AccountedUnaccountedReportPieChart extends StatelessWidget {
 
 // displays the Main category Distribution pie chart
 class MainCategoryDistributionPieChart extends StatelessWidget {
-  const MainCategoryDistributionPieChart({super.key});
+
+  final Future<List<Map<String, dynamic>>?> future;
+
+  const MainCategoryDistributionPieChart(
+      {super.key, required this.future});
 
   Color _getCategoryColor(int index) {
     switch (index) {
@@ -105,61 +108,51 @@ class MainCategoryDistributionPieChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer3<UserUidProvider, FirstAndLastDay,
-        MainCategoryTrackerProvider>(
-      builder: (context, user, day, main, child) {
-        return FutureBuilder(
-          future: main.retrieveMainTotalTimeSpentSpecificDates(
-            currentUser: user.userUid!,
-            firstDay: day.firstDay,
-            lastDay: day.lastDay,
-          ),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              // Loading state: Show a shimmer effect while data is being loaded.
-              return const ShimmerWidget.rectangular(width: 100, height: 100);
-            } else if (snapshot.hasError) {
-              // Error state: Display an error message if there's an issue with data retrieval.
-              return const Text("Error: Unable to retrieve data.");
-            } else {
-              if (snapshot.hasData &&
-                  snapshot.data != null &&
-                  snapshot.data!.isNotEmpty) {
-                List<Map<String, dynamic>> mainTotalResults =
-                    snapshot.data ?? [];
+    return FutureBuilder(
+      future: future,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          // Loading state: Show a shimmer effect while data is being loaded.
+          return const ShimmerWidget.rectangular(width: 100, height: 100);
+        } else if (snapshot.hasError) {
+          // Error state: Display an error message if there's an issue with data retrieval.
+          return const Text("Error: Unable to retrieve data.");
+        } else {
+          if (snapshot.hasData &&
+              snapshot.data != null &&
+              snapshot.data!.isNotEmpty) {
+            List<Map<String, dynamic>> mainTotalResults = snapshot.data ?? [];
 
-                double totalMainCategoryValues =
-                    mainTotalResults.fold(0.0, (prev, element) {
-                  return prev + (element["totalTimeSpent"] ?? 0.0);
-                });
+            double totalMainCategoryValues =
+                mainTotalResults.fold(0.0, (prev, element) {
+              return prev + (element["totalTimeSpent"] ?? 0.0);
+            });
 
-                List<PieChartSectionData> sections = [];
+            List<PieChartSectionData> sections = [];
 
-                for (int i = 0; i < mainTotalResults.length; i++) {
-                  final totalTimeSpent =
-                      mainTotalResults[i]["totalTimeSpent"] ?? 0.0;
-                  double categoryValue =
-                      totalTimeSpent / totalMainCategoryValues * 100;
-                  String formattedValue = categoryValue.toStringAsFixed(1);
+            for (int i = 0; i < mainTotalResults.length; i++) {
+              final totalTimeSpent =
+                  mainTotalResults[i]["totalTimeSpent"] ?? 0.0;
+              double categoryValue =
+                  totalTimeSpent / totalMainCategoryValues * 100;
+              String formattedValue = categoryValue.toStringAsFixed(1);
 
-                  sections.add(
-                    PieChartSectionData(
-                      titleStyle: AppTextStyle.pieChartTextStyling(),
-                      title: "$formattedValue%",
-                      value: categoryValue,
-                      color: _getCategoryColor(
-                          i), // Define this function to get category colors
-                    ),
-                  );
-                }
-
-                return PieChartBuilder(sections: sections);
-              } else {
-                return const InfoAboutNoData();
-              }
+              sections.add(
+                PieChartSectionData(
+                  titleStyle: AppTextStyle.pieChartTextStyling(),
+                  title: "$formattedValue%",
+                  value: categoryValue,
+                  color: _getCategoryColor(
+                      i), // Define this function to get category colors
+                ),
+              );
             }
-          },
-        );
+
+            return PieChartBuilder(sections: sections);
+          } else {
+            return const InfoAboutNoData();
+          }
+        }
       },
     );
   }

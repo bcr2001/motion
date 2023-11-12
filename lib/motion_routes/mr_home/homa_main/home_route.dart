@@ -72,7 +72,7 @@ class MotionHomeRoute extends StatelessWidget {
               // quote from the zenQuotes API
               quoteOfTheDay(),
 
-              // total accounted time and
+              //  total accounted time and
               //  total unaccounted time
               const TotalAccountedAndUnaccounted(),
 

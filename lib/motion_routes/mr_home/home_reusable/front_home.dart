@@ -160,7 +160,7 @@ Widget timeAccountedAndCurrentDate() {
                 // current date
                 Text(
                   formattedDate,
-                  style: Theme.of(context).textTheme.bodySmall,
+                  style: AppTextStyle.accountedAndUnaccountedGallaryStyle(),
                 ),
               ],
             ),
@@ -265,12 +265,12 @@ class _SubcategoryAndCurrentDayTotalsState
 
                             return ListTile(
                               title: Text(activeItems[index].subcategoryName),
-                              subtitle:
-                                  Text(activeItems[index].mainCategoryName),
-                              trailing: Text(
-                                convertedTotalTimeSpent,
-                                style: Theme.of(context).textTheme.bodySmall,
+                              subtitle: Text(
+                                activeItems[index].mainCategoryName,
+                                style: AppTextStyle.subtitleLTStyle(),
                               ),
+                              trailing: Text(convertedTotalTimeSpent,
+                                  style: AppTextStyle.leadingTextLTStyle()),
                               onTap: () {
                                 Navigator.push(
                                   context,
@@ -334,22 +334,25 @@ class _SubcategoryMonthTotalsAndAveragesState
 // there is no data in the database tables
 class InfoAboutHomePageSections extends StatelessWidget {
   final String infoText;
-  
+
   const InfoAboutHomePageSections({super.key, required this.infoText});
 
   @override
   Widget build(BuildContext context) {
     return Card(
-
       color: const Color(0xFF00B0F0),
       child: Padding(
         padding: const EdgeInsets.all(10.0),
         child: Row(
           children: [
             // info icon
-      
+
             // info text
-            Flexible(child: Text(infoText, style: AppTextStyle.infoTextStyle(),))
+            Flexible(
+                child: Text(
+              infoText,
+              style: AppTextStyle.infoTextStyle(),
+            ))
           ],
         ),
       ),

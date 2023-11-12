@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/assigner_pvd.dart';
 import 'package:motion/motion_reusable/db_re/sub_ui.dart';
-import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_routes/mr_home/home_reusable/back_home.dart';
 import 'package:motion/motion_routes/mr_home/home_reusable/front_home.dart';
 import 'package:motion/motion_themes/mth_app/app_images.dart';
-import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:provider/provider.dart';
 
 class TrackedSubcategories extends StatelessWidget {
