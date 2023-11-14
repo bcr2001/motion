@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_month_provider_pvd.dart';
 import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_pvd.dart';
 import 'package:motion/motion_core/motion_providers/web_api_pvd/zen_quotes_pvd.dart';
-import 'package:motion/motion_routes/mr_home/home_directions/category_direction.dart';
 import 'package:motion/motion_routes/mr_home/home_windows/tracking_window.dart';
 import 'package:motion/motion_routes/mr_home/home_windows/summary_window.dart';
+import 'package:motion/motion_screens/ms_report/report_back.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:provider/provider.dart';
@@ -81,12 +81,12 @@ class MotionHomeRoute extends StatelessWidget {
               const TrackedSubcategories(),
 
               // Summary
-              sectionTitle(titleName: AppString.summaryTitle),
-              const MainAndSubView(
-                  subcategoryView: SummaryWindow(
-                    isSubcatgory: true,
-                  ),
-                  mainCategoryView: SummaryWindow(isSubcatgory: false)),
+              sectionTitle(titleName: 
+              AppString.summaryTitle),
+              const InfoToTheUser(
+                sectionInformation: 
+                AppString.infoAboutSummaryWindow2),
+              const SummaryWindow()
             ])),
           )
         ],

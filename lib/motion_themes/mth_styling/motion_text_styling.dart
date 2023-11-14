@@ -23,18 +23,26 @@ class AppTextStyle {
 
   // section title style (main title)
   static sectionTitleTextStyle() {
-    return _baseStyle.copyWith(
-      fontSize: 18,
-      fontWeight: FontWeight.w600
-    );
+    return _baseStyle.copyWith(fontSize: 18, fontWeight: FontWeight.w600);
+  }
+
+  // section title style (subtitle)
+  static subSectionTitleTextStyle() {
+    return _baseStyle.copyWith(fontSize: 15, fontWeight: FontWeight.w600);
   }
 
   // section title style (main title)
   static specialSectionTitleTextStyle() {
     return _baseStyle.copyWith(
-      fontSize: 14,
-      fontWeight: FontWeight.w600,
-      color: Colors.blueGrey
+        fontSize: 14, fontWeight: FontWeight.w600, color: Colors.blueGrey);
+  }
+
+  // home page highlight element textStyle
+  static TextStyle tileElementTextStyle() {
+    return _baseStyle.copyWith(
+      color: Colors.white, 
+      fontSize: 12, 
+      fontWeight: FontWeight.w500
     );
   }
 
@@ -55,7 +63,13 @@ class AppTextStyle {
 
   // home page subtitle list tile style
   static TextStyle leadingTextLTStyle() {
-    return _baseStyle.copyWith(fontSize: 16, fontWeight: FontWeight.w500);
+    return _baseStyle.copyWith(fontSize: 14, fontWeight: FontWeight.w600);
+  }
+
+  // home page subtitle list tile style
+  static TextStyle trailingTextLTStyle() {
+    return _baseStyle.copyWith(
+        fontSize: 14, fontWeight: FontWeight.w600);
   }
 
   // home page tracking window information text style
@@ -104,7 +118,7 @@ class AppTextStyle {
   // account and unaccounted section style
   static TextStyle accountRegularAndUnaccountTextStyle() {
     return _baseStyle.copyWith(
-      fontSize: 22,
+      fontSize: 20,
       fontWeight: FontWeight.w600,
     );
   }
@@ -139,8 +153,8 @@ class AppTextStyle {
   // result title text style (home)
   static TextStyle resultTitleStyleHome(bool isUnaccounted) {
     return _baseStyle.copyWith(
-        fontWeight: FontWeight.w700,
-        fontSize: 13,
+        fontWeight: FontWeight.w800,
+        fontSize: 12,
         color: isUnaccounted ? const Color(0xFFD30000) : Colors.green);
   }
 

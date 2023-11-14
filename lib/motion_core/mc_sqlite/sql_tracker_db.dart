@@ -133,7 +133,6 @@ class TrackerDatabaseHelper {
           conflictAlgorithm: ConflictAlgorithm.replace);
     } catch (e) {
       logger.e("Error: $e");
-      throw ("An Error Occured during inserting");
     }
   }
 
@@ -175,8 +174,8 @@ class TrackerDatabaseHelper {
       return allMainCats.map((map) => MainCategory.fromMap(map)).toList();
     } catch (e) {
       logger.e("Error: $e");
-      return [];
     }
+    return [];
   }
 
   // gets the entire total for the timeSpent column of the main_category table
@@ -228,11 +227,10 @@ class TrackerDatabaseHelper {
       {required String currentUser}) async {
     try {
       final db = await database;
-      
+
       // this query returns a table of accounted and unaccounte
       // totals grouped by the year
-      final resultAAUBBY = await db.rawQuery(
-        '''
+      final resultAAUBBY = await db.rawQuery('''
         SELECT  (COALESCE(SUM(education), 0) + COALESCE(SUM(skills), 0)
                 + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(personalGrowth), 0)
                 + COALESCE(SUM(sleep), 0))/60 AS Accounted,
@@ -246,12 +244,11 @@ class TrackerDatabaseHelper {
         GROUP BY Year
         ''', [currentUser]);
 
-
       return resultAAUBBY;
     } catch (e) {
       logger.e("Error: $e");
-      return [];
     }
+    return [];
   }
 
   // get the monthly entire main category total
@@ -292,7 +289,7 @@ class TrackerDatabaseHelper {
       }
     } catch (e) {
       logger.e("Error: $e");
-      return 0.0;
+      rethrow;
     }
   }
 
@@ -408,7 +405,6 @@ class TrackerDatabaseHelper {
       return [];
     }
   }
-
 
   // updates existing main categories rows
   Future<void> updateMainCategory(MainCategory mainCategory) async {
@@ -544,7 +540,7 @@ class TrackerDatabaseHelper {
     } catch (e) {
       // Handle the exception, e.g., log it or rethrow it for debugging.
       logger.e('Error in getMonthTotalTimeSpent: $e');
-      rethrow; // Rethrow the exception for debugging or custom error handling.
+      return 0.0;
     }
   }
 
@@ -606,7 +602,7 @@ class TrackerDatabaseHelper {
       }
     } catch (e) {
       logger.e("Error: $e");
-      rethrow;
+      return 0.0;
     }
   }
 

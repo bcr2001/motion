@@ -150,8 +150,9 @@ Widget timeAccountedAndCurrentDate() {
                       return Text(
                         "$convertedAllTotalTimeSpent\nAccounted",
                         style: const TextStyle(
-                          fontSize: 24,
+                          fontSize: 21,
                           fontWeight: FontWeight.w600,
+                          color: AppColor.tileBackgroundColor
                         ),
                       );
                     }
@@ -264,13 +265,25 @@ class _SubcategoryAndCurrentDayTotalsState
                                 convertMinutesToTime(totalTimeSpentSub);
 
                             return ListTile(
-                              title: Text(activeItems[index].subcategoryName),
+                              title: Text(
+                                activeItems[index].subcategoryName,
+                                style: AppTextStyle.leadingTextLTStyle(),) ,
                               subtitle: Text(
                                 activeItems[index].mainCategoryName,
                                 style: AppTextStyle.subtitleLTStyle(),
                               ),
-                              trailing: Text(convertedTotalTimeSpent,
-                                  style: AppTextStyle.leadingTextLTStyle()),
+                              trailing: Container(
+                                width: 105,
+                                height: 23,
+                                decoration: BoxDecoration(
+                                  color: AppColor.tileBackgroundColor,
+                                  borderRadius: BorderRadius.circular(20),
+
+                                ),
+                                child: Center(child: Text(
+                                  convertedTotalTimeSpent,
+                                  style: AppTextStyle.tileElementTextStyle(),)),
+                              ),
                               onTap: () {
                                 Navigator.push(
                                   context,

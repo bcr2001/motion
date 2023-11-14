@@ -13,9 +13,8 @@ import 'package:provider/provider.dart';
 // button toggles (Subcategory and Category)
 // total time accounted for the current month
 class SummaryWindow extends StatelessWidget {
-  final bool isSubcatgory;
 
-  const SummaryWindow({super.key, required this.isSubcatgory});
+  const SummaryWindow({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -52,14 +51,27 @@ class SummaryWindow extends StatelessWidget {
                 return const InfoToTheUser(
                     sectionInformation: AppString.infoAboutSummaryWindow);
               } else {
-                return CardBuilder(
-                  itemsToBeDisplayed: isSubcatgory
-                      ? const SubcategoryMonthTotalsAndAverages(
-                          isSubcategory: true)
-                      : const SubcategoryMonthTotalsAndAverages(
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // subcategories and their totals and averages
+                    subSectionTitle2(titleName: AppString.homeSubcategoryTitle),
+                     const CardBuilder(
+                      itemsToBeDisplayed: SubcategoryMonthTotalsAndAverages(
+                              isSubcategory: true),
+                      timeAccountedAndOthers: null,
+                      sizedBoxHeight: 0.37,
+                    ),
+
+                    // main categories with there totals and averages
+                    subSectionTitle2(titleName: AppString.mainCategoryViewButtonName),
+                    const  CardBuilder(
+                      itemsToBeDisplayed: SubcategoryMonthTotalsAndAverages(
                           isSubcategory: false),
-                  timeAccountedAndOthers: null,
-                  sizedBoxHeight: 0.37,
+                      timeAccountedAndOthers: null,
+                      sizedBoxHeight: 0.38,
+                    ),
+                  ],
                 );
               }
             }

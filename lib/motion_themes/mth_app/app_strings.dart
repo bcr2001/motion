@@ -146,6 +146,9 @@ class AppString {
   static const String infoAboutSummaryWindow =
       "Information on time tracked within the tracking window will be summarized and showcased here. You can switch between Subcategory Summary and Main Category Summary. This summary pertains to the ongoing month.";
 
+  static const String infoAboutSummaryWindow2 =
+      "Subcategory and Main Category totals and averages for the current month.";
+
   // Report Page
   static const String reportTitle = "Report";
   static const String accountedVsUnaccounterTitle = "Accounted vs Unaccounted";

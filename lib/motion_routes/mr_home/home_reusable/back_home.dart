@@ -15,8 +15,20 @@ Widget sectionTitle({required String titleName}) {
   );
 }
 
+// subtitle builder
+Widget subSectionTitle2({required String titleName}) {
+  return Padding(
+    padding: const EdgeInsets.only(left: 25, top: 10, bottom: 10),
+    child: Text(
+      titleName,
+      style: AppTextStyle.subSectionTitleTextStyle(),
+    ),
+  );
+}
+
 // special title
-Widget specialSectionTitle({required String mainTitleName, required String elevatedTitleName}) {
+Widget specialSectionTitle(
+    {required String mainTitleName, required String elevatedTitleName}) {
   return Padding(
     padding: const EdgeInsets.only(left: 10, top: 10, bottom: 10),
     child: Row(
@@ -33,10 +45,11 @@ Widget specialSectionTitle({required String mainTitleName, required String eleva
           child: Text(
             elevatedTitleName,
             style: AppTextStyle.specialSectionTitleTextStyle(),
-            ),
+          ),
         )
       ],
-    ), );
+    ),
+  );
 }
 
 // builds the ListView.builder() of either
@@ -86,21 +99,55 @@ class _ScrollingListBuilderState extends State<ScrollingListBuilder> {
                       final convertedAverage =
                           convertMinutesToHoursOnly(item["average"]);
 
-                      return ListTile(
-                        title: Text(item[widget.columnName]),
-                        trailing: Text(
-                          convertedTotal,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                              color: Colors.green,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14),
-                        ),
-                        subtitle: Text(
-                          convertedAverage,
-                          style: AppTextStyle.subtitleLTStyle(),
-                        ),
-                      );
+                      return widget.columnName == "subcategoryName"
+                          ? ListTile(
+                              title: Text(
+                                item[widget.columnName],
+                                style: AppTextStyle.leadingTextLTStyle(),
+                              ),
+                              trailing: Text(
+                                convertedTotal,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w600, fontSize: 14),
+                              ),
+                              subtitle: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  color: AppColor.tileBackgroundColor,
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    convertedAverage,
+                                    style: AppTextStyle.tileElementTextStyle(),
+                                  ),
+                                ),
+                              ),
+                            )
+                          : ListTile(
+                              leading: Text(
+                                item[widget.columnName],
+                                style: AppTextStyle.leadingTextLTStyle(),
+                              ),
+                              title: Container(
+                                width: 120,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  color: AppColor.tileBackgroundColor,
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    convertedTotal,
+                                    textAlign: TextAlign.center,
+                                    style: AppTextStyle.tileElementTextStyle()
+                                  ),
+                                ),
+                              ),
+                              trailing: Text(
+                                convertedAverage,
+                                style: AppTextStyle.trailingTextLTStyle(),
+                              ),
+                            );
                     }));
           }
         });
@@ -125,7 +172,7 @@ class CardBuilder extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 25.0),
+      margin: const EdgeInsets.only(bottom: 40),
       height: screenHeight * 0.40,
       child: Card(
         child: Column(

@@ -161,41 +161,44 @@ class PieChartAndValuesAccountedAndUnaccounted extends StatelessWidget {
 
       return
           // pie chart and data values
-          Padding(
-        padding: const EdgeInsets.only(bottom: 15.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            // the pie chart that shows the distribution between
-            // accounted and unaccounted values
-            const AccountedUnaccountedReportPieChart(),
-
-            // accounted month total
-            Column(
-              children: [
-                // accounted total for the current month
-                entireTimeAccountedAndUnaccounted(
-                    future: main.retrieveEntireMonthlyTotalMainCategoryTable(
-                        currentUser, firstDayofMonth, lastDayOfMonth, false),
-                    resultName: AppString.accountedTitle,
-                    dayStyle: AppTextStyle.resultTitleStyle(false),
-                    hoursStyle:
-                        AppTextStyle.accountRegularAndUnaccountTextStyle()),
-
-                // unaccounted total for the current month
-                entireTimeAccountedAndUnaccounted(
-                    future: main.retrieveEntireMonthlyTotalMainCategoryTable(
-                        currentUser, firstDayofMonth, lastDayOfMonth, true),
-                    resultName: AppString.unAccountedTitle,
-                    dayStyle: AppTextStyle.resultTitleStyle(true),
-                    hoursStyle:
-                        AppTextStyle.accountRegularAndUnaccountTextStyle())
-              ],
-            ),
-
-            // pie chart legend
-            _columnPieChartColorPalette()
-          ],
+          Container(
+            height: 300,
+        margin: const EdgeInsets.only(bottom: 15.0),
+        child: Card(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              // the pie chart that shows the distribution between
+              // accounted and unaccounted values
+              const AccountedUnaccountedReportPieChart(),
+        
+              // accounted month total
+              Column(
+                children: [
+                  // accounted total for the current month
+                  entireTimeAccountedAndUnaccounted(
+                      future: main.retrieveEntireMonthlyTotalMainCategoryTable(
+                          currentUser, firstDayofMonth, lastDayOfMonth, false),
+                      resultName: AppString.accountedTitle,
+                      dayStyle: AppTextStyle.resultTitleStyle(false),
+                      hoursStyle:
+                          AppTextStyle.accountRegularAndUnaccountTextStyle()),
+        
+                  // unaccounted total for the current month
+                  entireTimeAccountedAndUnaccounted(
+                      future: main.retrieveEntireMonthlyTotalMainCategoryTable(
+                          currentUser, firstDayofMonth, lastDayOfMonth, true),
+                      resultName: AppString.unAccountedTitle,
+                      dayStyle: AppTextStyle.resultTitleStyle(true),
+                      hoursStyle:
+                          AppTextStyle.accountRegularAndUnaccountTextStyle())
+                ],
+              ),
+        
+              // pie chart legend
+              _columnPieChartColorPalette()
+            ],
+          ),
         ),
       );
     });
@@ -268,20 +271,23 @@ class PieChartDataMainCategoryDistribution extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return Container(
+      height: 300,
       padding: const EdgeInsets.symmetric(
-        vertical: 25,
+        vertical: 10,
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          // main category pie chart distribution
-          MainCategoryDistributionPieChart(
-              future:future,
-            ),
-
-          legendRows()
-        ],
+      child: Card(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            // main category pie chart distribution
+            MainCategoryDistributionPieChart(
+                future:future,
+              ),
+      
+            legendRows()
+          ],
+        ),
       ),
     );
   }
