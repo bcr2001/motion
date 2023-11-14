@@ -4,15 +4,15 @@ import 'package:flutter/material.dart';
 class AppColor {
 
   // accounted pie chart color (Annual Overview gallery page)
-  static const Color galleryPieChartAccountedColor = Color(0xFF00E900);
+  static const Color galleryPieChartAccountedColor = Colors.greenAccent;
   // unaccounted pie chart color (Annual Overview gallery page)
-  static const Color galleryPieChartUnaccountedColor = Color(0xFF0096FF);
+  static const Color galleryPieChartUnaccountedColor = Colors.lightBlue;
 
   // unaccounted pie section color
-  static const Color unAccountedColor = Color(0xFF00ECC2);
+  static const Color unAccountedColor = Color(0xFF0191B4);
 
   // accounted pie section color
-  static const Color accountedColor = Color(0xFF0191B4);
+  static const Color accountedColor = Colors.greenAccent;
 
   // sleep color
   static const Color sleepPieChartColor = Colors.blueGrey;

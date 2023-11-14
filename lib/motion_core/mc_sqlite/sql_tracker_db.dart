@@ -664,11 +664,12 @@ class TrackerDatabaseHelper {
             SELECT 
                 date,
                 subcategoryName,
-                timeSpent/60 AS timeSpent,
+                SUM(timeSpent)/60 AS timeSpent,
                 ROW_NUMBER() OVER (PARTITION BY subcategoryName ORDER BY timeSpent DESC) AS rk
             FROM subcategory
             WHERE currentLoggedInUser = ? 
             AND date BETWEEN ? AND ? AND timeSpent > 0
+            GROUP BY date, subcategoryName
         )
         SELECT 
             date,
@@ -676,7 +677,7 @@ class TrackerDatabaseHelper {
             timeSpent
         FROM RankedData
         WHERE rk = 1
-        ORDER BY date, timeSpent DESC;
+        ORDER BY timeSpent DESC;
         ''', [currentUser, firstDay, lastDay]);
 
       return resultHTTPS;

@@ -529,8 +529,9 @@ class GridHighestTrackedSubcategory extends StatelessWidget {
               // a list of the database query result
               List<Map<String, dynamic>> highestResults = snapshot.data!;
 
+
               return Container(
-                margin: const EdgeInsets.only(bottom: 25.0),
+                margin: const EdgeInsets.only(bottom: 30.0),
                 height: screenHeight * 0.45,
                 child: Card(
                   child: GridView.builder(
@@ -549,8 +550,6 @@ class GridHighestTrackedSubcategory extends StatelessWidget {
                         // element total time spent
                         final String elementTimeSpent = convertHoursToTimeGrid(
                             highestResults[index]["timeSpent"]);
-
-                        logger.i("Returned $elementTimeSpent");
 
                         // element date
                         final String elementDate =

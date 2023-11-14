@@ -3,6 +3,7 @@ import 'package:motion/motion_core/motion_providers/date_pvd/current_month_provi
 import 'package:motion/motion_core/motion_providers/date_pvd/first_and_last_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
+import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_screens/ms_report/report_back.dart';
 import 'package:provider/provider.dart';
 import '../../motion_routes/mr_home/home_reusable/back_home.dart';
@@ -93,6 +94,9 @@ class MonthlyReportPage extends StatelessWidget {
                   builder: (context, day, user, sub, child) {
                 // current logged in user
                 final String currentUserUid = user.userUid!;
+
+                logger.i(day.firstDay);
+                logger.i(day.lastDay);
 
                 return GridHighestTrackedSubcategory(
                   future: sub.retrieveHighestTrackedTimePerSubcategory(

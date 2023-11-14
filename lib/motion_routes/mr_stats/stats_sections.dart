@@ -144,8 +144,6 @@ class YearMainCategoryOveriew extends StatelessWidget {
             } else {
               final snapshotData = snapshot.data;
 
-              logger.i(snapshotData);
-
               return Container(
                 margin: const EdgeInsets.only(bottom: 25.0),
                 height: screenHeight * 0.33,
@@ -208,18 +206,21 @@ class AYearInSummaryPieChartDistribution extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Consumer2<UserUidProvider, MainCategoryTrackerProvider>(
-          builder: (context, user, main, child) {
-        // user uid
-        final String currentUser = user.userUid!;
-        return PieChartDataMainCategoryDistribution(
-          future: main.retrieveMainTotalTimeSpentSpecificDates(
-              currentUser: currentUser,
-              firstDay: "$year-01-01",
-              lastDay: "$year-12-31"),
-        );
-      }),
+    return Padding(
+      padding: const EdgeInsets.only(bottom:30.0),
+      child: Card(
+        child: Consumer2<UserUidProvider, MainCategoryTrackerProvider>(
+            builder: (context, user, main, child) {
+          // user uid
+          final String currentUser = user.userUid!;
+          return PieChartDataMainCategoryDistribution(
+            future: main.retrieveMainTotalTimeSpentSpecificDates(
+                currentUser: currentUser,
+                firstDay: "$year-01-01",
+                lastDay: "$year-12-31"),
+          );
+        }),
+      ),
     );
   }
 }

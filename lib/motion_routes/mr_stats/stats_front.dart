@@ -35,58 +35,61 @@ class YearsWorthOfSummaryStatitics extends StatelessWidget {
           // Accounted vs Unaccounted
           sectionTitle(titleName: AppString.accountedVsUnaccounterTitle),
 
-          Card(
-            child: Column(
-              children: [
-                // total accounted and unaccounted totals
-                // displays the total hours and days accounted
-                // and unaccounted for the entire year
-                YearTotalsAccountedUnaccountedBuilder(
-                    accountedDays: accountedDays,
-                    accountedHours: accountedHours,
-                    unaccountedDays: unaccountedDays,
-                    unaccountedHours: unaccountedHours),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 30.0),
+            child: Card(
+              child: Column(
+                children: [
+                  // total accounted and unaccounted totals
+                  // displays the total hours and days accounted
+                  // and unaccounted for the entire year
+                  YearTotalsAccountedUnaccountedBuilder(
+                      accountedDays: accountedDays,
+                      accountedHours: accountedHours,
+                      unaccountedDays: unaccountedDays,
+                      unaccountedHours: unaccountedHours),
 
-                    
-                // a pie chart showing the distibution of
-                // accounted and unaccounted totals for that
-                // year
-                YearPieChartDistributionAccountedUnaccounted(
-                    accountedTotalHours: accountedHours,
-                    unAccountedTotalHours: unaccountedHours),
-              ],
+                  // a pie chart showing the distibution of
+                  // accounted and unaccounted totals for that
+                  // year
+                  YearPieChartDistributionAccountedUnaccounted(
+                      accountedTotalHours: accountedHours,
+                      unAccountedTotalHours: unaccountedHours),
+                ],
+              ),
             ),
           ),
-
-          // grouped bar chart distibution for accounted and
-          // unaccounted data
-          AppImages.chartNoData,
 
           // SECTION 2: ACCOUNTED OVERVIEW
           sectionTitle(titleName: AppString.mainCategoryOverview),
 
-          // an overview of how much time was spent on 
+          // an overview of how much time was spent on
           // each main category through out the year
-          YearMainCategoryOveriew(year: year,),
+          YearMainCategoryOveriew(
+            year: year,
+          ),
 
           // SECTION 3: A YEAR IN SLICES
           sectionTitle(titleName: AppString.aYearInSlicesTitle),
           // a pie chart that shows the distribution of main
           // category elements
-          AYearInSummaryPieChartDistribution(year: year,),
-
+          AYearInSummaryPieChartDistribution(
+            year: year,
+          ),
 
           // SECTION 4: HIGHEST TRACKED TIME PER SUBCATEGORY
 
           // section title
-          specialSectionTitle(mainTitleName: AppString.highestTrackedTimeTitleMain, elevatedTitleName: AppString.highestTrackedTimeTitleSpecial),
+          specialSectionTitle(
+              mainTitleName: AppString.highestTrackedTimeTitleMain,
+              elevatedTitleName: AppString.highestTrackedTimeTitleSpecial),
           // information to the user regarding this section
-          const InfoToTheUser(sectionInformation: AppString.infoAboutHighestTimeTracked),
+          const InfoToTheUser(
+              sectionInformation: AppString.infoAboutHighestTimeTracked),
 
-
-
-          YearHighestTrackedTimePerSubcategory(year: year,)
-
+          YearHighestTrackedTimePerSubcategory(
+            year: year,
+          )
         ],
       ),
     );
