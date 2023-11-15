@@ -57,8 +57,7 @@ class _SignInPageState extends State<SignInPage> {
                   const Center(
                     child: Text(
                       AppString.logInWelcomeMessage,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontWeight: FontWeight.w600),
+                      textAlign: TextAlign.center
                     ),
                   ),
                   // continue with google widget and or widget

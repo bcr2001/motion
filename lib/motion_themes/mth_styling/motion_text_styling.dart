@@ -28,13 +28,19 @@ class AppTextStyle {
 
   // section title style (subtitle)
   static subSectionTitleTextStyle() {
-    return _baseStyle.copyWith(fontSize: 15, fontWeight: FontWeight.w600);
+    return _baseStyle.copyWith(fontSize: 15);
   }
 
   // section title style (main title)
   static specialSectionTitleTextStyle() {
     return _baseStyle.copyWith(
         fontSize: 14, fontWeight: FontWeight.w600, color: Colors.blueGrey);
+  }
+
+  // section title style 
+  static special1SectionTitleTextStyle() {
+    return _baseStyle.copyWith(
+        fontSize: 16, fontWeight: FontWeight.w600, color: Colors.blueGrey);
   }
 
   // home page highlight element textStyle
@@ -63,7 +69,13 @@ class AppTextStyle {
 
   // home page subtitle list tile style
   static TextStyle leadingTextLTStyle() {
-    return _baseStyle.copyWith(fontSize: 14, fontWeight: FontWeight.w600);
+    return _baseStyle.copyWith(fontSize: 14);
+  }
+
+  // home page subtitle list tile style
+  static TextStyle leadingStatsTextLTStyle() {
+    return _baseStyle.copyWith(
+      fontSize: 12.5);
   }
 
   // home page subtitle list tile style
@@ -155,7 +167,7 @@ class AppTextStyle {
     return _baseStyle.copyWith(
         fontWeight: FontWeight.w800,
         fontSize: 12,
-        color: isUnaccounted ? const Color(0xFFD30000) : Colors.green);
+        color: isUnaccounted ? const Color(0xFFD30000) : AppColor.tileBackgroundColor);
   }
 
   // result text style regular

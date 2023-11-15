@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:shimmer/shimmer.dart';
 
 // this class creates an add and a cancel text button
@@ -63,7 +64,7 @@ class CardConstructor extends StatelessWidget {
             padding: const EdgeInsets.only(top: 8.0, left: 8.0),
             child: Text(
               cardTitle,
-              style: Theme.of(context).textTheme.headlineSmall,
+              style: AppTextStyle.specialSectionTitleTextStyle(),
             ),
           ),
 

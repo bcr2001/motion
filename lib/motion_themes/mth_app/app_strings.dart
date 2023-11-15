@@ -20,7 +20,7 @@ class AppString {
   static const String deleteTitle = "Delete";
   static const String editPageUpdateButtonName = "UPDATE";
   static const String editPageDescription =
-      "Edit the subcategories and their corresponding main categories below:";
+      "Edit, archive, delete the subcategories and their corresponding main categories below:";
   static const String editPageUpdateError =
       "Please select a value from the drop-down.";
 
@@ -187,6 +187,8 @@ class AppString {
 
   static const String infoAboutAnnualOverviewEmpty =
       "Initiate the tracking process to generate and display your comprehensive yearly summary here..";
+  static const String infoAboutMonthlyReportEmpty =
+      "Initiate the tracking process to generate and display your comprehensive monthly report here..";
   static const String infoAboutGalleys =
       "To access the summary and analysis for a specific year, click on that year.";
   static const String infoAboutHighestTimeTracked =

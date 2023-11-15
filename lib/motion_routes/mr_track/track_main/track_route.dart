@@ -12,6 +12,7 @@ import 'package:motion/motion_routes/mr_track/track_reusable/front_track.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:motion/motion_reusable/mu_reusable/user_reusable.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
+import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:provider/provider.dart';
 
 // this is the page where users create and
@@ -65,15 +66,17 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
   }) {
     // Determine the icon based on the activeStatus
     Icon iconSelected = activeStatus == 0
-        ? const Icon(Icons.check_box_outline_blank_rounded) // Inactive icon
+        ? const Icon(Icons.check_box_outline_blank_rounded, size: 20,) // Inactive icon
         : const Icon(
             Icons.check_box_outlined,
-            color: AppColor.blueMainColor, // Active icon with custom color
+            color: AppColor.blueMainColor,
+            size: 20,// Active icon with custom color
           );
 
     // Create a ListTile with the specified title, and active status icon
     return ListTile(
-      title: Text(tileTitle), // Display the provided title text
+      title: Text(tileTitle, 
+      style: AppTextStyle.trailingTextLTStyle(),), // Display the provided title text
       trailing: IconButton(
         onPressed: () async {
           // Handle item press, potentially passing the associated item

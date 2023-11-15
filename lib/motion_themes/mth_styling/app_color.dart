@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 // contains all the colors used through out the app
 class AppColor {
   // home page element background color
-  static const tileBackgroundColor = const Color(0xFF00A7A7);
+  static const tileBackgroundColor = Color(0xFF00A7A7);
 
   // accounted pie chart color (Annual Overview gallery page)
-  static const Color galleryPieChartAccountedColor = Colors.greenAccent;
+  static const Color galleryPieChartAccountedColor = Color(0xFF00A7A7);
   // unaccounted pie chart color (Annual Overview gallery page)
   static const Color galleryPieChartUnaccountedColor = Colors.lightBlue;
 

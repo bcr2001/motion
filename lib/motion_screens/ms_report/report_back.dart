@@ -362,7 +362,7 @@ class MostAndLeastTrackedResult extends StatelessWidget {
               iconDirection: resultIcon,
               iconColor: resultIconColor,
             );
-            ;
+
           }
         }
       },
@@ -429,8 +429,8 @@ class InfoToTheUser extends StatelessWidget {
         children: [
           // info icon
           const Padding(
-            padding: EdgeInsets.only(right: 2.0),
-            child: Icon(Icons.info_outline),
+            padding: EdgeInsets.only(right: 6.0),
+            child: Icon(Icons.info_outline, size: 18,),
           ),
 
           // information about the specific section
@@ -565,9 +565,9 @@ class GridHighestTrackedSubcategory extends StatelessWidget {
             } else {
               // when the database table is empty and there is no data to be
               // displayed, then the placeholder grid below is shown
-              return Row(
+              return const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: const [
+                children: [
                   // first place holder: Subcategory 1
                   HighestTrackedSectionElement(
                       subcategoryName: AppString.subcategory1,

@@ -7,7 +7,7 @@ import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 // title builder
 Widget sectionTitle({required String titleName}) {
   return Padding(
-    padding: const EdgeInsets.only(left: 10, top: 10, bottom: 10),
+    padding: const EdgeInsets.only(left: 10, top: 20, bottom: 20),
     child: Text(
       titleName,
       style: AppTextStyle.sectionTitleTextStyle(),
@@ -18,7 +18,7 @@ Widget sectionTitle({required String titleName}) {
 // subtitle builder
 Widget subSectionTitle2({required String titleName}) {
   return Padding(
-    padding: const EdgeInsets.only(left: 25, top: 10, bottom: 10),
+    padding: const EdgeInsets.only(left: 25, top: 25, bottom: 15),
     child: Text(
       titleName,
       style: AppTextStyle.subSectionTitleTextStyle(),
@@ -108,9 +108,7 @@ class _ScrollingListBuilderState extends State<ScrollingListBuilder> {
                               trailing: Text(
                                 convertedTotal,
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w600, fontSize: 14),
-                              ),
+                                style: AppTextStyle.leadingStatsTextLTStyle(),),
                               subtitle: Container(
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(20),
@@ -136,16 +134,15 @@ class _ScrollingListBuilderState extends State<ScrollingListBuilder> {
                                   color: AppColor.tileBackgroundColor,
                                 ),
                                 child: Center(
-                                  child: Text(
-                                    convertedTotal,
-                                    textAlign: TextAlign.center,
-                                    style: AppTextStyle.tileElementTextStyle()
-                                  ),
+                                  child: Text(convertedTotal,
+                                      textAlign: TextAlign.center,
+                                      style:
+                                          AppTextStyle.tileElementTextStyle()),
                                 ),
                               ),
                               trailing: Text(
                                 convertedAverage,
-                                style: AppTextStyle.trailingTextLTStyle(),
+                                style: AppTextStyle.leadingStatsTextLTStyle(),
                               ),
                             );
                     }));
@@ -171,8 +168,7 @@ class CardBuilder extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 40),
+    return SizedBox(
       height: screenHeight * 0.40,
       child: Card(
         child: Column(

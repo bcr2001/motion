@@ -63,8 +63,8 @@ class _TrailingEditButtonsState extends State<TrailingEditButtons> {
 
     return isArchive
         ? IconButton(
-            iconSize: 20, onPressed: onPressed, icon: iconSelectedArchive)
-        : IconButton(iconSize: 20, onPressed: onPressed, icon: iconImage);
+            iconSize: 18, onPressed: onPressed, icon: iconSelectedArchive)
+        : IconButton(iconSize: 18, onPressed: onPressed, icon: iconImage);
   }
 
   // this alert dialog is rendered when the user

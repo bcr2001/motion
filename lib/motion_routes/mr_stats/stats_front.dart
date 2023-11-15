@@ -3,7 +3,6 @@ import 'package:motion/motion_routes/mr_home/home_reusable/back_home.dart';
 import 'package:motion/motion_routes/mr_stats/stats_back.dart';
 import 'package:motion/motion_routes/mr_stats/stats_sections.dart';
 import 'package:motion/motion_screens/ms_report/report_back.dart';
-import 'package:motion/motion_themes/mth_app/app_images.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 
 // the summary report of the year the user clicks on

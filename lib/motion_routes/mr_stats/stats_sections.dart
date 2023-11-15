@@ -166,12 +166,12 @@ class YearMainCategoryOveriew extends StatelessWidget {
                         final convertedAverage =
                             convertMinutesToHoursMonth(singleItem["average"]);
 
+                        // number of days
+                        String numberOfDays = convertMinutesToDays(singleItem["total"]);
+
                         return ListTile(
-                          leading: Text(
-                            mainCatName,
-                            style: AppTextStyle
-                                .accountedAndUnaccountedGallaryStyle(),
-                          ),
+                          leading: Text(mainCatName,
+                              style: AppTextStyle.leadingTextLTStyle()),
                           title: Container(
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(20),
@@ -179,15 +179,15 @@ class YearMainCategoryOveriew extends StatelessWidget {
                               child: Center(
                                 child: Text(
                                   convertedTotal,
-                                  style: const TextStyle(
-                                      color: AppColor.lightModeContentWidget,
-                                      fontSize: 14),
+                                  style: AppTextStyle.tileElementTextStyle(),
                                   textAlign: TextAlign.center,
                                 ),
                               )),
+                          subtitle: Text(
+                            numberOfDays,
+                            style: AppTextStyle.leadingStatsTextLTStyle(),),
                           trailing: Text(convertedAverage,
-                              style: const TextStyle(
-                                  fontSize: 13, fontWeight: FontWeight.w600)),
+                              style: AppTextStyle.leadingStatsTextLTStyle()),
                         );
                       }),
                 ),
@@ -207,20 +207,18 @@ class AYearInSummaryPieChartDistribution extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom:30.0),
-      child: Card(
-        child: Consumer2<UserUidProvider, MainCategoryTrackerProvider>(
-            builder: (context, user, main, child) {
-          // user uid
-          final String currentUser = user.userUid!;
-          return PieChartDataMainCategoryDistribution(
-            future: main.retrieveMainTotalTimeSpentSpecificDates(
-                currentUser: currentUser,
-                firstDay: "$year-01-01",
-                lastDay: "$year-12-31"),
-          );
-        }),
-      ),
+      padding: const EdgeInsets.only(bottom: 30.0),
+      child: Consumer2<UserUidProvider, MainCategoryTrackerProvider>(
+          builder: (context, user, main, child) {
+        // user uid
+        final String currentUser = user.userUid!;
+        return PieChartDataMainCategoryDistribution(
+          future: main.retrieveMainTotalTimeSpentSpecificDates(
+              currentUser: currentUser,
+              firstDay: "$year-01-01",
+              lastDay: "$year-12-31"),
+        );
+      }),
     );
   }
 }
@@ -229,7 +227,7 @@ class AYearInSummaryPieChartDistribution extends StatelessWidget {
 // for the entire
 class YearHighestTrackedTimePerSubcategory extends StatelessWidget {
   final String year;
-  
+
   const YearHighestTrackedTimePerSubcategory({super.key, required this.year});
 
   @override

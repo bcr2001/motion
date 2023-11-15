@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/assigner_pvd.dart';
+import 'package:motion/motion_screens/ms_report/report_back.dart';
+import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:provider/provider.dart';
 
 import '../../../motion_themes/mth_app/app_strings.dart';
@@ -28,10 +30,8 @@ class TrackEditingPage extends StatelessWidget {
               return Column(
                 children: [
                   // what the edit page is (an explanation)
-                  const Text(
-                    AppString.editPageDescription,
-                    style: TextStyle(fontSize: 15),
-                  ),
+                  const InfoToTheUser(
+                    sectionInformation: AppString.editPageDescription),
 
                   // all the items in the to_assign table
                   // for a particular user
@@ -50,8 +50,12 @@ class TrackEditingPage extends StatelessWidget {
                             ? ListTile(
                                 // Display the index (starting from 1) as a leading number
                                 leading: Text((index + 1).toString()),
-                                title: Text(item.subcategoryName),
-                                subtitle: Text(item.mainCategoryName),
+                                title: Text(
+                                  item.subcategoryName,
+                                  style: AppTextStyle.trailingTextLTStyle(),),
+                                subtitle: Text(
+                                  item.mainCategoryName, 
+                                  style: AppTextStyle.subtitleLTStyle(),),
                                 trailing: TrailingEditButtons(
                                   // Pass item details to the TrailingEditButtons widget
                                   itemIndexDateCreated: item.dateCreated,

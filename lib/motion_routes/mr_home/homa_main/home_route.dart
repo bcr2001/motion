@@ -66,21 +66,30 @@ class MotionHomeRoute extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 10.0),
             sliver: SliverList(
                 delegate: SliverChildListDelegate([
+
+                  
+              // SECTION ONE: NUMBER OF DAYS IN APP
               // total number of days in the main_category table
               numberOfDaysMainCategory(),
+              
 
+              // SECTION TWO: QUOTE OF THE DAY
               // quote from the zenQuotes API
               quoteOfTheDay(),
 
+
+              // SECTION THREE: ACCOUNTED AND UNACCOUNTED TOTALS
               //  total accounted time and
               //  total unaccounted time
               const TotalAccountedAndUnaccounted(),
 
-              // Tracking Window
+
+              // SECTION FOUR: TRACKING WINDOW
               sectionTitle(titleName: AppString.trackingWindowTitle),
               const TrackedSubcategories(),
 
-              // Summary
+
+              // SECTION FIVE: SUMMARY WINDOW
               sectionTitle(titleName: 
               AppString.summaryTitle),
               const InfoToTheUser(

@@ -30,6 +30,8 @@ String convertMinutesToTime(double minutes) {
   }
 }
 
+// converts minutes to hours if it's greater than 60
+// otherwise it returns a string of minutes
 String convertHoursToTimeGrid(double hours) {
   if (hours < 1) {
     double convertedHour = hours * 60;
@@ -37,6 +39,18 @@ String convertHoursToTimeGrid(double hours) {
     return "${convertedHour.toStringAsFixed(1)}M";
   } else {
     return "${hours.toStringAsFixed(2)}H";
+  }
+}
+
+// converts minutes to days
+String convertMinutesToDays(double minutes) {
+  double toDays = minutes / (60 * 24);
+  String toDaysString = toDays.toStringAsFixed(1);
+
+  if (toDays == 1) {
+    return "$toDaysString day";
+  } else {
+    return "$toDaysString days";
   }
 }
 

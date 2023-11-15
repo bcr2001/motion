@@ -109,8 +109,8 @@ class AnalysisGallery extends StatelessWidget {
                       shrinkWrap: true,
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
-                              mainAxisExtent: 200,
-                              crossAxisCount: 2,
+                              mainAxisExtent: 100,
+                              crossAxisCount: 3,
                               crossAxisSpacing: 5,
                               mainAxisSpacing: 5),
                       itemCount: dataResults.length,
@@ -143,11 +143,6 @@ class AnalysisGallery extends StatelessWidget {
                         final String year = dataResults[index]["Year"];
 
                         return AnnualGallaryBuilder(
-                          accountedTotalHours:accountedYearTotalString,
-                          unaccountedTotalHours:
-                              unaccountedYearTotalString,
-                          accountedTotalDays: accountedDaysTotalString,
-                          unaccountedTotalDays: unaccountedDaysTotalString,
                           gallaryYear: year,
                           onTap: () {
                             logger.i("$year clicked");

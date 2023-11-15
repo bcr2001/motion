@@ -41,7 +41,8 @@ class ContinueWithGoogleOr extends StatelessWidget {
                   
                   const Padding(
                     padding:  EdgeInsets.only(left: 45),
-                    child: Text(AppString.continueWithGoogle, style: TextStyle(fontWeight: FontWeight.w600),),
+                    child: Text(AppString.continueWithGoogle, 
+                    style: TextStyle(fontWeight: FontWeight.w600),),
                   )
       
                   // or

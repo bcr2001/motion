@@ -161,7 +161,7 @@ Widget timeAccountedAndCurrentDate() {
                 // current date
                 Text(
                   formattedDate,
-                  style: AppTextStyle.accountedAndUnaccountedGallaryStyle(),
+                  style: AppTextStyle.specialSectionTitleTextStyle(),
                 ),
               ],
             ),
@@ -270,7 +270,7 @@ class _SubcategoryAndCurrentDayTotalsState
                                 style: AppTextStyle.leadingTextLTStyle(),) ,
                               subtitle: Text(
                                 activeItems[index].mainCategoryName,
-                                style: AppTextStyle.subtitleLTStyle(),
+                                style: AppTextStyle.specialSectionTitleTextStyle(),
                               ),
                               trailing: Container(
                                 width: 105,

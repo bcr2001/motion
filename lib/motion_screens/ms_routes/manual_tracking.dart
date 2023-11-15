@@ -192,7 +192,6 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                                   errorMessage: AppString.manualRangeValueError,
                                   requiresColor: true);
                               logger.i("Failed Validation");
-                              
                             } else {
                               logger.i("Passed Validation");
 
@@ -286,12 +285,11 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // todays blocks title
-                    const Padding(
-                      padding: EdgeInsets.only(left: 16),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16),
                       child: Text(
                         AppString.blockTitle,
-                        style: TextStyle(
-                            fontWeight: FontWeight.w600, fontSize: 19),
+                        style: AppTextStyle.subSectionTitleTextStyle(),
                       ),
                     ),
 
@@ -308,10 +306,11 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                           return ListTile(
                             subtitle: Text(
                                 "${AppString.timeCreated} ${subsTrackedOnCurrentDay[index].timeRecorded}",
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                )),
-                            title: Text(convertedTimeRecorded),
+                                style: AppTextStyle.leadingStatsTextLTStyle()),
+                            title: Text(
+                              convertedTimeRecorded,
+                              style: AppTextStyle.special1SectionTitleTextStyle(),
+                            ),
                             trailing:
                                 // deletes entry in the subcategory table
                                 IconButton(
@@ -319,7 +318,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                                 subs.deleteSubcategoryEntry(
                                     subsTrackedOnCurrentDay[index].id!);
                               },
-                              icon: const Icon(Icons.delete_outlined),
+                              icon: const Icon(Icons.delete_outlined, size: 18,),
                             ),
                           );
                         })
