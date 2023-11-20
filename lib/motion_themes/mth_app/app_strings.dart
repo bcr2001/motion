@@ -183,6 +183,8 @@ class AppString {
   static const String totalUnaccountedTitle = "Total Unaccounted";
   static const String mainCategoryOverview = "Main Category Overview";
   static const String aYearInSlicesTitle = "A Year in Slices";
+  static const String distributionTitle = "Distribution";
+  static const String statusTitle = "Status";
 
 
   static const String infoAboutAnnualOverviewEmpty =
@@ -193,5 +195,7 @@ class AppString {
       "To access the summary and analysis for a specific year, click on that year.";
   static const String infoAboutHighestTimeTracked =
       "Below are the highest recorded durations for each subcategory, along with the respective dates during which they were logged over the course of the year.";
+  static const String infoAboutGroupedBarChart =
+      "The accounted and unaccounted time for a given month is delineated in days. ";
 
 }

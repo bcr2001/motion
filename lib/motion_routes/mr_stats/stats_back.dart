@@ -1,19 +1,19 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
+import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
+import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 
 // annual gallery builder
 class AnnualGallaryBuilder extends StatelessWidget {
-
   final String gallaryYear;
   final VoidCallback onTap;
 
   const AnnualGallaryBuilder(
-      {super.key,
-      required this.gallaryYear,
-      required this.onTap});
-
+      {super.key, required this.gallaryYear, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -42,12 +42,11 @@ class AnnualGallaryBuilder extends StatelessWidget {
             // divider
             const SizedBox(
               width: 100,
-              child:  Divider(
+              child: Divider(
                 thickness: 1.5,
                 color: AppColor.blueMainColor,
               ),
             ),
- 
           ],
         ),
       ),
@@ -87,7 +86,7 @@ class YearTotalsAccountedUnaccountedBuilder extends StatelessWidget {
             sectionName,
             style: AppTextStyle.accountedAndUnaccountedGallaryStyle(),
           ),
-    
+
           // days
 
           Row(
@@ -95,14 +94,15 @@ class YearTotalsAccountedUnaccountedBuilder extends StatelessWidget {
               Icon(
                 Icons.line_axis_rounded,
                 size: 30,
-                color: lineChartIconColor,),
+                color: lineChartIconColor,
+              ),
               Column(
                 children: [
                   Text(
                     "$sectionDays days",
                     style: sectionDataValueStyle,
                   ),
-    
+
                   // hours
                   Text(
                     "$sectionHours hours",
@@ -112,7 +112,7 @@ class YearTotalsAccountedUnaccountedBuilder extends StatelessWidget {
               ),
             ],
           ),
-    
+
           // section divider
           const SizedBox(
             width: 100,
@@ -152,3 +152,51 @@ class YearTotalsAccountedUnaccountedBuilder extends StatelessWidget {
     );
   }
 }
+
+
+  Widget makeTransactionsIcon() {
+    const width = 4.5;
+    const space = 3.5;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: width,
+          height: 10,
+          color: const Color(0xFFA9A9A9),
+        ),
+        const SizedBox(
+          width: space,
+        ),
+        Container(
+          width: width,
+          height: 28,
+          color: const Color(0xFF909090),
+        ),
+        const SizedBox(
+          width: space,
+        ),
+        Container(
+          width: width,
+          height: 42,
+          color: const Color(0xFFCFCFCF),
+        ),
+        const SizedBox(
+          width: space,
+        ),
+        Container(
+          width: width,
+          height: 28,
+          color: const Color(0xFF909090),
+        ),
+        const SizedBox(
+          width: space,
+        ),
+        Container(
+          width: width,
+          height: 10,
+          color: const Color(0xFFA9A9A9),
+        ),
+      ],
+    );
+  }

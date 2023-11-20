@@ -6,9 +6,9 @@ class AppColor {
   static const tileBackgroundColor = Color(0xFF00A7A7);
 
   // accounted pie chart color (Annual Overview gallery page)
-  static const Color galleryPieChartAccountedColor = Color(0xFF00A7A7);
+  static const Color galleryPieChartAccountedColor = Color(0xFF00E900);
   // unaccounted pie chart color (Annual Overview gallery page)
-  static const Color galleryPieChartUnaccountedColor = Colors.lightBlue;
+  static const Color galleryPieChartUnaccountedColor = Color(0xFF0096FF);
 
   // unaccounted pie section color
   static const Color unAccountedColor = Color(0xFF0191B4);

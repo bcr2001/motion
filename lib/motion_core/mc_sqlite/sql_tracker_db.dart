@@ -251,6 +251,37 @@ class TrackerDatabaseHelper {
     return [];
   }
 
+  // gets the accounted and unaccounted totals for each month during a
+  // particular year
+  Future<List<Map<String, dynamic>>> getMonthDistibutionOfAccountedUnaccounted(
+      {required String currentUser, required String year}) async {
+    try {
+      final db = await database;
+
+      final resultMDAUA = await db.rawQuery('''
+          SELECT  strftime('%m', date) AS Month, 
+                (COALESCE(SUM(education), 0) + 
+                COALESCE(SUM(skills), 0)
+              + COALESCE(SUM(entertainment), 0) + 
+              COALESCE(SUM(personalGrowth), 0)
+              + COALESCE(SUM(sleep), 0))/60 AS Accounted,
+              (((COUNT(date) * 24)*60) - (COALESCE(SUM(education), 0)
+                + COALESCE(SUM(skills), 0) + 
+                COALESCE(SUM(entertainment), 0)
+          + COALESCE(SUM(personalGrowth), 0) + 
+          COALESCE(SUM(sleep), 0)))/60 AS Unaccounted
+      FROM main_category
+      WHERE currentLoggedInUser = ? AND strftime('%Y', date) = ?
+      GROUP BY Month
+        ''', [currentUser, year]);
+
+      return resultMDAUA;
+    } catch (e) {
+      logger.e("Error: $e");
+      return [];
+    }
+  }
+
   // get the monthly entire main category total
   Future<double> getEntireMonthlyTotalMainCategoryTable(
     String currentUser,

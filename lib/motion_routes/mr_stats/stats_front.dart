@@ -54,6 +54,9 @@ class YearsWorthOfSummaryStatitics extends StatelessWidget {
                   YearPieChartDistributionAccountedUnaccounted(
                       accountedTotalHours: accountedHours,
                       unAccountedTotalHours: unaccountedHours),
+
+                  // accounted and unaccounted grouped bar chart distribution
+                  GroupedPieChartAccountedUnaccounted(year: year,)
                 ],
               ),
             ),

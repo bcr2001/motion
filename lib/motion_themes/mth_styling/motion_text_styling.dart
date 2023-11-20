@@ -37,7 +37,7 @@ class AppTextStyle {
         fontSize: 14, fontWeight: FontWeight.w600, color: Colors.blueGrey);
   }
 
-  // section title style 
+  // section title style
   static special1SectionTitleTextStyle() {
     return _baseStyle.copyWith(
         fontSize: 16, fontWeight: FontWeight.w600, color: Colors.blueGrey);
@@ -46,10 +46,9 @@ class AppTextStyle {
   // home page highlight element textStyle
   static TextStyle tileElementTextStyle() {
     return _baseStyle.copyWith(
-      color: Colors.white, 
-      fontSize: 12, 
-      fontWeight: FontWeight.w500
-    );
+        color: const Color(0xffededed),
+        fontSize: 11.5,
+        fontWeight: FontWeight.w600);
   }
 
   // stats page accounted and unaccounted gallary style
@@ -74,14 +73,12 @@ class AppTextStyle {
 
   // home page subtitle list tile style
   static TextStyle leadingStatsTextLTStyle() {
-    return _baseStyle.copyWith(
-      fontSize: 12.5);
+    return _baseStyle.copyWith(fontSize: 12.5);
   }
 
   // home page subtitle list tile style
   static TextStyle trailingTextLTStyle() {
-    return _baseStyle.copyWith(
-        fontSize: 14, fontWeight: FontWeight.w600);
+    return _baseStyle.copyWith(fontSize: 14, fontWeight: FontWeight.w600);
   }
 
   // home page tracking window information text style
@@ -167,7 +164,9 @@ class AppTextStyle {
     return _baseStyle.copyWith(
         fontWeight: FontWeight.w800,
         fontSize: 12,
-        color: isUnaccounted ? const Color(0xFFD30000) : AppColor.tileBackgroundColor);
+        color: isUnaccounted
+            ? const Color(0xFFD30000)
+            : AppColor.tileBackgroundColor);
   }
 
   // result text style regular

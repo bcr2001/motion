@@ -4,6 +4,8 @@ import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_reusable/db_re/sub_logic.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
+import 'package:motion/motion_routes/mr_home/home_reusable/back_home.dart';
+import 'package:motion/motion_routes/mr_stats/stats_back.dart';
 import 'package:motion/motion_screens/ms_report/report_back.dart';
 import 'package:motion/motion_screens/ms_report/report_front.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
@@ -79,7 +81,7 @@ class YearPieChartDistributionAccountedUnaccounted extends StatelessWidget {
     double unAccountedDoublePercent = (unaccountedDoubled / valueTotals) * 100;
 
     return Padding(
-      padding: const EdgeInsets.only(left: 10, top: 10.0, bottom: 15.0),
+      padding: const EdgeInsets.only(left: 10, top: 10.0, bottom: 35.0),
       child: Row(
         children: [
           PieChartBuilder(sections: [
@@ -146,7 +148,7 @@ class YearMainCategoryOveriew extends StatelessWidget {
 
               return Container(
                 margin: const EdgeInsets.only(bottom: 25.0),
-                height: screenHeight * 0.33,
+                height: screenHeight * 0.42,
                 child: Card(
                   child: ListView.builder(
                       itemCount: snapshotData!.length,
@@ -167,7 +169,8 @@ class YearMainCategoryOveriew extends StatelessWidget {
                             convertMinutesToHoursMonth(singleItem["average"]);
 
                         // number of days
-                        String numberOfDays = convertMinutesToDays(singleItem["total"]);
+                        String numberOfDays =
+                            convertMinutesToDays(singleItem["total"]);
 
                         return ListTile(
                           leading: Text(mainCatName,
@@ -175,7 +178,7 @@ class YearMainCategoryOveriew extends StatelessWidget {
                           title: Container(
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(20),
-                                  color: AppColor.blueMainColor),
+                                  color: AppColor.tileBackgroundColor),
                               child: Center(
                                 child: Text(
                                   convertedTotal,
@@ -185,7 +188,11 @@ class YearMainCategoryOveriew extends StatelessWidget {
                               )),
                           subtitle: Text(
                             numberOfDays,
-                            style: AppTextStyle.leadingStatsTextLTStyle(),),
+                            style: const TextStyle(
+                                color: AppColor.tileBackgroundColor,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600),
+                          ),
                           trailing: Text(convertedAverage,
                               style: AppTextStyle.leadingStatsTextLTStyle()),
                         );
@@ -241,6 +248,207 @@ class YearHighestTrackedTimePerSubcategory extends StatelessWidget {
               currentUser: currentUserUid,
               firstDay: "$year-01-01",
               lastDay: "$year-12-31"));
+    });
+  }
+}
+
+// accounted and unaccounted distribution grouped
+// bar graph
+class GroupedPieChartAccountedUnaccounted extends StatelessWidget {
+  final String year;
+
+  const GroupedPieChartAccountedUnaccounted({super.key, required this.year});
+
+  final double width = 10;
+
+  BarChartGroupData makeGroupData(int x, double y1, double y2) {
+    return BarChartGroupData(
+      barsSpace: 3,
+      x: x,
+      barRods: [
+        BarChartRodData(
+          toY: y1,
+          color: AppColor.galleryPieChartAccountedColor,
+          width: width,
+        ),
+        BarChartRodData(
+          toY: y2,
+          color: AppColor.galleryPieChartUnaccountedColor,
+          width: width,
+        ),
+      ],
+    );
+  }
+
+  // bottom titles representing the months
+  Widget bottomTitles(double value, TitleMeta meta) {
+    final titles = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ];
+
+    final Widget text = Text(
+      titles[value.toInt() % titles.length],
+      style: const TextStyle(
+        color: Color(0xff7589a2),
+        fontWeight: FontWeight.bold,
+        fontSize: 11,
+      ),
+    );
+
+    return SideTitleWidget(
+      axisSide: meta.axisSide,
+      space: 10, //margin top
+      child: text,
+    );
+  }
+
+  // y-axis titles
+  Widget leftTitles(double value, TitleMeta meta) {
+    const style = TextStyle(
+      color: Color(0xff7589a2),
+      fontWeight: FontWeight.bold,
+      fontSize: 10,
+    );
+    String text;
+    if (value == 0) {
+      text = '0H';
+    } else if (value == 12) {
+      text = '12H';
+    } else if (value == 24) {
+      text = '24H';
+    } else {
+      return Container();
+    }
+    return SideTitleWidget(
+      axisSide: meta.axisSide,
+      space: 2,
+      child: Text(text, style: style),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer2<UserUidProvider, MainCategoryTrackerProvider>(
+        builder: (context, user, main, child) {
+      final String currentLoggedInUser = user.userUid!;
+
+      return FutureBuilder(
+          future: main.retrieveMonthDistibutionOfAccountedUnaccounted(
+              currentUser: currentLoggedInUser, year: year),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            } else if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            } else {
+              final currentYearData = snapshot.data;
+
+              List<BarChartGroupData> showingBarGroups = [];
+
+              for (int i = 0; i < currentYearData!.length; i++) {
+                // month
+                final int month = int.parse(currentYearData[i]["Month"]) - 1;
+
+                // accounted
+                final double accounted = currentYearData[i]["Accounted"] / 24;
+                final String accountedStringDpChange =
+                    accounted.toStringAsFixed(2);
+                final double accountedRounded =
+                    double.parse(accountedStringDpChange);
+
+                // unaccounted
+                final double unaccounted =
+                    currentYearData[i]["Unaccounted"] / 24;
+                final String unaccountedStringDpChange =
+                    unaccounted.toStringAsFixed(2);
+                final double unaccountedRounded =
+                    double.parse(unaccountedStringDpChange);
+
+                final barGroup =
+                    makeGroupData(month, accountedRounded, unaccountedRounded);
+
+                showingBarGroups.add(barGroup);
+              }
+
+              logger.i(currentYearData);
+
+              return AspectRatio(
+                aspectRatio: 1,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10.0),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          makeTransactionsIcon(),
+                          const SizedBox(
+                            width: 38,
+                          ),
+                          specialSectionTitle(
+                            mainTitleName: AppString.distributionTitle, 
+                            elevatedTitleName: AppString.statusTitle),
+                          
+                        ],
+                      ),
+                    ),
+
+                    // info about the distribution
+                    const InfoToTheUser(
+                      sectionInformation: 
+                      AppString.infoAboutGroupedBarChart),
+
+                    // grouped barchart
+                    Expanded(
+                        child: BarChart(BarChartData(
+                            maxY: 30,
+                            titlesData: FlTitlesData(
+                              show: true,
+                              rightTitles: AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              topTitles: AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              bottomTitles: AxisTitles(
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  getTitlesWidget: bottomTitles,
+                                  reservedSize: 48,
+                                ),
+                              ),
+                              leftTitles: AxisTitles(
+                                  sideTitles: SideTitles(
+                                showTitles: true,
+                                reservedSize: 28,
+                                interval: 1,
+                                getTitlesWidget: leftTitles,
+                              )),
+                            ),
+                            borderData: FlBorderData(
+                              show: false,
+                            ),
+                            barGroups: showingBarGroups,
+                            gridData: FlGridData(show: false)))),
+                  ],
+                ),
+              );
+            }
+          });
     });
   }
 }

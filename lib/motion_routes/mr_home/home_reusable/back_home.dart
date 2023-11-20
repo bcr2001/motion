@@ -122,29 +122,32 @@ class _ScrollingListBuilderState extends State<ScrollingListBuilder> {
                                 ),
                               ),
                             )
-                          : ListTile(
-                              leading: Text(
-                                item[widget.columnName],
-                                style: AppTextStyle.leadingTextLTStyle(),
-                              ),
-                              title: Container(
-                                width: 120,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
-                                  color: AppColor.tileBackgroundColor,
+                          : Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 5),
+                            child: ListTile(
+                                leading: Text(
+                                  item[widget.columnName],
+                                  style: AppTextStyle.leadingTextLTStyle(),
                                 ),
-                                child: Center(
-                                  child: Text(convertedTotal,
-                                      textAlign: TextAlign.center,
-                                      style:
-                                          AppTextStyle.tileElementTextStyle()),
+                                title: Container(
+                                  width: 120,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(20),
+                                    color: AppColor.tileBackgroundColor,
+                                  ),
+                                  child: Center(
+                                    child: Text(convertedTotal,
+                                        textAlign: TextAlign.center,
+                                        style:
+                                            AppTextStyle.tileElementTextStyle()),
+                                  ),
+                                ),
+                                trailing: Text(
+                                  convertedAverage,
+                                  style: AppTextStyle.leadingStatsTextLTStyle(),
                                 ),
                               ),
-                              trailing: Text(
-                                convertedAverage,
-                                style: AppTextStyle.leadingStatsTextLTStyle(),
-                              ),
-                            );
+                          );
                     }));
           }
         });
@@ -168,7 +171,8 @@ class CardBuilder extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return SizedBox(
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 10),
       height: screenHeight * 0.40,
       child: Card(
         child: Column(

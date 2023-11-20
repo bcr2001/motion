@@ -22,10 +22,11 @@ import 'motion_themes/mth_theme/light_theme.dart';
 final GlobalKey<NavigatorState> navigationKey = GlobalKey<NavigatorState>();
 
 void main() async {
+  
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize the database helper
-  // final TrackerDatabaseHelper databaseHelper0 =
+  // final TrackerDatabaseHelper databaseHelper =
   // TrackerDatabaseHelper();
   // final dbHelper = AssignerDatabaseHelper();
 
@@ -54,7 +55,7 @@ void main() async {
 
   final trackMainCategoryDatabaseProvider = MainCategoryTrackerProvider();
 
-  // final allMain = await dbHelper.getAllItems();
+  // final allMain = await databaseHelper.getAllMainCategories();
   // final allMain = await databaseHelper.getAllSubcategories();
 
   // logger.i(allMain);
