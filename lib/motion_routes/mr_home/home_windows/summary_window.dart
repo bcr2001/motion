@@ -13,7 +13,6 @@ import 'package:provider/provider.dart';
 // button toggles (Subcategory and Category)
 // total time accounted for the current month
 class SummaryWindow extends StatelessWidget {
-
   const SummaryWindow({super.key});
 
   @override
@@ -56,16 +55,16 @@ class SummaryWindow extends StatelessWidget {
                   children: [
                     // subcategories and their totals and averages
                     subSectionTitle2(titleName: AppString.homeSubcategoryTitle),
-                     const CardBuilder(
+                    const CardBuilder(
                       itemsToBeDisplayed: SubcategoryMonthTotalsAndAverages(
-                              isSubcategory: true),
+                          isSubcategory: true),
                       timeAccountedAndOthers: null,
                       sizedBoxHeight: 0.37,
                     ),
 
                     // main categories with there totals and averages
-                    subSectionTitle2(titleName: AppString.mainCategoryViewButtonName),
-                    const  CardBuilder(
+                    subSectionTitle2(titleName: AppString.mainCategoryTitle),
+                    const CardBuilder(
                       itemsToBeDisplayed: SubcategoryMonthTotalsAndAverages(
                           isSubcategory: false),
                       timeAccountedAndOthers: null,

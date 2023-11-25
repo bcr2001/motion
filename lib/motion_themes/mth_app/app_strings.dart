@@ -140,8 +140,8 @@ class AppString {
   static const String zenQuotesDefault =
       "“Time is what we want most, but what we use worst.” - William Penn";
 
-  static const String subcategoryViewButtonName = "Subcategory";
-  static const String mainCategoryViewButtonName = "Main Category";
+  static const String subcategoryTitle = "Subcategory";
+  static const String mainCategoryTitle = "Main Categories";
 
   static const String infoAboutSummaryWindow =
       "Information on time tracked within the tracking window will be summarized and showcased here. You can switch between Subcategory Summary and Main Category Summary. This summary pertains to the ongoing month.";
@@ -159,17 +159,14 @@ class AppString {
   static const String mostAndLeastTrackedTitle = "Most and Least Tracked";
   static const String mainCategoryDistributionTitle =
       "Main Category Distribution";
-  static const String highestTrackedTimeTitleMain =
-      "Highest Tracked Time";
-  static const String highestTrackedTimeTitleSpecial =
-      "Per Subcategory";
+  static const String highestTrackedTimeTitleMain = "Highest Tracked Time";
+  static const String highestTrackedTimeTitleSpecial = "Per Subcategory";
 
   static const String informationAboutSleep =
       "The amount of time you spend sleeping is not considered when determining the most and least time tracked.";
   static const String informationAboutHighestTrackedTime =
       "During the month, these are the highest durations you have spent on specific subcategories, along with the dates they were recorded.";
-  static const String informationAboutNoData =
-      "No data";
+  static const String informationAboutNoData = "No data";
 
   static const String subcategory1 = "Subcategory 1";
   static const String subcategory2 = "Subcategory 2";
@@ -184,8 +181,10 @@ class AppString {
   static const String mainCategoryOverview = "Main Category Overview";
   static const String aYearInSlicesTitle = "A Year in Slices";
   static const String distributionTitle = "Distribution";
+  static const String distributionTitle2 = "Distribution of";
   static const String statusTitle = "Status";
 
+  static const String chartingAYearInLinesTitle = "Charting a Year in Lines";
 
   static const String infoAboutAnnualOverviewEmpty =
       "Initiate the tracking process to generate and display your comprehensive yearly summary here..";
@@ -197,5 +196,6 @@ class AppString {
       "Below are the highest recorded durations for each subcategory, along with the respective dates during which they were logged over the course of the year.";
   static const String infoAboutGroupedBarChart =
       "The accounted and unaccounted time for a given month is delineated in days. ";
-
+  static const String infoAboutLineChartData =
+      "The Main Category data values for a given month are delineated in hours. ";
 }

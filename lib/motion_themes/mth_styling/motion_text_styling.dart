@@ -21,6 +21,15 @@ class AppTextStyle {
   // BASE STYLE
   static final TextStyle _baseStyle = GoogleFonts.openSans(fontSize: 16.5);
 
+  // chart label text style
+  static chartLabelTextStyle() {
+    return _baseStyle.copyWith(
+      color: const Color(0xff7589a2),
+      fontWeight: FontWeight.bold,
+      fontSize: 10,
+    );
+  }
+
   // section title style (main title)
   static sectionTitleTextStyle() {
     return _baseStyle.copyWith(fontSize: 18, fontWeight: FontWeight.w600);
@@ -98,7 +107,10 @@ class AppTextStyle {
 
   // legend text style
   static TextStyle legendTextStyling() {
-    return _baseStyle.copyWith(fontSize: 14, fontWeight: FontWeight.w500);
+    return _baseStyle.copyWith(
+    fontSize: 11, 
+    fontWeight: FontWeight.w600,
+    color: Colors.blueGrey);
   }
 
   // report page most and least tracked title style

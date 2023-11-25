@@ -535,6 +535,7 @@ class GridHighestTrackedSubcategory extends StatelessWidget {
                 height: screenHeight * 0.45,
                 child: Card(
                   child: GridView.builder(
+                    physics:const AlwaysScrollableScrollPhysics(),
                       shrinkWrap: true,
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(

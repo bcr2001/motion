@@ -336,8 +336,12 @@ class TrackerDatabaseHelper {
       final resultAWAAD = await db.rawQuery('''
         SELECT 
             date, 
-            (COALESCE(education, 0) + COALESCE(skills, 0) + COALESCE(entertainment, 0) + COALESCE(personalGrowth, 0) + COALESCE(sleep, 0))/60 AS Accounted, 
-            24 - (COALESCE(education, 0) + COALESCE(skills, 0) + COALESCE(entertainment, 0) + COALESCE(personalGrowth, 0) + COALESCE(sleep, 0))/60 AS Unaccounted
+            (COALESCE(education, 0) + COALESCE(skills, 0) + 
+            COALESCE(entertainment, 0) + COALESCE(personalGrowth, 0) + 
+            COALESCE(sleep, 0))/60 AS Accounted, 
+            24 - (COALESCE(education, 0) + COALESCE(skills, 0) + 
+            COALESCE(entertainment, 0) + COALESCE(personalGrowth, 0) + 
+            COALESCE(sleep, 0))/60 AS Unaccounted
         FROM main_category
         WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
         ORDER BY date;
@@ -387,7 +391,8 @@ class TrackerDatabaseHelper {
       // for the most tracked main category if isMost is false
       // then the least tracked main category is returned
       final resultMLTMC = isMost ? await db.rawQuery('''
-      SELECT mainCategoryName AS result_tracked_category, SUM(timeSpent) AS time_spent
+      SELECT mainCategoryName AS result_tracked_category, SUM(timeSpent) 
+      AS time_spent
       FROM subcategory
       WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ? AND 
       mainCategoryName != 'Sleep'
@@ -395,7 +400,8 @@ class TrackerDatabaseHelper {
       ORDER BY time_spent DESC
       LIMIT 1
       ''', [currentUser, firstDay, lastDay]) : await db.rawQuery('''
-      SELECT mainCategoryName AS result_tracked_category, SUM(timeSpent) AS time_spent
+      SELECT mainCategoryName AS result_tracked_category, SUM(timeSpent) 
+      AS time_spent
       FROM subcategory
       WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
       GROUP BY mainCategoryName
@@ -433,6 +439,37 @@ class TrackerDatabaseHelper {
       // if there is an error, an empty list is returned
       // and the error is logged to the console
       logger.i("Error: $e");
+      return [];
+    }
+  }
+
+  // get yearly totals for all the main categories
+  Future<List<Map<String, dynamic>>>
+      getYearlyTotalsForAllMainCatgories({
+        required String currentUser,
+        required String year}) async {
+    try {
+      final db = await database;
+
+      final resultYTFAMC = await db.rawQuery(
+        '''
+        SELECT
+          strftime('%m', date) AS Month,
+          ROUND(COALESCE(SUM(education) / 60.0, 0), 2) AS education,
+          ROUND(COALESCE(SUM(skills) / 60.0, 0), 2) AS skills,
+          ROUND(COALESCE(SUM(entertainment) / 60.0, 0), 2) AS entertainment,
+          ROUND(COALESCE(SUM(personalGrowth) / 60.0, 0), 2) AS personalGrowth,
+          ROUND(COALESCE(SUM(sleep) / 60.0, 0), 2) AS sleep
+        FROM main_category
+        WHERE currentLoggedInUser = ? AND strftime('%Y', date) = ?
+        GROUP BY Month;
+        ''', [currentUser, year]);
+
+
+      return resultYTFAMC;
+    } catch (e) {
+      logger.i("Error: $e");
+
       return [];
     }
   }
@@ -692,7 +729,8 @@ class TrackerDatabaseHelper {
                 date,
                 subcategoryName,
                 SUM(timeSpent)/60 AS timeSpent,
-                ROW_NUMBER() OVER (PARTITION BY subcategoryName ORDER BY timeSpent DESC) AS rk
+                ROW_NUMBER() OVER (PARTITION BY subcategoryName ORDER 
+                BY timeSpent DESC) AS rk
             FROM subcategory
             WHERE currentLoggedInUser = ? 
             AND date BETWEEN ? AND ? AND timeSpent > 0

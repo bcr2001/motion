@@ -121,6 +121,13 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
     return await trackDbInstance.getMonthDistibutionOfAccountedUnaccounted(
         currentUser: currentUser, year: year);
   }
+
+  // get yearly totals for all the main categories
+  Future<List<Map<String, dynamic>>> retrieveYearlyTotalsForAllMainCatgories(
+      {required String currentUser, required String year}) async {
+    return await trackDbInstance.getYearlyTotalsForAllMainCatgories(
+        currentUser: currentUser, year: year);
+  }
 }
 
 // handles database operation for the subcategory table

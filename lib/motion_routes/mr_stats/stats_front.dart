@@ -28,6 +28,7 @@ class YearsWorthOfSummaryStatitics extends StatelessWidget {
         title: Text(year),
       ),
       body: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
         children: [
           // SECTION 1: ACCOUNTED VS UNACCOUNTED
@@ -91,7 +92,13 @@ class YearsWorthOfSummaryStatitics extends StatelessWidget {
 
           YearHighestTrackedTimePerSubcategory(
             year: year,
-          )
+          ),
+
+          // SECTION 5: CHARTING A YEAR IN LINES
+
+          // section title: Charting a Year in Lines
+          sectionTitle(titleName: AppString.chartingAYearInLinesTitle),
+          LineChartOfMainCategoryYearlyDistribution(year: year,)
         ],
       ),
     );

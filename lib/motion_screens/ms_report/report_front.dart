@@ -20,7 +20,7 @@ class MostAndLeastTrackedMaincategorySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MLTitleAndCard(
-        mlTitle: AppString.mainCategoryViewButtonName,
+        mlTitle: AppString.mainCategoryTitle,
         cardContent: Card(
           child: Padding(
               padding: const EdgeInsets.only(top: 10, bottom: 14),
@@ -79,7 +79,7 @@ class MostAndLeastTrackedSubcategorySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MLTitleAndCard(
-        mlTitle: AppString.subcategoryViewButtonName,
+        mlTitle: AppString.subcategoryTitle,
         cardContent: Card(
           child: Padding(
               padding: const EdgeInsets.only(top: 10, bottom: 14),
@@ -162,7 +162,7 @@ class PieChartAndValuesAccountedAndUnaccounted extends StatelessWidget {
       return
           // pie chart and data values
           Container(
-            height: 300,
+        height: 300,
         margin: const EdgeInsets.only(bottom: 15.0),
         child: Card(
           child: Row(
@@ -171,7 +171,7 @@ class PieChartAndValuesAccountedAndUnaccounted extends StatelessWidget {
               // the pie chart that shows the distribution between
               // accounted and unaccounted values
               const AccountedUnaccountedReportPieChart(),
-        
+
               // accounted month total
               Column(
                 children: [
@@ -183,7 +183,7 @@ class PieChartAndValuesAccountedAndUnaccounted extends StatelessWidget {
                       dayStyle: AppTextStyle.resultTitleStyle(false),
                       hoursStyle:
                           AppTextStyle.accountRegularAndUnaccountTextStyle()),
-        
+
                   // unaccounted total for the current month
                   entireTimeAccountedAndUnaccounted(
                       future: main.retrieveEntireMonthlyTotalMainCategoryTable(
@@ -194,7 +194,7 @@ class PieChartAndValuesAccountedAndUnaccounted extends StatelessWidget {
                           AppTextStyle.accountRegularAndUnaccountTextStyle())
                 ],
               ),
-        
+
               // pie chart legend
               _columnPieChartColorPalette()
             ],
@@ -205,32 +205,31 @@ class PieChartAndValuesAccountedAndUnaccounted extends StatelessWidget {
   }
 }
 
+// main category distribution legend
+Widget mainCategoryPieChartLegend(
+    {required Color color, required String mainCategoryName}) {
+  return Row(
+    children: [
+      // legend color
+      chartColorPalette(color: color),
+
+      // main category name
+      Padding(
+        padding: const EdgeInsets.only(left: 5.0),
+        child: Text(
+          mainCategoryName,
+          style: AppTextStyle.legendTextStyling(),
+        ),
+      )
+    ],
+  );
+}
+
 // Main Category Distribution Pie Chart and legend
 class PieChartDataMainCategoryDistribution extends StatelessWidget {
-
   final Future<List<Map<String, dynamic>>?> future;
-  
+
   const PieChartDataMainCategoryDistribution({super.key, required this.future});
-
-  // main category distribution legend
-  Widget _mainCategoryPieChartLegend(
-      {required Color color, required String mainCategoryName}) {
-    return Row(
-      children: [
-        // legend color
-        chartColorPalette(color: color),
-
-        // main category name
-        Padding(
-          padding: const EdgeInsets.only(left: 5.0),
-          child: Text(
-            mainCategoryName,
-            style: AppTextStyle.legendTextStyling(),
-          ),
-        )
-      ],
-    );
-  }
 
   // legend rows
   Widget legendRows() {
@@ -241,27 +240,27 @@ class PieChartDataMainCategoryDistribution extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           // sleep
-          _mainCategoryPieChartLegend(
+          mainCategoryPieChartLegend(
               color: AppColor.sleepPieChartColor,
               mainCategoryName: AppString.sleepMainCategory),
 
           // education
-          _mainCategoryPieChartLegend(
+          mainCategoryPieChartLegend(
               color: AppColor.educationPieChartColor,
               mainCategoryName: AppString.educationMainCategory),
 
           // skills
-          _mainCategoryPieChartLegend(
+          mainCategoryPieChartLegend(
               color: AppColor.skillsPieChartColor,
               mainCategoryName: AppString.skillMainCategory),
 
           // entertainment
-          _mainCategoryPieChartLegend(
+          mainCategoryPieChartLegend(
               color: AppColor.entertainmentPieChartColor,
               mainCategoryName: AppString.entertainmentMainCategory),
 
           // personal growth
-          _mainCategoryPieChartLegend(
+          mainCategoryPieChartLegend(
               color: AppColor.personalGrowthPieChartColor,
               mainCategoryName: AppString.personalGrowthMainCategory)
         ],
@@ -282,9 +281,9 @@ class PieChartDataMainCategoryDistribution extends StatelessWidget {
           children: [
             // main category pie chart distribution
             MainCategoryDistributionPieChart(
-                future:future,
-              ),
-      
+              future: future,
+            ),
+
             legendRows()
           ],
         ),

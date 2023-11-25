@@ -13,6 +13,9 @@ import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:provider/provider.dart';
 
+// chart text style
+TextStyle style = AppTextStyle.chartLabelTextStyle();
+
 // Section 1: Pie Chart
 class YearPieChartDistributionAccountedUnaccounted extends StatelessWidget {
   final String accountedTotalHours;
@@ -151,6 +154,7 @@ class YearMainCategoryOveriew extends StatelessWidget {
                 height: screenHeight * 0.42,
                 child: Card(
                   child: ListView.builder(
+                      physics: const NeverScrollableScrollPhysics(),
                       itemCount: snapshotData!.length,
                       itemBuilder: (BuildContext context, index) {
                         // single item index
@@ -315,18 +319,14 @@ class GroupedPieChartAccountedUnaccounted extends StatelessWidget {
 
   // y-axis titles
   Widget leftTitles(double value, TitleMeta meta) {
-    const style = TextStyle(
-      color: Color(0xff7589a2),
-      fontWeight: FontWeight.bold,
-      fontSize: 10,
-    );
+    TextStyle style = AppTextStyle.chartLabelTextStyle();
     String text;
     if (value == 0) {
-      text = '0H';
-    } else if (value == 12) {
-      text = '12H';
-    } else if (value == 24) {
-      text = '24H';
+      text = '0';
+    } else if (value == 15) {
+      text = '15';
+    } else if (value == 30) {
+      text = '31';
     } else {
       return Container();
     }
@@ -383,8 +383,6 @@ class GroupedPieChartAccountedUnaccounted extends StatelessWidget {
                 showingBarGroups.add(barGroup);
               }
 
-              logger.i(currentYearData);
-
               return AspectRatio(
                 aspectRatio: 1,
                 child: Column(
@@ -400,17 +398,19 @@ class GroupedPieChartAccountedUnaccounted extends StatelessWidget {
                             width: 38,
                           ),
                           specialSectionTitle(
-                            mainTitleName: AppString.distributionTitle, 
-                            elevatedTitleName: AppString.statusTitle),
-                          
+                              mainTitleName: AppString.distributionTitle,
+                              elevatedTitleName: AppString.statusTitle),
                         ],
                       ),
                     ),
 
                     // info about the distribution
                     const InfoToTheUser(
-                      sectionInformation: 
-                      AppString.infoAboutGroupedBarChart),
+                        sectionInformation: AppString.infoAboutGroupedBarChart),
+
+                    const SizedBox(
+                      height: 25,
+                    ),
 
                     // grouped barchart
                     Expanded(
@@ -451,4 +451,331 @@ class GroupedPieChartAccountedUnaccounted extends StatelessWidget {
           });
     });
   }
+}
+
+// section 5: line plot of main category distributions
+class LineChartOfMainCategoryYearlyDistribution extends StatelessWidget {
+  final String year;
+
+  const LineChartOfMainCategoryYearlyDistribution(
+      {super.key, required this.year});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer2<UserUidProvider, MainCategoryTrackerProvider>(
+        builder: (context, user, main, child) {
+      final String currentUser = user.userUid!;
+
+      return FutureBuilder(
+          future: main.retrieveYearlyTotalsForAllMainCatgories(
+              currentUser: currentUser, year: year),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            } else if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            } else {
+              final currentYearData = snapshot.data;
+
+              // Create LineChartBarData instances outside the loop
+              List<LineChartBarData> lineBarData = [
+                createLineChartBarData(
+                  data: currentYearData!,
+                  getCategoryValues: (data) => data["education"],
+                  color: AppColor.educationPieChartColor,
+                ),
+                createLineChartBarData(
+                  data: currentYearData,
+                  getCategoryValues: (data) => data["skills"],
+                  color: AppColor.skillsPieChartColor,
+                ),
+                createLineChartBarData(
+                  data: currentYearData,
+                  getCategoryValues: (data) => data["entertainment"],
+                  color: AppColor.entertainmentPieChartColor,
+                ),
+                createLineChartBarData(
+                  data: currentYearData,
+                  getCategoryValues: (data) => data["personalGrowth"],
+                  color: AppColor.personalGrowthPieChartColor,
+                ),
+                createLineChartBarData(
+                  data: currentYearData,
+                  getCategoryValues: (data) => data["sleep"],
+                  color: AppColor.sleepPieChartColor,
+                ),
+              ];
+
+              logger.i(currentYearData);
+
+              return Card(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // chart title
+                      Padding(
+                        padding: const EdgeInsets.only(left: 10.0, bottom: 20),
+                        child: Row(
+                          children: [
+                            // chart icon
+                            makeTransactionsIcon(),
+
+                            // title name
+                            specialSectionTitle(
+                                mainTitleName: AppString.distributionTitle2,
+                                elevatedTitleName: AppString.mainCategoryTitle)
+                          ],
+                        ),
+                      ),
+
+                      // information to the user
+                      const InfoToTheUser(
+                          sectionInformation: AppString.infoAboutLineChartData),
+
+                      // line chart
+                      SizedBox(
+                        height: 300,
+                        child: LineChart(LineChartData(
+                          lineTouchData: _LineChartBuilder().lineTouchData1,
+                          gridData: _LineChartBuilder().gridData,
+                          titlesData: _LineChartBuilder().titlesData1,
+                          borderData: _LineChartBuilder().borderData,
+                          lineBarsData: lineBarData,
+                          minX: 0,
+                          maxX: 13,
+                          maxY: 400,
+                          minY: 0,
+                        )),
+                      ),
+
+                      // piechart legend
+                      Container(
+                        margin: const EdgeInsets.only(top: 40),
+                        height: 60,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            // first row legend
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                // sleep
+                                mainCategoryPieChartLegend(
+                                    color: AppColor.sleepPieChartColor,
+                                    mainCategoryName:
+                                        AppString.sleepMainCategory),
+
+                                // education
+                                mainCategoryPieChartLegend(
+                                    color: AppColor.educationPieChartColor,
+                                    mainCategoryName:
+                                        AppString.educationMainCategory),
+
+                                // skills
+                                mainCategoryPieChartLegend(
+                                    color: AppColor.skillsPieChartColor,
+                                    mainCategoryName:
+                                        AppString.skillMainCategory),
+                              ],
+                            ),
+                            // second row legends
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                // entertainment
+                                mainCategoryPieChartLegend(
+                                    color: AppColor.entertainmentPieChartColor,
+                                    mainCategoryName:
+                                        AppString.entertainmentMainCategory),
+
+                                // personal growth
+                                mainCategoryPieChartLegend(
+                                    color: AppColor.personalGrowthPieChartColor,
+                                    mainCategoryName:
+                                        AppString.personalGrowthMainCategory)
+                              ],
+                            )
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+          });
+    });
+  }
+}
+
+// Function to create LineChartBarData
+LineChartBarData createLineChartBarData({
+  required List<Map<String, dynamic>> data,
+  required double Function(Map<String, dynamic>) getCategoryValues,
+  required Color color,
+}) {
+  return LineChartBarData(
+    isCurved: false,
+    color: color,
+    barWidth: 3,
+    isStrokeCapRound: true,
+    dotData: FlDotData(show: false),
+    belowBarData: BarAreaData(show: false),
+    spots: List.generate(
+      data.length,
+      (index) {
+        final int month = int.parse(data[index]["Month"]);
+        final double categoryValue = getCategoryValues(data[index]);
+
+        logger.i("Month: $month Category Value: $categoryValue");
+
+        return FlSpot(month.toDouble(), categoryValue);
+      },
+    ),
+  );
+}
+
+class _LineChartBuilder {
+  // line chart touch gestures
+  LineTouchData get lineTouchData1 => LineTouchData(
+        handleBuiltInTouches: true,
+        touchTooltipData: LineTouchTooltipData(
+          tooltipBgColor: Colors.white.withOpacity(0.8),
+        ),
+      );
+
+  // do not show the grid lines
+  FlGridData get gridData => FlGridData(show: false);
+
+  // titles to display on screen
+  FlTitlesData get titlesData1 => FlTitlesData(
+        bottomTitles: AxisTitles(
+          sideTitles: bottomTitles,
+        ),
+        rightTitles: AxisTitles(
+          sideTitles: SideTitles(showTitles: false),
+        ),
+        topTitles: AxisTitles(
+          sideTitles: SideTitles(showTitles: false),
+        ),
+        leftTitles: AxisTitles(
+          sideTitles: leftTitles(),
+        ),
+      );
+
+  // vertical y-axis titles
+  Widget leftTitleWidgets(double value, TitleMeta meta) {
+    TextStyle style = AppTextStyle.chartLabelTextStyle();
+    String text;
+    switch (value.toInt()) {
+      case 0:
+        text = '0h';
+        break;
+      case 50:
+        text = '50h';
+        break;
+      case 100:
+        text = '100h';
+        break;
+      case 150:
+        text = '150h';
+        break;
+      case 200:
+        text = '200h';
+        break;
+      case 250:
+        text = '250h';
+        break;
+      case 300:
+        text = '300h';
+        break;
+      default:
+        return Container();
+    }
+
+    return Text(text, style: style, textAlign: TextAlign.center);
+  }
+
+  SideTitles leftTitles() => SideTitles(
+        getTitlesWidget: leftTitleWidgets,
+        showTitles: true,
+        interval: 1,
+        reservedSize: 40,
+      );
+
+  // bottom line chart titles
+  // bottom titles representing the months
+  Widget bottomTitleWidgets(double value, TitleMeta meta) {
+    Widget text;
+    switch (value.toInt()) {
+      case 1:
+        text = Text('Jan', style: style);
+        break;
+      case 2:
+        text = Text('Feb', style: style);
+        break;
+      case 3:
+        text = Text('Mar', style: style);
+        break;
+      case 4:
+        text = Text('Apr', style: style);
+        break;
+      case 5:
+        text = Text('May', style: style);
+        break;
+      case 6:
+        text = Text('Jun', style: style);
+        break;
+      case 7:
+        text = Text('Jul', style: style);
+        break;
+      case 8:
+        text = Text('Aug', style: style);
+        break;
+      case 9:
+        text = Text('Sep', style: style);
+        break;
+      case 10:
+        text = Text('Oct', style: style);
+        break;
+      case 11:
+        text = Text('Nov', style: style);
+        break;
+      case 12:
+        text = Text('Dec', style: style);
+        break;
+      default:
+        text = const Text('');
+        break;
+    }
+
+    return SideTitleWidget(
+      axisSide: meta.axisSide,
+      space: 12,
+      child: text,
+    );
+  }
+
+  SideTitles get bottomTitles => SideTitles(
+        showTitles: true,
+        reservedSize: 35,
+        interval: 1,
+        getTitlesWidget: bottomTitleWidgets,
+      );
+
+  // border styling and configuration
+  FlBorderData get borderData => FlBorderData(
+        show: true,
+        border: const Border(
+          bottom: BorderSide(width: 1.5),
+          left: BorderSide(color: Colors.transparent),
+          right: BorderSide(color: Colors.transparent),
+          top: BorderSide(color: Colors.transparent),
+        ),
+      );
 }

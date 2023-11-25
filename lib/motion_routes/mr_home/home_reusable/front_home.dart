@@ -97,8 +97,9 @@ Widget numberOfDaysMainCategory() {
             return Text('Error: ${snapshot.error}');
           } else {
             // the reult from the database
-            // if empy the default value is 0
+            // if empty the default value is 0
             final totalNumberOfDays = snapshot.data ?? 0;
+
 
             // a text widget to display it on the screen
             return Padding(
@@ -150,10 +151,9 @@ Widget timeAccountedAndCurrentDate() {
                       return Text(
                         "$convertedAllTotalTimeSpent\nAccounted",
                         style: const TextStyle(
-                          fontSize: 21,
-                          fontWeight: FontWeight.w600,
-                          color: AppColor.tileBackgroundColor
-                        ),
+                            fontSize: 21,
+                            fontWeight: FontWeight.w600,
+                            color: AppColor.tileBackgroundColor),
                       );
                     }
                   },
@@ -267,10 +267,12 @@ class _SubcategoryAndCurrentDayTotalsState
                             return ListTile(
                               title: Text(
                                 activeItems[index].subcategoryName,
-                                style: AppTextStyle.leadingTextLTStyle(),) ,
+                                style: AppTextStyle.leadingTextLTStyle(),
+                              ),
                               subtitle: Text(
                                 activeItems[index].mainCategoryName,
-                                style: AppTextStyle.specialSectionTitleTextStyle(),
+                                style:
+                                    AppTextStyle.specialSectionTitleTextStyle(),
                               ),
                               trailing: Container(
                                 width: 105,
@@ -278,11 +280,12 @@ class _SubcategoryAndCurrentDayTotalsState
                                 decoration: BoxDecoration(
                                   color: AppColor.tileBackgroundColor,
                                   borderRadius: BorderRadius.circular(20),
-
                                 ),
-                                child: Center(child: Text(
+                                child: Center(
+                                    child: Text(
                                   convertedTotalTimeSpent,
-                                  style: AppTextStyle.tileElementTextStyle(),)),
+                                  style: AppTextStyle.tileElementTextStyle(),
+                                )),
                               ),
                               onTap: () {
                                 Navigator.push(
