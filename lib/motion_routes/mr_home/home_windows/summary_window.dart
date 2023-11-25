@@ -58,8 +58,7 @@ class SummaryWindow extends StatelessWidget {
                     const CardBuilder(
                       itemsToBeDisplayed: SubcategoryMonthTotalsAndAverages(
                           isSubcategory: true),
-                      timeAccountedAndOthers: null,
-                      sizedBoxHeight: 0.37,
+                      timeAccountedAndOthers: null
                     ),
 
                     // main categories with there totals and averages
@@ -67,8 +66,7 @@ class SummaryWindow extends StatelessWidget {
                     const CardBuilder(
                       itemsToBeDisplayed: SubcategoryMonthTotalsAndAverages(
                           isSubcategory: false),
-                      timeAccountedAndOthers: null,
-                      sizedBoxHeight: 0.38,
+                      timeAccountedAndOthers: null
                     ),
                   ],
                 );

@@ -88,6 +88,7 @@ class _ScrollingListBuilderState extends State<ScrollingListBuilder> {
                 trackVisibility: true,
                 child: ListView.builder(
                     padding: EdgeInsets.zero,
+                    shrinkWrap: true,
                     controller: _scrollController,
                     itemCount: monthTotalsAndAverage!.length,
                     itemBuilder: (BuildContext context, index) {
@@ -159,31 +160,28 @@ class _ScrollingListBuilderState extends State<ScrollingListBuilder> {
 class CardBuilder extends StatelessWidget {
   final Widget? timeAccountedAndOthers;
   final Widget itemsToBeDisplayed;
-  final double sizedBoxHeight;
 
   const CardBuilder(
       {super.key,
       required this.timeAccountedAndOthers,
-      required this.itemsToBeDisplayed,
-      this.sizedBoxHeight = 0.25});
+      required this.itemsToBeDisplayed});
 
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 5),
-      height: screenHeight * 0.40,
+    return Padding(
+      padding: const EdgeInsets.only(bottom:15.0),
       child: Card(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // time accounted
             timeAccountedAndOthers ?? const SizedBox.shrink(),
-
+    
             // database results
-            SizedBox(
-              height: screenHeight * sizedBoxHeight,
+            Container(
+              constraints: BoxConstraints(maxHeight: screenHeight * 0.38),
               child: itemsToBeDisplayed,
             )
           ],
