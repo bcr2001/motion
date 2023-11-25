@@ -32,12 +32,16 @@ class AppTextStyle {
 
   // section title style (main title)
   static sectionTitleTextStyle() {
-    return _baseStyle.copyWith(fontSize: 18, fontWeight: FontWeight.w600);
+    return _baseStyle.copyWith(fontSize: 18.5, fontWeight: FontWeight.w600);
   }
 
   // section title style (subtitle)
   static subSectionTitleTextStyle() {
-    return _baseStyle.copyWith(fontSize: 15);
+    return _baseStyle.copyWith(
+      fontSize: 14, 
+      decoration: TextDecoration.underline,
+      fontWeight: FontWeight.w600
+      );
   }
 
   // section title style (main title)

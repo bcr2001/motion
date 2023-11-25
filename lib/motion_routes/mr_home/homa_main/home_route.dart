@@ -66,8 +66,6 @@ class MotionHomeRoute extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 10.0),
             sliver: SliverList(
                 delegate: SliverChildListDelegate([
-
-                  
               // SECTION ONE: NUMBER OF DAYS IN APP
               // total number of days in the main_category table
               numberOfDaysMainCategory(),

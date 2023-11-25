@@ -1,4 +1,3 @@
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
@@ -85,7 +84,6 @@ class YearTotalsAccountedUnaccountedBuilder extends StatelessWidget {
           ),
 
           // days
-
           Row(
             children: [
               Icon(

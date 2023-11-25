@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_pvd.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
+import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:provider/provider.dart';
 import '../ms_routes/about_page.dart';
 import '../ms_reuse/screens_reusable.dart';
@@ -70,11 +71,11 @@ class _ThemeModeSettingsOption extends StatelessWidget {
         return ListTile(
           title: Text(
             AppString.themeTitle,
-            style: Theme.of(context).textTheme.headlineSmall,
+            style: AppTextStyle.leadingTextLTStyle(),
           ),
           subtitle: Text(
             themeValue.currentThemeModeName,
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: AppTextStyle.settingSubtitleStyling,
           ),
           trailing: Switch(
             activeColor: const Color(0xFF00B0F0),

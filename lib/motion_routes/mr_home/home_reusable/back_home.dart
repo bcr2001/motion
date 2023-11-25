@@ -7,7 +7,7 @@ import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 // title builder
 Widget sectionTitle({required String titleName}) {
   return Padding(
-    padding: const EdgeInsets.only(left: 10, top: 20, bottom: 20),
+    padding: const EdgeInsets.only(left: 10, top: 10, bottom: 15),
     child: Text(
       titleName,
       style: AppTextStyle.sectionTitleTextStyle(),
@@ -18,7 +18,7 @@ Widget sectionTitle({required String titleName}) {
 // subtitle builder
 Widget subSectionTitle2({required String titleName}) {
   return Padding(
-    padding: const EdgeInsets.only(left: 25, top: 25, bottom: 15),
+    padding: const EdgeInsets.only(left: 25, top: 10, bottom: 10),
     child: Text(
       titleName,
       style: AppTextStyle.subSectionTitleTextStyle(),
@@ -172,7 +172,7 @@ class CardBuilder extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 10),
+      margin: const EdgeInsets.symmetric(vertical: 5),
       height: screenHeight * 0.40,
       child: Card(
         child: Column(

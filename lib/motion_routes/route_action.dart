@@ -6,6 +6,7 @@ import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_screens/ms_settings/settings_page.dart';
 import 'package:motion/motion_screens/ms_tips/tips_page.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
+import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 
 import '../motion_screens/ms_report/report.dart';
 
@@ -60,8 +61,9 @@ showAlertDialog(BuildContext context) {
                 const Divider(),
 
                 // log out query
-                const Text(
+                 Text(
                   AppString.logOutQuestion,
+                  style: AppTextStyle.infoTextStyle(),
                 ),
 
                 // Custom widget for displaying two buttons: cancel and log out
