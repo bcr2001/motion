@@ -171,7 +171,7 @@ class CardBuilder extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom:15.0),
+      padding: const EdgeInsets.only(bottom:15.0, left: 2, right: 2),
       child: Card(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

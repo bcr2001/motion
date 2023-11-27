@@ -454,6 +454,56 @@ class GroupedPieChartAccountedUnaccounted extends StatelessWidget {
 }
 
 // section 5: line plot of main category distributions
+
+// chart legends
+Widget chartLegend() {
+  return // piechart legend
+      Container(
+    margin: const EdgeInsets.only(top: 40),
+    height: 60,
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        // first row legend
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            // sleep
+            mainCategoryPieChartLegend(
+                color: AppColor.sleepPieChartColor,
+                mainCategoryName: AppString.sleepMainCategory),
+
+            // education
+            mainCategoryPieChartLegend(
+                color: AppColor.educationPieChartColor,
+                mainCategoryName: AppString.educationMainCategory),
+
+            // skills
+            mainCategoryPieChartLegend(
+                color: AppColor.skillsPieChartColor,
+                mainCategoryName: AppString.skillMainCategory),
+          ],
+        ),
+        // second row legends
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            // entertainment
+            mainCategoryPieChartLegend(
+                color: AppColor.entertainmentPieChartColor,
+                mainCategoryName: AppString.entertainmentMainCategory),
+
+            // personal growth
+            mainCategoryPieChartLegend(
+                color: AppColor.personalGrowthPieChartColor,
+                mainCategoryName: AppString.personalGrowthMainCategory)
+          ],
+        )
+      ],
+    ),
+  );
+}
+
 class LineChartOfMainCategoryYearlyDistribution extends StatelessWidget {
   final String year;
 
@@ -508,102 +558,58 @@ class LineChartOfMainCategoryYearlyDistribution extends StatelessWidget {
                 ),
               ];
 
-              logger.i(currentYearData);
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 20.0),
+                child: Card(
+                  child: Container(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // chart title
+                        Padding(
+                          padding:
+                              const EdgeInsets.only(left: 10.0, bottom: 20, top: 15),
+                          child: Row(
+                            children: [
+                              // chart icon
+                              makeTransactionsIcon(),
 
-              return Card(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // chart title
-                      Padding(
-                        padding: const EdgeInsets.only(left: 10.0, bottom: 20),
-                        child: Row(
-                          children: [
-                            // chart icon
-                            makeTransactionsIcon(),
-
-                            // title name
-                            specialSectionTitle(
-                                mainTitleName: AppString.distributionTitle2,
-                                elevatedTitleName: AppString.mainCategoryTitle)
-                          ],
+                              // title name
+                              specialSectionTitle(
+                                  mainTitleName: AppString.distributionTitle2,
+                                  elevatedTitleName:
+                                      AppString.mainCategoryTitle)
+                            ],
+                          ),
                         ),
-                      ),
 
-                      // information to the user
-                      const InfoToTheUser(
-                          sectionInformation: AppString.infoAboutLineChartData),
+                        // information to the user
+                        const InfoToTheUser(
+                            sectionInformation:
+                                AppString.infoAboutLineChartData),
 
-                      // line chart
-                      SizedBox(
-                        height: 300,
-                        child: LineChart(LineChartData(
-                          lineTouchData: _LineChartBuilder().lineTouchData1,
-                          gridData: _LineChartBuilder().gridData,
-                          titlesData: _LineChartBuilder().titlesData1,
-                          borderData: _LineChartBuilder().borderData,
-                          lineBarsData: lineBarData,
-                          minX: 1,
-                          maxX: 12,
-                          maxY: 400,
-                          minY: 0,
-                        )),
-                      ),
-
-                      // piechart legend
-                      Container(
-                        margin: const EdgeInsets.only(top: 40),
-                        height: 60,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            // first row legend
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                // sleep
-                                mainCategoryPieChartLegend(
-                                    color: AppColor.sleepPieChartColor,
-                                    mainCategoryName:
-                                        AppString.sleepMainCategory),
-
-                                // education
-                                mainCategoryPieChartLegend(
-                                    color: AppColor.educationPieChartColor,
-                                    mainCategoryName:
-                                        AppString.educationMainCategory),
-
-                                // skills
-                                mainCategoryPieChartLegend(
-                                    color: AppColor.skillsPieChartColor,
-                                    mainCategoryName:
-                                        AppString.skillMainCategory),
-                              ],
-                            ),
-                            // second row legends
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                // entertainment
-                                mainCategoryPieChartLegend(
-                                    color: AppColor.entertainmentPieChartColor,
-                                    mainCategoryName:
-                                        AppString.entertainmentMainCategory),
-
-                                // personal growth
-                                mainCategoryPieChartLegend(
-                                    color: AppColor.personalGrowthPieChartColor,
-                                    mainCategoryName:
-                                        AppString.personalGrowthMainCategory)
-                              ],
-                            )
-                          ],
+                        // line chart
+                        SizedBox(
+                          height: 300,
+                          child: LineChart(LineChartData(
+                            lineTouchData: _LineChartBuilder().lineTouchData1,
+                            gridData: _LineChartBuilder().gridData,
+                            titlesData: _LineChartBuilder().titlesData1,
+                            borderData: _LineChartBuilder().borderData,
+                            lineBarsData: lineBarData,
+                            minX: 1,
+                            maxX: 13,
+                            maxY: 400,
+                            minY: 0,
+                          )),
                         ),
-                      ),
-                    ],
+
+                        // legend
+                        chartLegend()
+                      ],
+                    ),
                   ),
                 ),
               );
@@ -632,11 +638,62 @@ LineChartBarData createLineChartBarData({
         final int month = int.parse(data[index]["Month"]);
         final double categoryValue = getCategoryValues(data[index]);
 
-        logger.i("Month: $month Category Value: $categoryValue");
-
         return FlSpot(month.toDouble(), categoryValue);
       },
     ),
+  );
+}
+
+// bottom line chart titles
+// bottom titles representing the months
+Widget bottomTitleWidgets(double value, TitleMeta meta) {
+  Widget text;
+  switch (value.toInt()) {
+    case 1:
+      text = Text('Jan', style: style);
+      break;
+    case 2:
+      text = Text('Feb', style: style);
+      break;
+    case 3:
+      text = Text('Mar', style: style);
+      break;
+    case 4:
+      text = Text('Apr', style: style);
+      break;
+    case 5:
+      text = Text('May', style: style);
+      break;
+    case 6:
+      text = Text('Jun', style: style);
+      break;
+    case 7:
+      text = Text('Jul', style: style);
+      break;
+    case 8:
+      text = Text('Aug', style: style);
+      break;
+    case 9:
+      text = Text('Sep', style: style);
+      break;
+    case 10:
+      text = Text('Oct', style: style);
+      break;
+    case 11:
+      text = Text('Nov', style: style);
+      break;
+    case 12:
+      text = Text('Dec', style: style);
+      break;
+    default:
+      text = const Text('');
+      break;
+  }
+
+  return SideTitleWidget(
+    axisSide: meta.axisSide,
+    space: 12,
+    child: text,
   );
 }
 
@@ -708,59 +765,6 @@ class _LineChartBuilder {
         reservedSize: 40,
       );
 
-  // bottom line chart titles
-  // bottom titles representing the months
-  Widget bottomTitleWidgets(double value, TitleMeta meta) {
-    Widget text;
-    switch (value.toInt()) {
-      case 1:
-        text = Text('Jan', style: style);
-        break;
-      case 2:
-        text = Text('Feb', style: style);
-        break;
-      case 3:
-        text = Text('Mar', style: style);
-        break;
-      case 4:
-        text = Text('Apr', style: style);
-        break;
-      case 5:
-        text = Text('May', style: style);
-        break;
-      case 6:
-        text = Text('Jun', style: style);
-        break;
-      case 7:
-        text = Text('Jul', style: style);
-        break;
-      case 8:
-        text = Text('Aug', style: style);
-        break;
-      case 9:
-        text = Text('Sep', style: style);
-        break;
-      case 10:
-        text = Text('Oct', style: style);
-        break;
-      case 11:
-        text = Text('Nov', style: style);
-        break;
-      case 12:
-        text = Text('Dec', style: style);
-        break;
-      default:
-        text = const Text('');
-        break;
-    }
-
-    return SideTitleWidget(
-      axisSide: meta.axisSide,
-      space: 12,
-      child: text,
-    );
-  }
-
   SideTitles get bottomTitles => SideTitles(
         showTitles: true,
         reservedSize: 35,
@@ -778,4 +782,190 @@ class _LineChartBuilder {
           top: BorderSide(color: Colors.transparent),
         ),
       );
+}
+
+// Section 6: Stack Bar Chart
+
+class StackedBarChartOfMainCategoryDistribution extends StatelessWidget {
+  final String year;
+
+  const StackedBarChartOfMainCategoryDistribution(
+      {super.key, required this.year});
+
+  // space between bars
+  final double betweenSpace = 15;
+
+  // bar widths
+  final double barWidthInd = 10.0;
+
+// function to created stack bar chart
+  BarChartGroupData generateGroupData(
+    int x,
+    double education,
+    double skills,
+    double entertainment,
+    double personalGrowth,
+    double sleep,
+  ) {
+    return BarChartGroupData(
+      x: x,
+      groupVertically: true,
+      barRods: [
+        // education bar
+        BarChartRodData(
+          fromY: 0,
+          toY: education,
+          color: AppColor.educationPieChartColor,
+          width: barWidthInd,
+        ),
+
+        // skills bar
+        BarChartRodData(
+          fromY: education + betweenSpace,
+          toY: education + betweenSpace + skills,
+          color: AppColor.skillsPieChartColor,
+          width: barWidthInd,
+        ),
+
+        // entertainment bar
+        BarChartRodData(
+          fromY: education + betweenSpace + skills + betweenSpace,
+          toY: education + betweenSpace + skills + betweenSpace + entertainment,
+          color: AppColor.entertainmentPieChartColor,
+          width: barWidthInd,
+        ),
+
+        // personal growth bar
+        BarChartRodData(
+          fromY: education +
+              betweenSpace +
+              skills +
+              betweenSpace +
+              entertainment +
+              betweenSpace,
+          toY: education +
+              betweenSpace +
+              skills +
+              betweenSpace +
+              entertainment +
+              betweenSpace +
+              personalGrowth,
+          color: AppColor.personalGrowthPieChartColor,
+          width: barWidthInd,
+        ),
+
+        // sleep bar
+        BarChartRodData(
+          fromY: education +
+              betweenSpace +
+              skills +
+              betweenSpace +
+              entertainment +
+              betweenSpace +
+              personalGrowth +
+              betweenSpace,
+          toY: education +
+              betweenSpace +
+              skills +
+              betweenSpace +
+              entertainment +
+              betweenSpace +
+              personalGrowth +
+              betweenSpace +
+              sleep,
+          color: AppColor.sleepPieChartColor,
+          width: barWidthInd,
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer2<UserUidProvider, MainCategoryTrackerProvider>(
+        builder: (context, user, main, child) {
+      final String currentUser = user.userUid!;
+
+      return FutureBuilder(
+          future: main.retrieveYearlyTotalsForAllMainCatgories(
+              currentUser: currentUser, year: year),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            } else if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            } else {
+              final currentYearData = snapshot.data;
+
+              List<BarChartGroupData> stackBarGroups = [];
+
+              for (int i = 0; i < currentYearData!.length; i++) {
+                // month value
+                final int month = int.parse(currentYearData[i]["Month"]);
+
+                // education
+                final double educationValue = currentYearData[i]["education"];
+
+                // skills
+                final double skillValue = currentYearData[i]["skills"];
+
+                // entertainment
+                final double entertainmentValue =
+                    currentYearData[i]["entertainment"];
+
+                // personalGrowth
+                final double personalGrowthValue =
+                    currentYearData[i]["personalGrowth"];
+
+                // sleep
+                final double sleepValue = currentYearData[i]["sleep"];
+
+                final stackBarGroup = generateGroupData(
+                    month,
+                    educationValue,
+                    skillValue,
+                    entertainmentValue,
+                    personalGrowthValue,
+                    sleepValue);
+
+                stackBarGroups.add(stackBarGroup);
+              }
+              return Padding(
+                padding: const EdgeInsets.only(left: 24.0, right: 24.0),
+                child: AspectRatio(
+                  aspectRatio: 1.5,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // stacked bar chart
+                      Expanded(
+                          child: BarChart(BarChartData(
+                              alignment: BarChartAlignment.spaceBetween,
+                              groupsSpace: 2,
+                              titlesData: FlTitlesData(
+                                leftTitles: AxisTitles(),
+                                rightTitles: AxisTitles(),
+                                topTitles: AxisTitles(),
+                                bottomTitles: AxisTitles(
+                                  sideTitles: SideTitles(
+                                    showTitles: true,
+                                    getTitlesWidget: bottomTitleWidgets,
+                                    reservedSize: 30,
+                                  ),
+                                ),
+                              ),
+                              barTouchData: BarTouchData(enabled: false),
+                              borderData: FlBorderData(show: false),
+                              gridData: FlGridData(show: false),
+                              barGroups: stackBarGroups)))
+                    ],
+                  ),
+                ),
+              );
+            }
+          });
+    });
+  }
 }

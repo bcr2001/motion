@@ -57,7 +57,9 @@ class YearsWorthOfSummaryStatitics extends StatelessWidget {
                       unAccountedTotalHours: unaccountedHours),
 
                   // accounted and unaccounted grouped bar chart distribution
-                  GroupedPieChartAccountedUnaccounted(year: year,)
+                  GroupedPieChartAccountedUnaccounted(
+                    year: year,
+                  )
                 ],
               ),
             ),
@@ -98,7 +100,50 @@ class YearsWorthOfSummaryStatitics extends StatelessWidget {
 
           // section title: Charting a Year in Lines
           sectionTitle(titleName: AppString.chartingAYearInLinesTitle),
-          LineChartOfMainCategoryYearlyDistribution(year: year,)
+          LineChartOfMainCategoryYearlyDistribution(
+            year: year,
+          ),
+
+          // SECTION 6: STACKED BAR CHART
+          sectionTitle(titleName: AppString.stackingAYearInLinesTitle),
+          Card(
+              child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // icon and data
+              Padding(
+                padding: const EdgeInsets.only(left: 10.0, top: 15, bottom: 15),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    makeTransactionsIcon(),
+                    const SizedBox(
+                      width: 15,
+                    ),
+                    specialSectionTitle(
+                        mainTitleName: AppString.stackingATitle,
+                        elevatedTitleName: AppString.statusUpTitle),
+                  ],
+                ),
+              ),
+
+              // info to the user
+              const Padding(
+                padding:  EdgeInsets.only(bottom: 15.0),
+                child:  InfoToTheUser(
+                    sectionInformation: AppString.infoAboutStackChartData),
+              ),
+
+              // stacked bar chart
+              StackedBarChartOfMainCategoryDistribution(year: year),
+
+              // legend
+              Padding(
+                padding: const EdgeInsets.only(bottom: 30.0),
+                child: chartLegend(),
+              )
+            ],
+          ))
         ],
       ),
     );

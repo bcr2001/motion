@@ -181,10 +181,13 @@ class AppString {
   static const String mainCategoryOverview = "Main Category Overview";
   static const String aYearInSlicesTitle = "A Year in Slices";
   static const String distributionTitle = "Distribution";
-  static const String distributionTitle2 = "Distribution of";
+  static const String distributionTitle2 = "Lines of";
   static const String statusTitle = "Status";
+  static const String statusUpTitle = "Up";
 
-  static const String chartingAYearInLinesTitle = "Charting a Year in Lines";
+  static const String chartingAYearInLinesTitle = "Graphing a Year in Lines";
+  static const String stackingAYearInLinesTitle = "Stacking Up Your Year";
+  static const String stackingATitle = "Stacking";
 
   static const String infoAboutAnnualOverviewEmpty =
       "Initiate the tracking process to generate and display your comprehensive yearly summary here..";
@@ -198,4 +201,6 @@ class AppString {
       "The accounted and unaccounted time for a given month is delineated in days. ";
   static const String infoAboutLineChartData =
       "The Main Category data values for a given month are delineated in hours. ";
+  static const String infoAboutStackChartData =
+      "A monthly Distribution of Main Categories";
 }
