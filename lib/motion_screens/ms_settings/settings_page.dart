@@ -26,22 +26,6 @@ class SettingsPage extends StatelessWidget {
           children: [
             // theme mode settings
             const _ThemeModeSettingsOption(),
-
-            // download personal information settings
-            SettingsOptions(
-              null,
-              onTap: () {},
-              settingsTitle: AppString.downloadDataTitle,
-              settingsDesciption: AppString.downloadDataDescription,
-            ),
-
-            // notifications settings
-            SettingsOptions(
-              null,
-              onTap: () {},
-              settingsTitle: AppString.notificationTitle,
-              settingsDesciption: AppString.notificationDescription,
-            ),
             
             // about motion
             SettingsOptions(

@@ -138,15 +138,18 @@ class TrackerDatabaseHelper {
 
   // count the number of days in the main_category table
   Future<int> getNumberOfDays(String currentUser) async {
-    final db = await database;
-
     try {
+
+      final db = await database;
+
+      // number of days 
       final resultGNOD = await db.rawQuery('''
       SELECT COUNT(date) AS NumberOfDays
       FROM main_category
       WHERE currentLoggedInUser = ?
     ''', [currentUser]);
-
+  
+      // check if the result is empty
       if (resultGNOD.isNotEmpty) {
         final numberOfDays = resultGNOD.first["NumberOfDays"];
 

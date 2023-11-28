@@ -34,7 +34,7 @@ Widget entireTimeAccountedAndUnaccounted(
                 return const Text("Error 355 :(");
               } else {
                 // results for the sqlite query
-                final tableResult = snapshot.data;
+                final tableResult = snapshot.data ?? 0.0;
 
                 // convert the minutes to hours
                 final accountedConvertedResultsHours =
