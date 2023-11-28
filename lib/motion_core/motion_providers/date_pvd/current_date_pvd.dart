@@ -6,8 +6,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../motion_reusable/general_reuseable.dart';
 
 // contains functions that constantly updates
-//  the current date in the desired format
+// the current date in the desired format
 class CurrentDateProvider extends ChangeNotifier {
+  
   String _currentDate = DateFormat("yyyy-MM-dd").format(DateTime.now());
 
   String get currentDate => _currentDate;

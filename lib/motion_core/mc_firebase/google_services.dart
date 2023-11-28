@@ -7,6 +7,7 @@ import '../../motion_reusable/general_reuseable.dart';
 import '../../motion_themes/mth_app/app_strings.dart';
 
 class GoogleAuthService {
+
   // Sign in with Google and handle user authentication
   static Future<UserCredential> signInWithGoodle(context) async {
     // Display a circular progress indicator during the sign-in process
@@ -16,11 +17,17 @@ class GoogleAuthService {
       // Initiate the interactive sign-in process with Google
       final GoogleSignInAccount? gUser = await GoogleSignIn().signIn();
 
+
+      // Check if the user canceled the Google sign-in
+      if (gUser == null) {
+        return Future.error("User canceled Google sign-in");
+      }
+
       // Obtain authentication details from the Google sign-in request
       final GoogleSignInAuthentication gAuth = await gUser!.authentication;
 
       // Create a new credential for the user using Google's access and ID tokens
-      final credential = GoogleAuthProvider.credential(
+      final AuthCredential credential = GoogleAuthProvider.credential(
           accessToken: gAuth.accessToken, idToken: gAuth.idToken);
 
       // Sign in the user using Firebase authentication

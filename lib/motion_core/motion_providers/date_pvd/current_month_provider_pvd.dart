@@ -11,7 +11,7 @@ class CurrentMonthProvider extends ChangeNotifier {
 
   // name of the month
   String _currentMonthName = DateFormat.MMMM().format(DateTime.now());
-
+  
   String get currentMonthName => _currentMonthName;
 
   Timer? _timer;
