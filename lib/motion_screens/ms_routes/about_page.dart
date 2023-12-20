@@ -21,7 +21,7 @@ class AboutPage extends StatelessWidget {
             child: Column(
               children: [
                 // app logo
-                currentSelectedThemeMode(context) == ThemeModeSettings.lightMode
+                currentSelectedThemeMode(context) == ThemeModeSettingsN1.lightMode
                     ? getSvgAsset("about_motion_logo_light.svg")
                     : getSvgAsset("about_motion_logo.svg"),
 

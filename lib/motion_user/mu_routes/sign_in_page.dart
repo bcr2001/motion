@@ -3,6 +3,7 @@ import 'package:motion/motion_core/mc_firebase/firebase_services.dart';
 import 'package:motion/motion_core/mc_firebase/google_services.dart';
 import 'package:motion/motion_themes/mth_app/app_images.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
+import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import '../../motion_reusable/mu_reusable/user_reusable.dart';
 import '../../motion_reusable/mu_reusable/user_validator.dart';
 import '../mu_reusable/mu_reuse.dart';
@@ -54,10 +55,11 @@ class _SignInPageState extends State<SignInPage> {
                   ),
 
                   // welcome message
-                  const Center(
+                   Center(
                     child: Text(
                       AppString.logInWelcomeMessage,
-                      textAlign: TextAlign.center
+                      textAlign: TextAlign.center,
+                      style: AppTextStyle.special1SectionTitleTextStyle(),
                     ),
                   ),
                   // continue with google widget and or widget

@@ -1,83 +1,68 @@
 import 'package:flutter/material.dart';
-import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// app theme modes
-enum ThemeModeSettings {darkMode, lightMode }
+// (new) Theme Mode Provider
+enum ThemeModeSettingsN1 { darkMode, lightMode, systemDefault }
 
-// theme mode provider class
-class AppThemeModeProvider extends ChangeNotifier {
+class AppThemeModeProviderN1 extends ChangeNotifier {
   // shared preference instance
   SharedPreferences? _prefs;
 
-  // key to stored shared preferences
-  static const String themeKey = "themeKey";
+  // key for storing theme mode
+  static const String themeModeKey = "themeModeKey";
 
-  // current theme mode
-  ThemeModeSettings _currentThemeMode = ThemeModeSettings.lightMode;
+  // current radio group value (0 = system default)
+  int _groupValue = 0;
 
-  // current theme mode name
-  String _currentThemeModeName = "Light Mode";
+  // currently selected mode
+  ThemeModeSettingsN1 _currentThemeModeA1 = ThemeModeSettingsN1.systemDefault;
 
-  // theme mode text color(light mode)
-  Color _themeModeTextColor = Colors.black;
+  // theme mode getter
+  ThemeModeSettingsN1 get currentThemeMode => _currentThemeModeA1;
 
-  // current switch value (false = light mode)
-  bool switchValue = false;
+  // radio value getter
+  int get radioGroupValue => _groupValue;
 
-  // get currentThemeMode
-  ThemeModeSettings get currentThemeMode => _currentThemeMode;
-
-  // get currentThemeModeName
-  String get currentThemeModeName => _currentThemeModeName;
-
-  // get theme mode text color
-  Color get themeModeTextColor => _themeModeTextColor;
-
-  // initialize shared preferenced
- Future<void> initializeSharedPreferences() async {
+  // initialize shared preference and load saved theme mode
+  Future<void> initSharedPreferences() async {
     _prefs = await SharedPreferences.getInstance();
-    if (_prefs != null) {
-      _loadSavedThemeMode();
-    }
-  }
-  // theme mode change handler
-  void switchThemeModes(bool value) {
-    // dark mode
-    if (value == true) {
-      switchValue = value;
-      _currentThemeMode = ThemeModeSettings.darkMode;
-      _currentThemeModeName = "Dark Mode";
-      _themeModeTextColor = Colors.white;
-    // light mode
-    } else {
-      switchValue = value;
-      _currentThemeMode = ThemeModeSettings.lightMode;
-      _currentThemeModeName = "Light Mode";
-      _themeModeTextColor = Colors.black;
-    }
-    // save the current theme
-    _prefs?.setBool(themeKey, value);
-    // notify listener to rebuild ui with appropriate theme mode
-    notifyListeners();
+
+    _loadThemeMode();
   }
 
-  // load the saved theme mode
-  void _loadSavedThemeMode() {
-    try {
-      final savedThemeMode = _prefs!.getBool(themeKey);
-      if (savedThemeMode != null) {
-        switchValue = savedThemeMode;
-        if (switchValue == true) {
-          _currentThemeMode = ThemeModeSettings.darkMode;
-          _currentThemeModeName = "Dark Mode";
-        } else {
-          _currentThemeMode = ThemeModeSettings.lightMode;
-          _currentThemeModeName = "Light Mode";
-        }
+  // load saved theme mode from SharedPreferences
+  void _loadThemeMode() {
+    final savedThemeMode = _prefs?.getInt(themeModeKey);
+
+    if (savedThemeMode != null) {
+      _groupValue = savedThemeMode;
+
+      if (savedThemeMode == 0) {
+        _currentThemeModeA1 = ThemeModeSettingsN1.systemDefault;
+      } else if (savedThemeMode == 1) {
+        _currentThemeModeA1 = ThemeModeSettingsN1.lightMode;
+      } else {
+        _currentThemeModeA1 = ThemeModeSettingsN1.darkMode;
       }
-    } catch (error) {
-      logger.e("Error: $error");
     }
+  }
+
+  // handles setting of theme mode
+  void themeModeChanger(int value) {
+    _groupValue = value;
+
+    if (value == 0) {
+      _currentThemeModeA1 = ThemeModeSettingsN1.systemDefault;
+    } else if (value == 1) {
+      _currentThemeModeA1 = ThemeModeSettingsN1.lightMode;
+    } else {
+      _currentThemeModeA1 = ThemeModeSettingsN1.darkMode;
+    }
+
+    // save the current theme mode to shared preferences
+    _prefs!.setInt(themeModeKey, value);
+
+    // notify listeners
+    notifyListeners();
   }
 }

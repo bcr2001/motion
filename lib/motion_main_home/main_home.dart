@@ -53,7 +53,7 @@ class _MotionHome extends State<MainMotionHome> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AppThemeModeProvider>(
+    return Consumer<AppThemeModeProviderN1>(
         builder: (context, themeValue, child) {
       return Scaffold(
           // the app body of the current index
@@ -67,14 +67,14 @@ class _MotionHome extends State<MainMotionHome> {
               height: 70,
               child: FloatingActionButton.large(
                 backgroundColor:
-                    themeValue.currentThemeMode == ThemeModeSettings.lightMode
+                    themeValue.currentThemeMode == ThemeModeSettingsN1.lightMode
                         ? Colors.black
                         : Colors.white,
                 elevation: 0,
                 shape: const CircleBorder(),
                 child:
                     // different svg images depending on the theme mode (dark/light)
-                    themeValue.currentThemeMode == ThemeModeSettings.lightMode
+                    themeValue.currentThemeMode == ThemeModeSettingsN1.lightMode
                         ? SvgPicture.asset(
                             "assets/images/motion_icons/motion_logo_white.svg",
                             height: 30,

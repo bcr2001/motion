@@ -212,6 +212,13 @@ class AppTextStyle {
     fontWeight: FontWeight.w700,
   );
 
+  // dialog title text style
+  static final TextStyle snackBarTextStyle = _baseStyle.copyWith(
+    color: Colors.blue,
+    fontSize: 14,
+    fontWeight: FontWeight.w700,
+  );
+
   // settings page subtitle fontstyle
   static final TextStyle settingSubtitleStyling =
       _baseStyle.copyWith(color: const Color(0xff777777), fontSize: 15);

@@ -156,9 +156,10 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                                 mainCategoryProvider.selectedValue!,
                             dateCreated: date.currentDate,
                           ));
-                          snackBarMessage(context,
+                          snackBarMessage(
+                            context,
                               errorMessage:
-                                  "${subcategoryController.text}added to the ${mainCategoryProvider.selectedValue} Category");
+                                  "${subcategoryController.text} added to the ${mainCategoryProvider.selectedValue} Category");
 
                           navigationKey.currentState!.pop();
                           subcategoryController.text = "";

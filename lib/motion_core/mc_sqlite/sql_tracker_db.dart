@@ -622,14 +622,19 @@ class TrackerDatabaseHelper {
     final db = await database;
 
     try {
-      final resultMTA = isSubcategory ? await db.rawQuery('''
+      final resultMTA = isSubcategory ? 
+      
+      await db.rawQuery(
+      '''
       SELECT subcategoryName, SUM(timeSpent) AS total, 
       AVG(timeSpent * 1.0) AS average
       FROM subcategory
       WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
       GROUP BY subcategoryName
       ORDER BY total DESC;
-      ''', [currentUser, startingDate, endingDate]) : await db.rawQuery('''
+      ''', [currentUser, startingDate, endingDate]) : 
+
+      await db.rawQuery('''
       SELECT mainCategoryName, SUM(timeSpent) AS total, 
       AVG(timeSpent * 1.0) AS average
       FROM subcategory

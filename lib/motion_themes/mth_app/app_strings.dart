@@ -35,6 +35,7 @@ class AppString {
   static const String cancelTitle = "Cancel";
   static const String settingsTitle = "Settings";
   static const String tipsTitle = "Tips";
+  static const String themeSettingsTitle = "Theme Settings";
 
   static const String logOutQuestion = "Are you sure you want to log out?";
 
@@ -57,6 +58,10 @@ class AppString {
   static const String importDataDescription = "Bring your data into Motion.";
   static const String aboutMotionDescription =
       "Discover the essence of Motion.";
+  static const String themeSettingPageMessage = "Switch to your prefered theme";
+  static const ligthMode = "Light Mode";
+  static const darkMode = "Dark Mode";
+  static const systemDefault = "System Default";
 
   // sign in/ sign out page
   static const String logInTitle = "Log In";
@@ -67,7 +72,7 @@ class AppString {
   static const String confirmPasswordHintText = "Confirm Password";
 
   static const String logInWelcomeMessage =
-      "Welcome back to Motion! Log in to track your time, stay organized, and boost productivity";
+      "Welcome back to Motion! Log in to track your time, stay organized, and boost productivity !!";
   static const String signUpWelcomeMessage =
       "Join Motion and unlock the power of time management. Sign up today to start tracking your time efficiently and achieving your goals";
 

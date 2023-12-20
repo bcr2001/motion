@@ -23,9 +23,10 @@ class MotionHomeRoute extends StatelessWidget {
     return SliverAppBar(
       elevation: 0,
       backgroundColor:
-          currentSelectedThemeMode(context) == ThemeModeSettings.darkMode
+          currentSelectedThemeMode(context) == ThemeModeSettingsN1.darkMode
               ? Colors.black
-              : Colors.white,
+              : currentSelectedThemeMode(context) == ThemeModeSettingsN1.lightMode?
+              Colors.white : null,
       actions: const [MotionActionButtons()],
       pinned: true,
       centerTitle: false,

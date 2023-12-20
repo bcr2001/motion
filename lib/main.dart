@@ -24,21 +24,15 @@ import 'motion_themes/mth_theme/light_theme.dart';
 final GlobalKey<NavigatorState> navigationKey = GlobalKey<NavigatorState>();
 
 void main() async {
-  
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize the database helper
-  final TrackerDatabaseHelper databaseHelper =
-  TrackerDatabaseHelper();
+  final TrackerDatabaseHelper databaseHelper = TrackerDatabaseHelper();
   // final dbHelper = AssignerDatabaseHelper();
 
   // databaseHelper.updateCurrentUser();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
-  // AppThemeModeProvider Instance
-  final appThemeMode = AppThemeModeProvider();
-  await appThemeMode.initializeSharedPreferences();
 
   // ZenQuoteProvider
   final zenQuoteProvider = ZenQuoteProvider();
@@ -52,20 +46,25 @@ void main() async {
   final assignerProvider = AssignerMainProvider();
   assignerProvider.getAllUserItems();
 
+  // theme mode provider N1
+  final themeModeProviderN1 = AppThemeModeProviderN1();
+  themeModeProviderN1.initSharedPreferences();
+
   // TrackDatabaseProvider
   final trackSubcategoryDatabaseProvider = SubcategoryTrackerDatabaseProvider();
 
   final trackMainCategoryDatabaseProvider = MainCategoryTrackerProvider();
 
-  // final allMain = await databaseHelper.getAllMainCategories();
+  final allMain = await databaseHelper.getAllMainCategories();
   // final allMain = await databaseHelper.getAllSubcategories();
 
-  // await dbHelper.deleteDB();
+  logger.i(allMain);
 
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(
           create: (context) => FirstAndLastWithSevenDaysDiff()),
+      ChangeNotifierProvider.value(value: themeModeProviderN1),
       ChangeNotifierProvider(create: (context) => FirstAndLastDay()),
       ChangeNotifierProvider(create: (context) => CurrentYearProvider()),
       ChangeNotifierProvider(create: (context) => CurrentTimeProvider()),
@@ -79,7 +78,6 @@ void main() async {
       ),
       ChangeNotifierProvider(create: (context) => DropDownTrackProvider()),
       ChangeNotifierProvider(create: (context) => CurrentDateProvider()),
-      ChangeNotifierProvider.value(value: appThemeMode),
       ChangeNotifierProvider(create: (context) => zenQuoteProvider),
       ChangeNotifierProvider(create: (context) => CurrentMonthProvider())
     ],
@@ -93,7 +91,7 @@ class MainMotionApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AppThemeModeProvider>(
+    return Consumer<AppThemeModeProviderN1>(
         builder: (context, themeValue, child) {
       return MaterialApp(
           navigatorKey: navigationKey,
@@ -106,9 +104,9 @@ class MainMotionApp extends StatelessWidget {
           darkTheme: darkThemeData,
 
           // theme mode setter
-          themeMode: themeValue.currentThemeMode == ThemeModeSettings.lightMode
+          themeMode: themeValue.currentThemeMode == ThemeModeSettingsN1.lightMode
               ? ThemeMode.light
-              : ThemeMode.dark,
+              : themeValue.currentThemeMode == ThemeModeSettingsN1.darkMode ? ThemeMode.dark: ThemeMode.system,
           home: const AuthPage());
     });
   }

@@ -10,8 +10,8 @@ import '../motion_themes/mth_styling/app_color.dart';
 var logger = Logger();
 
 // // return current theme mode (dark or light theme)
-ThemeModeSettings currentSelectedThemeMode(BuildContext context) {
-  final selectedTheme = Provider.of<AppThemeModeProvider>(context);
+ThemeModeSettingsN1 currentSelectedThemeMode(BuildContext context) {
+  final selectedTheme = Provider.of<AppThemeModeProviderN1>(context);
   return selectedTheme.currentThemeMode;
 }
 
@@ -40,7 +40,7 @@ snackBarMessage(BuildContext context, {required String errorMessage, bool requir
         color: Colors.red,
         fontSize: 14
       ) 
-      :snackBarTheme.contentTextStyle, // Use the contentTextStyle from the theme.
+      : AppTextStyle.snackBarTextStyle, // Use the contentTextStyle from the theme.
     ),
   ));
 }

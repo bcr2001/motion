@@ -504,6 +504,9 @@ Widget chartLegend() {
   );
 }
 
+
+// the function below generates a line chart 
+// 
 class LineChartOfMainCategoryYearlyDistribution extends StatelessWidget {
   final String year;
 

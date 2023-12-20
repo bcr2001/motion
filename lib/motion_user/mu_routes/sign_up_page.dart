@@ -4,6 +4,7 @@ import 'package:motion/motion_themes/mth_app/app_images.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:motion/motion_reusable/mu_reusable/user_reusable.dart';
 import 'package:motion/motion_reusable/mu_reusable/user_validator.dart';
+import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:motion/motion_user/mu_reusable/mu_reuse.dart';
 
 import '../../motion_core/mc_firebase/google_services.dart';
@@ -58,10 +59,11 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
 
                   // sign up message
-                  const Center(
+                  Center(
                     child: Text(
                       AppString.signUpWelcomeMessage,
                       textAlign: TextAlign.center,
+                      style: AppTextStyle.special1SectionTitleTextStyle(),
                     ),
                   ),
 
