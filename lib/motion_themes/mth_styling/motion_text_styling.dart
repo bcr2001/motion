@@ -60,6 +60,13 @@ class AppTextStyle {
         fontWeight: FontWeight.w600);
   }
 
+  // stats page highlight element textStyle
+  static TextStyle statsElementTextStyle() {
+    return _baseStyle.copyWith(
+        fontSize: 11.5,
+        fontWeight: FontWeight.w600);
+  }
+
   // stats page accounted and unaccounted gallary style
   static TextStyle accountedAndUnaccountedGallaryStyle() {
     return _baseStyle.copyWith(fontWeight: FontWeight.w600, fontSize: 14.5);

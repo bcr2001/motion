@@ -174,7 +174,7 @@ class CategoryBuilder extends StatelessWidget {
             padding: const EdgeInsets.only(right: 50),
             child: Text(
               average,
-              style: AppTextStyle.averageTextStyleCSR(),
+              style: AppTextStyle.daysTextStyleCSR(),
             ),
           );
   }
@@ -207,7 +207,6 @@ class CategoryBuilder extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 170,
-      width: 170,
       padding: const EdgeInsets.all(10.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -227,11 +226,13 @@ class CategoryBuilder extends StatelessWidget {
               alignment: Alignment.bottomRight,
               child: Text(
                 galleryInitials,
-                style: AppTextStyle.tileElementTextStyle(),
+                style: AppTextStyle.statsElementTextStyle(),
               )),
 
           // gallery divider
-          const Divider()
+          const SizedBox(
+            width: 120,
+            child:  Divider())
         ],
       ),
     );
