@@ -30,16 +30,18 @@ class AppImages {
   // default pfp
   static final defaultPfp = getAssetImage("motion_pfp.jpg");
 
- 
-
-
   // google icon
   static final continueWithGoogleImage = getAssetImage("google_1.png", 30, 30);
 
 
-
   // no data available yet
   static final noTrackListAvailable = getAssetImage("trackInfo.png", 200, 200);
+
+
+  // analytics summary education gallery image
+  static final educationImageAS = getAssetImage("education.png");
+
+
 }
 
 // png images

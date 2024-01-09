@@ -136,19 +136,53 @@ class TrackerDatabaseHelper {
     }
   }
 
+  // get the totals for all 5 main categories
+  Future<List<Map<String, dynamic>>> getAllMainCategoryTotals(
+      {required String currentUser}) async {
+    try {
+      final db = await database;
+
+      final resultAMCT = await db.rawQuery("""
+            SELECT 
+                CAST(ROUND(COALESCE(sum(education)/60, 0), 2) AS VARCHAR) AS "educationHours",
+                CAST(ROUND(sum(education)/1440, 2) AS VARCHAR) AS "educationDays",
+                CAST(ROUND(AVG(education)/60, 2) AS VARCHAR) AS "educationAverage",
+                CAST(ROUND(COALESCE(sum(skills)/60, 0), 2) AS VARCHAR) AS "skillHours",
+                CAST(ROUND(sum(skills)/1440, 2) AS VARCHAR) AS "skillDays",
+                CAST(ROUND(AVG(skills)/60, 2) AS VARCHAR) AS "skillAverage",
+                CAST(ROUND(COALESCE(sum(entertainment)/60, 0), 2) AS VARCHAR) AS "entertainmentHours",
+                CAST(ROUND(sum(entertainment)/1440, 2) AS VARCHAR) AS "entertainmentDays",
+                CAST(ROUND(AVG(entertainment)/60, 2) AS VARCHAR) AS "entertainmentAverage",
+                CAST(ROUND(COALESCE(sum(personalGrowth)/60, 0), 2) AS VARCHAR) AS "pgHours",
+                CAST(ROUND(sum(personalGrowth)/1440, 2) AS VARCHAR) AS "pgDays",
+                CAST(ROUND(AVG(personalGrowth)/60, 2) AS VARCHAR) AS "pgAverage",
+                CAST(ROUND(COALESCE(sum(sleep)/60, 0), 2) AS VARCHAR) AS "sleepHours",
+                CAST(ROUND(sum(sleep)/1440, 2) AS VARCHAR) AS "sleepDays",
+                CAST(ROUND(AVG(sleep)/60, 2) AS VARCHAR) AS "sleepAverage"
+            FROM main_category
+            WHERE currentLoggedInUser = ?
+
+          """, [currentUser]);
+
+      return resultAMCT;
+    } catch (e) {
+      logger.e("Get All Main Category Total Error: $e");
+      return [];
+    }
+  }
+
   // count the number of days in the main_category table
   Future<int> getNumberOfDays(String currentUser) async {
     try {
-
       final db = await database;
 
-      // number of days 
+      // number of days
       final resultGNOD = await db.rawQuery('''
       SELECT COUNT(date) AS NumberOfDays
       FROM main_category
       WHERE currentLoggedInUser = ?
     ''', [currentUser]);
-  
+
       // check if the result is empty
       if (resultGNOD.isNotEmpty) {
         final numberOfDays = resultGNOD.first["NumberOfDays"];
@@ -234,12 +268,12 @@ class TrackerDatabaseHelper {
       // this query returns a table of accounted and unaccounte
       // totals grouped by the year
       final resultAAUBBY = await db.rawQuery('''
-        SELECT  (COALESCE(SUM(education), 0) + COALESCE(SUM(skills), 0)
-                + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(personalGrowth), 0)
-                + COALESCE(SUM(sleep), 0))/60 AS Accounted,
-                (((COUNT(date) * 24)*60) - (COALESCE(SUM(education), 0)
-                + COALESCE(SUM(skills), 0) + COALESCE(SUM(entertainment), 0)
-                + COALESCE(SUM(personalGrowth), 0) + COALESCE(SUM(sleep), 0)))/60
+        SELECT  (COALESCE(SUM(education), 0.0) + COALESCE(SUM(skills), 0.0)
+                + COALESCE(SUM(entertainment), 0.0) + COALESCE(SUM(personalGrowth), 0.0)
+                + COALESCE(SUM(sleep), 0.0))/60 AS Accounted,
+                (((COUNT(date) * 24)*60) - (COALESCE(SUM(education), 0.0)
+                + COALESCE(SUM(skills), 0.0) + COALESCE(SUM(entertainment), 0.0)
+                + COALESCE(SUM(personalGrowth), 0.0) + COALESCE(SUM(sleep), 0.0)))/60
                 AS Unaccounted,
                 strftime('%Y', date) AS Year
         FROM main_category
@@ -446,16 +480,37 @@ class TrackerDatabaseHelper {
     }
   }
 
-  // get yearly totals for all the main categories
-  Future<List<Map<String, dynamic>>>
-      getYearlyTotalsForAllMainCatgories({
-        required String currentUser,
-        required String year}) async {
+  // get the entire total time spent for the main category
+  Future<List<Map<String, dynamic>>> getEntireMainTotalTimeSpent(
+      {required String currentUser}) async {
     try {
       final db = await database;
 
-      final resultYTFAMC = await db.rawQuery(
-        '''
+      // returns a list of Map objects for the main categories
+      // together with their totals
+      final resultEMTTS = await db.rawQuery('''
+        SELECT mainCategoryName, SUM(timeSpent)/60 AS totalTimeSpent
+        FROM subcategory
+        WHERE currentLoggedInUser = ?
+        GROUP BY mainCategoryName
+        ''', [currentUser]);
+
+      return resultEMTTS;
+    } catch (e) {
+      // if there is an error, an empty list is returned
+      // and the error is logged to the console
+      logger.i("Error: $e");
+      return [];
+    }
+  }
+
+  // get yearly totals for all the main categories
+  Future<List<Map<String, dynamic>>> getYearlyTotalsForAllMainCatgories(
+      {required String currentUser, required String year}) async {
+    try {
+      final db = await database;
+
+      final resultYTFAMC = await db.rawQuery('''
         SELECT
           strftime('%m', date) AS Month,
           ROUND(COALESCE(SUM(education) / 60.0, 0), 2) AS education,
@@ -467,7 +522,6 @@ class TrackerDatabaseHelper {
         WHERE currentLoggedInUser = ? AND strftime('%Y', date) = ?
         GROUP BY Month;
         ''', [currentUser, year]);
-
 
       return resultYTFAMC;
     } catch (e) {
@@ -622,19 +676,14 @@ class TrackerDatabaseHelper {
     final db = await database;
 
     try {
-      final resultMTA = isSubcategory ? 
-      
-      await db.rawQuery(
-      '''
+      final resultMTA = isSubcategory ? await db.rawQuery('''
       SELECT subcategoryName, SUM(timeSpent) AS total, 
       AVG(timeSpent * 1.0) AS average
       FROM subcategory
       WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
       GROUP BY subcategoryName
       ORDER BY total DESC;
-      ''', [currentUser, startingDate, endingDate]) : 
-
-      await db.rawQuery('''
+      ''', [currentUser, startingDate, endingDate]) : await db.rawQuery('''
       SELECT mainCategoryName, SUM(timeSpent) AS total, 
       AVG(timeSpent * 1.0) AS average
       FROM subcategory

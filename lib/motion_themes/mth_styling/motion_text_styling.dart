@@ -32,16 +32,12 @@ class AppTextStyle {
 
   // section title style (main title)
   static sectionTitleTextStyle() {
-    return _baseStyle.copyWith(fontSize: 18.5, fontWeight: FontWeight.w600);
+    return _baseStyle.copyWith(fontSize: 17.5, fontWeight: FontWeight.w600);
   }
 
   // section title style (subtitle)
   static subSectionTitleTextStyle() {
-    return _baseStyle.copyWith(
-      fontSize: 14, 
-      decoration: TextDecoration.underline,
-      fontWeight: FontWeight.w600
-      );
+    return _baseStyle.copyWith(fontSize: 14, fontWeight: FontWeight.w600);
   }
 
   // section title style (main title)
@@ -112,9 +108,7 @@ class AppTextStyle {
   // legend text style
   static TextStyle legendTextStyling() {
     return _baseStyle.copyWith(
-    fontSize: 11, 
-    fontWeight: FontWeight.w600,
-    color: Colors.blueGrey);
+        fontSize: 11, fontWeight: FontWeight.w600, color: Colors.blueGrey);
   }
 
   // report page most and least tracked title style
@@ -183,6 +177,30 @@ class AppTextStyle {
         color: isUnaccounted
             ? const Color(0xFFD30000)
             : AppColor.tileBackgroundColor);
+  }
+
+  // category summary report (days)
+  static TextStyle daysTextStyleCSR() {
+    return _baseStyle.copyWith(
+        fontWeight: FontWeight.w600,
+        fontSize: 12,
+        color: AppColor.tileBackgroundColor);
+  }
+
+  // category summary report (average)
+  static TextStyle averageTextStyleCSR() {
+    return _baseStyle.copyWith(
+      fontWeight: FontWeight.w600,
+      fontSize: 12,
+    );
+  }
+
+  // category summary report (hours)
+  static TextStyle hoursTextStyleCSR() {
+    return _baseStyle.copyWith(
+      fontSize: 20,
+      fontWeight: FontWeight.w600,
+    );
   }
 
   // result text style regular

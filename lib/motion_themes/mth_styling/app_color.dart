@@ -20,7 +20,7 @@ class AppColor {
   static const Color sleepPieChartColor = Colors.blueGrey;
 
   // education color
-  static const Color educationPieChartColor = Color(0xFF8DE036);
+  static const Color educationPieChartColor = Color(0xFF80CA32);
 
   // skills color
   static const Color skillsPieChartColor = Color(0xFF9BA9B4);

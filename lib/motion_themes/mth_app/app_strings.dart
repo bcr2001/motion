@@ -29,7 +29,7 @@ class AppString {
   static const String statsNavigation = "Stats";
 
   // App bar titles
-  static const String statsRouteTitle = "Annual Overview";
+  static const String statsRouteTitle = "Analytics Summary";
   static const String motionRouteTitle = "Track";
   static const String logOutTitle = "Log out";
   static const String cancelTitle = "Cancel";
@@ -189,10 +189,14 @@ class AppString {
   static const String distributionTitle2 = "Lines of";
   static const String statusTitle = "Status";
   static const String statusUpTitle = "Up";
+  static const String mainCategorySummaryTitle = "Category Summary Report";
+  static const String yearlyReportTitle = "Annual Overview";
 
   static const String chartingAYearInLinesTitle = "Graphing a Year in Lines";
   static const String stackingAYearInLinesTitle = "Stacking Up Your Year";
   static const String stackingATitle = "Stacking";
+  static const String entireLifeTitle = "Entire Life";
+  static const String entireLifeInSlicesTitle = "in slices";
 
   static const String infoAboutAnnualOverviewEmpty =
       "Initiate the tracking process to generate and display your comprehensive yearly summary here..";

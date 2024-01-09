@@ -275,18 +275,16 @@ class PieChartDataMainCategoryDistribution extends StatelessWidget {
       padding: const EdgeInsets.symmetric(
         vertical: 10,
       ),
-      child: Card(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            // main category pie chart distribution
-            MainCategoryDistributionPieChart(
-              future: future,
-            ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          // main category pie chart distribution
+          MainCategoryDistributionPieChart(
+            future: future,
+          ),
 
-            legendRows()
-          ],
-        ),
+          legendRows()
+        ],
       ),
     );
   }

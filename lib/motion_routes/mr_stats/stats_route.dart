@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
+import 'package:motion/motion_routes/mr_home/home_reusable/back_home.dart';
 import 'package:motion/motion_routes/mr_stats/stats_back.dart';
 import 'package:motion/motion_routes/mr_stats/stats_front.dart';
 import 'package:motion/motion_routes/route_action.dart';
@@ -24,52 +25,72 @@ class MotionStatesRoute extends StatelessWidget {
           ),
           actions: const [MotionActionButtons()],
         ),
-        body: Consumer2<UserUidProvider, MainCategoryTrackerProvider>(
-          builder: (context, user, main, child) {
-            // current user uid
-            final String currentUser = user.userUid!;
-
-            // depending on whether the accounted time is 0
-            // or >0, a image will be shown of the screen to
-            // indicate to the user that there is no data
-            //  available and if data is available, then
-            // the gallary windows for the years will be shown
-            return FutureBuilder(
-                future: main.retrieveEntireTotalMainCategoryTable(
-                    currentUser, false),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    // While the data is loading, a shimmer effect is shown
-                    return const Center(
-                      child: CircularProgressIndicator(
-                        color: AppColor.blueMainColor,
-                      ),
-                    );
-                  } else if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  } else {
-                    final snapshotData = snapshot.data;
-
-                    if (snapshotData! <= 0) {
-                      return Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          // default display image that is shown when the page is empty
-                          AppImages.noAnalysisGallary,
-
-                          // information on why it is empty
-                          const InfoToTheUser(
-                              sectionInformation:
-                                  AppString.infoAboutAnnualOverviewEmpty)
-                        ],
+        body: SingleChildScrollView(
+          child: Consumer2<UserUidProvider, MainCategoryTrackerProvider>(
+            builder: (context, user, main, child) {
+              // current user uid
+              final String currentUser = user.userUid!;
+        
+              // depending on whether the accounted time is 0
+              // or >0, a image will be shown of the screen to
+              // indicate to the user that there is no data
+              //  available and if data is available, then
+              // the gallary windows for the years will be shown
+              return FutureBuilder(
+                  future: main.retrieveEntireTotalMainCategoryTable(
+                      currentUser, false),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      // While the data is loading, a shimmer effect is shown
+                      return const Center(
+                        child: CircularProgressIndicator(
+                          color: AppColor.blueMainColor,
+                        ),
                       );
+                    } else if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}');
                     } else {
-                      // if data is available, the the analysis gallaries are displayed
-                      return const AnalysisGallery();
+                      final snapshotData = snapshot.data;
+        
+                      if (snapshotData! <= 0) {
+                        return Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // default display image that is shown 
+                            // when the page is empty
+                            AppImages.noAnalysisGallary,
+        
+                            // information on why it is empty
+                            const InfoToTheUser(
+                                sectionInformation:
+                                    AppString.infoAboutAnnualOverviewEmpty)
+                          ],
+                        );
+                      } else {
+                        // if data is available,the analysis 
+                        // gallaries are displayed
+                        return Container(
+                          margin: const EdgeInsets.only(top: 20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Main Category Summary
+                              sectionTitle(
+                                  titleName: AppString.mainCategorySummaryTitle),
+                              const CategorySummaryReport(),
+        
+                              // Yealry Report
+                              sectionTitle(
+                                  titleName: AppString.yearlyReportTitle),
+                              const AnalysisGallery(),
+                            ],
+                          ),
+                        );
+                      }
                     }
-                  }
-                });
-          },
+                  });
+            },
+          ),
         ));
   }
 }
@@ -101,10 +122,13 @@ class AnalysisGallery extends StatelessWidget {
             } else {
               final dataResults = snapshot.data!;
 
-              logger.i(dataResults);
-
               return Column(
                 children: [
+                  // info to the user'
+                  const InfoToTheUser(
+                      sectionInformation: AppString.infoAboutGalleys),
+
+                  // yearly gallary
                   GridView.builder(
                       shrinkWrap: true,
                       gridDelegate:
@@ -158,10 +182,7 @@ class AnalysisGallery extends StatelessWidget {
                             }));
                           },
                         );
-                      }),
-                  // info to the user'
-                  const InfoToTheUser(
-                      sectionInformation: AppString.infoAboutGalleys),
+                      })
                 ],
               );
             }

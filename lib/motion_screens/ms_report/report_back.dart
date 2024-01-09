@@ -361,7 +361,6 @@ class MostAndLeastTrackedResult extends StatelessWidget {
               iconDirection: resultIcon,
               iconColor: resultIconColor,
             );
-
           }
         }
       },
@@ -429,7 +428,10 @@ class InfoToTheUser extends StatelessWidget {
           // info icon
           const Padding(
             padding: EdgeInsets.only(right: 6.0),
-            child: Icon(Icons.info_outline, size: 18,),
+            child: Icon(
+              Icons.info_outline,
+              size: 18,
+            ),
           ),
 
           // information about the specific section
@@ -528,13 +530,12 @@ class GridHighestTrackedSubcategory extends StatelessWidget {
               // a list of the database query result
               List<Map<String, dynamic>> highestResults = snapshot.data!;
 
-
               return Container(
                 margin: const EdgeInsets.only(bottom: 30.0),
                 height: screenHeight * 0.45,
                 child: Card(
                   child: GridView.builder(
-                    physics:const AlwaysScrollableScrollPhysics(),
+                      physics: const AlwaysScrollableScrollPhysics(),
                       shrinkWrap: true,
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
@@ -590,5 +591,23 @@ class GridHighestTrackedSubcategory extends StatelessWidget {
             }
           }
         });
+  }
+}
+
+// ANALYTICS SUMMARY
+// Pie chart that displays the distribution of
+// main category entire totals
+class AnalyticsMainCategoryDistributionPieChart extends StatelessWidget {
+  const AnalyticsMainCategoryDistributionPieChart({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer2<MainCategoryTrackerProvider, UserUidProvider>(
+        builder: ((context, main, user, child) {
+      
+      final String currentUser = user.userUid!;
+      return PieChartDataMainCategoryDistribution(
+        future: main.retrieveEntireMainTotalTimeSpent(currentUser: currentUser));
+    }));
   }
 }
