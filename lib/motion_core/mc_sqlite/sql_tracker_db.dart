@@ -531,6 +531,58 @@ class TrackerDatabaseHelper {
     }
   }
 
+  // get the daily accounted and intensity score for all main categories
+  Future<List<Map<String, dynamic>>> getDailyAccountedAndIntensities(
+      {required String currentUser,
+      required String firstDayOfMonth,
+      required String lastDayOfMonth}) async {
+    try {
+      final db = await database;
+
+      final resultDAAI = await db.rawQuery('''
+        SELECT date, ROUND((COALESCE(education, 0) + COALESCE     (skills,0) + 
+                     COALESCE(entertainment,0) + COALESCE(personalGrowth,0) + 
+                     COALESCE(sleep, 0))/60,2) AS accounted,
+            CASE
+                WHEN ROUND((COALESCE(education, 0) + COALESCE(skills,0) + 
+                     COALESCE(entertainment,0) + COALESCE(personalGrowth,0) + 
+                     COALESCE(sleep, 0))/60,2) <= 0 THEN 0
+                WHEN ROUND((COALESCE(education, 0) + COALESCE(skills,0) + 
+                     COALESCE(entertainment,0) + COALESCE(personalGrowth,0) + 
+                     COALESCE(sleep, 0))/60,2) <= 3 THEN 3
+                WHEN ROUND((COALESCE(education, 0) + COALESCE(skills,0) + 
+                     COALESCE(entertainment,0) + COALESCE(personalGrowth,0) + 
+                    COALESCE(sleep, 0))/60,2) <=6 THEN 6
+                WHEN ROUND((COALESCE(education, 0) + COALESCE(skills,0) + 
+                     COALESCE(entertainment,0) + COALESCE(personalGrowth,0) + 
+                    COALESCE(sleep, 0))/60,2) <=9 THEN 9
+                WHEN ROUND((COALESCE(education, 0) + COALESCE(skills,0) + 
+                     COALESCE(entertainment,0) + COALESCE(personalGrowth,0) + 
+                     COALESCE(sleep, 0))/60,2) <=12 THEN 12
+                WHEN ROUND((COALESCE(education, 0) + COALESCE(skills,0) + 
+                     COALESCE(entertainment,0) + COALESCE(personalGrowth,0) + 
+                     COALESCE(sleep, 0))/60,2) <=15 THEN 15
+                WHEN ROUND((COALESCE(education, 0) + COALESCE(skills,0) + 
+                     COALESCE(entertainment,0) + COALESCE(personalGrowth,0) + 
+                     COALESCE(sleep, 0))/60,2) <=18 THEN 18
+                WHEN ROUND((COALESCE(education, 0) + COALESCE(skills,0) + 
+                     COALESCE(entertainment,0) + COALESCE(personalGrowth,0) + 
+                     COALESCE(sleep, 0))/60,2) <=21 THEN 21
+                WHEN ROUND((COALESCE(education, 0) + COALESCE(skills,0) + 
+                     COALESCE(entertainment,0) + COALESCE(personalGrowth,0) + 
+                     COALESCE(sleep, 0))/60,2) <=24 THEN 24
+            END AS intensity
+        FROM main_category
+        WHERE currentLoggedInUser = ?
+        ''', [currentUser]);
+
+      return resultDAAI;
+    } catch (e) {
+      logger.e("Daily Accounted and Intensity error: $e");
+      return [];
+    }
+  }
+
   // updates existing main categories rows
   Future<void> updateMainCategory(MainCategory mainCategory) async {
     try {
@@ -805,6 +857,26 @@ class TrackerDatabaseHelper {
       return resultHTTPS;
     } catch (e) {
       logger.e("Error: $e");
+      return [];
+    }
+  }
+
+  // get the subcetegory totals for a specific date
+  Future<List<Map<String, dynamic>>>
+      getSubcategoryTotalsForSpecificDate({required String selectedDate, required String currentUser}) async {
+    try {
+      final db = await database;
+
+      final resultSTFSD = await db.rawQuery('''
+      SELECT date, subcategoryName, ROUND(sum(timeSpent)/60,2) AS totalTimeSpent
+      FROM subcategory
+      WHERE date = ? AND currentLoggedInUser = ?
+      GROUP BY subcategoryName
+      ''', [selectedDate, currentUser]);
+
+      return resultSTFSD;
+    } catch (e) {
+      logger.e("Subcategory Totals For Specific Date Error: $e");
       return [];
     }
   }

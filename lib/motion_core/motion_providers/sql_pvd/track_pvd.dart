@@ -143,6 +143,17 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
     return await trackDbInstance.getEntireMainTotalTimeSpent(
         currentUser: currentUser);
   }
+
+  // get the daily intensity scores
+  Future<List<Map<String, dynamic>>> retrieveDailyAccountedAndIntensities(
+      {required String currentUser,
+      required String firstDayOfMonth,
+      required String lastDayOfMonth}) async {
+    return await trackDbInstance.getDailyAccountedAndIntensities(
+        currentUser: currentUser,
+        firstDayOfMonth: firstDayOfMonth,
+        lastDayOfMonth: lastDayOfMonth);
+  }
 }
 
 // SUBCATEGORY TABLE
@@ -215,6 +226,13 @@ class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
       required String lastDay}) async {
     return await trackDbInstance.getHighestTrackedTimePerSubcategory(
         currentUser: currentUser, firstDay: firstDay, lastDay: lastDay);
+  }
+
+  // get the subcategory totals for a specific date
+  Future<List<Map<String, dynamic>>> retrieveSubcategoryTotalsForSpecificDate(
+      {required String selectedDate, required String currentUser}) async {
+    return await trackDbInstance.getSubcategoryTotalsForSpecificDate(
+        selectedDate: selectedDate, currentUser: currentUser);
   }
 
   // inserting data into the subcategory table

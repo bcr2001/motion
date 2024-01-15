@@ -2,6 +2,17 @@ import 'package:flutter/material.dart';
 
 // contains all the colors used through out the app
 class AppColor {
+  // default heat map block color
+  static const defaultHeatMapBlockColor = Color(0xFFDBDBDB);
+  static const intensity3 = Color.fromRGBO(0, 140, 0, 0.125);
+  static const intensity6 = Color.fromRGBO(0, 140, 0, 0.25);
+  static const intensity9 = Color.fromRGBO(0, 140, 0, 0.375);
+  static const intensity12 = Color.fromRGBO(0, 140, 0, 0.50);
+  static const intensity15 = Color.fromRGBO(0, 140, 0, 0.625);
+  static const intensity18 = Color.fromRGBO(0, 140, 0, 0.75);
+  static const intensity21 = Color.fromRGBO(0, 140, 0, 0.875);
+  static const intensity24 = Color.fromRGBO(0, 140, 0, 1);
+
   // home page element background color
   static const tileBackgroundColor = Color(0xFF00A7A7);
 
@@ -41,7 +52,7 @@ class AppColor {
   // main app theme color
   static const Color blueMainColor = Color(0xFF00B0F0);
 
-  // app content widget background colot
+  // app content widget background color
   static const Color lightModeContentWidget = Color(0xFFF5F5FF);
   static const Color darkModeContentWidget = Color(0xFF1B2135);
 }

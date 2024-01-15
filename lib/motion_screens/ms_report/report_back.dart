@@ -12,7 +12,7 @@ import 'package:provider/provider.dart';
 import '../../motion_reusable/db_re/sub_ui.dart';
 
 // A custom widget for displaying a pie chart
-//representing accounted and unaccounted data.
+// representing accounted and unaccounted data.
 class AccountedUnaccountedReportPieChart extends StatelessWidget {
   const AccountedUnaccountedReportPieChart({super.key});
 

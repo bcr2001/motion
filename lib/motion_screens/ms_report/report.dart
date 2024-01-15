@@ -5,6 +5,7 @@ import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_screens/ms_report/report_back.dart';
+import 'package:motion/motion_screens/ms_report/report_heat_map.dart';
 import 'package:motion/motion_themes/mth_app/app_images.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:provider/provider.dart';
@@ -72,6 +73,21 @@ class MonthlyReportPage extends StatelessWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
                     children: [
+                      // SECTION 1 (new): Contributions
+                      // This section displays a heat map representing the 
+                      // distribution of accounted time intensities for the 
+                      // entire month.
+                      // Each cell in the heat map corresponds to a day, 
+                      // and its color indicates the intensity of accounted time 
+                      // for that day.
+                      // Users can visualize their activity patterns throughout 
+                      // the month using this heat map.
+                      sectionTitle(titleName: AppString.contributionTitle),
+                      const ContributionsHeatMap(),
+
+
+
+
                       // SECTION 1:
                       // Pie Chart Data Title
                       sectionTitle(

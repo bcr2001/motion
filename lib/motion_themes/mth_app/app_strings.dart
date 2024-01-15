@@ -156,6 +156,7 @@ class AppString {
 
   // Report Page
   static const String reportTitle = "Report";
+  static const String contributionTitle = "Contributions";
   static const String accountedVsUnaccounterTitle = "Accounted vs Unaccounted";
   static const String mostTrackedMainTitle = "Most Tracked\nMain Category";
   static const String leastTrackedMainTitle = "Least Tracked\nMain Category";
