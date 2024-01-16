@@ -549,28 +549,19 @@ class TrackerDatabaseHelper {
                      COALESCE(sleep, 0))/60,2) <= 0 THEN 0
                 WHEN ROUND((COALESCE(education, 0) + COALESCE(skills,0) + 
                      COALESCE(entertainment,0) + COALESCE(personalGrowth,0) + 
-                     COALESCE(sleep, 0))/60,2) <= 3 THEN 3
+                     COALESCE(sleep, 0))/60,2) <= 5 THEN 5
                 WHEN ROUND((COALESCE(education, 0) + COALESCE(skills,0) + 
                      COALESCE(entertainment,0) + COALESCE(personalGrowth,0) + 
-                    COALESCE(sleep, 0))/60,2) <=6 THEN 6
+                    COALESCE(sleep, 0))/60,2) <= 10 THEN 10
                 WHEN ROUND((COALESCE(education, 0) + COALESCE(skills,0) + 
                      COALESCE(entertainment,0) + COALESCE(personalGrowth,0) + 
-                    COALESCE(sleep, 0))/60,2) <=9 THEN 9
+                    COALESCE(sleep, 0))/60,2) <= 15 THEN 15
                 WHEN ROUND((COALESCE(education, 0) + COALESCE(skills,0) + 
                      COALESCE(entertainment,0) + COALESCE(personalGrowth,0) + 
-                     COALESCE(sleep, 0))/60,2) <=12 THEN 12
+                     COALESCE(sleep, 0))/60,2) <= 20 THEN 20
                 WHEN ROUND((COALESCE(education, 0) + COALESCE(skills,0) + 
                      COALESCE(entertainment,0) + COALESCE(personalGrowth,0) + 
-                     COALESCE(sleep, 0))/60,2) <=15 THEN 15
-                WHEN ROUND((COALESCE(education, 0) + COALESCE(skills,0) + 
-                     COALESCE(entertainment,0) + COALESCE(personalGrowth,0) + 
-                     COALESCE(sleep, 0))/60,2) <=18 THEN 18
-                WHEN ROUND((COALESCE(education, 0) + COALESCE(skills,0) + 
-                     COALESCE(entertainment,0) + COALESCE(personalGrowth,0) + 
-                     COALESCE(sleep, 0))/60,2) <=21 THEN 21
-                WHEN ROUND((COALESCE(education, 0) + COALESCE(skills,0) + 
-                     COALESCE(entertainment,0) + COALESCE(personalGrowth,0) + 
-                     COALESCE(sleep, 0))/60,2) <=24 THEN 24
+                     COALESCE(sleep, 0))/60,2) <= 25 THEN 25
             END AS intensity
         FROM main_category
         WHERE currentLoggedInUser = ?
@@ -868,10 +859,11 @@ class TrackerDatabaseHelper {
       final db = await database;
 
       final resultSTFSD = await db.rawQuery('''
-      SELECT date, subcategoryName, ROUND(sum(timeSpent)/60,2) AS totalTimeSpent
+      SELECT date, subcategoryName, ROUND(sum(timeSpent),2) AS totalTimeSpent
       FROM subcategory
       WHERE date = ? AND currentLoggedInUser = ?
       GROUP BY subcategoryName
+      ORDER BY totalTimeSpent DESC
       ''', [selectedDate, currentUser]);
 
       return resultSTFSD;
