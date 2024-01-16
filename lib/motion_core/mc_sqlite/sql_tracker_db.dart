@@ -533,9 +533,7 @@ class TrackerDatabaseHelper {
 
   // get the daily accounted and intensity score for all main categories
   Future<List<Map<String, dynamic>>> getDailyAccountedAndIntensities(
-      {required String currentUser,
-      required String firstDayOfMonth,
-      required String lastDayOfMonth}) async {
+      {required String currentUser}) async {
     try {
       final db = await database;
 

@@ -146,13 +146,9 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
 
   // get the daily intensity scores
   Future<List<Map<String, dynamic>>> retrieveDailyAccountedAndIntensities(
-      {required String currentUser,
-      required String firstDayOfMonth,
-      required String lastDayOfMonth}) async {
+      {required String currentUser}) async {
     return await trackDbInstance.getDailyAccountedAndIntensities(
-        currentUser: currentUser,
-        firstDayOfMonth: firstDayOfMonth,
-        lastDayOfMonth: lastDayOfMonth);
+        currentUser: currentUser);
   }
 }
 

@@ -22,15 +22,10 @@ class ContributionsHeatMap extends StatelessWidget {
       // user firebase uid
       final String currentUserUid = user.userUid!;
 
-      // first and last day of the current month
-      final String firstDayOfMonth = days.firstDay;
-      final String lastDayOfMonth = days.lastDay;
 
       return FutureBuilder(
           future: main.retrieveDailyAccountedAndIntensities(
-              currentUser: currentUserUid,
-              firstDayOfMonth: firstDayOfMonth,
-              lastDayOfMonth: lastDayOfMonth),
+              currentUser: currentUserUid),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
