@@ -75,9 +75,6 @@ class MotionStatesRoute extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Contributions 
-                              sectionTitle(titleName: AppString.contributionTitle),
-                              const SummaryContributionHeatMap(),
 
                               // Main Category Summary
                               sectionTitle(

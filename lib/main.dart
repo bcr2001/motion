@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:motion/firebase_options.dart';
-import 'package:motion/motion_core/mc_sqlite/sql_tracker_db.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_month_provider_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_time_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_year_pcd.dart';
@@ -12,7 +11,6 @@ import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_pvd.dart';
 import 'package:motion/motion_core/motion_providers/dropDown_pvd/drop_down_pvd.dart';
-import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_user/mu_ops/auth_page.dart';
 import 'package:provider/provider.dart';
 import 'motion_core/motion_providers/date_pvd/current_date_pvd.dart';
@@ -27,7 +25,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize the database helper
-  final TrackerDatabaseHelper databaseHelper = TrackerDatabaseHelper();
+  // final TrackerDatabaseHelper databaseHelper = TrackerDatabaseHelper();
   // final dbHelper = AssignerDatabaseHelper();
 
   // databaseHelper.updateCurrentUser();

@@ -36,6 +36,14 @@ class YearsWorthOfSummaryStatitics extends StatelessWidget {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
         children: [
+
+          // SECTION 1(new): Contributions 
+          // This section displays to the user a HeatMap
+          // showing entire years contibutions to time 
+          // they have accounted for
+          sectionTitle(titleName: AppString.contributionTitle),
+          SummaryContributionHeatMap(year: int.parse(year)),
+
           // SECTION 1: ACCOUNTED VS UNACCOUNTED
           // Accounted vs Unaccounted
           sectionTitle(titleName: AppString.accountedVsUnaccounterTitle),

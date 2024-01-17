@@ -10,10 +10,13 @@ import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:provider/provider.dart';
 
 import '../../motion_core/motion_providers/date_pvd/first_and_last_pvd.dart';
+import '../../motion_reusable/general_reuseable.dart';
 
 // Section 1: HeatMap Calender
 class SummaryContributionHeatMap extends StatelessWidget {
-  const SummaryContributionHeatMap({super.key});
+  final int year;
+
+  const SummaryContributionHeatMap({super.key, required this.year});
 
   @override
   Widget build(BuildContext context) {
@@ -41,17 +44,15 @@ class SummaryContributionHeatMap extends StatelessWidget {
 
               return Container(
                 padding: const EdgeInsets.all(5),
-                margin:const  EdgeInsets.all(8.0),
+                margin: const EdgeInsets.all(8.0),
                 decoration: BoxDecoration(
-                  border: Border.all(
-                    color: AppColor.tileBackgroundColor,
-                    width: 2.0
-                  ),
-                borderRadius: BorderRadius.circular(10)
-                ),
+                    border: Border.all(
+                        color: AppColor.tileBackgroundColor, width: 2.0),
+                    borderRadius: BorderRadius.circular(10)),
                 child: HeatMap(
+                  startDate: DateTime(year,1,3),
+                  endDate: DateTime(year, 12, 31),
                   fontSize: 12,
-                  showText: false,
                   scrollable: true,
                   defaultColor: AppColor.defaultHeatMapBlockColor,
                   colorMode: ColorMode.color,
