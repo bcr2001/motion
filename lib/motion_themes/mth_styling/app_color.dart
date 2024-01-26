@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 class AppColor {
   // default heat map block color
   static const defaultHeatMapBlockColor = Color(0xFFDBDBDB);
-  static const intensity5 = Color.fromRGBO(0, 140, 0, 0.125);
-  static const intensity10 = Color.fromRGBO(0, 140, 0, 0.23);
-  static const intensity15 = Color.fromRGBO(0, 140, 0, 0.375);
-  static const intensity20 = Color.fromRGBO(0, 170, 0, 0.65);
+  static const intensity5 = Color.fromRGBO(0, 255, 0, 0.11);
+  static const intensity10 = Color.fromRGBO(0, 255, 0, 0.20);
+  static const intensity15 = Color.fromRGBO(0, 140, 0, 0.38);
+  static const intensity20 = Color.fromRGBO(0, 190, 0, 0.65);
   static const intensity25 = Color.fromRGBO(1, 154, 1, 1);
 
   // home page element background color

@@ -33,6 +33,7 @@ snackBarMessage(BuildContext context, {required String errorMessage, bool requir
   final snackBarTheme = Theme.of(context).snackBarTheme;
 
   return ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    duration: const Duration(milliseconds: 600),
     backgroundColor: snackBarTheme.backgroundColor,
     content: Text(
       errorMessage,

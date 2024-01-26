@@ -70,7 +70,8 @@ class ContributionsHeatMap extends StatelessWidget {
                             alertDialogContent: SpecificDaySummaryHeatMap(
                                 dateValue: formattedDate),
                             screenHeight: 200,
-                            screenWidth: 150);
+                            screenWidth: 150,
+                            heightFactor: 0.30,);
                       });
                 },
               );
@@ -227,8 +228,9 @@ class SpecificDaySummaryHeatMap extends StatelessWidget {
 
                   // subcategories and their recorded time
                   Container(
+                    alignment: Alignment.center,
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    height: 150,
+                    height: 210,
                     child: Scrollbar(
                         radius: const Radius.circular(10.0),
                         trackVisibility: true,
@@ -242,7 +244,7 @@ class SpecificDaySummaryHeatMap extends StatelessWidget {
                               final convertedTotalTimeSpent1 =
                                   convertMinutesToTime(
                                       snapShotData[index]["totalTimeSpent"]);
-
+                  
                               return ListTile(
                                 title: Text(
                                     snapShotData[index]["subcategoryName"],
