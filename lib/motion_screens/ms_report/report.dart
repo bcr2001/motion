@@ -56,7 +56,7 @@ class MonthlyReportPage extends StatelessWidget {
               final snapshotData = snapshot.data;
 
               if (snapshotData! <= 0) {
-                  return Column(
+                return Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     // default display image that is shown when the page is empty
@@ -74,19 +74,19 @@ class MonthlyReportPage extends StatelessWidget {
                         const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
                     children: [
                       // SECTION 1 (new): Contributions
-                      // This section displays a heat map representing the 
-                      // distribution of accounted time intensities for the 
+                      // This section displays a heat map representing the
+                      // distribution of accounted time intensities for the
                       // entire month.
-                      // Each cell in the heat map corresponds to a day, 
-                      // and its color indicates the intensity of accounted time 
+                      // Each cell in the heat map corresponds to a day,
+                      // and its color indicates the intensity of accounted time
                       // for that day.
-                      // Users can visualize their activity patterns throughout 
+                      // Users can visualize their activity patterns throughout
                       // the month using this heat map.
                       sectionTitle(titleName: AppString.contributionTitle),
+                      const InfoToTheUser(
+                          sectionInformation:
+                              AppString.informationAboutContribution),
                       const ContributionsHeatMap(),
-
-
-
 
                       // SECTION 1:
                       // Pie Chart Data Title

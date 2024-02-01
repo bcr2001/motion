@@ -172,6 +172,8 @@ class AppString {
       "The amount of time you spend sleeping is not considered when determining the most and least time tracked.";
   static const String informationAboutHighestTrackedTime =
       "During the month, these are the highest durations you have spent on specific subcategories, along with the dates they were recorded.";
+  static const String informationAboutContribution =
+      "Entertainment subcategories do not affect your contribution score.";
   static const String informationAboutNoData = "No data";
 
   static const String subcategory1 = "Subcategory 1";
