@@ -710,33 +710,45 @@ class TrackerDatabaseHelper {
     }
   }
 
-  // gets the total and average time spent on all
-  // subcategories for the entire month
+  /// Calculates total and average time spent on subcategories or main categories for a user.
+  /// It sums time spent per day for each category, then averages these sums over the specified date range.
+  /// [currentUser]: User ID for data retrieval.
+  /// [startingDate], [endingDate]: Date range for query.
+  /// [isSubcategory]: Determines if data is fetched for subcategories (true) or main categories (false).
+  /// Returns a list of maps with category names, total and average times.
   Future<List<Map<String, dynamic>>> getMonthTotalAndAverage(String currentUser,
       String startingDate, String endingDate, bool isSubcategory) async {
     final db = await database;
 
     try {
       final resultMTA = isSubcategory ? await db.rawQuery('''
-      SELECT subcategoryName, SUM(timeSpent) AS total, 
-      AVG(timeSpent * 1.0) AS average
+    SELECT subcategoryName, SUM(dailyTotal) AS total, 
+    AVG(dailyTotal) AS average
+    FROM (
+      SELECT date, subcategoryName, SUM(timeSpent) AS dailyTotal
       FROM subcategory
       WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
-      GROUP BY subcategoryName
-      ORDER BY total DESC;
-      ''', [currentUser, startingDate, endingDate]) : await db.rawQuery('''
-      SELECT mainCategoryName, SUM(timeSpent) AS total, 
-      AVG(timeSpent * 1.0) AS average
+      GROUP BY date, subcategoryName
+    )
+    GROUP BY subcategoryName
+    ORDER BY total DESC;
+    ''', [currentUser, startingDate, endingDate]) : await db.rawQuery('''
+    SELECT mainCategoryName, SUM(dailyTotal) AS total, 
+    AVG(dailyTotal) AS average
+    FROM (
+      SELECT date, mainCategoryName, SUM(timeSpent) AS dailyTotal
       FROM subcategory
       WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
-      GROUP BY mainCategoryName
-      ORDER BY total DESC;
-      ''', [currentUser, startingDate, endingDate]);
+      GROUP BY date, mainCategoryName
+    )
+    GROUP BY mainCategoryName
+    ORDER BY total DESC;
+    ''', [currentUser, startingDate, endingDate]);
 
       return resultMTA;
     } catch (e) {
       // Handle any database query errors, e.g., log
-      //the error and return an empty list or throw an exception.
+      // the error and return an empty list or throw an exception.
       logger.e('Error in getMonthTotalAndAverage: $e');
       return [];
     }

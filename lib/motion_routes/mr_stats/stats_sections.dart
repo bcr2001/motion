@@ -10,7 +10,7 @@ import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:provider/provider.dart';
 
 import '../../motion_core/motion_providers/date_pvd/first_and_last_pvd.dart';
-import '../../motion_reusable/general_reuseable.dart';
+// import '../../motion_reusable/general_reuseable.dart';
 
 // Section 1: HeatMap Calender
 class SummaryContributionHeatMap extends StatelessWidget {
