@@ -10,6 +10,7 @@ import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:provider/provider.dart';
 import '../../motion_reusable/db_re/sub_ui.dart';
+import '../../motion_reusable/general_reuseable.dart';
 
 // A custom widget for displaying a pie chart
 // representing accounted and unaccounted data.
@@ -82,28 +83,36 @@ class AccountedUnaccountedReportPieChart extends StatelessWidget {
   }
 }
 
+
+
 // displays the Main category Distribution pie chart
 class MainCategoryDistributionPieChart extends StatelessWidget {
   final Future<List<Map<String, dynamic>>?> future;
 
   const MainCategoryDistributionPieChart({super.key, required this.future});
 
-  Color _getCategoryColor(int index) {
-    switch (index) {
-      case 0:
+Color getCategoryColorByName(String? categoryName) {
+    // Debugging: Print the category name
+    logger.i("Category Name: $categoryName");
+
+    switch (categoryName) {
+      case AppString.educationMainCategory:
         return AppColor.educationPieChartColor;
-      case 1:
+      case AppString.entertainmentMainCategory:
         return AppColor.entertainmentPieChartColor;
-      case 2:
+      case AppString.personalGrowthMainCategory:
         return AppColor.personalGrowthPieChartColor;
-      case 3:
+      case AppString.skillMainCategory:
         return AppColor.skillsPieChartColor;
-      case 4:
+      case AppString.sleepMainCategory:
         return AppColor.sleepPieChartColor;
       default:
-        return Colors.grey; // Default color for other categories
+        // Debugging: Handle unexpected category names
+        logger.i("Unexpected Category Name: $categoryName");
+        return Colors.grey; // Default color for null or unrecognized category
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -111,17 +120,14 @@ class MainCategoryDistributionPieChart extends StatelessWidget {
       future: future,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          // Loading state: Show a shimmer effect while data is being loaded.
           return const ShimmerWidget.rectangular(width: 100, height: 100);
         } else if (snapshot.hasError) {
-          // Error state: Display an error message if there's an issue with data retrieval.
           return const Text("Error: Unable to retrieve data.");
         } else {
           if (snapshot.hasData &&
               snapshot.data != null &&
               snapshot.data!.isNotEmpty) {
             List<Map<String, dynamic>> mainTotalResults = snapshot.data ?? [];
-
             double totalMainCategoryValues =
                 mainTotalResults.fold(0.0, (prev, element) {
               return prev + (element["totalTimeSpent"] ?? 0.0);
@@ -135,14 +141,16 @@ class MainCategoryDistributionPieChart extends StatelessWidget {
               double categoryValue =
                   totalTimeSpent / totalMainCategoryValues * 100;
               String formattedValue = categoryValue.toStringAsFixed(1);
+              // Handling potential null values
+              String? categoryName =
+                  mainTotalResults[i]["mainCategoryName"] as String?;
 
               sections.add(
                 PieChartSectionData(
                   titleStyle: AppTextStyle.pieChartTextStyling(),
                   title: "$formattedValue%",
                   value: categoryValue,
-                  color: _getCategoryColor(
-                      i), // Define this function to get category colors
+                  color: getCategoryColorByName(categoryName),
                 ),
               );
             }
@@ -156,6 +164,8 @@ class MainCategoryDistributionPieChart extends StatelessWidget {
     );
   }
 }
+
+
 
 // A custom widget for displaying a pie chart using the FL Chart library.
 class PieChartBuilder extends StatelessWidget {
