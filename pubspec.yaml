@@ -86,9 +86,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/motion_icons/
-    - assets/data/to_assign.csv
-    - assets/data/subcategory.csv
-    - assets/data/main_category.csv
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
