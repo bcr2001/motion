@@ -36,7 +36,7 @@ class ContributionsHeatMap extends StatelessWidget {
             } else {
               final results = snapshot.data!;
 
-              logger.i(results);
+              // logger.i(results);
 
               final convertedResults = datasetFormatConverter(data: results);
 

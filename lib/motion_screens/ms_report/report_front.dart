@@ -231,7 +231,25 @@ class PieChartDataMainCategoryDistribution extends StatelessWidget {
 
   const PieChartDataMainCategoryDistribution({super.key, required this.future});
 
-  // legend rows
+  // Function to get color by category name
+  Color getCategoryColorByName(String categoryName) {
+    switch (categoryName) {
+      case AppString.educationMainCategory:
+        return AppColor.educationPieChartColor;
+      case AppString.entertainmentMainCategory:
+        return AppColor.entertainmentPieChartColor;
+      case AppString.personalGrowthMainCategory:
+        return AppColor.personalGrowthPieChartColor;
+      case AppString.skillMainCategory:
+        return AppColor.skillsPieChartColor;
+      case AppString.sleepMainCategory:
+        return AppColor.sleepPieChartColor;
+      default:
+        return Colors.grey; // Default color
+    }
+  }
+
+  // Legend rows
   Widget legendRows() {
     return SizedBox(
       height: 150,
@@ -239,30 +257,32 @@ class PieChartDataMainCategoryDistribution extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          // sleep
+          // Sleep
           mainCategoryPieChartLegend(
-              color: AppColor.sleepPieChartColor,
+              color: getCategoryColorByName(AppString.sleepMainCategory),
               mainCategoryName: AppString.sleepMainCategory),
 
-          // education
+          // Education
           mainCategoryPieChartLegend(
-              color: AppColor.educationPieChartColor,
+              color: getCategoryColorByName(AppString.educationMainCategory),
               mainCategoryName: AppString.educationMainCategory),
 
-          // skills
+          // Skills
           mainCategoryPieChartLegend(
-              color: AppColor.skillsPieChartColor,
+              color: getCategoryColorByName(AppString.skillMainCategory),
               mainCategoryName: AppString.skillMainCategory),
 
-          // entertainment
+          // Entertainment
           mainCategoryPieChartLegend(
-              color: AppColor.entertainmentPieChartColor,
+              color:
+                  getCategoryColorByName(AppString.entertainmentMainCategory),
               mainCategoryName: AppString.entertainmentMainCategory),
 
-          // personal growth
+          // Personal Growth
           mainCategoryPieChartLegend(
-              color: AppColor.personalGrowthPieChartColor,
-              mainCategoryName: AppString.personalGrowthMainCategory)
+              color:
+                  getCategoryColorByName(AppString.personalGrowthMainCategory),
+              mainCategoryName: AppString.personalGrowthMainCategory),
         ],
       ),
     );
@@ -278,7 +298,7 @@ class PieChartDataMainCategoryDistribution extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          // main category pie chart distribution
+          // Main category pie chart distribution
           MainCategoryDistributionPieChart(
             future: future,
           ),
