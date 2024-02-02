@@ -540,18 +540,24 @@ class TrackerDatabaseHelper {
       final resultDAAI = await db.rawQuery('''
             SELECT date, 
                   ROUND((COALESCE(education, 0) + COALESCE(skills, 0) + 
-                          COALESCE(personalGrowth, 0) + COALESCE(sleep, 0)) / 60, 2) AS accounted,
+                          COALESCE(personalGrowth, 0) + COALESCE(entertainment, 0) +
+                          COALESCE(sleep, 0)) / 60, 2) AS accounted,
                   CASE
                       WHEN ROUND((COALESCE(education, 0) + COALESCE(skills, 0) + 
-                                  COALESCE(personalGrowth, 0) + COALESCE(sleep, 0)) / 60, 2) <= 0 THEN 0
+                                  COALESCE(personalGrowth, 0) + COALESCE(entertainment, 0) +
+                                  COALESCE(sleep, 0)) / 60, 2) <= 0 THEN 0
                       WHEN ROUND((COALESCE(education, 0) + COALESCE(skills, 0) + 
-                                  COALESCE(personalGrowth, 0) + COALESCE(sleep, 0)) / 60, 2) <= 4 THEN 5
+                                  COALESCE(personalGrowth, 0) + COALESCE(entertainment, 0) +
+                                  COALESCE(sleep, 0)) / 60, 2) <= 5 THEN 5
                       WHEN ROUND((COALESCE(education, 0) + COALESCE(skills, 0) + 
-                                  COALESCE(personalGrowth, 0) + COALESCE(sleep, 0)) / 60, 2) <= 8 THEN 10
+                                  COALESCE(personalGrowth, 0) + COALESCE(entertainment, 0) +
+                                  COALESCE(sleep, 0)) / 60, 2) <= 10 THEN 10
                       WHEN ROUND((COALESCE(education, 0) + COALESCE(skills, 0) + 
-                                  COALESCE(personalGrowth, 0) + COALESCE(sleep, 0)) / 60, 2) <= 12 THEN 15
+                                  COALESCE(personalGrowth, 0) + COALESCE(entertainment, 0) +
+                                  COALESCE(sleep, 0)) / 60, 2) <= 15 THEN 15
                       WHEN ROUND((COALESCE(education, 0) + COALESCE(skills, 0) + 
-                                  COALESCE(personalGrowth, 0) + COALESCE(sleep, 0)) / 60, 2) <= 16 THEN 20
+                                  COALESCE(personalGrowth, 0) + COALESCE(entertainment, 0) +
+                                  COALESCE(sleep, 0)) / 60, 2) <= 20 THEN 20
                       ELSE 25
                   END AS intensity
             FROM main_category
@@ -857,8 +863,8 @@ class TrackerDatabaseHelper {
   }
 
   // get the subcetegory totals for a specific date
-  Future<List<Map<String, dynamic>>>
-      getSubcategoryTotalsForSpecificDate({required String selectedDate, required String currentUser}) async {
+  Future<List<Map<String, dynamic>>> getSubcategoryTotalsForSpecificDate(
+      {required String selectedDate, required String currentUser}) async {
     try {
       final db = await database;
 
