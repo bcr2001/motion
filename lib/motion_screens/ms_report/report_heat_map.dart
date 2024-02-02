@@ -21,7 +21,6 @@ class ContributionsHeatMap extends StatelessWidget {
       // user firebase uid
       final String currentUserUid = user.userUid!;
 
-
       return FutureBuilder(
           future: main.retrieveDailyAccountedAndIntensities(
               currentUser: currentUserUid),
@@ -36,6 +35,8 @@ class ContributionsHeatMap extends StatelessWidget {
               return const Text("Error 355 :(");
             } else {
               final results = snapshot.data!;
+
+              logger.i(results);
 
               final convertedResults = datasetFormatConverter(data: results);
 
@@ -66,12 +67,13 @@ class ContributionsHeatMap extends StatelessWidget {
                       context: context,
                       builder: (BuildContext context) {
                         return AlertDialogConst(
-                            alertDialogTitle: dateTitle,
-                            alertDialogContent: SpecificDaySummaryHeatMap(
-                                dateValue: formattedDate),
-                            screenHeight: 200,
-                            screenWidth: 150,
-                            heightFactor: 0.30,);
+                          alertDialogTitle: dateTitle,
+                          alertDialogContent: SpecificDaySummaryHeatMap(
+                              dateValue: formattedDate),
+                          screenHeight: 200,
+                          screenWidth: 150,
+                          heightFactor: 0.30,
+                        );
                       });
                 },
               );
@@ -186,7 +188,7 @@ class SpecificDaySummaryHeatMap extends StatelessWidget {
             } else {
               final snapShotData = snapshot.data!;
 
-              logger.i(snapShotData);
+              // logger.i(snapShotData);
 
               // calculating total accounted time
               final double totalTimeAccounted =
@@ -212,7 +214,7 @@ class SpecificDaySummaryHeatMap extends StatelessWidget {
                       ),
                     ),
                   ),
-                  
+
                   // total time accounted for selected date
                   Align(
                     alignment: Alignment.topLeft,
@@ -223,8 +225,6 @@ class SpecificDaySummaryHeatMap extends StatelessWidget {
                       ),
                     ),
                   ),
-
-  
 
                   // subcategories and their recorded time
                   Container(
@@ -244,7 +244,7 @@ class SpecificDaySummaryHeatMap extends StatelessWidget {
                               final convertedTotalTimeSpent1 =
                                   convertMinutesToTime(
                                       snapShotData[index]["totalTimeSpent"]);
-                  
+
                               return ListTile(
                                 title: Text(
                                     snapShotData[index]["subcategoryName"],
