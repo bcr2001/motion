@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:motion/motion_core/mc_api/api_requests.dart';
 import 'package:flutter/material.dart';
@@ -32,23 +34,34 @@ class ZenQuoteProvider extends ChangeNotifier {
   }
 
   Future<void> fetchTodaysQuote() async {
-    // fetches the Future<String> returned
-    // when fetchQuote() is executed
     try {
-      _todaysQuote = await fetchZenQuote();
-
-      // save preferences
-      _prefs?.setString(quotekey, _todaysQuote);
-      _prefs?.setString(dateKey, DateTime.now().toIso8601String());
-
-      // notifty listeners of changes
-      notifyListeners();
+      var isConnected = await _checkInternetConnectivity();
+      if (isConnected) {
+        // Fetch the quote only if there's internet connectivity
+        _todaysQuote = await fetchZenQuote();
+        // ... [rest of your code]
+      } else {
+        // Handle no internet scenario
+        _todaysQuote = AppString.defaultAppQuote;
+        notifyListeners();
+      }
     } catch (e) {
       logger.e("Error: $e");
-      _todaysQuote =
-          "“Time is what we want most, but what we use worst.” - William Penn";
+      _todaysQuote = AppString.defaultAppQuote;
       notifyListeners();
     }
+  }
+
+  Future<bool> _checkInternetConnectivity() async {
+    try {
+      final result = await InternetAddress.lookup('example.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        return true;
+      }
+    } on SocketException catch (_) {
+      return false;
+    }
+    return false;
   }
 
   // load saved quote
