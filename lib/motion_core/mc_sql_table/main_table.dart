@@ -4,7 +4,7 @@ class MainCategory {
   double education; // Amount of time spent on education
   double skills; // Amount of time spent on skills development
   double entertainment; // Amount of time spent on entertainment
-  double personalGrowth; // Amount of time spent on personal growth
+  double selfDevelopment; // Amount of time spent on Self Development
   double sleep; // Amount of time spent on sleep
   String currentLoggedInUser; // User associated with the record
 
@@ -13,7 +13,7 @@ class MainCategory {
     this.education = 0.0, // Default value for education
     this.skills = 0.0, // Default value for skills
     this.entertainment = 0.0, // Default value for entertainment
-    this.personalGrowth = 0.0, // Default value for personal growth
+    this.selfDevelopment = 0.0, // Default value for Self Development
     this.sleep = 0.0, // Default value for sleep
     required this.currentLoggedInUser,
   });
@@ -25,7 +25,7 @@ class MainCategory {
       education: map['education'] ?? 0.0,
       skills: map['skills'] ?? 0.0,
       entertainment: map['entertainment'] ?? 0.0,
-      personalGrowth: map['personalGrowth'] ?? 0.0,
+      selfDevelopment: map['selfDevelopment'] ?? 0.0,
       sleep: map['sleep'] ?? 0.0,
       currentLoggedInUser: map['currentLoggedInUser'],
     );
@@ -38,7 +38,7 @@ class MainCategory {
       'education': education,
       'skills': skills,
       'entertainment': entertainment,
-      'personalGrowth': personalGrowth,
+      'selfDevelopment': selfDevelopment,
       'sleep': sleep,
       'currentLoggedInUser': currentLoggedInUser,
     };
@@ -46,6 +46,6 @@ class MainCategory {
 
   @override
   String toString() {
-    return 'Main category{date: $date, education: $education, skills: $skills, entertainment: $entertainment, personalGrowth: $personalGrowth, sleep: $sleep, user: $currentLoggedInUser}';
+    return 'Main category{date: $date, education: $education, skills: $skills, entertainment: $entertainment, selfDevelopment: $selfDevelopment, sleep: $sleep, user: $currentLoggedInUser}';
   }
 }

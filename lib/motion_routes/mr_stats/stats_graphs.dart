@@ -53,10 +53,10 @@ Widget chartLegend() {
                 color: AppColor.entertainmentPieChartColor,
                 mainCategoryName: AppString.entertainmentMainCategory),
 
-            // personal growth
+            // Self Development
             mainCategoryPieChartLegend(
-                color: AppColor.personalGrowthPieChartColor,
-                mainCategoryName: AppString.personalGrowthMainCategory)
+                color: AppColor.selfDevelopmentPieChartColor,
+                mainCategoryName: AppString.selfDevelopmentMainCategory)
           ],
         )
       ],
@@ -167,11 +167,11 @@ class YearPieChartDistributionAccountedUnaccounted extends StatelessWidget {
 }
 
 // SECTION 2: A YEAR IN SLICES
-// This section presents a pie chart that illustrates the proportional 
+// This section presents a pie chart that illustrates the proportional
 // distribution of the 5 main categories over the course of a year.
-// Each slice of the pie represents a main category, and its size corresponds 
+// Each slice of the pie represents a main category, and its size corresponds
 // to the proportion of time spent on that category throughout the year.
-// This visualization offers a clear overview of how time is allocated across 
+// This visualization offers a clear overview of how time is allocated across
 // the main categories for the entire year.
 class AYearInSummaryPieChartDistribution extends StatelessWidget {
   final String year;
@@ -398,9 +398,9 @@ class GroupedPieChartAccountedUnaccounted extends StatelessWidget {
 }
 
 // SECTION 5: LINE PLOT OF MAIN CATEGORY DISTRIBUTIONS
-// This section presents a line plot illustrating the change in total time 
+// This section presents a line plot illustrating the change in total time
 // tracked for each main category over time.
-// The plot provides a visual representation of how the total time tracked 
+// The plot provides a visual representation of how the total time tracked
 // for each main category evolves from month to month.
 class LineChartOfMainCategoryYearlyDistribution extends StatelessWidget {
   final String year;
@@ -446,8 +446,8 @@ class LineChartOfMainCategoryYearlyDistribution extends StatelessWidget {
                 ),
                 createLineChartBarData(
                   data: currentYearData,
-                  getCategoryValues: (data) => data["personalGrowth"],
-                  color: AppColor.personalGrowthPieChartColor,
+                  getCategoryValues: (data) => data["selfDevelopment"],
+                  color: AppColor.selfDevelopmentPieChartColor,
                 ),
                 createLineChartBarData(
                   data: currentYearData,
@@ -683,11 +683,11 @@ class _LineChartBuilder {
 }
 
 // SECTION 6: STACKED BAR CHART
-// This section features a stacked bar chart that visualizes the distribution 
+// This section features a stacked bar chart that visualizes the distribution
 // of time spent across different categories for each month.
-// The bars are divided into segments, each representing a specific category, 
+// The bars are divided into segments, each representing a specific category,
 // and stacked to show the total time spent in each month.
-// Users can easily compare the distribution of time spent across categories 
+// Users can easily compare the distribution of time spent across categories
 // within each month and track changes over time.
 class StackedBarChartOfMainCategoryDistribution extends StatelessWidget {
   final String year;
@@ -707,7 +707,7 @@ class StackedBarChartOfMainCategoryDistribution extends StatelessWidget {
     double education,
     double skills,
     double entertainment,
-    double personalGrowth,
+    double selfDevelopment,
     double sleep,
   ) {
     return BarChartGroupData(
@@ -738,7 +738,7 @@ class StackedBarChartOfMainCategoryDistribution extends StatelessWidget {
           width: barWidthInd,
         ),
 
-        // personal growth bar
+        // Self Development bar
         BarChartRodData(
           fromY: education +
               betweenSpace +
@@ -752,8 +752,8 @@ class StackedBarChartOfMainCategoryDistribution extends StatelessWidget {
               betweenSpace +
               entertainment +
               betweenSpace +
-              personalGrowth,
-          color: AppColor.personalGrowthPieChartColor,
+              selfDevelopment,
+          color: AppColor.selfDevelopmentPieChartColor,
           width: barWidthInd,
         ),
 
@@ -765,7 +765,7 @@ class StackedBarChartOfMainCategoryDistribution extends StatelessWidget {
               betweenSpace +
               entertainment +
               betweenSpace +
-              personalGrowth +
+              selfDevelopment +
               betweenSpace,
           toY: education +
               betweenSpace +
@@ -773,7 +773,7 @@ class StackedBarChartOfMainCategoryDistribution extends StatelessWidget {
               betweenSpace +
               entertainment +
               betweenSpace +
-              personalGrowth +
+              selfDevelopment +
               betweenSpace +
               sleep,
           color: AppColor.sleepPieChartColor,
@@ -818,9 +818,9 @@ class StackedBarChartOfMainCategoryDistribution extends StatelessWidget {
                 final double entertainmentValue =
                     currentYearData[i]["entertainment"];
 
-                // personalGrowth
-                final double personalGrowthValue =
-                    currentYearData[i]["personalGrowth"];
+                // selfDevelopment
+                final double selfDevelopmentValue =
+                    currentYearData[i]["selfDevelopment"];
 
                 // sleep
                 final double sleepValue = currentYearData[i]["sleep"];
@@ -830,7 +830,7 @@ class StackedBarChartOfMainCategoryDistribution extends StatelessWidget {
                     educationValue,
                     skillValue,
                     entertainmentValue,
-                    personalGrowthValue,
+                    selfDevelopmentValue,
                     sleepValue);
 
                 stackBarGroups.add(stackBarGroup);

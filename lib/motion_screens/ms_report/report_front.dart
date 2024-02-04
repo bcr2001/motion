@@ -238,8 +238,8 @@ class PieChartDataMainCategoryDistribution extends StatelessWidget {
         return AppColor.educationPieChartColor;
       case AppString.entertainmentMainCategory:
         return AppColor.entertainmentPieChartColor;
-      case AppString.personalGrowthMainCategory:
-        return AppColor.personalGrowthPieChartColor;
+      case AppString.selfDevelopmentMainCategory:
+        return AppColor.selfDevelopmentPieChartColor;
       case AppString.skillMainCategory:
         return AppColor.skillsPieChartColor;
       case AppString.sleepMainCategory:
@@ -278,11 +278,11 @@ class PieChartDataMainCategoryDistribution extends StatelessWidget {
                   getCategoryColorByName(AppString.entertainmentMainCategory),
               mainCategoryName: AppString.entertainmentMainCategory),
 
-          // Personal Growth
+          // Self Development
           mainCategoryPieChartLegend(
               color:
-                  getCategoryColorByName(AppString.personalGrowthMainCategory),
-              mainCategoryName: AppString.personalGrowthMainCategory),
+                  getCategoryColorByName(AppString.selfDevelopmentMainCategory),
+              mainCategoryName: AppString.selfDevelopmentMainCategory),
         ],
       ),
     );

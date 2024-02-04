@@ -11,7 +11,7 @@ import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_pvd.dart';
 import 'package:motion/motion_core/motion_providers/dropDown_pvd/drop_down_pvd.dart';
-// import 'package:motion/motion_reusable/general_reuseable.dart';
+import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_user/mu_ops/auth_page.dart';
 import 'package:provider/provider.dart';
 import 'motion_core/motion_providers/date_pvd/current_date_pvd.dart';
@@ -19,7 +19,7 @@ import 'motion_core/motion_providers/sql_pvd/assigner_pvd.dart';
 import 'motion_core/motion_providers/web_api_pvd/zen_quotes_pvd.dart';
 import 'motion_themes/mth_theme/dark_theme.dart';
 import 'motion_themes/mth_theme/light_theme.dart';
-// import 'motion_core/mc_sqlite/sql_tracker_db.dart';
+import 'motion_core/mc_sqlite/sql_tracker_db.dart';
 
 final GlobalKey<NavigatorState> navigationKey = GlobalKey<NavigatorState>();
 
@@ -27,7 +27,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize the database helper
-  // final TrackerDatabaseHelper databaseHelper = TrackerDatabaseHelper();
+  final TrackerDatabaseHelper databaseHelper = TrackerDatabaseHelper();
   // final dbHelper = AssignerDatabaseHelper();
 
   // databaseHelper.updateCurrentUser();
@@ -55,11 +55,11 @@ void main() async {
 
   final trackMainCategoryDatabaseProvider = MainCategoryTrackerProvider();
 
-  // final allMain = await databaseHelper.getAllMainCategories();
+  final allMain = await databaseHelper.getAllMainCategories();
   // final allMain = await databaseHelper.getAllSubcategories();
 
 
-  // logger.i();
+  logger.i(allMain);
 
   runApp(MultiProvider(
     providers: [

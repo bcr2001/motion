@@ -23,7 +23,7 @@ class _MyDropdownButtonState extends State<MyDropdownButton> {
     "Education",
     "Skills",
     "Entertainment",
-    "Personal Growth",
+    "Self Development",
     "Sleep"
   ];
 
@@ -44,7 +44,7 @@ class _MyDropdownButtonState extends State<MyDropdownButton> {
             iconSize: 28,
             value: selectedValue.selectedValue,
             hint: widget.isUpdate!
-                ?  Text(widget.mainCategoryName!)
+                ? Text(widget.mainCategoryName!)
                 : const Text(AppString.trackDropDownHintText),
             items: listItems.map((String value) {
               return DropdownMenuItem(
@@ -80,7 +80,10 @@ class TrackEditPopUpMenu extends StatelessWidget {
                 builder: (BuildContext context) => const TrackEditingPage()));
       },
       itemBuilder: (context) {
-        return [const PopupMenuItem(value: "edit", child: Text(AppString.editPageAppBarTitle))];
+        return [
+          const PopupMenuItem(
+              value: "edit", child: Text(AppString.editPageAppBarTitle))
+        ];
       },
     );
   }

@@ -107,7 +107,7 @@ class AppString {
   static const String educationMainCategory = "Education";
   static const String skillMainCategory = "Skills";
   static const String entertainmentMainCategory = "Entertainment";
-  static const String personalGrowthMainCategory = "Personal Growth";
+  static const String selfDevelopmentMainCategory = "Self Development";
   static const String sleepMainCategory = "Sleep";
 
   static const String addItem = "Add";
@@ -215,4 +215,22 @@ class AppString {
       "The Main Category data values for a given month are delineated in hours. ";
   static const String infoAboutStackChartData =
       "A monthly Distribution of Main Categories";
+
+  // TIPS ROUTE
+
+  static const String tipsImportantNoteTitle = "Important Notes";
+  static const String note1TrackingGuide =
+      "To accurately monitor your activities, start a stopwatch on your phone or device when you begin a task. Stop it once you finish, then log the time in the app's relevant subcategory. This method ensures precise tracking of time spent on each activity.";
+  static const String note2NoEstimating =
+      "If you forget to start the timer when beginning an activity, don't guess the elapsed time. Instead, consider that period as untracked and start timing from the moment you remember, treating it as the activity's start.";
+  static const String note3IndividualUseOnly =
+      "This tracking system is intended for individual use and should only be used for specific, focused activities. Please avoid tracking activities that do not have a clear and defined purpose.";
+  static const String note4ConciseTracking =
+      "To avoid confusion and keep your tracking list clear, it's best to use broader subcategories. For example, instead of tracking each school subject separately, group them under a more general category like 'Studying.'";
+  static const String note5subcategoryAssignment =
+      "When assigning subcategories to main categories, carefully consider their placement since the categorization can be nuanced. Refer to the FOUNDERS gallery for ideas on effective organization. Remember, categorization can be subjective, so adjust as needed to fit your application's specific objectives and user preferences.";
+  static const String note6KeyExamples =
+      "Below are the main categories and key EXAMPLES of subcategories that can be tracked under each one. Tracking the main categories directly is not feasible, so corresponding subcategories must be created for each main category.";
+  static const String note7BackSlashAlert =
+      "Please note that the '/'symbol is used to indicate alternative names for subcategories, and you have the flexibility to name subcategories in the way that best suits your preferences.";
 }
