@@ -48,7 +48,7 @@ class TrackerDatabaseHelper {
         education REAL,
         skills REAL,
         entertainment REAL,
-        personalGrowth REAL,
+        selfDevelopment REAL,
         sleep REAL,
         currentLoggedInUser TEXT,
         PRIMARY KEY (date, currentLoggedInUser)
@@ -85,8 +85,8 @@ class TrackerDatabaseHelper {
             entertainment = (SELECT SUM(timeSpent) FROM subcategory 
             WHERE mainCategoryName = 'Entertainment' AND date = NEW.date 
             AND currentLoggedInUser = NEW.currentLoggedInUser),
-            personalGrowth = (SELECT SUM(timeSpent) FROM subcategory WHERE 
-            mainCategoryName = 'Personal Growth' AND date = NEW.date AND 
+            selfDevelopment = (SELECT SUM(timeSpent) FROM subcategory WHERE 
+            mainCategoryName = 'Self Development' AND date = NEW.date AND 
             currentLoggedInUser = NEW.currentLoggedInUser),
             sleep = (SELECT SUM(timeSpent) FROM subcategory WHERE 
             mainCategoryName = 'Sleep' AND date = NEW.date AND 
@@ -111,8 +111,8 @@ class TrackerDatabaseHelper {
               entertainment = (SELECT SUM(timeSpent) FROM subcategory WHERE 
               mainCategoryName = 'Entertainment' AND date = OLD.date AND 
               currentLoggedInUser = OLD.currentLoggedInUser),
-              personalGrowth = (SELECT SUM(timeSpent) FROM subcategory WHERE 
-              mainCategoryName = 'Personal Growth' AND date = OLD.date AND 
+              selfDevelopment = (SELECT SUM(timeSpent) FROM subcategory WHERE 
+              mainCategoryName = 'Self Development' AND date = OLD.date AND 
               currentLoggedInUser = OLD.currentLoggedInUser),
               sleep = (SELECT SUM(timeSpent) FROM subcategory WHERE 
               mainCategoryName = 'Sleep' AND date = OLD.date AND 
@@ -153,9 +153,9 @@ class TrackerDatabaseHelper {
                 CAST(ROUND(COALESCE(sum(entertainment)/60, 0), 2) AS VARCHAR) AS "entertainmentHours",
                 CAST(ROUND(sum(entertainment)/1440, 2) AS VARCHAR) AS "entertainmentDays",
                 CAST(ROUND(AVG(entertainment)/60, 2) AS VARCHAR) AS "entertainmentAverage",
-                CAST(ROUND(COALESCE(sum(personalGrowth)/60, 0), 2) AS VARCHAR) AS "pgHours",
-                CAST(ROUND(sum(personalGrowth)/1440, 2) AS VARCHAR) AS "pgDays",
-                CAST(ROUND(AVG(personalGrowth)/60, 2) AS VARCHAR) AS "pgAverage",
+                CAST(ROUND(COALESCE(sum(selfDevelopment)/60, 0), 2) AS VARCHAR) AS "pgHours",
+                CAST(ROUND(sum(selfDevelopment)/1440, 2) AS VARCHAR) AS "pgDays",
+                CAST(ROUND(AVG(selfDevelopment)/60, 2) AS VARCHAR) AS "pgAverage",
                 CAST(ROUND(COALESCE(sum(sleep)/60, 0), 2) AS VARCHAR) AS "sleepHours",
                 CAST(ROUND(sum(sleep)/1440, 2) AS VARCHAR) AS "sleepDays",
                 CAST(ROUND(AVG(sleep)/60, 2) AS VARCHAR) AS "sleepAverage"
@@ -228,13 +228,13 @@ class TrackerDatabaseHelper {
       final resultETMCT = isUnaccounted ? await db.rawQuery('''
         SELECT ((COUNT(date) * 24)*60) - (COALESCE(SUM(education), 0) 
         + COALESCE(SUM(skills), 0) + COALESCE(SUM(entertainment), 0) + 
-        COALESCE(SUM(personalGrowth), 0) + COALESCE(SUM(sleep), 0)) 
+        COALESCE(SUM(selfDevelopment), 0) + COALESCE(SUM(sleep), 0)) 
         AS EntireTotalResult
         FROM main_category
         WHERE currentLoggedInUser = ?
         ''', [currentUser]) : await db.rawQuery('''
         SELECT COALESCE(SUM(education), 0) + COALESCE(SUM(skills), 0) 
-        + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(personalGrowth), 0) 
+        + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(selfDevelopment), 0) 
         + COALESCE(SUM(sleep), 0) AS EntireTotalResult
         FROM main_category
         WHERE currentLoggedInUser = ?
@@ -269,11 +269,11 @@ class TrackerDatabaseHelper {
       // totals grouped by the year
       final resultAAUBBY = await db.rawQuery('''
         SELECT  (COALESCE(SUM(education), 0.0) + COALESCE(SUM(skills), 0.0)
-                + COALESCE(SUM(entertainment), 0.0) + COALESCE(SUM(personalGrowth), 0.0)
+                + COALESCE(SUM(entertainment), 0.0) + COALESCE(SUM(selfDevelopment), 0.0)
                 + COALESCE(SUM(sleep), 0.0))/60 AS Accounted,
                 (((COUNT(date) * 24)*60) - (COALESCE(SUM(education), 0.0)
                 + COALESCE(SUM(skills), 0.0) + COALESCE(SUM(entertainment), 0.0)
-                + COALESCE(SUM(personalGrowth), 0.0) + COALESCE(SUM(sleep), 0.0)))/60
+                + COALESCE(SUM(selfDevelopment), 0.0) + COALESCE(SUM(sleep), 0.0)))/60
                 AS Unaccounted,
                 strftime('%Y', date) AS Year
         FROM main_category
@@ -300,12 +300,12 @@ class TrackerDatabaseHelper {
                 (COALESCE(SUM(education), 0) + 
                 COALESCE(SUM(skills), 0)
               + COALESCE(SUM(entertainment), 0) + 
-              COALESCE(SUM(personalGrowth), 0)
+              COALESCE(SUM(selfDevelopment), 0)
               + COALESCE(SUM(sleep), 0))/60 AS Accounted,
               (((COUNT(date) * 24)*60) - (COALESCE(SUM(education), 0)
                 + COALESCE(SUM(skills), 0) + 
                 COALESCE(SUM(entertainment), 0)
-          + COALESCE(SUM(personalGrowth), 0) + 
+          + COALESCE(SUM(selfDevelopment), 0) + 
           COALESCE(SUM(sleep), 0)))/60 AS Unaccounted
       FROM main_category
       WHERE currentLoggedInUser = ? AND strftime('%Y', date) = ?
@@ -332,13 +332,13 @@ class TrackerDatabaseHelper {
       final resultEMTMC = isUnaccounted ? await db.rawQuery('''
         SELECT ((COUNT(date) * 24)*60) - (COALESCE(SUM(education), 0) 
         + COALESCE(SUM(skills), 0) + COALESCE(SUM(entertainment), 0) 
-        + COALESCE(SUM(personalGrowth), 0) + COALESCE(SUM(sleep), 0)) 
+        + COALESCE(SUM(selfDevelopment), 0) + COALESCE(SUM(sleep), 0)) 
         AS EntireTotalResult
         FROM main_category
         WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
             ''', [currentUser, firstDay, lastDay]) : await db.rawQuery('''
         SELECT COALESCE(SUM(education), 0) + COALESCE(SUM(skills), 0) 
-        + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(personalGrowth), 0)
+        + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(selfDevelopment), 0)
         + COALESCE(SUM(sleep), 0) AS EntireTotalResult
         FROM main_category
         WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
@@ -374,10 +374,10 @@ class TrackerDatabaseHelper {
         SELECT 
             date, 
             (COALESCE(education, 0) + COALESCE(skills, 0) + 
-            COALESCE(entertainment, 0) + COALESCE(personalGrowth, 0) + 
+            COALESCE(entertainment, 0) + COALESCE(selfDevelopment, 0) + 
             COALESCE(sleep, 0))/60 AS Accounted, 
             24 - (COALESCE(education, 0) + COALESCE(skills, 0) + 
-            COALESCE(entertainment, 0) + COALESCE(personalGrowth, 0) + 
+            COALESCE(entertainment, 0) + COALESCE(selfDevelopment, 0) + 
             COALESCE(sleep, 0))/60 AS Unaccounted
         FROM main_category
         WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
@@ -399,10 +399,10 @@ class TrackerDatabaseHelper {
 
       final resultMAT = await db.rawQuery('''
         SELECT COALESCE(SUM(education), 0) + COALESCE(SUM(skills), 0)
-        + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(personalGrowth), 0)
+        + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(selfDevelopment), 0)
         + COALESCE(SUM(sleep), 0) AS Accounted, ((COUNT(date) * 24)*60)
          - (COALESCE(SUM(education), 0) + COALESCE(SUM(skills), 0) 
-         + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(personalGrowth), 0)
+         + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(selfDevelopment), 0)
          + COALESCE(SUM(sleep), 0)) AS Unaccounted
         FROM main_category
         WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
@@ -516,7 +516,7 @@ class TrackerDatabaseHelper {
           ROUND(COALESCE(SUM(education) / 60.0, 0), 2) AS education,
           ROUND(COALESCE(SUM(skills) / 60.0, 0), 2) AS skills,
           ROUND(COALESCE(SUM(entertainment) / 60.0, 0), 2) AS entertainment,
-          ROUND(COALESCE(SUM(personalGrowth) / 60.0, 0), 2) AS personalGrowth,
+          ROUND(COALESCE(SUM(selfDevelopment) / 60.0, 0), 2) AS selfDevelopment,
           ROUND(COALESCE(SUM(sleep) / 60.0, 0), 2) AS sleep
         FROM main_category
         WHERE currentLoggedInUser = ? AND strftime('%Y', date) = ?
@@ -540,23 +540,23 @@ class TrackerDatabaseHelper {
       final resultDAAI = await db.rawQuery('''
             SELECT date, 
                   ROUND((COALESCE(education, 0) + COALESCE(skills, 0) + 
-                          COALESCE(personalGrowth, 0) + COALESCE(entertainment, 0) +
+                          COALESCE(selfDevelopment, 0) + COALESCE(entertainment, 0) +
                           COALESCE(sleep, 0)) / 60, 2) AS accounted,
                   CASE
                       WHEN ROUND((COALESCE(education, 0) + COALESCE(skills, 0) + 
-                                  COALESCE(personalGrowth, 0) + COALESCE(entertainment, 0) +
+                                  COALESCE(selfDevelopment, 0) + COALESCE(entertainment, 0) +
                                   COALESCE(sleep, 0)) / 60, 2) <= 0 THEN 0
                       WHEN ROUND((COALESCE(education, 0) + COALESCE(skills, 0) + 
-                                  COALESCE(personalGrowth, 0) + COALESCE(entertainment, 0) +
+                                  COALESCE(selfDevelopment, 0) + COALESCE(entertainment, 0) +
                                   COALESCE(sleep, 0)) / 60, 2) <= 5 THEN 5
                       WHEN ROUND((COALESCE(education, 0) + COALESCE(skills, 0) + 
-                                  COALESCE(personalGrowth, 0) + COALESCE(entertainment, 0) +
+                                  COALESCE(selfDevelopment, 0) + COALESCE(entertainment, 0) +
                                   COALESCE(sleep, 0)) / 60, 2) <= 10 THEN 10
                       WHEN ROUND((COALESCE(education, 0) + COALESCE(skills, 0) + 
-                                  COALESCE(personalGrowth, 0) + COALESCE(entertainment, 0) +
+                                  COALESCE(selfDevelopment, 0) + COALESCE(entertainment, 0) +
                                   COALESCE(sleep, 0)) / 60, 2) <= 15 THEN 15
                       WHEN ROUND((COALESCE(education, 0) + COALESCE(skills, 0) + 
-                                  COALESCE(personalGrowth, 0) + COALESCE(entertainment, 0) +
+                                  COALESCE(selfDevelopment, 0) + COALESCE(entertainment, 0) +
                                   COALESCE(sleep, 0)) / 60, 2) <= 20 THEN 20
                       ELSE 25
                   END AS intensity

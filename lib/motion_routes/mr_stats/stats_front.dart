@@ -120,10 +120,10 @@ class EntireDataStatistic extends StatelessWidget {
                                 "${allMainCategoryTotals[0]["entertainmentAverage"]} hrs/day",
                           ),
 
-                          // Personal Growth Information
+                          // Self Development Information
                           CategoryBuilder(
                             mainCategoryName:
-                                AppString.personalGrowthMainCategory,
+                                AppString.selfDevelopmentMainCategory,
                             galleryInitials: "PG",
                             totalHours:
                                 "${allMainCategoryTotals[0]["pgHours"]} HRS",
@@ -230,9 +230,7 @@ class CategoryBuilder extends StatelessWidget {
               )),
 
           // gallery divider
-          const SizedBox(
-            width: 120,
-            child:  Divider())
+          const SizedBox(width: 120, child: Divider())
         ],
       ),
     );

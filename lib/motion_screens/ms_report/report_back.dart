@@ -83,15 +83,13 @@ class AccountedUnaccountedReportPieChart extends StatelessWidget {
   }
 }
 
-
-
 // displays the Main category Distribution pie chart
 class MainCategoryDistributionPieChart extends StatelessWidget {
   final Future<List<Map<String, dynamic>>?> future;
 
   const MainCategoryDistributionPieChart({super.key, required this.future});
 
-Color getCategoryColorByName(String? categoryName) {
+  Color getCategoryColorByName(String? categoryName) {
     // Debugging: Print the category name
     logger.i("Category Name: $categoryName");
 
@@ -100,8 +98,8 @@ Color getCategoryColorByName(String? categoryName) {
         return AppColor.educationPieChartColor;
       case AppString.entertainmentMainCategory:
         return AppColor.entertainmentPieChartColor;
-      case AppString.personalGrowthMainCategory:
-        return AppColor.personalGrowthPieChartColor;
+      case AppString.selfDevelopmentMainCategory:
+        return AppColor.selfDevelopmentPieChartColor;
       case AppString.skillMainCategory:
         return AppColor.skillsPieChartColor;
       case AppString.sleepMainCategory:
@@ -112,7 +110,6 @@ Color getCategoryColorByName(String? categoryName) {
         return Colors.grey; // Default color for null or unrecognized category
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -164,8 +161,6 @@ Color getCategoryColorByName(String? categoryName) {
     );
   }
 }
-
-
 
 // A custom widget for displaying a pie chart using the FL Chart library.
 class PieChartBuilder extends StatelessWidget {
@@ -440,7 +435,8 @@ class InfoToTheUser extends StatelessWidget {
             padding: EdgeInsets.only(right: 6.0),
             child: Icon(
               Icons.info_outline,
-              size: 18,
+              size: 25,
+              color: AppColor.tileBackgroundColor,
             ),
           ),
 
@@ -614,10 +610,10 @@ class AnalyticsMainCategoryDistributionPieChart extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer2<MainCategoryTrackerProvider, UserUidProvider>(
         builder: ((context, main, user, child) {
-      
       final String currentUser = user.userUid!;
       return PieChartDataMainCategoryDistribution(
-        future: main.retrieveEntireMainTotalTimeSpent(currentUser: currentUser));
+          future:
+              main.retrieveEntireMainTotalTimeSpent(currentUser: currentUser));
     }));
   }
 }

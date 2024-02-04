@@ -66,17 +66,22 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
   }) {
     // Determine the icon based on the activeStatus
     Icon iconSelected = activeStatus == 0
-        ? const Icon(Icons.check_box_outline_blank_rounded, size: 20,) // Inactive icon
+        ? const Icon(
+            Icons.check_box_outline_blank_rounded,
+            size: 20,
+          ) // Inactive icon
         : const Icon(
             Icons.check_box_outlined,
             color: AppColor.blueMainColor,
-            size: 20,// Active icon with custom color
+            size: 20, // Active icon with custom color
           );
 
     // Create a ListTile with the specified title, and active status icon
     return ListTile(
-      title: Text(tileTitle, 
-      style: AppTextStyle.trailingTextLTStyle(),), // Display the provided title text
+      title: Text(
+        tileTitle,
+        style: AppTextStyle.trailingTextLTStyle(),
+      ), // Display the provided title text
       trailing: IconButton(
         onPressed: () async {
           // Handle item press, potentially passing the associated item
@@ -156,8 +161,7 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                                 mainCategoryProvider.selectedValue!,
                             dateCreated: date.currentDate,
                           ));
-                          snackBarMessage(
-                            context,
+                          snackBarMessage(context,
                               errorMessage:
                                   "${subcategoryController.text} added to the ${mainCategoryProvider.selectedValue} Category");
 
@@ -200,10 +204,9 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
             builder: (context, assignedList, userUiD, child) {
               var items = assignedList.assignerItems;
               var user = userUiD.userUid;
-              
+
               return ListView(
                 children: [
-
                   // education category
                   CardConstructor(
                       cardTitle: AppString.educationMainCategory,
@@ -255,15 +258,15 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                                 : const SizedBox.shrink();
                           })),
 
-                  // personal growth category
+                  // Self Development category
                   CardConstructor(
-                      cardTitle: AppString.personalGrowthMainCategory,
+                      cardTitle: AppString.selfDevelopmentMainCategory,
                       cardListView: TrackListViewBuiler(
                           itemCount: items.length,
                           itemBuilder: (BuildContext context, index) {
                             return items[index].currentLoggedInUser == user &&
                                     items[index].mainCategoryName ==
-                                        AppString.personalGrowthMainCategory &&
+                                        AppString.selfDevelopmentMainCategory &&
                                     items[index].isArchive == 0
                                 ? _listTileBuilder(
                                     activeStatus: items[index].isActive,

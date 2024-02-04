@@ -36,8 +36,8 @@ class AppColor {
   // entertainment color
   static const Color entertainmentPieChartColor = Color(0xFF287094);
 
-  // personal growth color
-  static const Color personalGrowthPieChartColor = Color(0xFF37AA85);
+  // Self Development color
+  static const Color selfDevelopmentPieChartColor = Color(0xFF37AA85);
 
   // most tracked color
   static const Color mostTrackedBorderColor = Color(0XFF52D726);

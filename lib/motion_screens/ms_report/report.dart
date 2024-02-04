@@ -83,9 +83,6 @@ class MonthlyReportPage extends StatelessWidget {
                       // Users can visualize their activity patterns throughout
                       // the month using this heat map.
                       sectionTitle(titleName: AppString.contributionTitle),
-                      const InfoToTheUser(
-                          sectionInformation:
-                              AppString.informationAboutContribution),
                       const ContributionsHeatMap(),
 
                       // SECTION 1:
