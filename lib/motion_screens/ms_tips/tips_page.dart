@@ -25,7 +25,10 @@ class TipsPage extends StatelessWidget {
         
               // notes before examples: Contains important information the user should know about 
               // how the app should be used
-               const NotesBeforeTheExamples()
+               const NotesBeforeTheExamples(),
+
+              // main categories and examples of subcategories that can be tracked under them 
+              const MainCategoriesAndSubcategoryExamples()
             ],
           ),
         ),
