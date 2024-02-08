@@ -7,16 +7,14 @@ import '../../motion_reusable/general_reuseable.dart';
 import '../../motion_themes/mth_app/app_strings.dart';
 
 class GoogleAuthService {
-
   // Sign in with Google and handle user authentication
-  static Future<UserCredential> signInWithGoodle(context) async {
+  static Future<UserCredential> signInWithGoogle(context) async {
     // Display a circular progress indicator during the sign-in process
     circularIndicator(context);
 
     try {
       // Initiate the interactive sign-in process with Google
       final GoogleSignInAccount? gUser = await GoogleSignIn().signIn();
-
 
       // Check if the user canceled the Google sign-in
       if (gUser == null) {
@@ -47,7 +45,7 @@ class GoogleAuthService {
       return authResult;
     } catch (e) {
       // Log and rethrow any errors that occur during the process
-      logger.e("Error: $e");
+      logger.e("(signInWithGoogle): Error => $e");
 
       // Display an error message using a snack bar.
       snackBarMessage(context,

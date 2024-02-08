@@ -7,15 +7,20 @@ import '../../motion_themes/mth_app/app_strings.dart';
 // Function to make an HTTP request to the ZenQuotes API.
 // Returns the HTTP response containing the Zen quote data.
 Future<http.Response> _getZenQuote() async {
-  // / API endpoint for fetching today's Zen quote
   const String zenQuotesApiUrl = "https://zenquotes.io/api/today";
+  try {
+    // Perform the HTTP GET request with a timeout of 10 seconds.
+    final response = await http
+        .get(Uri.parse(zenQuotesApiUrl))
+        .timeout(const Duration(seconds: 10));
+    return response;
+  } catch (e) {
+    // Log any error for debugging
+    logger.i("Error in HTTP request to ZenQuotes API: $e");
 
-  // Perform the HTTP GET request with a timeout of 10 seconds.
-  final request = await http
-      .get(Uri.parse(zenQuotesApiUrl))
-      .timeout(const Duration(seconds: 10));
-
-  return request;
+    // Throw an exception or handle it as per your application's requirement
+    rethrow;
+  }
 }
 
 // Function to fetch a Zen quote from the remote API.

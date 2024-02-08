@@ -126,12 +126,15 @@ class _ScrollingListBuilderState extends State<ScrollingListBuilder> {
                           : Padding(
                             padding: const EdgeInsets.symmetric(vertical: 5),
                             child: ListTile(
+                                // Main Category Name
                                 leading: Text(
                                   item[widget.columnName],
                                   style: AppTextStyle.leadingTextLTStyle(),
                                 ),
+                                // total hours spent on a particular main
+                                // main category during a specific month
                                 title: Container(
-                                  width: 120,
+                                  width: 130,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(20),
                                     color: AppColor.tileBackgroundColor,

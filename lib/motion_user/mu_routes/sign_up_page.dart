@@ -70,7 +70,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   // continue with google widget and or widget
                   ContinueWithGoogleOr(
                     onPressed: () {
-                      GoogleAuthService.signInWithGoodle(context);
+                      GoogleAuthService.signInWithGoogle(context);
                     },
                   ),
 
@@ -119,9 +119,10 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
 
                   // Sign In Option
-                  RegSignOption2(regMessage: AppString.alreadyMember, 
-                  regTextSpan: AppString.logInTitle, 
-                  regAction: widget.toSignInPage)
+                  RegSignOption2(
+                      regMessage: AppString.alreadyMember,
+                      regTextSpan: AppString.logInTitle,
+                      regAction: widget.toSignInPage)
                 ],
               ),
             ),

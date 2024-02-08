@@ -20,7 +20,7 @@ class AppString {
   static const String deleteTitle = "Delete";
   static const String editPageUpdateButtonName = "UPDATE";
   static const String editPageDescription =
-      "Edit, archive, delete the subcategories and their corresponding main categories below:";
+      "Edit, archive, and delete subcategories below:";
   static const String editPageUpdateError =
       "Please select a value from the drop-down.";
 

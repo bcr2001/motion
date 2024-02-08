@@ -33,7 +33,7 @@ class AuthServices {
     } on FirebaseAuthException catch (e) {
       if (e.code == "user-not-found") {
         // Handle the case where the user does not exist.
-        logger.e("no user in the system!");
+        logger.e("(signInUser): no user in the system!");
 
         // Display an error message using a snack bar.
         snackBarMessage(context,
@@ -42,7 +42,7 @@ class AuthServices {
       } else if (e.code == "wrong-password") {
         // Handle the case of an incorrect password.
 
-        logger.e("Incorrect password");
+        logger.e("(signInUser): Incorrect password");
 
         // Display an error message using a snack bar.
         snackBarMessage(context,
@@ -50,7 +50,7 @@ class AuthServices {
             errorMessage: AppString.firebaseIncorrectPassword);
       } else {
         // Handle other FirebaseAuth exceptions.
-        logger.e("something went wrong during the sign in process");
+        logger.e("(signInUser): something went wrong during the sign in process");
 
         // Display an error message using a snack bar.
         snackBarMessage(context,
@@ -77,7 +77,7 @@ class AuthServices {
     } on FirebaseAuthException catch (e) {
       if (e.code == "email-already-in-use") {
         // Handle the case where the email is already in use.
-        logger.e("something went wrong during the sign up process $e");
+        logger.e("(signUpUser): something went wrong during the sign up process $e");
         // Display an error message using a snack bar.
         snackBarMessage(context,
         requiresColor: true,
@@ -100,7 +100,7 @@ class AuthServices {
     } on FirebaseAuthException catch (e) {
       // Handle errors during sign-out.
 
-      logger.e("unable to sign out $e");
+      logger.e("(signOutUser): unable to sign out $e");
 
       // Display an error message using a snack bar.
       snackBarMessage(

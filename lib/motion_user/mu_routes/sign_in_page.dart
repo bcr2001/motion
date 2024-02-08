@@ -55,7 +55,7 @@ class _SignInPageState extends State<SignInPage> {
                   ),
 
                   // welcome message
-                   Center(
+                  Center(
                     child: Text(
                       AppString.logInWelcomeMessage,
                       textAlign: TextAlign.center,
@@ -65,7 +65,7 @@ class _SignInPageState extends State<SignInPage> {
                   // continue with google widget and or widget
                   ContinueWithGoogleOr(
                     onPressed: () {
-                      GoogleAuthService.signInWithGoodle(context);
+                      GoogleAuthService.signInWithGoogle(context);
                     },
                   ),
 
