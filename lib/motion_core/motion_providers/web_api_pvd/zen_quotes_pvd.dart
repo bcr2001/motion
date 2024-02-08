@@ -34,34 +34,23 @@ class ZenQuoteProvider extends ChangeNotifier {
   }
 
   Future<void> fetchTodaysQuote() async {
+    // fetches the Future<String> returned
+    // when fetchQuote() is executed
     try {
-      var isConnected = await _checkInternetConnectivity();
-      if (isConnected) {
-        // Fetch the quote only if there's internet connectivity
-        _todaysQuote = await fetchZenQuote();
-        // ... [rest of your code]
-      } else {
-        // Handle no internet scenario
-        _todaysQuote = AppString.defaultAppQuote;
-        notifyListeners();
-      }
+      _todaysQuote = await fetchZenQuote();
+
+      // save preferences
+      _prefs?.setString(quotekey, _todaysQuote);
+      _prefs?.setString(dateKey, DateTime.now().toIso8601String());
+
+      // notifty listeners of changes
+      notifyListeners();
     } catch (e) {
       logger.e("Error: $e");
-      _todaysQuote = AppString.defaultAppQuote;
+      _todaysQuote =
+          "“Time is what we want most, but what we use worst.” - William Penn";
       notifyListeners();
     }
-  }
-
-  Future<bool> _checkInternetConnectivity() async {
-    try {
-      final result = await InternetAddress.lookup('example.com');
-      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-        return true;
-      }
-    } on SocketException catch (_) {
-      return false;
-    }
-    return false;
   }
 
   // load saved quote
