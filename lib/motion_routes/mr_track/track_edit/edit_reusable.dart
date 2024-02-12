@@ -11,6 +11,7 @@ import '../../../motion_reusable/db_re/sub_ui.dart';
 import '../../../motion_reusable/mu_reusable/user_reusable.dart';
 import '../../../motion_reusable/mu_reusable/user_validator.dart';
 import '../../../motion_themes/mth_app/app_strings.dart';
+import '../../../motion_themes/mth_styling/motion_text_styling.dart';
 
 // edit page trailing buttons for delete and update
 class TrailingEditButtons extends StatefulWidget {
@@ -183,7 +184,8 @@ class _TrailingEditButtonsState extends State<TrailingEditButtons> {
 
               // Alert dialog message
               Text(
-                  "Are you sure you want to delete ${widget.itemIndexSubcategoryName}?"),
+                  "Are you sure you want to delete ${widget.itemIndexSubcategoryName}?",
+                  style: AppTextStyle.infoTextStyle(),),
 
               // Buttons
               CancelAddTextButtons(

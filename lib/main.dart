@@ -29,7 +29,6 @@ import 'motion_core/mc_sqlite/sql_tracker_db.dart';
 
 final GlobalKey<NavigatorState> navigationKey = GlobalKey<NavigatorState>();
 
-// important functions
 
 
 void main() async {
