@@ -11,11 +11,13 @@ import 'package:motion/motion_core/motion_providers/date_pvd/current_year_pcd.da
 import 'package:motion/motion_core/motion_providers/date_pvd/first_and_last_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/seven_days_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
+import 'package:motion/motion_core/motion_providers/sql_pvd/experience_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_pvd.dart';
 import 'package:motion/motion_core/motion_providers/dropDown_pvd/drop_down_pvd.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_user/mu_ops/auth_page.dart';
+import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 import 'motion_core/mc_sql_table/assign_table.dart';
 import 'motion_core/mc_sql_table/main_table.dart';
@@ -27,19 +29,24 @@ import 'motion_themes/mth_theme/dark_theme.dart';
 import 'motion_themes/mth_theme/light_theme.dart';
 import 'motion_core/mc_sqlite/sql_tracker_db.dart';
 
+// This creates a global key for managing the state of a navigator widget in Flutter.
 final GlobalKey<NavigatorState> navigationKey = GlobalKey<NavigatorState>();
 
+
+// This instantiates a database helper class (TrackerDatabaseHelper) for managing database operations, likely related to tracking functionality.
+final TrackerDatabaseHelper trackDbInstance = TrackerDatabaseHelper();
 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
 
   // Initialize the database helper
   final TrackerDatabaseHelper databaseHelper = TrackerDatabaseHelper();
   // final dbHelper = AssignerDatabaseHelper();
 
   // databaseHelper.updateCurrentUser();
+
+  // await databaseHelper.populateExperiencePointsFromMainCategory();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
@@ -66,12 +73,14 @@ void main() async {
   final trackMainCategoryDatabaseProvider = MainCategoryTrackerProvider();
 
   // final allMain = await dbHelper.getAllItems();
-  // final allMain = await databaseHelper.getAllSubcategories();
+  // final allMain = await databaseHelper.getAllMainCategories();
+  final allMain = await databaseHelper.getAllExperiencePoints(date: "2024-02-13");
 
-  // logger.i(allMain);
+  logger.i(allMain);
 
   runApp(MultiProvider(
     providers: [
+      ChangeNotifierProvider(create: (context)=> ExperiencePointTableProvider()),
       ChangeNotifierProvider(
           create: (context) => FirstAndLastWithSevenDaysDiff()),
       ChangeNotifierProvider.value(value: themeModeProviderN1),

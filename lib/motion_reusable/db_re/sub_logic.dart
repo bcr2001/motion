@@ -3,6 +3,8 @@ import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../../main.dart';
+
 // returns the full time representation of minutes
 // for example 150mins => 2hrs 50mins
 String convertMinutesToTime(double minutes) {
@@ -115,4 +117,16 @@ Future<bool> mainCategoryExists(String date, String currentUser) async {
     WHERE date = ? AND currentLoggedInUser = ?
   ''', [date, currentUser]);
   return mainCategoryExistsQuery.isNotEmpty;
+}
+
+// Check if the date and currentLoggedInUser exist in the experience_points table
+Future<bool> experiencePointsExists(String date, String currentUser) async {
+  final Database db = await trackDbInstance.database;
+
+  final expPointsExistsQuery = await db.rawQuery('''
+    SELECT 1
+    FROM experience_points
+    WHERE date = ? AND currentLoggedInUser = ?
+  ''', [date, currentUser]);
+  return expPointsExistsQuery.isNotEmpty;
 }

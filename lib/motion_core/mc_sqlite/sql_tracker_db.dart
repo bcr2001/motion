@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:motion/motion_core/mc_sql_table/experience_table.dart';
 import 'package:motion/motion_core/mc_sql_table/main_table.dart';
 import 'package:motion/motion_core/mc_sql_table/sub_table.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
@@ -37,7 +38,165 @@ class TrackerDatabaseHelper {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, 'tracker.db');
 
-    return await openDatabase(path, version: 6, onCreate: _createDatabase);
+    return await openDatabase(path,
+        version: 9, onCreate: _createDatabase, onUpgrade: _onUpgradeDatabase);
+  }
+
+  void _onUpgradeDatabase(Database db, int oldVersion, int newVersion) async {
+    logger.i("Database _onUpgradeDatabase function called");
+    if (oldVersion < 9) {
+    //   await db.execute('DROP TABLE IF EXISTS experience_points');
+    //   // Upgrade the database schema here
+    //   await db.execute('''
+    //   CREATE TABLE experience_points(
+    //     date TEXT,
+    //     educationXP INTEGER,
+    //     skillsXP INTEGER,
+    //     sdXP INTEGER,
+    //     sleepXP INTEGER,
+    //     currentLoggedInUser TEXT,
+    //     PRIMARY KEY (date, currentLoggedInUser),
+    //     FOREIGN KEY (date, currentLoggedInUser) 
+    //     REFERENCES main_category(date, currentLoggedInUser)
+    //   )
+    // ''');
+
+      // Trigger: update_experience_points_after_insert
+      // Purpose: Updates the experience_points table after a new entry is
+      //          inserted into the subcategory table.
+      // Functionality:
+      // -- 1. Triggered after an INSERT operation on the subcategory table.
+      // -- 2. For each main category(Education, Skills, Personal Growth, Sleep)
+      //       it sums the timeSpent from the subcategory table.
+      // -- 3. Applies a CASE statement for each category to determine the
+      //       appropriate experience points based on the total timeSpent.
+      // -- 4. Updates the experience_points table with the calculated
+      //       experience points for each category.
+      // -- 5. Ensures the update is for the specific date and user matching
+      //       the new entry in the subcategory table.
+      await db.execute('''
+        CREATE TRIGGER IF NOT EXISTS update_experience_points
+        AFTER INSERT ON subcategory
+        BEGIN
+          UPDATE experience_points
+          SET 
+            educationXP = (SELECT 
+              CASE
+                  WHEN SUM(timeSpent) < 15 THEN 0
+                  WHEN SUM(timeSpent) < 60 THEN 5
+                  WHEN SUM(timeSpent) < 120 THEN 10
+                  WHEN SUM(timeSpent) < 180 THEN 15
+                  WHEN SUM(timeSpent) < 240 THEN 20
+                  WHEN SUM(timeSpent) >= 240 THEN 25
+                  ELSE 0 
+              END
+            FROM subcategory 
+            WHERE mainCategoryName = 'Education' AND date = NEW.date AND currentLoggedInUser = NEW.currentLoggedInUser),
+
+            skillsXP = (SELECT 
+              CASE
+                  WHEN SUM(timeSpent) < 15 THEN 0
+                  WHEN SUM(timeSpent) >= 15 AND SUM(timeSpent) < 60 THEN 5
+                  WHEN SUM(timeSpent) >= 60 AND SUM(timeSpent) < 120 THEN 10
+                  WHEN SUM(timeSpent) >= 120 AND SUM(timeSpent) < 180 THEN 15
+                  WHEN SUM(timeSpent) >= 180 AND SUM(timeSpent) < 240 THEN 20
+                  WHEN SUM(timeSpent) >= 240 THEN 25
+                  ELSE 0 
+              END
+            FROM subcategory 
+            WHERE mainCategoryName = 'Skills' AND date = NEW.date AND currentLoggedInUser = NEW.currentLoggedInUser),
+
+
+            sdXP = (SELECT 
+              CASE
+                  WHEN SUM(timeSpent) < 15 THEN 0
+                  WHEN SUM(timeSpent) >= 15 AND SUM(timeSpent) < 60 THEN 10
+                  WHEN SUM(timeSpent) >= 60 AND SUM(timeSpent) < 120 THEN 15
+                  WHEN SUM(timeSpent) >= 120 AND SUM(timeSpent) < 180 THEN 20
+                  WHEN SUM(timeSpent) >= 180 THEN 25
+                  ELSE 0 
+              END
+            FROM subcategory 
+            WHERE mainCategoryName = 'Self Development' AND date = NEW.date AND currentLoggedInUser = NEW.currentLoggedInUser),
+
+
+            sleepXP = (SELECT 
+                CASE
+                    WHEN SUM(timeSpent) < 300 THEN 0
+                    WHEN SUM(timeSpent) >= 300 AND SUM(timeSpent) < 360 THEN 5
+                    WHEN SUM(timeSpent) >= 360 AND SUM(timeSpent) < 420 THEN 10
+                    WHEN SUM(timeSpent) >= 420 AND SUM(timeSpent) < 480 THEN 20
+                    WHEN SUM(timeSpent) >= 480 THEN 25
+                    ELSE 0 
+                END
+              FROM subcategory 
+              WHERE mainCategoryName = 'Sleep' AND date = NEW.date AND currentLoggedInUser = NEW.currentLoggedInUser)
+            WHERE date = NEW.date AND currentLoggedInUser = NEW.currentLoggedInUser;
+          END;  
+        ''');
+
+      // trigger to update the experience point table if a deletion is made in the subcategory table
+      await db.execute('''
+        CREATE TRIGGER IF NOT EXISTS update_experience_points_after_delete
+        AFTER DELETE ON subcategory
+        BEGIN
+          UPDATE experience_points
+          SET 
+            educationXP = (SELECT 
+              CASE
+                  WHEN SUM(timeSpent) < 15 THEN 0
+                  WHEN SUM(timeSpent) < 60 THEN 5
+                  WHEN SUM(timeSpent) < 120 THEN 10
+                  WHEN SUM(timeSpent) < 180 THEN 15
+                  WHEN SUM(timeSpent) < 240 THEN 20
+                  WHEN SUM(timeSpent) >= 240 THEN 25
+                  ELSE 0 
+              END
+            FROM subcategory 
+            WHERE mainCategoryName = 'Education' AND date = OLD.date AND currentLoggedInUser = OLD.currentLoggedInUser),
+
+            skillsXP = (SELECT 
+              CASE
+                  WHEN SUM(timeSpent) < 15 THEN 0
+                  WHEN SUM(timeSpent) >= 15 AND SUM(timeSpent) < 60 THEN 5
+                  WHEN SUM(timeSpent) >= 60 AND SUM(timeSpent) < 120 THEN 10
+                  WHEN SUM(timeSpent) >= 120 AND SUM(timeSpent) < 180 THEN 15
+                  WHEN SUM(timeSpent) >= 180 AND SUM(timeSpent) < 240 THEN 20
+                  WHEN SUM(timeSpent) >= 240 THEN 25
+                  ELSE 0 
+              END
+            FROM subcategory 
+            WHERE mainCategoryName = 'Skills' AND date = OLD.date AND currentLoggedInUser = OLD.currentLoggedInUser),
+
+            sdXP = (SELECT 
+              CASE
+                  WHEN SUM(timeSpent) < 15 THEN 0
+                  WHEN SUM(timeSpent) >= 15 AND SUM(timeSpent) < 60 THEN 10
+                  WHEN SUM(timeSpent) >= 60 AND SUM(timeSpent) < 120 THEN 15
+                  WHEN SUM(timeSpent) >= 120 AND SUM(timeSpent) < 180 THEN 20
+                  WHEN SUM(timeSpent) >= 180 THEN 25
+                  ELSE 0 
+              END
+            FROM subcategory 
+            WHERE mainCategoryName = 'Self Development' AND date = OLD.date AND currentLoggedInUser = OLD.currentLoggedInUser),
+
+            sleepXP = (SELECT 
+              CASE
+                  WHEN SUM(timeSpent) < 300 THEN 0
+                  WHEN SUM(timeSpent) >= 300 AND SUM(timeSpent) < 360 THEN 5
+                  WHEN SUM(timeSpent) >= 360 AND SUM(timeSpent) < 420 THEN 10
+                  WHEN SUM(timeSpent) >= 420 AND SUM(timeSpent) < 480 THEN 20
+                  WHEN SUM(timeSpent) >= 480 THEN 25
+                  ELSE 0 
+              END
+            FROM subcategory 
+            WHERE mainCategoryName = 'Sleep' AND date = OLD.date AND currentLoggedInUser = OLD.currentLoggedInUser)
+          WHERE date = OLD.date AND currentLoggedInUser = OLD.currentLoggedInUser;
+        END;
+        ''');
+
+      logger.i("Database _onUpgradeDatabase COMPLETED");
+    }
   }
 
   void _createDatabase(Database db, int version) async {
@@ -904,18 +1063,125 @@ class TrackerDatabaseHelper {
     }
   }
 
-// Delete the entire database
-  Future<void> deleteDb() async {
+  // Comprehensive CRUD Operations for the ExperiencePoints Table
+
+  
+  // insert new rows into the experience_points table
+  Future<void> insertExperiencePoint(ExperiencePoints experience) async {
     try {
-      final dbPath = await getDatabasesPath();
-      final path = join(dbPath, "tracker.db");
-
-      await deleteDatabase(path);
-      _database = null; // Reset the database instance
-
-      logger.i("Database has been deleted");
+      final db = await database;
+      await db.insert('experience_points', experience.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace);
     } catch (e) {
       logger.e("Error: $e");
     }
   }
+
+  // get  all data from the experience_points table.
+  Future<List<ExperiencePoints>> getAllExperiencePoints({required String date}) async {
+    final db = await database;
+    final result = await db.rawQuery('''
+      SELECT *
+      FROM experience_points
+      WHERE date = ?;
+      ''', [date]);
+
+    return result.map((map) => ExperiencePoints.fromMap(map)).toList();
+  }
+
+  /// Calculates the average daily efficiency score for the specified user.
+  /// Aggregates experience points across categories from `experience_points`
+  /// table.
+  /// Returns the average score or 0.0 in case of no data or errors.
+  ///
+  /// Param:
+  ///   - `currentUser`: User ID to calculate the score for.
+  Future<double> experiencePointsEfficiencyScore(
+      {required String currentUser}) async {
+    try {
+      final db = await database;
+
+      final resultEPES = await db.rawQuery('''
+      SELECT ROUND((SUM(educationXP) + SUM(skillsXP) + SUM(sdXP) + SUM(sleepXP)) / 
+              COUNT(DISTINCT date), 2) AS efficiencyScore
+      FROM experience_points
+      WHERE currentLoggedInUser = ?
+      ''', [currentUser]);
+
+      if (resultEPES.isNotEmpty) {
+        // first row and column
+        final totalEPES = resultEPES.first['efficiencyScore'];
+        if (totalEPES is double) {
+          return totalEPES;
+        } else {
+          return 0.0; // Handle the case where the result is not a double
+        }
+      } else {
+        return 0.0; // Return 0.0 if no matching records are found
+      }
+    } catch (e) {
+      logger.e("(experiencePointsEfficiencyScore) ERROR: $e");
+      return 0.0;
+    }
+  }
+
+  /// Calculates the average monthly efficiency score for a user over a
+  /// specified date range.
+  /// The score is computed as the sum of experience points across categories
+  /// (educationXP, skillsXP, sdXP, sleepXP),
+  /// divided by the count of distinct days with data within the month.
+  /// This ensures an accurate average, considering only days where data is
+  /// present.
+  ///
+  /// Params:
+  ///   - `currentUser`: User ID for whom the score is calculated.
+  ///   - `firstDayOfMonth`: The start date of the month.
+  ///   - `lastDayOfMonth`: The end date of the month.
+  /// Returns a double representing the monthly average efficiency score, or
+  /// 0.0 if no data is found or in case of an error.
+  Future<double> monthlyEfficiencyScore(
+      {required String currentUser,
+      required String firstDayOfMonth,
+      required String lastDayOfMonth}) async {
+    try {
+      final db = await database;
+
+      final resultMES = await db.rawQuery('''
+        SELECT ROUND((SUM(educationXP) + SUM(skillsXP) + SUM(sdXP) 
+                + SUM(sleepXP)) / COUNT(DISTINCT date), 2) AS efficiencyScore
+        FROM experience_points
+        WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
+        ''', [currentUser, firstDayOfMonth, lastDayOfMonth]);
+
+      if (resultMES.isNotEmpty) {
+        // first row and column
+        final totalMES = resultMES.first['efficiencyScore'];
+        if (totalMES is double) {
+          return totalMES;
+        } else {
+          return 0.0; // Handle the case where the result is not a double
+        }
+      } else {
+        return 0.0; // Return 0.0 if no matching records are found
+      }
+    } catch (e) {
+      logger.e("(monthlyEfficiencyScore) ERROR: $e");
+      return 0.0;
+    }
+  }
+
+  // Delete the entire database
+  // Future<void> deleteDb() async {
+  //   try {
+  //     final dbPath = await getDatabasesPath();
+  //     final path = join(dbPath, "tracker.db");
+
+  //     await deleteDatabase(path);
+  //     _database = null; // Reset the database instance
+
+  //     logger.i("Database has been deleted");
+  //   } catch (e) {
+  //     logger.e("Error: $e");
+  //   }
+  // }
 }

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:motion/main.dart';
+import 'package:motion/motion_core/mc_sql_table/experience_table.dart';
 import 'package:motion/motion_core/mc_sql_table/main_table.dart';
 import 'package:motion/motion_core/mc_sql_table/sub_table.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_date_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_time_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
+import 'package:motion/motion_core/motion_providers/sql_pvd/experience_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_reusable/db_re/sub_logic.dart';
 import 'package:motion/motion_reusable/db_re/sub_ui.dart';
@@ -142,9 +144,9 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                   ),
 
                   // cancel and add button
-                  Consumer4<CurrentDateProvider, UserUidProvider,
-                      CurrentTimeProvider, MainCategoryTrackerProvider>(
-                    builder: (context, date, uid, time, mainCat, child) {
+                  Consumer5<CurrentDateProvider, UserUidProvider,
+                      CurrentTimeProvider, MainCategoryTrackerProvider, ExperiencePointTableProvider>(
+                    builder: (context, date, uid, time, mainCat, xp,child) {
                       return CancelAddTextButtons(
                         firstButtonName: AppString.trackCancelTextButton,
                         secondButtonName: AppString.trackAddTextButton,
@@ -201,7 +203,24 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                                   await mainCategoryExists(
                                       date.currentDate, uid.userUid!);
 
+                              final experiencePointsExists2 =
+                                  await experiencePointsExists(
+                                      date.currentDate, uid.userUid!);
+
                               logger.i(mainCategoryExists1);
+
+                              if (!experiencePointsExists2) {
+                                logger.i("a new row is being added into the experience_point table");
+                                // Insert date and currentLoggedInUser into
+                                //the experience_point table
+                                final experiencePointInsert = ExperiencePoints(
+                                  date: date.currentDate,
+                                  currentLoggedInUser: uid.userUid!,
+                                );
+
+                                await xp.insertIntoExperiencePoint(experiencePointInsert);
+                                logger.i("a new row has been inserted");
+                              }
 
                               if (!mainCategoryExists1) {
                                 logger.i("Main Category is being added");
