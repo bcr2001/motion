@@ -149,7 +149,7 @@ Widget timeAccountedAndCurrentDate() {
                           convertMinutesToTime(totalTimeSpentAllSub);
 
                       return Text(
-                        "$convertedAllTotalTimeSpent\nAccounted",
+                        "$convertedAllTotalTimeSpent\n  Accounted",
                         style: const TextStyle(
                             fontSize: 21,
                             fontWeight: FontWeight.w600,

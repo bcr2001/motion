@@ -76,6 +76,7 @@ void main() async {
   // final allMain = await databaseHelper.getAllMainCategories();
   final allMain = await databaseHelper.getAllExperiencePoints(date: "2024-02-13");
 
+
   logger.i(allMain);
 
   runApp(MultiProvider(

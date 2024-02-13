@@ -12,6 +12,7 @@ import 'package:motion/motion_routes/route_action.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import '../home_reusable/back_home.dart';
 import '../home_reusable/front_home.dart';
+import '../home_windows/efficieny_window.dart';
 import '../home_windows/total_acc_unacc.dart';
 
 // home route
@@ -75,6 +76,11 @@ class MotionHomeRoute extends StatelessWidget {
               // SECTION TWO: QUOTE OF THE DAY
               // quote from the zenQuotes API
               quoteOfTheDay(),
+
+              // SECTION 3.0: EFFICENCY SCORE
+              // This section displays the users entire efficieny
+              // score
+              const EfficienyScoreWindow(),
 
 
               // SECTION THREE: ACCOUNTED AND UNACCOUNTED TOTALS
