@@ -7,7 +7,7 @@ import 'package:motion/firebase_options.dart';
 import 'package:motion/motion_core/mc_sql_table/sub_table.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_month_provider_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_time_pvd.dart';
-import 'package:motion/motion_core/motion_providers/date_pvd/current_year_pcd.dart';
+import 'package:motion/motion_core/motion_providers/date_pvd/current_year_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/first_and_last_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/seven_days_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
@@ -29,11 +29,13 @@ import 'motion_themes/mth_theme/dark_theme.dart';
 import 'motion_themes/mth_theme/light_theme.dart';
 import 'motion_core/mc_sqlite/sql_tracker_db.dart';
 
-// This creates a global key for managing the state of a navigator widget in Flutter.
+// This creates a global key for managing the state of a navigator widget 
+// in Flutter.
 final GlobalKey<NavigatorState> navigationKey = GlobalKey<NavigatorState>();
 
 
-// This instantiates a database helper class (TrackerDatabaseHelper) for managing database operations, likely related to tracking functionality.
+// This instantiates a database helper class (TrackerDatabaseHelper) for 
+// managing database operations, likely related to tracking functionality.
 final TrackerDatabaseHelper trackDbInstance = TrackerDatabaseHelper();
 
 
@@ -74,9 +76,9 @@ void main() async {
 
   // final allMain = await dbHelper.getAllItems();
   // final allMain = await databaseHelper.getAllMainCategories();
-  final allMain = await databaseHelper.getAllExperiencePoints(date: "2024-02-13");
+  final allMain = await databaseHelper.getAllExperiencePoints(date: "2024-02-14");
 
-
+ 
   logger.i(allMain);
 
   runApp(MultiProvider(

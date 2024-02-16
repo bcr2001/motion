@@ -6,7 +6,6 @@ import '../../mc_sql_table/experience_table.dart';
 // EXPERIENCE POINT TABLE
 // handles database operations for the experience_points table
 class ExperiencePointTableProvider extends ChangeNotifier {
-
   /// Inserts an ExperiencePoints object into the database.
   ///
   /// This function delegates the insertion operation to the `insertExperiencePoint` method
@@ -19,7 +18,6 @@ class ExperiencePointTableProvider extends ChangeNotifier {
     await trackDbInstance.insertExperiencePoint(experience);
   }
 
-
   /// Retrieves the average daily efficiency score for a specified user.
   /// This function acts as a wrapper around the database query to fetch the efficiency score,
   /// encapsulating the database logic and providing a clean interface for the UI components.
@@ -27,10 +25,17 @@ class ExperiencePointTableProvider extends ChangeNotifier {
   /// Params:
   ///   - `currentUser`: The identifier (ID) of the user for whom the score is being retrieved.
   /// Returns a `Future<double>` representing the user's average efficiency score.
+  /// (entire)
   Future<double> retrieveExperiencePointsEfficiencyScore(
       {required String currentUser}) async {
-    return await trackDbInstance.experiencePointsEfficiencyScore(
+    return await trackDbInstance.entireExperiencePointsEfficiencyScore(
         currentUser: currentUser);
+  }
+  /// (year)
+  Future<double> retrieveYearExperiencePointsEfficiencyScore(
+      {required String currentUser, required String currentYear}) async {
+    return await trackDbInstance.entireYearExperiencePointsEfficiencyScore(
+        currentUser: currentUser, currentYear: currentYear);
   }
 
   /// Retrieves the average monthly efficiency score for a specified user within a given date range.

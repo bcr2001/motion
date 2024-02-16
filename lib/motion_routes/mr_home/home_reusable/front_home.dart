@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_date_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_month_provider_pvd.dart';
+import 'package:motion/motion_core/motion_providers/date_pvd/current_year_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/first_and_last_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/assigner_pvd.dart';
@@ -77,43 +78,68 @@ Widget entireTimeAccountedAndUnaccounted(
   );
 }
 
-// returns the number of days in the main_category table
-Widget numberOfDaysMainCategory() {
-  // main enables access to the SQL query to get the number of days
-  // user provider allows us to get the currently logged in user
-  return Consumer2<MainCategoryTrackerProvider, UserUidProvider>(
-      builder: (context, main, user, child) {
-    // firebase user uid
-    final userUid = user.userUid;
+// A widget that displays the total number of days accounted for in 
+// the main_category table. It can show the total number of days for either 
+// all time or for a specific year, based on the value of `getAllDays`.
+class NumberOfDaysMainCategory extends StatelessWidget {
+  final bool getAllDays;
+  const NumberOfDaysMainCategory({super.key, required this.getAllDays});
 
+  // A helper method that creates a FutureBuilder to fetch and display the data.
+  // It shows a loading indicator while waiting, an error message in case of 
+  // an error, and the total number of days when data is available.
+  Widget _futureData({Future<dynamic>? future}) {
     return FutureBuilder(
-        future: main.retrievedNumberOfDays(userUid!),
-        builder: (BuildContext context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            // shimmer effect is displayed while the data is being loaded
-            return const ShimmerWidget.rectangular(width: 20, height: 20);
-          } else if (snapshot.hasError) {
-            // if the result has an error the error message is shown
-            return Text('Error: ${snapshot.error}');
-          } else {
-            // the reult from the database
-            // if empty the default value is 0
-            final totalNumberOfDays = snapshot.data ?? 0;
+      future: future,
+      builder: (BuildContext context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          // Display shimmer effect while the data is being loaded
+          return const ShimmerWidget.rectangular(width: 20, height: 20);
+        } else if (snapshot.hasError) {
+          // Display an error message if there is an error
+          return Text('Error: ${snapshot.error}');
+        } else {
+          // Extract and display the total number of days
+          final totalNumberOfDays = snapshot.data ?? 0;
+          return Padding(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: Text(
+              "Day: $totalNumberOfDays",
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+            ),
+          );
+        }
+      },
+    );
+  }
 
+  @override
+  Widget build(BuildContext context) {
+    // Using Consumer3 to access three different providers
+    return Consumer3<MainCategoryTrackerProvider, UserUidProvider,
+        CurrentYearProvider>(
+      builder: (context, main, user, year, child) {
+        final userUid = user.userUid; // Firebase user UID
+        final currentYear = year.currentYear; // Current year
 
-            // a text widget to display it on the screen
-            return Padding(
-              padding: const EdgeInsets.only(left: 8.0),
-              child: Text(
-                "Day: $totalNumberOfDays",
-                style:
-                    const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-              ),
-            );
-          }
-        });
-  });
+        // Decide which future to use based on the value of getAllDays
+        // and call _futureData to build the UI accordingly
+        return getAllDays
+            ? _futureData(
+                future: main.retrievedNumberOfDays(currentUser: userUid!),
+              )
+            : _futureData(
+                future: main.retrievedNumberOfDays(
+                    currentUser: userUid!,
+                    currentYear: currentYear,
+                    getAllDays: false),
+              );
+      },
+    );
+  }
 }
+
+
 
 // returns the total time accounted for the current date
 // and the current date text to the right

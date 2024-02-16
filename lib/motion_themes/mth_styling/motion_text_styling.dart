@@ -35,6 +35,11 @@ class AppTextStyle {
     return _baseStyle.copyWith(fontSize: 17.5, fontWeight: FontWeight.w600);
   }
 
+  // section title style (ef score)
+  static sectionTitleTextStyleEF2() {
+    return _baseStyle.copyWith(fontSize: 20.5, fontWeight: FontWeight.w600);
+  }
+
   // section title style (subtitle)
   static subSectionTitleTextStyle() {
     return _baseStyle.copyWith(fontSize: 14, fontWeight: FontWeight.w600);

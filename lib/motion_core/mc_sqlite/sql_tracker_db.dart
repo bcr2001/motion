@@ -45,21 +45,21 @@ class TrackerDatabaseHelper {
   void _onUpgradeDatabase(Database db, int oldVersion, int newVersion) async {
     logger.i("Database _onUpgradeDatabase function called");
     if (oldVersion < 9) {
-    //   await db.execute('DROP TABLE IF EXISTS experience_points');
-    //   // Upgrade the database schema here
-    //   await db.execute('''
-    //   CREATE TABLE experience_points(
-    //     date TEXT,
-    //     educationXP INTEGER,
-    //     skillsXP INTEGER,
-    //     sdXP INTEGER,
-    //     sleepXP INTEGER,
-    //     currentLoggedInUser TEXT,
-    //     PRIMARY KEY (date, currentLoggedInUser),
-    //     FOREIGN KEY (date, currentLoggedInUser) 
-    //     REFERENCES main_category(date, currentLoggedInUser)
-    //   )
-    // ''');
+      //   await db.execute('DROP TABLE IF EXISTS experience_points');
+      //   // Upgrade the database schema here
+      //   await db.execute('''
+      //   CREATE TABLE experience_points(
+      //     date TEXT,
+      //     educationXP INTEGER,
+      //     skillsXP INTEGER,
+      //     sdXP INTEGER,
+      //     sleepXP INTEGER,
+      //     currentLoggedInUser TEXT,
+      //     PRIMARY KEY (date, currentLoggedInUser),
+      //     FOREIGN KEY (date, currentLoggedInUser)
+      //     REFERENCES main_category(date, currentLoggedInUser)
+      //   )
+      // ''');
 
       // Trigger: update_experience_points_after_insert
       // Purpose: Updates the experience_points table after a new entry is
@@ -331,20 +331,55 @@ class TrackerDatabaseHelper {
   }
 
   // count the number of days in the main_category table
-  Future<int> getNumberOfDays(String currentUser) async {
+  Future<int> getNumberOfDays(
+      {required String currentUser,
+      bool getAllDays = true,
+      String currentYear = ""}) async {
     try {
       final db = await database;
 
       // number of days
-      final resultGNOD = await db.rawQuery('''
-      SELECT COUNT(date) AS NumberOfDays
-      FROM main_category
-      WHERE currentLoggedInUser = ?
-    ''', [currentUser]);
+      final resultGNOD = getAllDays ? await db.rawQuery('''
+        SELECT COUNT(DISTINCT date) AS NumberOfDays
+        FROM main_category
+        WHERE currentLoggedInUser = ?
+      ''', [currentUser]) : await db.rawQuery('''
+        SELECT COUNT(DISTINCT date) AS NumberOfDays
+        FROM main_category
+        WHERE currentLoggedInUser = ? AND strftime('%Y', date) = ?
+      ''', [currentUser, currentYear]);
 
       // check if the result is empty
       if (resultGNOD.isNotEmpty) {
         final numberOfDays = resultGNOD.first["NumberOfDays"];
+
+        if (numberOfDays is int) {
+          return numberOfDays;
+        }
+      }
+    } catch (e) {
+      logger.e("Error querying the database: $e");
+    }
+
+    return 0; // Return 0 if there's an error or no result.
+  }
+
+  // count the number of days in the main_category table for the current year
+  Future<int> getNumberOfDaysInYear(
+      {required String currentUser, required String currentYear}) async {
+    try {
+      final db = await database;
+
+      // number of days
+      final resultGNODY = await db.rawQuery('''
+      SELECT COUNT(date) AS NumberOfDays
+      FROM main_category
+      WHERE currentLoggedInUser = ? AND str("YYYY", date) = ?
+    ''', [currentUser, currentYear]);
+
+      // check if the result is empty
+      if (resultGNODY.isNotEmpty) {
+        final numberOfDays = resultGNODY.first["NumberOfDays"];
 
         if (numberOfDays is int) {
           return numberOfDays;
@@ -413,6 +448,49 @@ class TrackerDatabaseHelper {
     } catch (e) {
       // Handle any database query errors, e.g., log the error
       //and return an empty list or throw an exception.
+      logger.e('Error in getMonthTotalAndAverage: $e');
+      rethrow;
+    }
+  }
+
+  // gets the entire total for the timeSpent column of the main_category table
+  // for the current year
+  Future<double> getEntireYearTotalMainCategoryTable(
+      String currentUser, bool isUnaccounted, String currentYear) async {
+    try {
+      final db = await database;
+
+      final query = isUnaccounted
+          ? '''
+        SELECT ((COUNT(date) * 24)*60) - (COALESCE(SUM(education), 0) 
+        + COALESCE(SUM(skills), 0) + COALESCE(SUM(entertainment), 0) + 
+        COALESCE(SUM(selfDevelopment), 0) + COALESCE(SUM(sleep), 0)) 
+        AS EntireTotalResult
+        FROM main_category
+        WHERE currentLoggedInUser = ? AND strftime('%Y', date) = ?
+        '''
+          : '''
+        SELECT COALESCE(SUM(education), 0) + COALESCE(SUM(skills), 0) 
+        + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(selfDevelopment), 0) 
+        + COALESCE(SUM(sleep), 0) AS EntireTotalResult
+        FROM main_category
+        WHERE currentLoggedInUser = ? AND strftime('%Y', date) = ?
+        ''';
+
+      final resultETMCT = await db.rawQuery(query, [currentUser, currentYear]);
+
+      if (resultETMCT.isNotEmpty) {
+        final totalETMCT = resultETMCT.first["EntireTotalResult"];
+        if (totalETMCT is double) {
+          return totalETMCT;
+        } else {
+          logger.i("No data so a 0.0 is being returned");
+          return 0.0;
+        }
+      } else {
+        return 0.0;
+      }
+    } catch (e) {
       logger.e('Error in getMonthTotalAndAverage: $e');
       rethrow;
     }
@@ -1065,7 +1143,6 @@ class TrackerDatabaseHelper {
 
   // Comprehensive CRUD Operations for the ExperiencePoints Table
 
-  
   // insert new rows into the experience_points table
   Future<void> insertExperiencePoint(ExperiencePoints experience) async {
     try {
@@ -1078,7 +1155,8 @@ class TrackerDatabaseHelper {
   }
 
   // get  all data from the experience_points table.
-  Future<List<ExperiencePoints>> getAllExperiencePoints({required String date}) async {
+  Future<List<ExperiencePoints>> getAllExperiencePoints(
+      {required String date}) async {
     final db = await database;
     final result = await db.rawQuery('''
       SELECT *
@@ -1096,7 +1174,8 @@ class TrackerDatabaseHelper {
   ///
   /// Param:
   ///   - `currentUser`: User ID to calculate the score for.
-  Future<double> experiencePointsEfficiencyScore(
+  /// (entire)
+  Future<double> entireExperiencePointsEfficiencyScore(
       {required String currentUser}) async {
     try {
       final db = await database;
@@ -1107,6 +1186,36 @@ class TrackerDatabaseHelper {
       FROM experience_points
       WHERE currentLoggedInUser = ?
       ''', [currentUser]);
+
+      if (resultEPES.isNotEmpty) {
+        // first row and column
+        final totalEPES = resultEPES.first['efficiencyScore'];
+        if (totalEPES is double) {
+          return totalEPES;
+        } else {
+          return 0.0; // Handle the case where the result is not a double
+        }
+      } else {
+        return 0.0; // Return 0.0 if no matching records are found
+      }
+    } catch (e) {
+      logger.e("(experiencePointsEfficiencyScore) ERROR: $e");
+      return 0.0;
+    }
+  }
+
+  // (year)
+  Future<double> entireYearExperiencePointsEfficiencyScore(
+      {required String currentUser, required String currentYear}) async {
+    try {
+      final db = await database;
+
+      final resultEPES = await db.rawQuery('''
+      SELECT ROUND((SUM(educationXP) + SUM(skillsXP) + SUM(sdXP) + SUM(sleepXP)) / 
+        COUNT(DISTINCT date), 2) AS efficiencyScore
+      FROM experience_points
+      WHERE currentLoggedInUser = ? AND strftime('%Y', date) = ?
+      ''', [currentUser, currentYear]);
 
       if (resultEPES.isNotEmpty) {
         // first row and column

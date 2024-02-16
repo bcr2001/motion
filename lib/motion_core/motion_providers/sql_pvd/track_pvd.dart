@@ -5,7 +5,6 @@ import 'package:motion/motion_core/mc_sqlite/sql_tracker_db.dart';
 
 import '../../../main.dart';
 
-
 // MAIN CATEGORY TABLE
 //handles database operations for the main_category table
 class MainCategoryTrackerProvider extends ChangeNotifier {
@@ -30,6 +29,17 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
         .getEntireTotalMainCategoryTable(currentUser, isUnaccounted);
 
     return theEntireTotal;
+  }
+
+  // Retrieve the entire total from the main category table.
+  // for the current year
+  Future<double> retrieveGetEntireYearTotalMainCategoryTable(
+      String currentUser, bool isUnaccounted, String currentYear) async {
+    double theEntireYearTotal =
+        await trackDbInstance.getEntireYearTotalMainCategoryTable(
+            currentUser, isUnaccounted, currentYear);
+
+    return theEntireYearTotal;
   }
 
   // retrieve the current month entire acounted and unaccounted totals
@@ -61,8 +71,10 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
   }
 
   // retrieve the total number of days in the main_category table
-  Future<int> retrievedNumberOfDays(String currentUser) async {
-    int numberOfDays = await trackDbInstance.getNumberOfDays(currentUser);
+  Future<int> retrievedNumberOfDays(
+      {required String currentUser, String currentYear = "", bool getAllDays = true}) async {
+    int numberOfDays = await trackDbInstance.getNumberOfDays(
+        currentUser: currentUser, currentYear: currentYear, getAllDays: getAllDays);
 
     return numberOfDays;
   }

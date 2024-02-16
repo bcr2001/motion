@@ -104,7 +104,8 @@ class AppString {
   static const String motionLLC = "MOTION LLC. ALL RIGHTS RESERVED";
 
   // TRACK (MOTION) PAGE
-  static const String efficiencyScoreTitle = "Efficiency Score";
+  static const String efficiencyScoreTitle = "EFS";
+  static const String entireTitle = "Entire";
   static const String educationMainCategory = "Education";
   static const String skillMainCategory = "Skills";
   static const String entertainmentMainCategory = "Entertainment";

@@ -3,6 +3,8 @@ import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_routes/mr_home/home_reusable/back_home.dart';
+import 'package:motion/motion_routes/mr_home/home_reusable/front_home.dart';
+import 'package:motion/motion_routes/mr_home/home_windows/total_acc_unacc.dart';
 import 'package:motion/motion_routes/mr_stats/stats_back.dart';
 import 'package:motion/motion_routes/mr_stats/stats_front.dart';
 // import 'package:motion/motion_routes/mr_stats/stats_sections.dart';
@@ -12,6 +14,8 @@ import 'package:motion/motion_themes/mth_app/app_images.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:provider/provider.dart';
+
+import '../mr_home/home_windows/efficieny_window.dart';
 
 // stats route
 class MotionStatesRoute extends StatelessWidget {
@@ -54,18 +58,20 @@ class MotionStatesRoute extends StatelessWidget {
                       final snapshotData = snapshot.data;
         
                       if (snapshotData! <= 0) {
-                        return Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            // default display image that is shown 
-                            // when the page is empty
-                            AppImages.noAnalysisGallary,
-        
-                            // information on why it is empty
-                            const InfoToTheUser(
-                                sectionInformation:
-                                    AppString.infoAboutAnnualOverviewEmpty)
-                          ],
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // default display image that is shown 
+                              // when the page is empty
+                              AppImages.noAnalysisGallary,
+                                
+                              // information on why it is empty
+                              const InfoToTheUser(
+                                  sectionInformation:
+                                      AppString.infoAboutAnnualOverviewEmpty)
+                            ],
+                          ),
                         );
                       } else {
                         // if data is available,the analysis 
@@ -79,7 +85,21 @@ class MotionStatesRoute extends StatelessWidget {
                               // Main Category Summary
                               sectionTitle(
                                   titleName: AppString.mainCategorySummaryTitle),
+                              
+                              // total number of days
+                              const NumberOfDaysMainCategory(getAllDays: true),
+                              
+                              // users all time efficiency score 
+                              const EfficienyScoreWindow(getEntireScore: true,),
+
+
+                              // displays the total time accounted and unaccounted
+                              // for the entire period
+                              const TotalAccountedAndUnaccounted(getEntireTotal: true),
+
+                              
                               const CategorySummaryReport(),
+
         
                               // Yealry Report
                               sectionTitle(

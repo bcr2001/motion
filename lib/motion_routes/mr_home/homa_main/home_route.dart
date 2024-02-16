@@ -70,7 +70,7 @@ class MotionHomeRoute extends StatelessWidget {
                 delegate: SliverChildListDelegate([
               // SECTION ONE: NUMBER OF DAYS IN APP
               // total number of days in the main_category table
-              numberOfDaysMainCategory(),
+              const NumberOfDaysMainCategory(getAllDays: false,),
               
 
               // SECTION TWO: QUOTE OF THE DAY
@@ -80,13 +80,12 @@ class MotionHomeRoute extends StatelessWidget {
               // SECTION 3.0: EFFICENCY SCORE
               // This section displays the users entire efficieny
               // score
-              const EfficienyScoreWindow(),
-
+              const EfficienyScoreWindow(getEntireScore: false,),
 
               // SECTION THREE: ACCOUNTED AND UNACCOUNTED TOTALS
               //  total accounted time and
               //  total unaccounted time
-              const TotalAccountedAndUnaccounted(),
+              const TotalAccountedAndUnaccounted(getEntireTotal: false,),
 
 
               // SECTION FOUR: TRACKING WINDOW

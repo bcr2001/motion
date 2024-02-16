@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:motion/motion_core/motion_providers/date_pvd/current_year_pvd.dart';
 import 'package:motion/motion_reusable/db_re/sub_logic.dart';
 import 'package:motion/motion_reusable/db_re/sub_ui.dart';
+import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
+import 'package:provider/provider.dart';
 
 // title builder
 Widget sectionTitle({required String titleName}) {
@@ -46,6 +49,55 @@ Widget specialSectionTitle(
             elevatedTitleName,
             style: AppTextStyle.specialSectionTitleTextStyle(),
           ),
+        )
+      ],
+    ),
+  );
+}
+
+// special title
+Widget specialSectionTitleEFS(
+    {required String mainTitleName, required String elevatedTitleName, required bool getEntire}) {
+  return Padding(
+    padding: const EdgeInsets.only(left: 10, top: 10, bottom: 10),
+    child: Row(
+      children: [
+        // main title
+        Text(
+          mainTitleName,
+          style: AppTextStyle.sectionTitleTextStyleEF2(),
+        ),
+
+        // elevated title name
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10.0, left: 5.0),
+              child: Text(
+                elevatedTitleName,
+                style: AppTextStyle.specialSectionTitleTextStyle(),
+              ),
+            ),
+
+            // year
+            getEntire? Consumer<CurrentYearProvider>(
+              builder: (BuildContext context, year, child) {
+                final currentYear = year.currentYear;
+                
+                return Padding(
+                  padding: const EdgeInsets.only(left:2.0),
+                  child: Text(
+                    currentYear,
+                    style: AppTextStyle.specialSectionTitleTextStyle(),
+                  ),
+                );
+              },
+            ): Padding(
+              padding: const EdgeInsets.only(left: 2.0),
+              child: Text(AppString.entireTitle, style: AppTextStyle.specialSectionTitleTextStyle(),),
+            )
+          ],
         )
       ],
     ),
@@ -109,7 +161,8 @@ class _ScrollingListBuilderState extends State<ScrollingListBuilder> {
                               trailing: Text(
                                 convertedTotal,
                                 textAlign: TextAlign.center,
-                                style: AppTextStyle.leadingStatsTextLTStyle(),),
+                                style: AppTextStyle.leadingStatsTextLTStyle(),
+                              ),
                               subtitle: Container(
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(20),
@@ -124,8 +177,8 @@ class _ScrollingListBuilderState extends State<ScrollingListBuilder> {
                               ),
                             )
                           : Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 5),
-                            child: ListTile(
+                              padding: const EdgeInsets.symmetric(vertical: 5),
+                              child: ListTile(
                                 // Main Category Name
                                 leading: Text(
                                   item[widget.columnName],
@@ -142,8 +195,8 @@ class _ScrollingListBuilderState extends State<ScrollingListBuilder> {
                                   child: Center(
                                     child: Text(convertedTotal,
                                         textAlign: TextAlign.center,
-                                        style:
-                                            AppTextStyle.tileElementTextStyle()),
+                                        style: AppTextStyle
+                                            .tileElementTextStyle()),
                                   ),
                                 ),
                                 trailing: Text(
@@ -151,7 +204,7 @@ class _ScrollingListBuilderState extends State<ScrollingListBuilder> {
                                   style: AppTextStyle.leadingStatsTextLTStyle(),
                                 ),
                               ),
-                          );
+                            );
                     }));
           }
         });
@@ -174,14 +227,14 @@ class CardBuilder extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom:15.0, left: 2, right: 2),
+      padding: const EdgeInsets.only(bottom: 15.0, left: 2, right: 2),
       child: Card(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // time accounted
             timeAccountedAndOthers ?? const SizedBox.shrink(),
-    
+
             // database results
             Container(
               constraints: BoxConstraints(maxHeight: screenHeight * 0.38),

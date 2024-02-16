@@ -1,68 +1,81 @@
 import 'package:flutter/material.dart';
+import 'package:motion/motion_core/motion_providers/date_pvd/current_year_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
+import 'package:motion/motion_routes/mr_home/home_reusable/back_home.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:provider/provider.dart';
 
 import '../../../motion_core/motion_providers/sql_pvd/experience_pvd.dart';
 import '../../../motion_themes/mth_app/app_strings.dart';
 
-
 /// Displays the user's efficiency score using `ExperiencePointTableProvider`.
-/// Uses `FutureBuilder` to asynchronously fetch the score and handles loading and error states.
+/// Uses `FutureBuilder` to asynchronously fetch the score and handles loading
+/// and error states.
 /// On successful data retrieval, it shows the calculated efficiency score.
 class EfficienyScoreWindow extends StatelessWidget {
-  const EfficienyScoreWindow({super.key});
+  final bool getEntireScore;
+  const EfficienyScoreWindow({super.key, required this.getEntireScore});
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<ExperiencePointTableProvider, UserUidProvider>(
-        builder: ((context, xp, user, child) {
+    return Consumer3<ExperiencePointTableProvider, UserUidProvider,
+        CurrentYearProvider>(builder: ((context, xp, user, year, child) {
       final String currentUser = user.userUid!;
+      final String currentYear = year.currentYear;
 
-      return FutureBuilder(
-          future: xp.retrieveExperiencePointsEfficiencyScore(
-              currentUser: currentUser),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const ShimmerWidget.rectangular(width: 50, height: 30);
-            } else if (snapshot.hasError) {
-              return const Text("N/A");
-            } else {
-              final resultSnapShot = snapshot.data ?? 0.0;
+      return getEntireScore
+          ? FutureBuilder(
+              future: xp.retrieveExperiencePointsEfficiencyScore(
+                  currentUser: currentUser),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const ShimmerWidget.rectangular(width: 50, height: 30);
+                } else if (snapshot.hasError) {
+                  return const Text("N/A");
+                } else {
+                  final resultSnapShot = snapshot.data ?? 0.0;
 
-              final efficientResults = resultSnapShot / 100;
+                  final efficientResults = resultSnapShot / 100;
 
-              logger.i("Total Efficiency Score: $resultSnapShot");
+                  logger.i("Total Efficiency Score: $resultSnapShot");
 
-              return efficiencySection(score: "$efficientResults");
-            }
-          });
+                  return efficiencySection(
+                      score: "$efficientResults", getEntire: false);
+                }
+              })
+          : FutureBuilder(
+              future: xp.retrieveYearExperiencePointsEfficiencyScore(
+                  currentUser: currentUser, currentYear: currentYear),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const ShimmerWidget.rectangular(width: 50, height: 30);
+                } else if (snapshot.hasError) {
+                  return const Text("N/A");
+                } else {
+                  final resultSnapShot = snapshot.data ?? 0.0;
+
+                  final efficientResults = resultSnapShot / 100;
+
+                  logger.i("Total Efficiency Score: $resultSnapShot");
+
+                  return efficiencySection(
+                      score: "$efficientResults", getEntire: true);
+                }
+              });
     }));
   }
 }
 
-
 // database calculated efficiency score and title
-Widget efficiencySection({required String score}) {
+Widget efficiencySection({required String score, required bool getEntire}) {
   return Container(
-    alignment: Alignment.topRight,
-    child: Column(
-      children: [
-        // efficienty score
-        Text(
-          score,
-          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
-          textAlign: TextAlign.center,
-        ),
-
-        // efficiency score title
-        Text(
-          AppString.efficiencyScoreTitle,
-          style: AppTextStyle.tileElementTextStyle(),
-        )
-      ],
-    ),
+    margin: const EdgeInsets.only(left: 10),
+    alignment: Alignment.topLeft,
+    child: specialSectionTitleEFS(
+        getEntire: getEntire,
+        mainTitleName: score,
+        elevatedTitleName: AppString.efficiencyScoreTitle),
   );
 }
