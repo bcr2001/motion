@@ -127,92 +127,95 @@ class AnalysisGallery extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<UserUidProvider, MainCategoryTrackerProvider>(
-        builder: (context, user, main, child) {
-      // current user uid
-      final String currentUser = user.userUid!;
-
-      // returns a grid view of yearly break down gallaries
-      return FutureBuilder(
-          future: main.retrieveAccountedAndUnaccountedBrokenByYears(
-              currentUser: currentUser),
-          builder: ((context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              // Loading state: Show a shimmer effect while data is being loaded.
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            } else if (snapshot.hasError) {
-              // Error state: Display an error message if there's an issue with data retrieval.
-              return const Text("Error 355 :(");
-            } else {
-              final dataResults = snapshot.data!;
-
-              return Column(
-                children: [
-                  // info to the user'
-                  const InfoToTheUser(
-                      sectionInformation: AppString.infoAboutGalleys),
-
-                  // yearly gallary
-                  GridView.builder(
-                      shrinkWrap: true,
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                              mainAxisExtent: 100,
-                              crossAxisCount: 3,
-                              crossAxisSpacing: 5,
-                              mainAxisSpacing: 5),
-                      itemCount: dataResults.length,
-                      itemBuilder: (context, index) {
-                        // accounted total for the year in hours
-                        final double accountedYearTotal =
-                            dataResults[index]["Accounted"];
-                        final String accountedYearTotalString =
-                            accountedYearTotal.toStringAsFixed(2);
-
-                        // accounted total for the year in days
-                        final double accountedDaysTotal =
-                            accountedYearTotal / 24;
-                        final String accountedDaysTotalString =
-                            accountedDaysTotal.toStringAsFixed(2);
-
-                        // unaccounted total for the year in hours
-                        final double unaccountedYearTotal =
-                            dataResults[index]["Unaccounted"];
-                        final String unaccountedYearTotalString =
-                            unaccountedYearTotal.toStringAsFixed(2);
-
-                        // unaccounted total for the years in days
-                        final double unaccountedDaysTotal =
-                            unaccountedYearTotal / 24;
-                        final String unaccountedDaysTotalString =
-                            unaccountedDaysTotal.toStringAsFixed(2);
-
-                        // year
-                        final String year = dataResults[index]["Year"];
-
-                        return AnnualGallaryBuilder(
-                          gallaryYear: year,
-                          onTap: () {
-                            logger.i("$year clicked");
-                            Navigator.push(context, MaterialPageRoute(
-                                builder: (BuildContext context) {
-                              return YearsWorthOfSummaryStatitics(
-                                year: year,
-                                accountedDays: accountedDaysTotalString,
-                                accountedHours: accountedYearTotalString,
-                                unaccountedDays: unaccountedDaysTotalString,
-                                unaccountedHours: unaccountedYearTotalString,
-                              );
-                            }));
-                          },
-                        );
-                      })
-                ],
-              );
-            }
-          }));
-    });
+    return Padding(
+      padding: const EdgeInsets.only(bottom:50.0),
+      child: Consumer2<UserUidProvider, MainCategoryTrackerProvider>(
+          builder: (context, user, main, child) {
+        // current user uid
+        final String currentUser = user.userUid!;
+    
+        // returns a grid view of yearly break down gallaries
+        return FutureBuilder(
+            future: main.retrieveAccountedAndUnaccountedBrokenByYears(
+                currentUser: currentUser),
+            builder: ((context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                // Loading state: Show a shimmer effect while data is being loaded.
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              } else if (snapshot.hasError) {
+                // Error state: Display an error message if there's an issue with data retrieval.
+                return const Text("Error 355 :(");
+              } else {
+                final dataResults = snapshot.data!;
+    
+                return Column(
+                  children: [
+                    // info to the user'
+                    const InfoToTheUser(
+                        sectionInformation: AppString.infoAboutGalleys),
+    
+                    // yearly gallary
+                    GridView.builder(
+                        shrinkWrap: true,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                                mainAxisExtent: 100,
+                                crossAxisCount: 3,
+                                crossAxisSpacing: 5,
+                                mainAxisSpacing: 5),
+                        itemCount: dataResults.length,
+                        itemBuilder: (context, index) {
+                          // accounted total for the year in hours
+                          final double accountedYearTotal =
+                              dataResults[index]["Accounted"];
+                          final String accountedYearTotalString =
+                              accountedYearTotal.toStringAsFixed(2);
+    
+                          // accounted total for the year in days
+                          final double accountedDaysTotal =
+                              accountedYearTotal / 24;
+                          final String accountedDaysTotalString =
+                              accountedDaysTotal.toStringAsFixed(2);
+    
+                          // unaccounted total for the year in hours
+                          final double unaccountedYearTotal =
+                              dataResults[index]["Unaccounted"];
+                          final String unaccountedYearTotalString =
+                              unaccountedYearTotal.toStringAsFixed(2);
+    
+                          // unaccounted total for the years in days
+                          final double unaccountedDaysTotal =
+                              unaccountedYearTotal / 24;
+                          final String unaccountedDaysTotalString =
+                              unaccountedDaysTotal.toStringAsFixed(2);
+    
+                          // year
+                          final String year = dataResults[index]["Year"];
+    
+                          return AnnualGallaryBuilder(
+                            gallaryYear: year,
+                            onTap: () {
+                              logger.i("$year clicked");
+                              Navigator.push(context, MaterialPageRoute(
+                                  builder: (BuildContext context) {
+                                return YearsWorthOfSummaryStatitics(
+                                  year: year,
+                                  accountedDays: accountedDaysTotalString,
+                                  accountedHours: accountedYearTotalString,
+                                  unaccountedDays: unaccountedDaysTotalString,
+                                  unaccountedHours: unaccountedYearTotalString,
+                                );
+                              }));
+                            },
+                          );
+                        })
+                  ],
+                );
+              }
+            }));
+      }),
+    );
   }
 }

@@ -7,6 +7,7 @@ import 'package:motion/motion_routes/mr_stats/stats_route.dart';
 import 'package:provider/provider.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import '../motion_themes/mth_app/app_strings.dart';
+import '../motion_themes/mth_styling/motion_text_styling.dart';
 
 // Scaffold and Bottom App Bar routes
 class MainMotionHome extends StatefulWidget {
@@ -27,29 +28,34 @@ class _MotionHome extends State<MainMotionHome> {
   ];
 
   // Helper function to build Google Nav Bar buttons
-  GButton gButtonBuilder({required IconData gIcon, required String gText}) {
+  GButton gButtonBuilder(BuildContext context,{
+    required IconData gIcon, 
+    required String gText}) {
     return GButton(
         icon: gIcon,
         text: gText,
-        textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600));
+        textStyle: AppTextStyle.navigationTextLTStyle(),
+        iconSize: 20,
+        iconColor: Theme.of(context).iconTheme.color);
   }
 
   // google nav bar button
-  static const _navButtons = <GButton>[
-    // home button
-    GButton(
-      icon: Icons.home_filled,
-      text: AppString.homeNavigation,
-      textStyle: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-    ),
+  // Helper function to build Google Nav Bar buttons
+  List<GButton> _navButtons(BuildContext context) {
+    return <GButton>[
+      // home button
+      gButtonBuilder(
+        context, 
+        gIcon: Icons.home_filled, 
+        gText: AppString.homeNavigation),
 
-    // stats button
-    GButton(
-        icon: Icons.bubble_chart_outlined,
-        text: AppString.statsNavigation,
-        textSize: 14,
-        textStyle: TextStyle(fontSize: 15, fontWeight: FontWeight.w600))
-  ];
+      // stats button
+      gButtonBuilder(
+        context, 
+        gIcon: Icons.bubble_chart_outlined, 
+        gText: AppString.statsNavigation),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,14 +63,42 @@ class _MotionHome extends State<MainMotionHome> {
         builder: (context, themeValue, child) {
       return Scaffold(
           // the app body of the current index
-          body: motionAppRoutes[currentIndex],
+          body: Stack(
+            children: [
+              motionAppRoutes[currentIndex],
+
+            Positioned(
+              bottom: 0,
+                left: 0,
+                right: 0,
+              child: SafeArea(
+            child: GNav(
+            backgroundColor: Colors.black.withOpacity(0.5),
+            haptic: true,
+            curve: Curves.linear,
+            padding:const EdgeInsets.all(8),
+            duration: const Duration(milliseconds: 500),
+            gap: 10.0,
+            tabMargin: const EdgeInsets.all(5),
+            selectedIndex: currentIndex,
+            tabs: _navButtons(context),
+            onTabChange: (index) {
+              setState(() {
+                currentIndex = index;
+              });
+            },
+                    )))
+
+              
+            ],
+          ),
 
           // centered Motion logo floating action button
           floatingActionButton: Padding(
             padding: const EdgeInsets.only(top: 50),
             child: SizedBox(
-              width: 70,
-              height: 70,
+              width: 60,
+              height: 60,
               child: FloatingActionButton.large(
                 backgroundColor:
                     themeValue.currentThemeMode == ThemeModeSettingsN1.lightMode
@@ -99,23 +133,7 @@ class _MotionHome extends State<MainMotionHome> {
           floatingActionButtonLocation:
               FloatingActionButtonLocation.centerDocked,
 
-          // bottom navigation bar
-          bottomNavigationBar: SafeArea(
-              child: GNav(
-            haptic: true,
-            curve: Curves.linear,
-            padding: const EdgeInsets.all(15),
-            duration: const Duration(milliseconds: 500),
-            gap: 10.0,
-            tabMargin: const EdgeInsets.all(5),
-            selectedIndex: currentIndex,
-            tabs: _navButtons,
-            onTabChange: (index) {
-              setState(() {
-                currentIndex = index;
-              });
-            },
-          )));
+          );
     });
   }
 }

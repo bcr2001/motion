@@ -17,62 +17,65 @@ class SummaryWindow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer3<UserUidProvider, FirstAndLastDay,
-            MainCategoryTrackerProvider>(
-        builder: (context, user, day, main, child) {
-      // currently logged in user
-      final String currentUser = user.userUid!;
-
-      // first and last day of the current month
-      final String firstDayOfMonth = day.firstDay;
-      final String lastDayOfMonth = day.lastDay;
-
-      // if the total amount of time for the current
-      // month is 0, then the summary page info
-      // is displayed
-      return FutureBuilder(
-          future: main.retrieveEntireMonthlyTotalMainCategoryTable(
-              currentUser, firstDayOfMonth, lastDayOfMonth, false),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              // While the data is loading, a shimmer effect is shown
-              return const Center(
-                child: CircularProgressIndicator(
-                  color: AppColor.blueMainColor,
-                ),
-              );
-            } else if (snapshot.hasError) {
-              return Text('Error: ${snapshot.error}');
-            } else {
-              final snapshotData = snapshot.data;
-
-              if (snapshotData! <= 0) {
-                return const InfoToTheUser(
-                    sectionInformation: AppString.infoAboutSummaryWindow);
-              } else {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // subcategories and their totals and averages
-                    subSectionTitle2(titleName: AppString.homeSubcategoryTitle),
-                    const CardBuilder(
-                      itemsToBeDisplayed: SubcategoryMonthTotalsAndAverages(
-                          isSubcategory: true),
-                      timeAccountedAndOthers: null
-                    ),
-
-                    // main categories with there totals and averages
-                    subSectionTitle2(titleName: AppString.mainCategoryTitle),
-                    const CardBuilder(
-                      itemsToBeDisplayed: SubcategoryMonthTotalsAndAverages(
-                          isSubcategory: false),
-                      timeAccountedAndOthers: null
-                    ),
-                  ],
+    return Padding(
+      padding: const EdgeInsets.only(bottom:50.0),
+      child: Consumer3<UserUidProvider, FirstAndLastDay,
+              MainCategoryTrackerProvider>(
+          builder: (context, user, day, main, child) {
+        // currently logged in user
+        final String currentUser = user.userUid!;
+    
+        // first and last day of the current month
+        final String firstDayOfMonth = day.firstDay;
+        final String lastDayOfMonth = day.lastDay;
+    
+        // if the total amount of time for the current
+        // month is 0, then the summary page info
+        // is displayed
+        return FutureBuilder(
+            future: main.retrieveEntireMonthlyTotalMainCategoryTable(
+                currentUser, firstDayOfMonth, lastDayOfMonth, false),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                // While the data is loading, a shimmer effect is shown
+                return const Center(
+                  child: CircularProgressIndicator(
+                    color: AppColor.blueMainColor,
+                  ),
                 );
+              } else if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              } else {
+                final snapshotData = snapshot.data;
+    
+                if (snapshotData! <= 0) {
+                  return const InfoToTheUser(
+                      sectionInformation: AppString.infoAboutSummaryWindow);
+                } else {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // subcategories and their totals and averages
+                      subSectionTitle2(titleName: AppString.homeSubcategoryTitle),
+                      const CardBuilder(
+                        itemsToBeDisplayed: SubcategoryMonthTotalsAndAverages(
+                            isSubcategory: true),
+                        timeAccountedAndOthers: null
+                      ),
+    
+                      // main categories with there totals and averages
+                      subSectionTitle2(titleName: AppString.mainCategoryTitle),
+                      const CardBuilder(
+                        itemsToBeDisplayed: SubcategoryMonthTotalsAndAverages(
+                            isSubcategory: false),
+                        timeAccountedAndOthers: null
+                      ),
+                    ],
+                  );
+                }
               }
-            }
-          });
-    });
+            });
+      }),
+    );
   }
 }

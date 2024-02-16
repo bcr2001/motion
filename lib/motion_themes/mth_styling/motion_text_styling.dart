@@ -102,6 +102,11 @@ class AppTextStyle {
     return _baseStyle.copyWith(fontSize: 14, fontWeight: FontWeight.w600);
   }
 
+  // home page subtitle list tile style
+  static TextStyle navigationTextLTStyle() {
+    return _baseStyle.copyWith(fontSize: 12, fontWeight: FontWeight.w600);
+  }
+
   // home page tracking window information text style
   static TextStyle infoTextStyle() {
     return _baseStyle.copyWith(fontSize: 15);
