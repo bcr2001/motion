@@ -131,11 +131,17 @@ class _TrailingEditButtonsState extends State<TrailingEditButtons> {
                                 requiresColor: true,
                                 errorMessage: AppString.editPageUpdateError);
                           } else {
+
+
+                              // Trim white spaces from the subcategory name
+                            String trimmedSubcategoryName =
+                                _editTextController.text.trim();
+
                             // Update the assigned item and close the dialog
                             updateItem.updateAssignedItems(Assigner(
                               id: widget.itemIndexId,
                               currentLoggedInUser: widget.itemIndexCurrentUser,
-                              subcategoryName: _editTextController.text,
+                              subcategoryName: trimmedSubcategoryName,
                               mainCategoryName: maincat.selectedValue!,
                               dateCreated: widget.itemIndexDateCreated,
                               isActive: widget.itemIndexIsActive,

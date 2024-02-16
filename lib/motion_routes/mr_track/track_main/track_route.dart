@@ -150,13 +150,18 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                                   AppString.trackMainCategoryNotSelectedError);
                         } else {
                           _formKey.currentState!.save();
+
+                            // Trim white spaces from the subcategory name
+                          String trimmedSubcategoryName =
+                              subcategoryController.text.trim();
+
                           Provider.of<AssignerMainProvider>(context,
                                   listen: false)
                               .insertIntoAssignerDb(Assigner(
                             currentLoggedInUser: userUidProvider.userUid == null
                                 ? AppString.unknown
                                 : userUidProvider.userUid!,
-                            subcategoryName: subcategoryController.text,
+                            subcategoryName: trimmedSubcategoryName,
                             mainCategoryName:
                                 mainCategoryProvider.selectedValue!,
                             dateCreated: date.currentDate,
