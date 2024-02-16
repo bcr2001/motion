@@ -35,7 +35,7 @@ class MotionStatesRoute extends StatelessWidget {
             builder: (context, user, main, child) {
               // current user uid
               final String currentUser = user.userUid!;
-        
+
               // depending on whether the accounted time is 0
               // or >0, a image will be shown of the screen to
               // indicate to the user that there is no data
@@ -56,16 +56,16 @@ class MotionStatesRoute extends StatelessWidget {
                       return Text('Error: ${snapshot.error}');
                     } else {
                       final snapshotData = snapshot.data;
-        
+
                       if (snapshotData! <= 0) {
                         return Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              // default display image that is shown 
+                              // default display image that is shown
                               // when the page is empty
                               AppImages.noAnalysisGallary,
-                                
+
                               // information on why it is empty
                               const InfoToTheUser(
                                   sectionInformation:
@@ -74,33 +74,37 @@ class MotionStatesRoute extends StatelessWidget {
                           ),
                         );
                       } else {
-                        // if data is available,the analysis 
+                        // if data is available,the analysis
                         // gallaries are displayed
                         return Container(
                           margin: const EdgeInsets.only(top: 20),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              // users all time efficiency score
+                              // total number of days
+                              const EfficiencyAndNumberOfDays(
+                                efficiencyScore: EfficienyScoreWindow(
+                                getEntireScore: true,
+                              ), numberOfDays: Padding(
+                                    padding: EdgeInsets.only(bottom: 8.0),
+                                    child: NumberOfDaysMainCategory(
+                                        getAllDays: true),
+                                  )),
+
+                              // displays the total time accounted 
+                              // and unaccounted for the entire period
+                              const TotalAccountedAndUnaccounted(
+                                  getEntireTotal: true),
 
                               // Main Category Summary
                               sectionTitle(
-                                  titleName: AppString.mainCategorySummaryTitle),
-                              
-                              // total number of days
-                              const NumberOfDaysMainCategory(getAllDays: true),
-                              
-                              // users all time efficiency score 
-                              const EfficienyScoreWindow(getEntireScore: true,),
+                                  titleName:
+                                      AppString.mainCategorySummaryTitle),
 
 
-                              // displays the total time accounted and unaccounted
-                              // for the entire period
-                              const TotalAccountedAndUnaccounted(getEntireTotal: true),
-
-                              
                               const CategorySummaryReport(),
 
-        
                               // Yealry Report
                               sectionTitle(
                                   titleName: AppString.yearlyReportTitle),

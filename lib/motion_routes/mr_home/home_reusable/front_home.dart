@@ -78,15 +78,15 @@ Widget entireTimeAccountedAndUnaccounted(
   );
 }
 
-// A widget that displays the total number of days accounted for in 
-// the main_category table. It can show the total number of days for either 
+// A widget that displays the total number of days accounted for in
+// the main_category table. It can show the total number of days for either
 // all time or for a specific year, based on the value of `getAllDays`.
 class NumberOfDaysMainCategory extends StatelessWidget {
   final bool getAllDays;
   const NumberOfDaysMainCategory({super.key, required this.getAllDays});
 
   // A helper method that creates a FutureBuilder to fetch and display the data.
-  // It shows a loading indicator while waiting, an error message in case of 
+  // It shows a loading indicator while waiting, an error message in case of
   // an error, and the total number of days when data is available.
   Widget _futureData({Future<dynamic>? future}) {
     return FutureBuilder(
@@ -102,10 +102,10 @@ class NumberOfDaysMainCategory extends StatelessWidget {
           // Extract and display the total number of days
           final totalNumberOfDays = snapshot.data ?? 0;
           return Padding(
-            padding: const EdgeInsets.only(left: 8.0),
+            padding: const EdgeInsets.only(right: 8.0),
             child: Text(
               "Day: $totalNumberOfDays",
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
             ),
           );
         }
@@ -139,7 +139,29 @@ class NumberOfDaysMainCategory extends StatelessWidget {
   }
 }
 
+// efficiency score and number of days placement
+// the efficiency score and number of days placed in a row 
+// space between
+class EfficiencyAndNumberOfDays extends StatelessWidget {
+  final Widget efficiencyScore;
+  final Widget numberOfDays;
+  const EfficiencyAndNumberOfDays(
+      {super.key, required this.efficiencyScore, required this.numberOfDays});
 
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        // efficiency score
+        efficiencyScore,
+
+        // number of days
+        numberOfDays
+      ],
+    );
+  }
+}
 
 // returns the total time accounted for the current date
 // and the current date text to the right

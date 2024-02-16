@@ -68,19 +68,17 @@ class MotionHomeRoute extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 10.0),
             sliver: SliverList(
                 delegate: SliverChildListDelegate([
-              // SECTION ONE: NUMBER OF DAYS IN APP
-              // total number of days in the main_category table
-              const NumberOfDaysMainCategory(getAllDays: false,),
-              
 
-              // SECTION TWO: QUOTE OF THE DAY
+              // SECTION ONE: QUOTE OF THE DAY
               // quote from the zenQuotes API
               quoteOfTheDay(),
 
-              // SECTION 3.0: EFFICENCY SCORE
-              // This section displays the users entire efficieny
-              // score
-              const EfficienyScoreWindow(getEntireScore: false,),
+              // SECTION TWO: EFFICENCY SCORE
+              // This section displays the users entire efficieny score
+              // total number of days in the main_category table
+              const EfficiencyAndNumberOfDays(
+                efficiencyScore: EfficienyScoreWindow(getEntireScore: false,),
+                numberOfDays: NumberOfDaysMainCategory(getAllDays: false,)),
 
               // SECTION THREE: ACCOUNTED AND UNACCOUNTED TOTALS
               //  total accounted time and
