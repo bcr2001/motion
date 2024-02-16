@@ -24,10 +24,11 @@ class SummaryContributionHeatMap extends StatelessWidget {
         FirstAndLastDay>(builder: (context, user, main, days, child) {
       // user firebase uid
       final String currentUserUid = user.userUid!;
+      final String targetYearData = year.toString();
 
       return FutureBuilder(
           future: main.retrieveDailyAccountedAndIntensities(
-              currentUser: currentUserUid),
+              currentUser: currentUserUid, year: targetYearData, getEntireIntensity: false),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
@@ -50,8 +51,8 @@ class SummaryContributionHeatMap extends StatelessWidget {
                         color: AppColor.tileBackgroundColor, width: 2.0),
                     borderRadius: BorderRadius.circular(10)),
                 child: HeatMap(
-                  startDate: DateTime(year,1,3),
-                  endDate: DateTime(year, 12, 31),
+                  startDate: DateTime(year,1,1),
+                  endDate: DateTime(year,12,31),
                   fontSize: 12,
                   scrollable: true,
                   defaultColor: AppColor.defaultHeatMapBlockColor,

@@ -770,11 +770,13 @@ class TrackerDatabaseHelper {
 
   // get the daily accounted and intensity score for all main categories
   Future<List<Map<String, dynamic>>> getDailyAccountedAndIntensities(
-      {required String currentUser}) async {
+      {required String currentUser,
+      String year = "",
+      bool getEntireIntensity = true}) async {
     try {
       final db = await database;
 
-      final resultDAAI = await db.rawQuery('''
+      final resultDAAI = getEntireIntensity ? await db.rawQuery('''
             SELECT date, 
                   ROUND((COALESCE(education, 0) + COALESCE(skills, 0) + 
                           COALESCE(selfDevelopment, 0) + COALESCE(entertainment, 0) +
@@ -800,7 +802,33 @@ class TrackerDatabaseHelper {
             FROM main_category
             WHERE currentLoggedInUser = ?
 
-        ''', [currentUser]);
+        ''', [currentUser]) : await db.rawQuery('''
+            SELECT date, 
+                  ROUND((COALESCE(education, 0) + COALESCE(skills, 0) + 
+                          COALESCE(selfDevelopment, 0) + COALESCE(entertainment, 0) +
+                          COALESCE(sleep, 0)) / 60, 2) AS accounted,
+                  CASE
+                      WHEN ROUND((COALESCE(education, 0) + COALESCE(skills, 0) + 
+                                  COALESCE(selfDevelopment, 0) + COALESCE(entertainment, 0) +
+                                  COALESCE(sleep, 0)) / 60, 2) <= 0 THEN 0
+                      WHEN ROUND((COALESCE(education, 0) + COALESCE(skills, 0) + 
+                                  COALESCE(selfDevelopment, 0) + COALESCE(entertainment, 0) +
+                                  COALESCE(sleep, 0)) / 60, 2) <= 5 THEN 5
+                      WHEN ROUND((COALESCE(education, 0) + COALESCE(skills, 0) + 
+                                  COALESCE(selfDevelopment, 0) + COALESCE(entertainment, 0) +
+                                  COALESCE(sleep, 0)) / 60, 2) <= 10 THEN 10
+                      WHEN ROUND((COALESCE(education, 0) + COALESCE(skills, 0) + 
+                                  COALESCE(selfDevelopment, 0) + COALESCE(entertainment, 0) +
+                                  COALESCE(sleep, 0)) / 60, 2) <= 15 THEN 15
+                      WHEN ROUND((COALESCE(education, 0) + COALESCE(skills, 0) + 
+                                  COALESCE(selfDevelopment, 0) + COALESCE(entertainment, 0) +
+                                  COALESCE(sleep, 0)) / 60, 2) <= 20 THEN 20
+                      ELSE 25
+                  END AS intensity
+            FROM main_category
+            WHERE currentLoggedInUser = ? AND strftime("%Y", date) = ?
+
+        ''', [currentUser, year]);
 
       return resultDAAI;
     } catch (e) {

@@ -23,7 +23,7 @@ class ContributionsHeatMap extends StatelessWidget {
 
       return FutureBuilder(
           future: main.retrieveDailyAccountedAndIntensities(
-              currentUser: currentUserUid),
+              currentUser: currentUserUid, getEntireIntensity: true),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(

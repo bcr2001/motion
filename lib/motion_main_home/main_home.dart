@@ -73,7 +73,9 @@ class _MotionHome extends State<MainMotionHome> {
                 right: 0,
               child: SafeArea(
             child: GNav(
-            backgroundColor: Colors.black.withOpacity(0.5),
+            backgroundColor:  themeValue.currentThemeMode == ThemeModeSettingsN1.lightMode
+                        ? Colors.white.withOpacity(0.5)
+                        : Colors.black.withOpacity(0.5),
             haptic: true,
             curve: Curves.linear,
             padding:const EdgeInsets.all(8),
@@ -107,7 +109,8 @@ class _MotionHome extends State<MainMotionHome> {
                 elevation: 0,
                 shape: const CircleBorder(),
                 child:
-                    // different svg images depending on the theme mode (dark/light)
+                    // different svg images depending on the theme mode 
+                    // (dark/light)
                     themeValue.currentThemeMode == ThemeModeSettingsN1.lightMode
                         ? SvgPicture.asset(
                             "assets/images/motion_icons/motion_logo_white.svg",

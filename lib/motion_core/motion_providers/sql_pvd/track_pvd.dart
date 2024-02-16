@@ -159,9 +159,9 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
 
   // get the daily intensity scores
   Future<List<Map<String, dynamic>>> retrieveDailyAccountedAndIntensities(
-      {required String currentUser}) async {
+      {required String currentUser, String year = "", bool getEntireIntensity = true}) async {
     return await trackDbInstance.getDailyAccountedAndIntensities(
-        currentUser: currentUser);
+        currentUser: currentUser, year: year, getEntireIntensity: getEntireIntensity);
   }
 }
 
