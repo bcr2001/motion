@@ -4,6 +4,7 @@ import 'package:motion/motion_core/motion_providers/date_pvd/first_and_last_pvd.
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
+import 'package:motion/motion_routes/mr_home/home_windows/efficieny_window.dart';
 import 'package:motion/motion_screens/ms_report/report_back.dart';
 import 'package:motion/motion_screens/ms_report/report_heat_map.dart';
 import 'package:motion/motion_themes/mth_app/app_images.dart';
@@ -73,6 +74,11 @@ class MonthlyReportPage extends StatelessWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
                     children: [
+                      // SECTION 0 (new): Current Month Efficiency Score
+                      // gets the efficiency score of the current month
+                      const EfficienyScoreSelectedYearOrMont(
+                        getSelectedYearEfs: false),
+
                       // SECTION 1 (new): Contributions
                       // This section displays a heat map representing the
                       // distribution of accounted time intensities for the

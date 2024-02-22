@@ -9,8 +9,6 @@ import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import '../mr_home/home_reusable/back_home.dart';
 import '../mr_home/home_windows/efficieny_window.dart';
 
-
-
 // the summary report of the year the user clicks on
 class YearsWorthOfSummaryStatitics extends StatelessWidget {
   final String year;
@@ -37,15 +35,14 @@ class YearsWorthOfSummaryStatitics extends StatelessWidget {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
         children: [
-
-          // SECTION 0(new): Efficiency Score 
-          // This section displays the efficieny score for the 
+          // SECTION 0(new): Efficiency Score
+          // This section displays the efficieny score for the
           // selected year
-          EfficienyScoreSelectedYear(selectedYear: year),
+          EfficienyScoreSelectedYearOrMont(selectedYear: year, getSelectedYearEfs: true,),
 
-          // SECTION 1(new): Contributions 
+          // SECTION 1(new): Contributions
           // This section displays to the user a HeatMap
-          // showing entire years contibutions to time 
+          // showing entire years contibutions to time
           // they have accounted for
           sectionTitle(titleName: AppString.contributionTitle),
           SummaryContributionHeatMap(year: int.parse(year)),
@@ -168,7 +165,6 @@ class YearsWorthOfSummaryStatitics extends StatelessWidget {
     );
   }
 }
-
 
 // annual gallery builder
 class AnnualGallaryBuilder extends StatelessWidget {
@@ -315,50 +311,49 @@ class YearTotalsAccountedUnaccountedBuilder extends StatelessWidget {
   }
 }
 
-
-  Widget makeTransactionsIcon() {
-    const width = 4.5;
-    const space = 3.5;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: width,
-          height: 10,
-          color: const Color(0xFFA9A9A9),
-        ),
-        const SizedBox(
-          width: space,
-        ),
-        Container(
-          width: width,
-          height: 28,
-          color: const Color(0xFF909090),
-        ),
-        const SizedBox(
-          width: space,
-        ),
-        Container(
-          width: width,
-          height: 42,
-          color: const Color(0xFFCFCFCF),
-        ),
-        const SizedBox(
-          width: space,
-        ),
-        Container(
-          width: width,
-          height: 28,
-          color: const Color(0xFF909090),
-        ),
-        const SizedBox(
-          width: space,
-        ),
-        Container(
-          width: width,
-          height: 10,
-          color: const Color(0xFFA9A9A9),
-        ),
-      ],
-    );
-  }
+Widget makeTransactionsIcon() {
+  const width = 4.5;
+  const space = 3.5;
+  return Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Container(
+        width: width,
+        height: 10,
+        color: const Color(0xFFA9A9A9),
+      ),
+      const SizedBox(
+        width: space,
+      ),
+      Container(
+        width: width,
+        height: 28,
+        color: const Color(0xFF909090),
+      ),
+      const SizedBox(
+        width: space,
+      ),
+      Container(
+        width: width,
+        height: 42,
+        color: const Color(0xFFCFCFCF),
+      ),
+      const SizedBox(
+        width: space,
+      ),
+      Container(
+        width: width,
+        height: 28,
+        color: const Color(0xFF909090),
+      ),
+      const SizedBox(
+        width: space,
+      ),
+      Container(
+        width: width,
+        height: 10,
+        color: const Color(0xFFA9A9A9),
+      ),
+    ],
+  );
+}
