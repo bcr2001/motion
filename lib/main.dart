@@ -1,10 +1,7 @@
-import 'package:csv/csv.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:motion/firebase_options.dart';
-import 'package:motion/motion_core/mc_sql_table/sub_table.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_month_provider_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_time_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_year_pvd.dart';
@@ -17,11 +14,7 @@ import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_pvd.dar
 import 'package:motion/motion_core/motion_providers/dropDown_pvd/drop_down_pvd.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_user/mu_ops/auth_page.dart';
-import 'package:path/path.dart';
 import 'package:provider/provider.dart';
-import 'motion_core/mc_sql_table/assign_table.dart';
-import 'motion_core/mc_sql_table/main_table.dart';
-import 'motion_core/mc_sqlite/sql_assigner_db.dart';
 import 'motion_core/motion_providers/date_pvd/current_date_pvd.dart';
 import 'motion_core/motion_providers/sql_pvd/assigner_pvd.dart';
 import 'motion_core/motion_providers/web_api_pvd/zen_quotes_pvd.dart';

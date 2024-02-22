@@ -45,21 +45,21 @@ class TrackerDatabaseHelper {
   void _onUpgradeDatabase(Database db, int oldVersion, int newVersion) async {
     logger.i("Database _onUpgradeDatabase function called");
     if (oldVersion < 9) {
-      //   await db.execute('DROP TABLE IF EXISTS experience_points');
-      //   // Upgrade the database schema here
-      //   await db.execute('''
-      //   CREATE TABLE experience_points(
-      //     date TEXT,
-      //     educationXP INTEGER,
-      //     skillsXP INTEGER,
-      //     sdXP INTEGER,
-      //     sleepXP INTEGER,
-      //     currentLoggedInUser TEXT,
-      //     PRIMARY KEY (date, currentLoggedInUser),
-      //     FOREIGN KEY (date, currentLoggedInUser)
-      //     REFERENCES main_category(date, currentLoggedInUser)
-      //   )
-      // ''');
+        await db.execute('DROP TABLE IF EXISTS experience_points');
+        // Upgrade the database schema here
+        await db.execute('''
+        CREATE TABLE experience_points(
+          date TEXT,
+          educationXP INTEGER,
+          skillsXP INTEGER,
+          sdXP INTEGER,
+          sleepXP INTEGER,
+          currentLoggedInUser TEXT,
+          PRIMARY KEY (date, currentLoggedInUser),
+          FOREIGN KEY (date, currentLoggedInUser)
+          REFERENCES main_category(date, currentLoggedInUser)
+        )
+      ''');
 
       // Trigger: update_experience_points_after_insert
       // Purpose: Updates the experience_points table after a new entry is

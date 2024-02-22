@@ -7,6 +7,7 @@ import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 
 import '../mr_home/home_reusable/back_home.dart';
+import '../mr_home/home_windows/efficieny_window.dart';
 
 
 
@@ -36,6 +37,11 @@ class YearsWorthOfSummaryStatitics extends StatelessWidget {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
         children: [
+
+          // SECTION 0(new): Efficiency Score 
+          // This section displays the efficieny score for the 
+          // selected year
+          EfficienyScoreSelectedYear(selectedYear: year),
 
           // SECTION 1(new): Contributions 
           // This section displays to the user a HeatMap

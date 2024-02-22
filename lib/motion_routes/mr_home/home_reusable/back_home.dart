@@ -55,9 +55,43 @@ Widget specialSectionTitle(
   );
 }
 
-// special title
+// special title used to display efficiency score for
+// the selected year
+Widget specialSectionTitleSelectedYear({required String mainTitleName}){
+  return Container(
+    margin: const EdgeInsets.only(left: 10),
+    child: Padding(
+      padding: const EdgeInsets.only(right: 20, top: 10, bottom: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          // main title
+          Text(
+            mainTitleName,
+            style: AppTextStyle.sectionTitleTextStyleEF2(),
+          ),
+
+          // efs titel
+           Padding(
+            padding: const EdgeInsets.only(bottom: 10.0, left: 5.0),
+            child: Text(
+              AppString.efficiencyScoreTitle,
+              style: AppTextStyle.specialSectionTitleTextStyle(),
+            ),
+          ),
+
+
+        ],
+      ),
+    ),
+  );
+
+}
+
+// special title used to display efficiency scores for 
+// the  current year and the overrall total efs
 Widget specialSectionTitleEFS(
-    {required String mainTitleName, required String elevatedTitleName, required bool getEntire}) {
+    {required String mainTitleName, required bool getEntire}) {
   return Padding(
     padding: const EdgeInsets.only(left: 10, top: 10, bottom: 10),
     child: Row(
@@ -75,7 +109,7 @@ Widget specialSectionTitleEFS(
             Padding(
               padding: const EdgeInsets.only(bottom: 10.0, left: 5.0),
               child: Text(
-                elevatedTitleName,
+                AppString.efficiencyScoreTitle,
                 style: AppTextStyle.specialSectionTitleTextStyle(),
               ),
             ),
