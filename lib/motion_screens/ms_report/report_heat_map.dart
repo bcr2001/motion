@@ -5,6 +5,7 @@ import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_reusable/db_re/sub_logic.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
+import 'package:motion/motion_routes/mr_home/home_windows/efficieny_window.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_heatmap_calendar/flutter_heatmap_calendar.dart';
@@ -188,6 +189,8 @@ class SpecificDaySummaryHeatMap extends StatelessWidget {
             } else {
               final snapShotData = snapshot.data!;
 
+              logger.i(dateValue);
+
               // logger.i(snapShotData);
 
               // calculating total accounted time
@@ -204,26 +207,43 @@ class SpecificDaySummaryHeatMap extends StatelessWidget {
 
               return Column(
                 children: [
-                  // contirbution Score
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: Text(
-                      "Contribution Score: $contributionScore",
-                      style: const TextStyle(
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-
                   // total time accounted for selected date
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: Text(
-                      "Accounted: $totalTimeAccountedConverted",
-                      style: const TextStyle(
-                        fontSize: 14,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // total accounted time for the selected day
+                      // and the contibution score
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Align(
+                            alignment: Alignment.topLeft,
+                            child: Text(
+                              "Accounted: $totalTimeAccountedConverted",
+                              style: const TextStyle(
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+
+                          // contirbution Score
+                          Align(
+                            alignment: Alignment.topLeft,
+                            child: Text(
+                              "Contribution Score: $contributionScore",
+                              style: const TextStyle(
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
+
+                      // efficiency score for the current date
+                      EfficienyScoreSelectedDay(
+                        selectedDay: dateValue,
+                      ),
+                    ],
                   ),
 
                   // subcategories and their recorded time

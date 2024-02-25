@@ -30,6 +30,7 @@ class ExperiencePointTableProvider extends ChangeNotifier {
     return await trackDbInstance.entireExperiencePointsEfficiencyScore(
         currentUser: currentUser);
   }
+
   /// (year)
   Future<double> retrieveYearExperiencePointsEfficiencyScore(
       {required String currentUser, required String currentYear}) async {
@@ -54,5 +55,12 @@ class ExperiencePointTableProvider extends ChangeNotifier {
         currentUser: currentUser,
         firstDayOfMonth: firstDayOfMonth,
         lastDayOfMonth: lastDayOfMonth);
+  }
+
+  // gets the daily experience points earned
+  Future<int> retrieveDailyExperiencePoints(
+      {required currentUser, required String selectedDate}) async {
+    return await trackDbInstance.dailyExperiencePoints(
+        currentUser: currentUser, selectedDate: selectedDate);
   }
 }

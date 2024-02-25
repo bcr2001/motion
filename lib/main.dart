@@ -15,6 +15,7 @@ import 'package:motion/motion_core/motion_providers/dropDown_pvd/drop_down_pvd.d
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_user/mu_ops/auth_page.dart';
 import 'package:provider/provider.dart';
+import 'motion_core/mc_sql_table/sub_table.dart';
 import 'motion_core/motion_providers/date_pvd/current_date_pvd.dart';
 import 'motion_core/motion_providers/sql_pvd/assigner_pvd.dart';
 import 'motion_core/motion_providers/web_api_pvd/zen_quotes_pvd.dart';
@@ -22,12 +23,11 @@ import 'motion_themes/mth_theme/dark_theme.dart';
 import 'motion_themes/mth_theme/light_theme.dart';
 import 'motion_core/mc_sqlite/sql_tracker_db.dart';
 
-// This creates a global key for managing the state of a navigator widget 
+// This creates a global key for managing the state of a navigator widget
 // in Flutter.
 final GlobalKey<NavigatorState> navigationKey = GlobalKey<NavigatorState>();
 
-
-// This instantiates a database helper class (TrackerDatabaseHelper) for 
+// This instantiates a database helper class (TrackerDatabaseHelper) for
 // managing database operations, likely related to tracking functionality.
 final TrackerDatabaseHelper trackDbInstance = TrackerDatabaseHelper();
 
@@ -68,15 +68,16 @@ void main() async {
   final trackMainCategoryDatabaseProvider = MainCategoryTrackerProvider();
 
   // final allMain = await dbHelper.getAllItems();
-  // final allMain = await databaseHelper.getAllMainCategories();
-  final allMain = await databaseHelper.getAllExperiencePoints(date: "2024-02-14");
+  // final allMain = await databaseHelper.getAllSubcategories();
+  // final allMain = await databaseHelper.getAllExperiencePoints(date: "2024-02-14");
 
- 
-  logger.i(allMain);
+
+  // logger.i(allMain);
 
   runApp(MultiProvider(
     providers: [
-      ChangeNotifierProvider(create: (context)=> ExperiencePointTableProvider()),
+      ChangeNotifierProvider(
+          create: (context) => ExperiencePointTableProvider()),
       ChangeNotifierProvider(
           create: (context) => FirstAndLastWithSevenDaysDiff()),
       ChangeNotifierProvider.value(value: themeModeProviderN1),

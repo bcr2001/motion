@@ -13,13 +13,53 @@ import '../../../motion_core/motion_providers/sql_pvd/experience_pvd.dart';
 /// and error states.
 /// On successful data retrieval, it shows the calculated efficiency score.
 
-// Get's the efficiency score of the selected year
+/// Get's the efficiency score for the selected date on the report
+/// page heat map section
+class EfficienyScoreSelectedDay extends StatelessWidget {
+  final String selectedDay;
+
+  const EfficienyScoreSelectedDay({super.key, required this.selectedDay});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer2<ExperiencePointTableProvider, UserUidProvider>(
+        builder: (context, xp, user, child) {
+      // currently logged in user uid
+      final String userUID = user.userUid!;
+
+      return FutureBuilder(
+          future: xp.retrieveDailyExperiencePoints(
+              currentUser: userUID, selectedDate: selectedDay),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const ShimmerWidget.rectangular(width: 50, height: 30);
+            } else if (snapshot.hasError) {
+              return const Text("N/A");
+            } else {
+              final resultSnapShot = snapshot.data!;
+              final String resultString = resultSnapShot.toString();
+
+              logger.i("xp earned = $resultSnapShot");
+
+              return Text(
+                "$resultString XP",
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              );
+            }
+          });
+    });
+  }
+}
+
+// Get's the efficiency score of the selected year or month
 class EfficienyScoreSelectedYearOrMont extends StatelessWidget {
-  final String? selectedYear;
+  final String selectedYear;
   final bool getSelectedYearEfs;
 
   const EfficienyScoreSelectedYearOrMont(
-      {super.key, this.selectedYear, required this.getSelectedYearEfs});
+      {super.key,
+      required this.selectedYear,
+      required this.getSelectedYearEfs});
 
   @override
   Widget build(BuildContext context) {
@@ -32,45 +72,52 @@ class EfficienyScoreSelectedYearOrMont extends StatelessWidget {
       String firstDayOfMonth = fal.firstDay;
       String lastDayOfMonth = fal.lastDay;
 
-      return getSelectedYearEfs? FutureBuilder(
-          future: xp.retrieveYearExperiencePointsEfficiencyScore(
-              currentUser: currentUserUid, currentYear: selectedYear!),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const ShimmerWidget.rectangular(width: 50, height: 30);
-            } else if (snapshot.hasError) {
-              return const Text("N/A");
-            } else {
-              final resultSnapShot = snapshot.data ?? 0.0;
+      return getSelectedYearEfs
+          ? FutureBuilder(
+              future: xp.retrieveYearExperiencePointsEfficiencyScore(
+                  currentUser: currentUserUid, currentYear: selectedYear),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const ShimmerWidget.rectangular(width: 50, height: 30);
+                } else if (snapshot.hasError) {
+                  return const Text("N/A");
+                } else {
+                  final resultSnapShot = snapshot.data ?? 0.0;
 
-              final efficientResults = resultSnapShot / 100;
+                  final efficientResults = resultSnapShot / 100;
 
-              logger.i(
-                  "Total Efficiency Score for $selectedYear: $resultSnapShot");
+                  logger.i(
+                      "Total Efficiency Score for $selectedYear: $resultSnapShot");
 
-              return specialSectionTitleSelectedYear(
-                  mainTitleName: efficientResults.toString());
-            }
-          }): FutureBuilder(
-          future: xp.retrieveMonthlyEfficiencyScore(currentUser: currentUserUid, firstDayOfMonth: firstDayOfMonth, lastDayOfMonth: lastDayOfMonth),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const ShimmerWidget.rectangular(width: 50, height: 30);
-            } else if (snapshot.hasError) {
-              return const Text("N/A");
-            } else {
-              final resultSnapShot = snapshot.data ?? 0.0;
+                  return specialSectionTitleSelectedYear(
+                      mainTitleName: efficientResults.toString());
+                }
+              })
+          : FutureBuilder(
+              future: xp.retrieveMonthlyEfficiencyScore(
+                  currentUser: currentUserUid,
+                  firstDayOfMonth: firstDayOfMonth,
+                  lastDayOfMonth: lastDayOfMonth),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const ShimmerWidget.rectangular(width: 50, height: 30);
+                } else if (snapshot.hasError) {
+                  return const Text("N/A");
+                } else {
+                  final resultSnapShot = snapshot.data ?? 0.0;
 
-              final efficientResults = resultSnapShot / 100;
+                  final efficientResults = resultSnapShot / 100;
 
-              logger.i(
-                  "Total Efficiency Score for $selectedYear: $resultSnapShot");
+                  logger.i(
+                      "Total Efficiency Score for $selectedYear: $resultSnapShot");
 
-              return specialSectionTitleSelectedYear(
-                  mainTitleName: efficientResults.toString());
-            }
+                  return specialSectionTitleSelectedYear(
+                      mainTitleName: efficientResults.toString());
+                }
+              });
     });
-});}}
+  }
+}
 
 // Gets the entire efficieny score or the efficiency score of the
 // current year

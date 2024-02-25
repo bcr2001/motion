@@ -45,9 +45,9 @@ class TrackerDatabaseHelper {
   void _onUpgradeDatabase(Database db, int oldVersion, int newVersion) async {
     logger.i("Database _onUpgradeDatabase function called");
     if (oldVersion < 9) {
-        await db.execute('DROP TABLE IF EXISTS experience_points');
-        // Upgrade the database schema here
-        await db.execute('''
+      await db.execute('DROP TABLE IF EXISTS experience_points');
+      // Upgrade the database schema here
+      await db.execute('''
         CREATE TABLE experience_points(
           date TEXT,
           educationXP INTEGER,
@@ -1154,6 +1154,8 @@ class TrackerDatabaseHelper {
       final db = await database;
       await db.update('subcategory', subcategory.toMap(),
           where: 'id = ?', whereArgs: [subcategory.id]);
+
+      logger.i("Update successfull");
     } catch (e) {
       logger.e("Error: $e");
     }
@@ -1209,11 +1211,15 @@ class TrackerDatabaseHelper {
       final db = await database;
 
       final resultEPES = await db.rawQuery('''
-      SELECT ROUND((SUM(educationXP) + SUM(skillsXP) + SUM(sdXP) + SUM(sleepXP)) / 
-              COUNT(DISTINCT date), 2) AS efficiencyScore
-      FROM experience_points
-      WHERE currentLoggedInUser = ?
-      ''', [currentUser]);
+          SELECT ROUND((
+            COALESCE(SUM(educationXP), 0) + 
+            COALESCE(SUM(skillsXP), 0) + 
+            COALESCE(SUM(sdXP), 0) + 
+            COALESCE(SUM(sleepXP), 0)
+          ) / COUNT(DISTINCT date), 2) AS efficiencyScore
+          FROM experience_points
+          WHERE currentLoggedInUser = ?
+        ''', [currentUser]);
 
       if (resultEPES.isNotEmpty) {
         // first row and column
@@ -1239,10 +1245,16 @@ class TrackerDatabaseHelper {
       final db = await database;
 
       final resultEPES = await db.rawQuery('''
-      SELECT ROUND((SUM(educationXP) + SUM(skillsXP) + SUM(sdXP) + SUM(sleepXP)) / 
-        COUNT(DISTINCT date), 2) AS efficiencyScore
-      FROM experience_points
-      WHERE currentLoggedInUser = ? AND strftime('%Y', date) = ?
+          SELECT ROUND(
+            (
+              COALESCE(SUM(educationXP), 0) + 
+              COALESCE(SUM(skillsXP), 0) + 
+              COALESCE(SUM(sdXP), 0) + 
+              COALESCE(SUM(sleepXP), 0)
+            ) / COUNT(DISTINCT date), 2
+          ) AS efficiencyScore
+          FROM experience_points
+          WHERE currentLoggedInUser = ? AND strftime('%Y', date) = ?
       ''', [currentUser, currentYear]);
 
       if (resultEPES.isNotEmpty) {
@@ -1284,11 +1296,15 @@ class TrackerDatabaseHelper {
       final db = await database;
 
       final resultMES = await db.rawQuery('''
-        SELECT ROUND((SUM(educationXP) + SUM(skillsXP) + SUM(sdXP) 
-                + SUM(sleepXP)) / COUNT(DISTINCT date), 2) AS efficiencyScore
-        FROM experience_points
-        WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
-        ''', [currentUser, firstDayOfMonth, lastDayOfMonth]);
+      SELECT ROUND((
+        COALESCE(SUM(educationXP), 0) + 
+        COALESCE(SUM(skillsXP), 0) + 
+        COALESCE(SUM(sdXP), 0) + 
+        COALESCE(SUM(sleepXP), 0)
+      ) / COUNT(DISTINCT date), 2) AS efficiencyScore
+      FROM experience_points
+      WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
+    ''', [currentUser, firstDayOfMonth, lastDayOfMonth]);
 
       if (resultMES.isNotEmpty) {
         // first row and column
@@ -1304,6 +1320,37 @@ class TrackerDatabaseHelper {
     } catch (e) {
       logger.e("(monthlyEfficiencyScore) ERROR: $e");
       return 0.0;
+    }
+  }
+
+  // Gets the efficiency score for the selected date
+  // Gets the total experience points for the selected date
+  Future<int> dailyExperiencePoints(
+      {required String currentUser, required String selectedDate}) async {
+    try {
+      final db = await database;
+
+      final resultDES = await db.rawQuery('''
+      SELECT COALESCE(SUM(educationXP), 0) + COALESCE(SUM(skillsXP), 0) + 
+             COALESCE(SUM(sdXP), 0) + COALESCE(SUM(sleepXP), 0) AS totalXP
+      FROM experience_points
+      WHERE currentLoggedInUser = ? AND date = ?
+    ''', [currentUser, selectedDate]);
+
+      if (resultDES.isNotEmpty) {
+        final totalXP = resultDES.first['totalXP'];
+
+        if (totalXP is int) {
+          return totalXP;
+        } else {
+          return 0; // Handle the case where the result is not a double
+        }
+      } else {
+        return 0; // Return 0.0 if no matching records are found
+      }
+    } catch (e) {
+      logger.e("(dailyExperiencePoints) ERROR: $e");
+      return 0; // Return 0.0 on error
     }
   }
 

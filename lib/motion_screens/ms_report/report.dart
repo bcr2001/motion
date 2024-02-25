@@ -77,7 +77,7 @@ class MonthlyReportPage extends StatelessWidget {
                       // SECTION 0 (new): Current Month Efficiency Score
                       // gets the efficiency score of the current month
                       const EfficienyScoreSelectedYearOrMont(
-                        getSelectedYearEfs: false),
+                        getSelectedYearEfs: false, selectedYear: '',),
 
                       // SECTION 1 (new): Contributions
                       // This section displays a heat map representing the
