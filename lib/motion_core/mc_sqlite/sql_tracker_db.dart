@@ -39,27 +39,27 @@ class TrackerDatabaseHelper {
     final path = join(dbPath, 'tracker.db');
 
     return await openDatabase(path,
-        version: 9, onCreate: _createDatabase, onUpgrade: _onUpgradeDatabase);
+        version: 10, onCreate: _createDatabase, onUpgrade: _onUpgradeDatabase);
   }
 
   void _onUpgradeDatabase(Database db, int oldVersion, int newVersion) async {
     logger.i("Database _onUpgradeDatabase function called");
-    if (oldVersion < 9) {
-      await db.execute('DROP TABLE IF EXISTS experience_points');
-      // Upgrade the database schema here
-      await db.execute('''
-        CREATE TABLE experience_points(
-          date TEXT,
-          educationXP INTEGER,
-          skillsXP INTEGER,
-          sdXP INTEGER,
-          sleepXP INTEGER,
-          currentLoggedInUser TEXT,
-          PRIMARY KEY (date, currentLoggedInUser),
-          FOREIGN KEY (date, currentLoggedInUser)
-          REFERENCES main_category(date, currentLoggedInUser)
-        )
-      ''');
+    if (oldVersion < 10) {
+      // await db.execute('DROP TABLE IF EXISTS experience_points');
+      // // Upgrade the database schema here
+      // await db.execute('''
+      //   CREATE TABLE experience_points(
+      //     date TEXT,
+      //     educationXP INTEGER,
+      //     skillsXP INTEGER,
+      //     sdXP INTEGER,
+      //     sleepXP INTEGER,
+      //     currentLoggedInUser TEXT,
+      //     PRIMARY KEY (date, currentLoggedInUser),
+      //     FOREIGN KEY (date, currentLoggedInUser)
+      //     REFERENCES main_category(date, currentLoggedInUser)
+      //   )
+      // ''');
 
       // Trigger: update_experience_points_after_insert
       // Purpose: Updates the experience_points table after a new entry is
@@ -82,12 +82,12 @@ class TrackerDatabaseHelper {
           SET 
             educationXP = (SELECT 
               CASE
-                  WHEN SUM(timeSpent) < 15 THEN 0
-                  WHEN SUM(timeSpent) < 60 THEN 5
-                  WHEN SUM(timeSpent) < 120 THEN 10
-                  WHEN SUM(timeSpent) < 180 THEN 15
-                  WHEN SUM(timeSpent) < 240 THEN 20
-                  WHEN SUM(timeSpent) >= 240 THEN 25
+                  WHEN COALESCE(SUM(timeSpent), 0) < 15 THEN 0
+                  WHEN COALESCE(SUM(timeSpent), 0) < 60 THEN 5
+                  WHEN COALESCE(SUM(timeSpent), 0) < 120 THEN 10
+                  WHEN COALESCE(SUM(timeSpent), 0) < 180 THEN 15
+                  WHEN COALESCE(SUM(timeSpent), 0) < 240 THEN 20
+                  WHEN COALESCE(SUM(timeSpent), 0) >= 240 THEN 25
                   ELSE 0 
               END
             FROM subcategory 
@@ -95,12 +95,12 @@ class TrackerDatabaseHelper {
 
             skillsXP = (SELECT 
               CASE
-                  WHEN SUM(timeSpent) < 15 THEN 0
-                  WHEN SUM(timeSpent) >= 15 AND SUM(timeSpent) < 60 THEN 5
-                  WHEN SUM(timeSpent) >= 60 AND SUM(timeSpent) < 120 THEN 10
-                  WHEN SUM(timeSpent) >= 120 AND SUM(timeSpent) < 180 THEN 15
-                  WHEN SUM(timeSpent) >= 180 AND SUM(timeSpent) < 240 THEN 20
-                  WHEN SUM(timeSpent) >= 240 THEN 25
+                  WHEN COALESCE(SUM(timeSpent), 0) < 15 THEN 0
+                  WHEN COALESCE(SUM(timeSpent), 0) >= 15 AND COALESCE(SUM(timeSpent), 0) < 60 THEN 5
+                  WHEN COALESCE(SUM(timeSpent), 0) >= 60 AND COALESCE(SUM(timeSpent), 0) < 120 THEN 10
+                  WHEN COALESCE(SUM(timeSpent), 0) >= 120 AND COALESCE(SUM(timeSpent), 0) < 180 THEN 15
+                  WHEN COALESCE(SUM(timeSpent), 0) >= 180 AND COALESCE(SUM(timeSpent), 0) < 240 THEN 20
+                  WHEN COALESCE(SUM(timeSpent), 0) >= 240 THEN 25
                   ELSE 0 
               END
             FROM subcategory 
@@ -109,11 +109,11 @@ class TrackerDatabaseHelper {
 
             sdXP = (SELECT 
               CASE
-                  WHEN SUM(timeSpent) < 15 THEN 0
-                  WHEN SUM(timeSpent) >= 15 AND SUM(timeSpent) < 60 THEN 10
-                  WHEN SUM(timeSpent) >= 60 AND SUM(timeSpent) < 120 THEN 15
-                  WHEN SUM(timeSpent) >= 120 AND SUM(timeSpent) < 180 THEN 20
-                  WHEN SUM(timeSpent) >= 180 THEN 25
+                  WHEN COALESCE(SUM(timeSpent), 0) < 15 THEN 0
+                  WHEN COALESCE(SUM(timeSpent), 0) >= 15 AND COALESCE(SUM(timeSpent), 0) < 60 THEN 10
+                  WHEN COALESCE(SUM(timeSpent), 0) >= 60 AND COALESCE(SUM(timeSpent), 0) < 120 THEN 15
+                  WHEN COALESCE(SUM(timeSpent), 0) >= 120 AND COALESCE(SUM(timeSpent), 0) < 180 THEN 20
+                  WHEN COALESCE(SUM(timeSpent), 0) >= 180 THEN 25
                   ELSE 0 
               END
             FROM subcategory 
@@ -122,11 +122,11 @@ class TrackerDatabaseHelper {
 
             sleepXP = (SELECT 
                 CASE
-                    WHEN SUM(timeSpent) < 300 THEN 0
-                    WHEN SUM(timeSpent) >= 300 AND SUM(timeSpent) < 360 THEN 5
-                    WHEN SUM(timeSpent) >= 360 AND SUM(timeSpent) < 420 THEN 10
-                    WHEN SUM(timeSpent) >= 420 AND SUM(timeSpent) < 480 THEN 20
-                    WHEN SUM(timeSpent) >= 480 THEN 25
+                    WHEN COALESCE(SUM(timeSpent), 0) < 300 THEN 0
+                    WHEN COALESCE(SUM(timeSpent), 0) >= 300 AND COALESCE(SUM(timeSpent), 0) < 360 THEN 5
+                    WHEN COALESCE(SUM(timeSpent), 0) >= 360 AND COALESCE(SUM(timeSpent), 0) < 420 THEN 10
+                    WHEN COALESCE(SUM(timeSpent), 0) >= 420 AND COALESCE(SUM(timeSpent), 0) < 480 THEN 20
+                    WHEN COALESCE(SUM(timeSpent), 0) >= 480 THEN 25
                     ELSE 0 
                 END
               FROM subcategory 
@@ -144,12 +144,12 @@ class TrackerDatabaseHelper {
           SET 
             educationXP = (SELECT 
               CASE
-                  WHEN SUM(timeSpent) < 15 THEN 0
-                  WHEN SUM(timeSpent) < 60 THEN 5
-                  WHEN SUM(timeSpent) < 120 THEN 10
-                  WHEN SUM(timeSpent) < 180 THEN 15
-                  WHEN SUM(timeSpent) < 240 THEN 20
-                  WHEN SUM(timeSpent) >= 240 THEN 25
+                  WHEN COALESCE(SUM(timeSpent), 0) < 15 THEN 0
+                  WHEN COALESCE(SUM(timeSpent), 0) < 60 THEN 5
+                  WHEN COALESCE(SUM(timeSpent), 0) < 120 THEN 10
+                  WHEN COALESCE(SUM(timeSpent), 0) < 180 THEN 15
+                  WHEN COALESCE(SUM(timeSpent), 0) < 240 THEN 20
+                  WHEN COALESCE(SUM(timeSpent), 0) >= 240 THEN 25
                   ELSE 0 
               END
             FROM subcategory 
@@ -157,12 +157,12 @@ class TrackerDatabaseHelper {
 
             skillsXP = (SELECT 
               CASE
-                  WHEN SUM(timeSpent) < 15 THEN 0
-                  WHEN SUM(timeSpent) >= 15 AND SUM(timeSpent) < 60 THEN 5
-                  WHEN SUM(timeSpent) >= 60 AND SUM(timeSpent) < 120 THEN 10
-                  WHEN SUM(timeSpent) >= 120 AND SUM(timeSpent) < 180 THEN 15
-                  WHEN SUM(timeSpent) >= 180 AND SUM(timeSpent) < 240 THEN 20
-                  WHEN SUM(timeSpent) >= 240 THEN 25
+                  WHEN COALESCE(SUM(timeSpent), 0) < 15 THEN 0
+                  WHEN COALESCE(SUM(timeSpent), 0) >= 15 AND COALESCE(SUM(timeSpent), 0) < 60 THEN 5
+                  WHEN COALESCE(SUM(timeSpent), 0) >= 60 AND COALESCE(SUM(timeSpent), 0) < 120 THEN 10
+                  WHEN COALESCE(SUM(timeSpent), 0) >= 120 AND COALESCE(SUM(timeSpent), 0) < 180 THEN 15
+                  WHEN COALESCE(SUM(timeSpent), 0) >= 180 AND COALESCE(SUM(timeSpent), 0) < 240 THEN 20
+                  WHEN COALESCE(SUM(timeSpent), 0) >= 240 THEN 25
                   ELSE 0 
               END
             FROM subcategory 
@@ -170,11 +170,11 @@ class TrackerDatabaseHelper {
 
             sdXP = (SELECT 
               CASE
-                  WHEN SUM(timeSpent) < 15 THEN 0
-                  WHEN SUM(timeSpent) >= 15 AND SUM(timeSpent) < 60 THEN 10
-                  WHEN SUM(timeSpent) >= 60 AND SUM(timeSpent) < 120 THEN 15
-                  WHEN SUM(timeSpent) >= 120 AND SUM(timeSpent) < 180 THEN 20
-                  WHEN SUM(timeSpent) >= 180 THEN 25
+                  WHEN COALESCE(SUM(timeSpent), 0) < 15 THEN 0
+                  WHEN COALESCE(SUM(timeSpent), 0) >= 15 AND COALESCE(SUM(timeSpent), 0) < 60 THEN 10
+                  WHEN COALESCE(SUM(timeSpent), 0) >= 60 AND COALESCE(SUM(timeSpent), 0) < 120 THEN 15
+                  WHEN COALESCE(SUM(timeSpent), 0) >= 120 AND COALESCE(SUM(timeSpent), 0) < 180 THEN 20
+                  WHEN COALESCE(SUM(timeSpent), 0) >= 180 THEN 25
                   ELSE 0 
               END
             FROM subcategory 
@@ -182,11 +182,11 @@ class TrackerDatabaseHelper {
 
             sleepXP = (SELECT 
               CASE
-                  WHEN SUM(timeSpent) < 300 THEN 0
-                  WHEN SUM(timeSpent) >= 300 AND SUM(timeSpent) < 360 THEN 5
-                  WHEN SUM(timeSpent) >= 360 AND SUM(timeSpent) < 420 THEN 10
-                  WHEN SUM(timeSpent) >= 420 AND SUM(timeSpent) < 480 THEN 20
-                  WHEN SUM(timeSpent) >= 480 THEN 25
+                  WHEN COALESCE(SUM(timeSpent), 0) < 300 THEN 0
+                  WHEN COALESCE(SUM(timeSpent), 0) >= 300 AND COALESCE(SUM(timeSpent), 0) < 360 THEN 5
+                  WHEN COALESCE(SUM(timeSpent), 0) >= 360 AND COALESCE(SUM(timeSpent), 0) < 420 THEN 10
+                  WHEN COALESCE(SUM(timeSpent), 0) >= 420 AND COALESCE(SUM(timeSpent), 0) < 480 THEN 20
+                  WHEN COALESCE(SUM(timeSpent), 0) >= 480 THEN 25
                   ELSE 0 
               END
             FROM subcategory 
@@ -235,19 +235,19 @@ class TrackerDatabaseHelper {
       AFTER INSERT ON subcategory
       BEGIN
         UPDATE main_category
-        SET education = (SELECT SUM(timeSpent) FROM subcategory WHERE 
+        SET education = (SELECT COALESCE(SUM(timeSpent), 0) FROM subcategory WHERE 
         mainCategoryName = 'Education' AND date = NEW.date AND 
         currentLoggedInUser = NEW.currentLoggedInUser),
-            skills = (SELECT SUM(timeSpent) FROM subcategory 
+            skills = (SELECT COALESCE(SUM(timeSpent), 0) FROM subcategory 
             WHERE mainCategoryName = 'Skills' AND date = NEW.date AND 
             currentLoggedInUser = NEW.currentLoggedInUser),
-            entertainment = (SELECT SUM(timeSpent) FROM subcategory 
+            entertainment = (SELECT COALESCE(SUM(timeSpent), 0) FROM subcategory 
             WHERE mainCategoryName = 'Entertainment' AND date = NEW.date 
             AND currentLoggedInUser = NEW.currentLoggedInUser),
-            selfDevelopment = (SELECT SUM(timeSpent) FROM subcategory WHERE 
+            selfDevelopment = (SELECT COALESCE(SUM(timeSpent), 0) FROM subcategory WHERE 
             mainCategoryName = 'Self Development' AND date = NEW.date AND 
             currentLoggedInUser = NEW.currentLoggedInUser),
-            sleep = (SELECT SUM(timeSpent) FROM subcategory WHERE 
+            sleep = (SELECT COALESCE(SUM(timeSpent), 0) FROM subcategory WHERE 
             mainCategoryName = 'Sleep' AND date = NEW.date AND 
             currentLoggedInUser = NEW.currentLoggedInUser)
         WHERE date = NEW.date AND currentLoggedInUser = NEW.currentLoggedInUser;
@@ -261,19 +261,19 @@ class TrackerDatabaseHelper {
         AFTER DELETE ON subcategory
         BEGIN
           UPDATE main_category
-          SET education = (SELECT SUM(timeSpent) FROM subcategory WHERE 
+          SET education = (SELECT COALESCE(SUM(timeSpent), 0) FROM subcategory WHERE 
           mainCategoryName = 'Education' AND date = OLD.date AND 
           currentLoggedInUser = OLD.currentLoggedInUser),
-              skills = (SELECT SUM(timeSpent) FROM subcategory WHERE 
+              skills = (SELECT COALESCE(SUM(timeSpent), 0) FROM subcategory WHERE 
               mainCategoryName = 'Skills' AND date = OLD.date AND 
               currentLoggedInUser = OLD.currentLoggedInUser),
-              entertainment = (SELECT SUM(timeSpent) FROM subcategory WHERE 
+              entertainment = (SELECT COALESCE(SUM(timeSpent), 0) FROM subcategory WHERE 
               mainCategoryName = 'Entertainment' AND date = OLD.date AND 
               currentLoggedInUser = OLD.currentLoggedInUser),
-              selfDevelopment = (SELECT SUM(timeSpent) FROM subcategory WHERE 
+              selfDevelopment = (SELECT COALESCE(SUM(timeSpent), 0) FROM subcategory WHERE 
               mainCategoryName = 'Self Development' AND date = OLD.date AND 
               currentLoggedInUser = OLD.currentLoggedInUser),
-              sleep = (SELECT SUM(timeSpent) FROM subcategory WHERE 
+              sleep = (SELECT COALESCE(SUM(timeSpent), 0) FROM subcategory WHERE 
               mainCategoryName = 'Sleep' AND date = OLD.date AND 
               currentLoggedInUser = OLD.currentLoggedInUser)
           WHERE date = OLD.date AND 
@@ -302,27 +302,25 @@ class TrackerDatabaseHelper {
       final db = await database;
 
       final resultAMCT = await db.rawQuery("""
-            SELECT 
-                CAST(ROUND(COALESCE(sum(education)/60, 0), 2) AS VARCHAR) AS "educationHours",
-                CAST(ROUND(sum(education)/1440, 2) AS VARCHAR) AS "educationDays",
-                CAST(ROUND(AVG(education)/60, 2) AS VARCHAR) AS "educationAverage",
-                CAST(ROUND(COALESCE(sum(skills)/60, 0), 2) AS VARCHAR) AS "skillHours",
-                CAST(ROUND(sum(skills)/1440, 2) AS VARCHAR) AS "skillDays",
-                CAST(ROUND(AVG(skills)/60, 2) AS VARCHAR) AS "skillAverage",
-                CAST(ROUND(COALESCE(sum(entertainment)/60, 0), 2) AS VARCHAR) AS "entertainmentHours",
-                CAST(ROUND(sum(entertainment)/1440, 2) AS VARCHAR) AS "entertainmentDays",
-                CAST(ROUND(AVG(entertainment)/60, 2) AS VARCHAR) AS "entertainmentAverage",
-                CAST(ROUND(COALESCE(sum(selfDevelopment)/60, 0), 2) AS VARCHAR) AS "pgHours",
-                CAST(ROUND(sum(selfDevelopment)/1440, 2) AS VARCHAR) AS "pgDays",
-                CAST(ROUND(AVG(selfDevelopment)/60, 2) AS VARCHAR) AS "pgAverage",
-                CAST(ROUND(COALESCE(sum(sleep)/60, 0), 2) AS VARCHAR) AS "sleepHours",
-                CAST(ROUND(sum(sleep)/1440, 2) AS VARCHAR) AS "sleepDays",
-                CAST(ROUND(AVG(sleep)/60, 2) AS VARCHAR) AS "sleepAverage"
-            FROM main_category
-            WHERE currentLoggedInUser = ?
-
+          SELECT 
+              CAST(ROUND(COALESCE(SUM(education)/60, 0), 2) AS VARCHAR) AS "educationHours",
+              CAST(ROUND(COALESCE(SUM(education)/1440, 0), 2) AS VARCHAR) AS "educationDays",
+              CAST(ROUND(COALESCE(AVG(education)/60, 0), 2) AS VARCHAR) AS "educationAverage",
+              CAST(ROUND(COALESCE(SUM(skills)/60, 0), 2) AS VARCHAR) AS "skillHours",
+              CAST(ROUND(COALESCE(SUM(skills)/1440, 0), 2) AS VARCHAR) AS "skillDays",
+              CAST(ROUND(COALESCE(AVG(skills)/60, 0), 2) AS VARCHAR) AS "skillAverage",
+              CAST(ROUND(COALESCE(SUM(entertainment)/60, 0), 2) AS VARCHAR) AS "entertainmentHours",
+              CAST(ROUND(COALESCE(SUM(entertainment)/1440, 0), 2) AS VARCHAR) AS "entertainmentDays",
+              CAST(ROUND(COALESCE(AVG(entertainment)/60, 0), 2) AS VARCHAR) AS "entertainmentAverage",
+              CAST(ROUND(COALESCE(SUM(selfDevelopment)/60, 0), 2) AS VARCHAR) AS "pgHours",
+              CAST(ROUND(COALESCE(SUM(selfDevelopment)/1440, 0), 2) AS VARCHAR) AS "pgDays",
+              CAST(ROUND(COALESCE(AVG(selfDevelopment)/60, 0), 2) AS VARCHAR) AS "pgAverage",
+              CAST(ROUND(COALESCE(SUM(sleep)/60, 0), 2) AS VARCHAR) AS "sleepHours",
+              CAST(ROUND(COALESCE(SUM(sleep)/1440, 0), 2) AS VARCHAR) AS "sleepDays",
+              CAST(ROUND(COALESCE(AVG(sleep)/60, 0), 2) AS VARCHAR) AS "sleepAverage"
+          FROM main_category
+          WHERE currentLoggedInUser = ?
           """, [currentUser]);
-
       return resultAMCT;
     } catch (e) {
       logger.e("Get All Main Category Total Error: $e");
@@ -665,7 +663,7 @@ class TrackerDatabaseHelper {
       // for the most tracked main category if isMost is false
       // then the least tracked main category is returned
       final resultMLTMC = isMost ? await db.rawQuery('''
-      SELECT mainCategoryName AS result_tracked_category, SUM(timeSpent) 
+      SELECT mainCategoryName AS result_tracked_category, COALESCE(SUM(timeSpent), 0) 
       AS time_spent
       FROM subcategory
       WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ? AND 
@@ -674,7 +672,7 @@ class TrackerDatabaseHelper {
       ORDER BY time_spent DESC
       LIMIT 1
       ''', [currentUser, firstDay, lastDay]) : await db.rawQuery('''
-      SELECT mainCategoryName AS result_tracked_category, SUM(timeSpent) 
+      SELECT mainCategoryName AS result_tracked_category, COALESCE(SUM(timeSpent), 0) 
       AS time_spent
       FROM subcategory
       WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
@@ -702,7 +700,7 @@ class TrackerDatabaseHelper {
       // returns a list of Map objects for the main categories
       // together with their totals for the specified dates.
       final resultMTTSSD = await db.rawQuery('''
-        SELECT mainCategoryName, SUM(timeSpent)/60 AS totalTimeSpent
+        SELECT mainCategoryName, COALESCE(SUM(timeSpent)/60, 0) AS totalTimeSpent
         FROM subcategory
         WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
         GROUP BY mainCategoryName
@@ -726,7 +724,7 @@ class TrackerDatabaseHelper {
       // returns a list of Map objects for the main categories
       // together with their totals
       final resultEMTTS = await db.rawQuery('''
-        SELECT mainCategoryName, SUM(timeSpent)/60 AS totalTimeSpent
+        SELECT mainCategoryName, COALESCE(SUM(timeSpent)/60, 0) AS totalTimeSpent
         FROM subcategory
         WHERE currentLoggedInUser = ?
         GROUP BY mainCategoryName
@@ -928,7 +926,7 @@ class TrackerDatabaseHelper {
       final db = await database;
 
       final result = await db.rawQuery('''
-    SELECT SUM(timeSpent) as total
+    SELECT COALESCE(SUM(timeSpent), 0) as total
     FROM subcategory
     WHERE date = ? AND currentLoggedInUser = ?;
     ''', [currentDate, currentUser]);
@@ -956,7 +954,7 @@ class TrackerDatabaseHelper {
       final db = await database;
 
       final resultMTTS = await db.rawQuery('''
-      SELECT SUM(timeSpent) as total
+      SELECT COALESCE(SUM(timeSpent), 0) as total
       FROM subcategory
       WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?;
     ''', [currentUser, startingDate, endingDate]);
@@ -987,10 +985,10 @@ class TrackerDatabaseHelper {
 
     try {
       final resultMTA = isSubcategory ? await db.rawQuery('''
-    SELECT subcategoryName, SUM(dailyTotal) AS total, 
-    AVG(dailyTotal) AS average
+    SELECT subcategoryName, COALESCE(SUM(dailyTotal), 0) AS total, 
+    COALESCE(AVG(dailyTotal), 0) AS average
     FROM (
-      SELECT date, subcategoryName, SUM(timeSpent) AS dailyTotal
+      SELECT date, subcategoryName, COALESCE(SUM(timeSpent), 0) AS dailyTotal
       FROM subcategory
       WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
       GROUP BY date, subcategoryName
@@ -998,10 +996,10 @@ class TrackerDatabaseHelper {
     GROUP BY subcategoryName
     ORDER BY total DESC;
     ''', [currentUser, startingDate, endingDate]) : await db.rawQuery('''
-    SELECT mainCategoryName, SUM(dailyTotal) AS total, 
-    AVG(dailyTotal) AS average
+    SELECT mainCategoryName, COALESCE(SUM(dailyTotal),0) AS total, 
+    COALESCE(AVG(dailyTotal), 0) AS average
     FROM (
-      SELECT date, mainCategoryName, SUM(timeSpent) AS dailyTotal
+      SELECT date, mainCategoryName, COALESCE(SUM(timeSpent), 0) AS dailyTotal
       FROM subcategory
       WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
       GROUP BY date, mainCategoryName
@@ -1027,7 +1025,7 @@ class TrackerDatabaseHelper {
 
       // returns total based on the current date, user, and subcategory name
       final result = await db.rawQuery('''
-    SELECT SUM(timeSpent) as total_time_spent
+    SELECT COALESCE(SUM(timeSpent),0) as total_time_spent
     FROM subcategory
     WHERE date = ? AND currentLoggedInUser = ? AND subcategoryName = ?
   ''', [currentDate, currentUser, subcategoryName]);
@@ -1063,7 +1061,7 @@ class TrackerDatabaseHelper {
       //currentUserget
       final resultMLTS = isMost ? await db.rawQuery('''
       SELECT subcategoryName AS result_tracked_category, 
-      SUM(timeSpent) AS time_spent
+      COALESCE(SUM(timeSpent), 0) AS time_spent
       FROM subcategory 
       WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ? 
       AND mainCategoryName != 'Sleep'
@@ -1072,7 +1070,7 @@ class TrackerDatabaseHelper {
       LIMIT 1;
       ''', [currentUser, firstDay, lastDay]) : await db.rawQuery('''
       SELECT subcategoryName AS result_tracked_category, 
-      SUM(timeSpent) AS time_spent
+      COALESCE(SUM(timeSpent), 0) AS time_spent
       FROM subcategory 
       WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ? 
       AND mainCategoryName != 'Sleep'
@@ -1103,7 +1101,7 @@ class TrackerDatabaseHelper {
             SELECT 
                 date,
                 subcategoryName,
-                SUM(timeSpent)/60 AS timeSpent,
+                COALESCE(SUM(timeSpent)/60, 0) AS timeSpent,
                 ROW_NUMBER() OVER (PARTITION BY subcategoryName ORDER 
                 BY timeSpent DESC) AS rk
             FROM subcategory
@@ -1134,7 +1132,7 @@ class TrackerDatabaseHelper {
       final db = await database;
 
       final resultSTFSD = await db.rawQuery('''
-      SELECT date, subcategoryName, ROUND(sum(timeSpent),2) AS totalTimeSpent
+      SELECT date, subcategoryName, ROUND(COALESCE(SUM(timeSpent), 0),2) AS totalTimeSpent
       FROM subcategory
       WHERE date = ? AND currentLoggedInUser = ?
       GROUP BY subcategoryName
