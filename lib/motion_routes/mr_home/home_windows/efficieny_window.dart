@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:motion/motion_core/motion_providers/date_pvd/current_date_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_year_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/first_and_last_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
@@ -8,6 +9,7 @@ import 'package:motion/motion_routes/mr_home/home_reusable/back_home.dart';
 import 'package:provider/provider.dart';
 import '../../../motion_core/motion_providers/sql_pvd/experience_pvd.dart';
 import '../../../motion_themes/mth_app/app_strings.dart';
+import '../../../motion_themes/mth_styling/app_color.dart';
 import '../../../motion_themes/mth_styling/motion_text_styling.dart';
 
 /// Displays the user's efficiency score using `ExperiencePointTableProvider`.
@@ -46,6 +48,44 @@ class EfficienyScoreSelectedDay extends StatelessWidget {
               return Text(
                 "$resultString XP",
                 style: const TextStyle(fontWeight: FontWeight.w600),
+              );
+            }
+          });
+    });
+  }
+}
+
+// Get's the xp earned for the current day being tracked
+class XPForTheCurrentDay extends StatelessWidget {
+  const XPForTheCurrentDay({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer3<ExperiencePointTableProvider, CurrentDateProvider,
+        UserUidProvider>(builder: (context, xp, date, user, child) {
+      // current date
+      final today = date.currentDate;
+
+      // currently logged in user uid
+      final currentUserUid = user.userUid!;
+
+      return FutureBuilder(
+          future: xp.retrieveDailyExperiencePoints(
+              currentUser: currentUserUid, selectedDate: today),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const ShimmerWidget.rectangular(width: 120, height: 40);
+            } else if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            } else {
+              final totalXPEarned = snapshot.data ?? 0;
+
+              return Text(
+                " $totalXPEarned XP\nEarned",
+                style: const TextStyle(
+                    fontSize: 21,
+                    fontWeight: FontWeight.w600,
+                    color: AppColor.tileBackgroundColor),
               );
             }
           });
@@ -189,7 +229,12 @@ Widget efficiencySection({required String score, required bool getEntire}) {
   );
 }
 
-// Productive days (Most and Least) future builder class
+/// A widget that builds and displays the most or least productive day.
+/// It uses a FutureBuilder to asynchronously fetch data about the productive day.
+/// - `productiveMessage`: A string to display the type of productive day (most or least).
+/// - `future`: The future that fetches the productive day data.
+/// This widget handles different states like loading, error, and data display.
+/// It shows a shimmer effect while loading and displays the productive day once data is fetched.
 class ProductiveDayBuilder extends StatelessWidget {
   final String productiveMessage;
   final Future<dynamic>? future;
@@ -224,7 +269,15 @@ class ProductiveDayBuilder extends StatelessWidget {
   }
 }
 
-// most productive day
+/// A widget that determines and builds either the most or least productive day.
+/// It uses Consumer3 to listen to changes from ExperiencePointTableProvider,
+///  UserUidProvider, and FirstAndLastDay.
+/// - `getMostProductiveDay`: A boolean to decide if fetching the most
+///  productive day (`true`) or the least (`false`).
+/// Depending on `getMostProductiveDay`, it fetches and displays the relevant
+///  productive day using `ProductiveDayBuilder`. It provides the necessary
+///  parameters like the user's UID and the first and last day of the current
+///  month to the `ProductiveDayBuilder`.
 class MostAndLeastProductiveDayBuilder extends StatelessWidget {
   final bool getMostProductiveDay;
 

@@ -13,6 +13,7 @@ import 'package:motion/motion_screens/ms_routes/manual_tracking.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:provider/provider.dart';
 import '../../../motion_themes/mth_styling/motion_text_styling.dart';
+import '../home_windows/efficieny_window.dart';
 
 // total all time accounted for and unaccounted for
 Widget entireTimeAccountedAndUnaccounted(
@@ -140,7 +141,7 @@ class NumberOfDaysMainCategory extends StatelessWidget {
 }
 
 // efficiency score and number of days placement
-// the efficiency score and number of days placed in a row 
+// the efficiency score and number of days placed in a row
 // space between
 class EfficiencyAndNumberOfDays extends StatelessWidget {
   final Widget efficiencyScore;
@@ -165,16 +166,26 @@ class EfficiencyAndNumberOfDays extends StatelessWidget {
 
 // returns the total time accounted for the current date
 // and the current date text to the right
-Widget timeAccountedAndCurrentDate() {
+Widget timeAccountedCurrentDateXP() {
   return Consumer3<SubcategoryTrackerDatabaseProvider, CurrentDateProvider,
       UserUidProvider>(
     builder: (context, sub, date, user, child) {
       String formattedDate = date.getFormattedDate();
 
       return Padding(
-        padding: const EdgeInsets.only(top: 15, left: 10, right: 10),
+        padding: const EdgeInsets.only(top: 15, left: 10, right: 10, bottom: 10),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // current (today's) date
+            Padding(
+              padding: const EdgeInsets.only(top:10.0, bottom: 15),
+              child: Text(
+                formattedDate,
+                style: AppTextStyle.specialSectionTitleTextStyle(),
+              ),
+            ),
+
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -197,7 +208,7 @@ Widget timeAccountedAndCurrentDate() {
                           convertMinutesToTime(totalTimeSpentAllSub);
 
                       return Text(
-                        "$convertedAllTotalTimeSpent\n  Accounted",
+                        "$convertedAllTotalTimeSpent\n   Accounted",
                         style: const TextStyle(
                             fontSize: 21,
                             fontWeight: FontWeight.w600,
@@ -206,12 +217,11 @@ Widget timeAccountedAndCurrentDate() {
                     }
                   },
                 ),
-                // current date
-                Text(
-                  formattedDate,
-                  style: AppTextStyle.specialSectionTitleTextStyle(),
-                ),
+
+                // total XP earned (today)
+                const XPForTheCurrentDay()
               ],
+
             ),
             const SizedBox.shrink(), // Add some spacing
           ],

@@ -83,7 +83,7 @@ class CurrentDateProvider extends ChangeNotifier {
                     ? 'rd'
                     : 'th';
 
-    return '$day$daySuffix $dayOfWeekName';
+    return '$dayOfWeekName $day$daySuffix ';
   }
 
   @override

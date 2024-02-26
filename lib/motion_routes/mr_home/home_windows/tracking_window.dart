@@ -40,7 +40,7 @@ class TrackedSubcategories extends StatelessWidget {
                 return AppImages.trackListEmpty;
               } else {
                 return CardBuilder(
-                    timeAccountedAndOthers: timeAccountedAndCurrentDate(),
+                    timeAccountedAndOthers: timeAccountedCurrentDateXP(),
                     itemsToBeDisplayed: const SubcategoryAndCurrentDayTotals());
               }
             }
