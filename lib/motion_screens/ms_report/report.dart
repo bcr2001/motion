@@ -77,7 +77,9 @@ class MonthlyReportPage extends StatelessWidget {
                       // SECTION 0 (new): Current Month Efficiency Score
                       // gets the efficiency score of the current month
                       const EfficienyScoreSelectedYearOrMont(
-                        getSelectedYearEfs: false, selectedYear: '',),
+                        getSelectedYearEfs: false,
+                        selectedYear: '',
+                      ),
 
                       // SECTION 1 (new): Contributions
                       // This section displays a heat map representing the
@@ -91,7 +93,14 @@ class MonthlyReportPage extends StatelessWidget {
                       sectionTitle(titleName: AppString.contributionTitle),
                       const ContributionsHeatMap(),
 
-                      // SECTION 1:
+                      // Most and Least Productive days
+                      const MostAndLeastProductiveDayBuilder(
+                        getMostProductiveDay: true,
+                      ),
+                      const MostAndLeastProductiveDayBuilder(
+                          getMostProductiveDay: false),
+
+                      // SECTION 3:
                       // Pie Chart Data Title
                       sectionTitle(
                           titleName: AppString.accountedVsUnaccounterTitle),

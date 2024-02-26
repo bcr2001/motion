@@ -1352,6 +1352,43 @@ class TrackerDatabaseHelper {
     }
   }
 
+  // get the most and least productive days
+  Future<List<Map<String, dynamic>>> getMostAndLeastProductiveDays(
+      {required String currentUser,
+      required String firstDay,
+      required String lastDay,
+      required bool getMostProductiveDay}) async {
+    try {
+      final db = await database;
+
+      // the most and least productive days result
+      final resultMALPD = getMostProductiveDay ? await db.rawQuery("""
+      SELECT date, MAX(totalMostXP) AS most_productive
+      FROM (
+        SELECT date, COALESCE(SUM(educationXP), 0) + COALESCE(SUM(skillsXP), 0) + 
+             COALESCE(SUM(sdXP), 0) + COALESCE(SUM(sleepXP), 0) AS totalMostXP
+        FROM experience_points
+        WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
+        GROUP BY date
+      ) AS totalMostXP
+        """, [currentUser, firstDay, lastDay]) : await db.rawQuery("""
+      SELECT date, MIN(totalLeastXP) AS least_productive
+      FROM (
+        SELECT date, COALESCE(SUM(educationXP), 0) + COALESCE(SUM(skillsXP), 0) + 
+             COALESCE(SUM(sdXP), 0) + COALESCE(SUM(sleepXP), 0) AS totalLeastXP
+        FROM experience_points
+        WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
+        GROUP BY date
+      ) AS totalLeastXP
+        """, [currentUser, firstDay, lastDay]);
+
+      return resultMALPD;
+    } catch (e) {
+      logger.e("(getMostAndLeastProductiveDays) ERROR $e");
+      return [];
+    }
+  }
+
   // Delete the entire database
   // Future<void> deleteDb() async {
   //   try {

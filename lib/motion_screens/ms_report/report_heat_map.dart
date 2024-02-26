@@ -41,42 +41,45 @@ class ContributionsHeatMap extends StatelessWidget {
 
               final convertedResults = datasetFormatConverter(data: results);
 
-              return HeatMapCalendar(
-                textColor: Colors.black,
-                fontSize: 15,
-                borderRadius: 8,
-                defaultColor: AppColor.defaultHeatMapBlockColor,
-                flexible: true,
-                colorMode: ColorMode.color,
-                datasets: convertedResults,
-                colorsets: const {
-                  0: AppColor.defaultHeatMapBlockColor,
-                  5: AppColor.intensity5,
-                  10: AppColor.intensity10,
-                  15: AppColor.intensity15,
-                  20: AppColor.intensity20,
-                  25: AppColor.intensity25,
-                },
-                onClick: (value) {
-                  // yyyy-mm-dd date format
-                  String formattedDate = DateFormat('yyyy-MM-dd').format(value);
-
-                  // dd-mm-yyyy date format
-                  String dateTitle = formatDateString(formattedDate);
-
-                  showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialogConst(
-                          alertDialogTitle: dateTitle,
-                          alertDialogContent: SpecificDaySummaryHeatMap(
-                              dateValue: formattedDate),
-                          screenHeight: 200,
-                          screenWidth: 150,
-                          heightFactor: 0.30,
-                        );
-                      });
-                },
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12.0),
+                child: HeatMapCalendar(
+                  textColor: Colors.black,
+                  fontSize: 15,
+                  borderRadius: 8,
+                  defaultColor: AppColor.defaultHeatMapBlockColor,
+                  flexible: true,
+                  colorMode: ColorMode.color,
+                  datasets: convertedResults,
+                  colorsets: const {
+                    0: AppColor.defaultHeatMapBlockColor,
+                    5: AppColor.intensity5,
+                    10: AppColor.intensity10,
+                    15: AppColor.intensity15,
+                    20: AppColor.intensity20,
+                    25: AppColor.intensity25,
+                  },
+                  onClick: (value) {
+                    // yyyy-mm-dd date format
+                    String formattedDate = DateFormat('yyyy-MM-dd').format(value);
+              
+                    // dd-mm-yyyy date format
+                    String dateTitle = formatDateString(formattedDate);
+              
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialogConst(
+                            alertDialogTitle: dateTitle,
+                            alertDialogContent: SpecificDaySummaryHeatMap(
+                                dateValue: formattedDate),
+                            screenHeight: 200,
+                            screenWidth: 150,
+                            heightFactor: 0.30,
+                          );
+                        });
+                  },
+                ),
               );
             }
           });

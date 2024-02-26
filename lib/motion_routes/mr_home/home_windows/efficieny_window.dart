@@ -7,6 +7,8 @@ import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_routes/mr_home/home_reusable/back_home.dart';
 import 'package:provider/provider.dart';
 import '../../../motion_core/motion_providers/sql_pvd/experience_pvd.dart';
+import '../../../motion_themes/mth_app/app_strings.dart';
+import '../../../motion_themes/mth_styling/motion_text_styling.dart';
 
 /// Displays the user's efficiency score using `ExperiencePointTableProvider`.
 /// Uses `FutureBuilder` to asynchronously fetch the score and handles loading
@@ -185,4 +187,88 @@ Widget efficiencySection({required String score, required bool getEntire}) {
       mainTitleName: score,
     ),
   );
+}
+
+// Productive days (Most and Least) future builder class
+class ProductiveDayBuilder extends StatelessWidget {
+  final String productiveMessage;
+  final Future<dynamic>? future;
+
+  const ProductiveDayBuilder(
+      {super.key, required this.productiveMessage, this.future});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+        future: future,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const ShimmerWidget.rectangular(width: 100, height: 30);
+          } else if (snapshot.hasError) {
+            return const Text("N/A");
+          } else {
+            final resultSnapShot = snapshot.data;
+
+            // (most/least) productive date
+            final String date = resultSnapShot[0]["date"];
+
+            return Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Text(
+                "$productiveMessage .............................................. $date",
+                style: AppTextStyle.tileElementTextStyle(),
+              ),
+            );
+          }
+        });
+  }
+}
+
+// most productive day
+class MostAndLeastProductiveDayBuilder extends StatelessWidget {
+  final bool getMostProductiveDay;
+
+  const MostAndLeastProductiveDayBuilder(
+      {super.key, required this.getMostProductiveDay});
+
+  @override
+  Widget build(BuildContext context) {
+    return getMostProductiveDay
+        ? Consumer3<ExperiencePointTableProvider, UserUidProvider,
+            FirstAndLastDay>(builder: (context, xp, user, firstAndLast, child) {
+            // currently logged in user uid
+            final String currentUserUid = user.userUid!;
+
+            // first and last day of the current month
+            final String firstDayOfMonth = firstAndLast.firstDay;
+            final String lastDayOfMonth = firstAndLast.lastDay;
+
+            return ProductiveDayBuilder(
+              productiveMessage: AppString.mostProductiveDay,
+              future: xp.retrieveMostAndLeastProductiveDays(
+                  currentUser: currentUserUid,
+                  firstDay: firstDayOfMonth,
+                  lastDay: lastDayOfMonth,
+                  getMostProductiveDay: true),
+            );
+          })
+        : Consumer3<ExperiencePointTableProvider, UserUidProvider,
+            FirstAndLastDay>(builder: (context, xp, user, firstAndLast, child) {
+            // currently logged in user uid
+            final String currentUserUid = user.userUid!;
+
+            // first and last day of the current month
+            final String firstDayOfMonth = firstAndLast.firstDay;
+            final String lastDayOfMonth = firstAndLast.lastDay;
+
+            return ProductiveDayBuilder(
+              productiveMessage: AppString.leastProductiveDay,
+              future: xp.retrieveMostAndLeastProductiveDays(
+                  currentUser: currentUserUid,
+                  firstDay: firstDayOfMonth,
+                  lastDay: lastDayOfMonth,
+                  getMostProductiveDay: false),
+            );
+          });
+  }
 }

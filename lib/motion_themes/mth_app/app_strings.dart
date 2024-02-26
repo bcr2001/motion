@@ -185,6 +185,9 @@ class AppString {
   static const String hoursTimeSpentHolder = "0.00";
   static const String firstDayOfTrackingEver = "01/07/2021";
 
+  static const String mostProductiveDay = "Most Productive Day";
+  static const String leastProductiveDay = "Least Productive Day";
+
   // STATS ROUTE
   static const String totalAccountedTitle = "Total Accounted";
   static const String totalUnaccountedTitle = "Total Unaccounted";

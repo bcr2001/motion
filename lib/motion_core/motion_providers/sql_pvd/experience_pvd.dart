@@ -63,4 +63,18 @@ class ExperiencePointTableProvider extends ChangeNotifier {
     return await trackDbInstance.dailyExperiencePoints(
         currentUser: currentUser, selectedDate: selectedDate);
   }
+
+  // retrieve the most and least productive days based on
+  // experience points earned for a particular point
+  Future<List<Map<String, dynamic>>> retrieveMostAndLeastProductiveDays(
+      {required String currentUser,
+        required String firstDay,
+      required String lastDay,
+      required bool getMostProductiveDay}) async {
+    return await trackDbInstance.getMostAndLeastProductiveDays(
+        currentUser: currentUser,
+        firstDay: firstDay,
+        lastDay: lastDay,
+        getMostProductiveDay: getMostProductiveDay);
+  }
 }
