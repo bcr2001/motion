@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/first_and_last_pvd.dart';
@@ -10,6 +12,7 @@ import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_heatmap_calendar/flutter_heatmap_calendar.dart';
 
+import '../../motion_themes/mth_app/app_strings.dart';
 import '../../motion_themes/mth_styling/motion_text_styling.dart';
 
 class ContributionsHeatMap extends StatelessWidget {
@@ -61,21 +64,19 @@ class ContributionsHeatMap extends StatelessWidget {
                   },
                   onClick: (value) {
                     // yyyy-mm-dd date format
-                    String formattedDate = DateFormat('yyyy-MM-dd').format(value);
-              
+                    String formattedDate =
+                        DateFormat('yyyy-MM-dd').format(value);
+
                     // dd-mm-yyyy date format
                     String dateTitle = formatDateString(formattedDate);
-              
+
                     showDialog(
                         context: context,
                         builder: (BuildContext context) {
-                          return AlertDialogConst(
+                          return DynamicHeightAlertDialog(
                             alertDialogTitle: dateTitle,
                             alertDialogContent: SpecificDaySummaryHeatMap(
                                 dateValue: formattedDate),
-                            screenHeight: 200,
-                            screenWidth: 150,
-                            heightFactor: 0.30,
                           );
                         });
                   },
@@ -163,23 +164,127 @@ String calculateScoreFromMinutes(double minutes) {
 
 // Display an alert dialog when the user clicks on a specific day on the heatmap.
 // This dialog provides additional information or options related to the selected day.
-class SpecificDaySummaryHeatMap extends StatelessWidget {
+class SpecificDaySummaryHeatMap extends StatefulWidget {
   final String dateValue;
 
-  SpecificDaySummaryHeatMap({super.key, required this.dateValue});
+  const SpecificDaySummaryHeatMap({super.key, required this.dateValue});
 
-  final ScrollController _scrollController1 = ScrollController();
+  @override
+  State<SpecificDaySummaryHeatMap> createState() =>
+      _SpecificDaySummaryHeatMapState();
+}
+
+class _SpecificDaySummaryHeatMapState extends State<SpecificDaySummaryHeatMap> {
+  ScrollController _scrollController1 = ScrollController();
+  bool isSubcategoryActive = true; // State to track active button
+
+  // Function to toggle the active button state
+  void toggleActiveButton(bool isSubcategory) {
+    setState(() {
+      isSubcategoryActive = isSubcategory;
+    });
+  }
+
+  // initialize scroll controller
+  @override
+  void initState() {
+    super.initState();
+    _scrollController1 = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _scrollController1.dispose();
+    super.dispose();
+  }
+
+  // Elevated button with dynamic styling based on active state
+  // Outlined button with dynamic styling based on active state
+  Widget _outlineButton(
+      {required void Function()? onPressed,
+      required String buttonName,
+      required bool isActive}) {
+    return OutlinedButton(
+        onPressed: onPressed,
+        style: OutlinedButton.styleFrom(
+          side: BorderSide(
+            color: isActive
+                ? AppColor.blueMainColor
+                : Colors.transparent, // Dynamic outline color
+            width: 2.0, // You can adjust the width as needed
+          ),
+        ),
+        child: Text(
+          buttonName,
+          style: AppTextStyle.alertDialogElevatedButtonTextStyle(),
+        ));
+  }
+
+  // Subcategory and main category buttons
+  Widget subAndMainButtons() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 12.0, bottom: 5),
+      child: Row(
+        children: [
+          // Subcategory button
+          _outlineButton(
+            onPressed: () => toggleActiveButton(true),
+            buttonName: AppString.subcategoryTitle,
+            isActive: isSubcategoryActive,
+          ),
+
+          // Main category button
+          _outlineButton(
+            onPressed: () => toggleActiveButton(false),
+            buttonName: AppString.mainCategoryTitle,
+            isActive: !isSubcategoryActive,
+          )
+        ],
+      ),
+    );
+  }
+
+  // calculates the approriate height of the alert dialog
+  // based on the number of items in the list view item count
+  double calculateContainerHeight(int itemCount, double itemHeight) {
+    return itemCount * itemHeight;
+  }
+
+  //
+  Widget _contentContainer(
+      {required double containerHeight,
+      required int itemCount,
+      required Widget Function(BuildContext, int) itemBuilder}) {
+    return Container(
+      height: containerHeight,
+      alignment: Alignment.center,
+      padding: const EdgeInsets.symmetric(vertical: 3.0),
+      child: Scrollbar(
+        thickness: 3,
+        thumbVisibility: true,
+        radius: const Radius.circular(10.0),
+        trackVisibility: true,
+        controller: _scrollController1,
+        child: ListView.builder(
+            controller: _scrollController1,
+            padding: EdgeInsets.zero,
+            itemCount: itemCount,
+            itemBuilder: itemBuilder),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<SubcategoryTrackerDatabaseProvider, UserUidProvider>(
-        builder: (context, sub, user, child) {
+    return Consumer3<SubcategoryTrackerDatabaseProvider, UserUidProvider,
+            MainCategoryTrackerProvider>(
+        builder: (context, sub, user, main, child) {
       // current logged in user uid
       final String currentUserUid = user.userUid!;
 
       return FutureBuilder(
           future: sub.retrieveSubcategoryTotalsForSpecificDate(
-              selectedDate: dateValue, currentUser: currentUserUid),
+              selectedDate: widget.dateValue, currentUser: currentUserUid),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
@@ -192,7 +297,7 @@ class SpecificDaySummaryHeatMap extends StatelessWidget {
             } else {
               final snapShotData = snapshot.data!;
 
-              logger.i(dateValue);
+              logger.i(widget.dateValue);
 
               // logger.i(snapShotData);
 
@@ -202,6 +307,10 @@ class SpecificDaySummaryHeatMap extends StatelessWidget {
 
               final String totalTimeAccountedConverted =
                   convertMinutesToTime(totalTimeAccounted);
+
+              double maxHeight = 300.0; // Maximum height for the container
+              double containerHeight = min(
+                  calculateContainerHeight(snapShotData.length, 60), maxHeight);
 
               final String contributionScore =
                   calculateScoreFromMinutes(totalTimeAccounted);
@@ -244,50 +353,105 @@ class SpecificDaySummaryHeatMap extends StatelessWidget {
 
                       // efficiency score for the current date
                       EfficienyScoreSelectedDay(
-                        selectedDay: dateValue,
+                        selectedDay: widget.dateValue,
                       ),
                     ],
                   ),
 
-                  // subcategories and their recorded time
-                  Container(
-                    alignment: Alignment.center,
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    height: 210,
-                    child: Scrollbar(
-                        radius: const Radius.circular(10.0),
-                        trackVisibility: true,
-                        controller: _scrollController1,
-                        child: ListView.builder(
-                            padding: EdgeInsets.zero,
-                            shrinkWrap: true,
-                            itemCount: snapShotData.length,
-                            itemBuilder: (BuildContext context, index) {
-                              // convert minutes to appropriate time format
-                              final convertedTotalTimeSpent1 =
-                                  convertMinutesToTime(
-                                      snapShotData[index]["totalTimeSpent"]);
+                  // buttons that toggle between subcategory and main category
+                  // data
+                  subAndMainButtons(),
 
-                              return ListTile(
-                                title: Text(
-                                    snapShotData[index]["subcategoryName"],
-                                    style: AppTextStyle.leadingTextLTStyle()),
-                                trailing: Container(
-                                  width: 105,
-                                  height: 23,
-                                  decoration: BoxDecoration(
-                                    color: AppColor.tileBackgroundColor,
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Center(
-                                      child: Text(
-                                    convertedTotalTimeSpent1,
-                                    style: AppTextStyle.tileElementTextStyle(),
-                                  )),
+                  // subcategories and their recorded time
+
+                  isSubcategoryActive
+                      ? _contentContainer(
+                          containerHeight: containerHeight,
+                          itemCount: snapShotData.length,
+                          itemBuilder: (BuildContext context, index) {
+                            // convert minutes to appropriate time format
+                            final convertedTotalTimeSpent1 =
+                                convertMinutesToTime(
+                                    snapShotData[index]["totalTimeSpent"]);
+
+                            return ListTile(
+                              title: Text(
+                                  snapShotData[index]["subcategoryName"],
+                                  style: AppTextStyle.leadingTextLTStyle()),
+                              trailing: Container(
+                                width: 105,
+                                height: 23,
+                                decoration: BoxDecoration(
+                                  color: AppColor.tileBackgroundColor,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Center(
+                                    child: Text(
+                                  convertedTotalTimeSpent1,
+                                  style: AppTextStyle.tileElementTextStyle(),
+                                )),
+                              ),
+                            );
+                          })
+                      : FutureBuilder(
+                          future: main.retrieveMCTotalAndXPEarned(
+                              currentUser: currentUserUid,
+                              targetDate: widget.dateValue),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Center(
+                                child: CircularProgressIndicator(
+                                  color: AppColor.blueMainColor,
                                 ),
                               );
-                            })),
-                  ),
+                            } else if (snapshot.hasError) {
+                              return const Text("Error 355 :(");
+                            } else {
+                              final resultMCTotalAndXP = snapshot.data ?? [];
+
+                              // Maximum height for the container
+                              double maxHeight = 300.0;
+                              double containerHeight2 =
+                                  calculateContainerHeight(
+                                      resultMCTotalAndXP.length, 60);
+
+                              double finalContainerHeight =
+                                  min(containerHeight2, maxHeight);
+
+                              logger.i(
+                                  "CONTAINER HEIGHT MAIN: $containerHeight2");
+
+                              return _contentContainer(
+                                  containerHeight: finalContainerHeight,
+                                  itemCount: resultMCTotalAndXP.length,
+                                  itemBuilder: (BuildContext context, index) {
+                                    // main category name
+                                    final String rltMainCategoryName =
+                                        resultMCTotalAndXP[index]
+                                            ["mainCategoryName"];
+
+                                    // total time spent
+                                    final double rltTotalTimeSpent =
+                                        resultMCTotalAndXP[index]
+                                            ["totalTimeSpent"];
+                                    final String rltTotalTimeSpentConverted =
+                                        convertMinutesToTime(rltTotalTimeSpent);
+
+                                    // total xp earned
+                                    final String rltXPEarned =
+                                        resultMCTotalAndXP[index]["xp_earned"];
+
+                                    return CustomeListTile1(
+                                        leadingName: rltMainCategoryName,
+                                        titleName: rltTotalTimeSpentConverted,
+                                        trailingName: rltMainCategoryName !=
+                                                "Entertainment"
+                                            ? "$rltXPEarned xp"
+                                            : rltXPEarned);
+                                  });
+                            }
+                          })
                 ],
               );
             }

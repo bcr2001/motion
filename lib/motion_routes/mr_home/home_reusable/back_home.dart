@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_year_pvd.dart';
 import 'package:motion/motion_reusable/db_re/sub_logic.dart';
 import 'package:motion/motion_reusable/db_re/sub_ui.dart';
+import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
@@ -212,32 +213,9 @@ class _ScrollingListBuilderState extends State<ScrollingListBuilder> {
                             )
                           : Padding(
                               padding: const EdgeInsets.symmetric(vertical: 5),
-                              child: ListTile(
-                                // Main Category Name
-                                leading: Text(
-                                  item[widget.columnName],
-                                  style: AppTextStyle.leadingTextLTStyle(),
-                                ),
-                                // total hours spent on a particular main
-                                // main category during a specific month
-                                title: Container(
-                                  width: 130,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(20),
-                                    color: AppColor.tileBackgroundColor,
-                                  ),
-                                  child: Center(
-                                    child: Text(convertedTotal,
-                                        textAlign: TextAlign.center,
-                                        style: AppTextStyle
-                                            .tileElementTextStyle()),
-                                  ),
-                                ),
-                                trailing: Text(
-                                  convertedAverage,
-                                  style: AppTextStyle.leadingStatsTextLTStyle(),
-                                ),
-                              ),
+                              child: CustomeListTile1(leadingName: item[widget.columnName],
+                              titleName: convertedTotal,
+                              trailingName:convertedAverage,)
                             );
                     }));
           }

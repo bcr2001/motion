@@ -295,6 +295,84 @@ class TrackerDatabaseHelper {
     }
   }
 
+  // get an left join table of main category table time spent
+  // totals for a particular date and experience point earned from each
+  // main category
+  Future<List<Map<String, dynamic>>> getMCTotalAndXPEarned(
+      {required String currentUser, required String targetDate}) async {
+    try {
+      final db = await database;
+
+      final resultLJOMXP = await db.rawQuery('''
+        SELECT 
+            mainCategoryName, 
+            totalTimeSpent,
+            CASE
+                WHEN mainCategoryName = 'Education' THEN
+                    CASE 
+                        WHEN totalTimeSpent < 15 THEN '0'
+                        WHEN totalTimeSpent < 60 THEN '5'
+                        WHEN totalTimeSpent < 120 THEN '10'
+                        WHEN totalTimeSpent < 180 THEN '15'
+                        WHEN totalTimeSpent < 240 THEN '20'
+                        WHEN totalTimeSpent >= 240 THEN '25'
+                        ELSE '0'
+                    END
+                WHEN mainCategoryName = 'Skills' THEN
+                    CASE 
+                        WHEN totalTimeSpent < 15 THEN '0'
+                        WHEN totalTimeSpent >= 15 AND totalTimeSpent < 60 THEN '5'
+                        WHEN totalTimeSpent >= 60 AND totalTimeSpent < 120 THEN '10'
+                        WHEN totalTimeSpent >= 120 AND totalTimeSpent < 180 THEN '15'
+                        WHEN totalTimeSpent >= 180 AND totalTimeSpent < 240 THEN '20'
+                        WHEN totalTimeSpent >= 240 THEN '25'
+                        ELSE '0'
+                    END
+                WHEN mainCategoryName = 'Self Development' THEN
+                    CASE 
+                        WHEN totalTimeSpent < 15 THEN '0'
+                        WHEN totalTimeSpent >= 15 AND totalTimeSpent < 60 THEN '10'
+                        WHEN totalTimeSpent >= 60 AND totalTimeSpent < 120 THEN '15'
+                        WHEN totalTimeSpent >= 120 AND totalTimeSpent < 180 THEN '20'
+                        WHEN totalTimeSpent >= 180 THEN '25'
+                        ELSE '0'
+                    END
+                WHEN mainCategoryName = 'Sleep' THEN
+                    CASE 
+                        WHEN totalTimeSpent < 300 THEN '0'
+                        WHEN totalTimeSpent >= 300 AND totalTimeSpent < 360 THEN '5'
+                        WHEN totalTimeSpent >= 360 AND totalTimeSpent < 420 THEN '10'
+                        WHEN totalTimeSpent >= 420 AND totalTimeSpent < 480 THEN '20'
+                        WHEN totalTimeSpent >= 480 THEN '25'
+                        ELSE '0'
+                    END
+                WHEN mainCategoryName = 'Entertainment' THEN
+                    'N/A'
+                ELSE '0'
+            END AS xp_earned
+        FROM 
+            (
+                SELECT 
+                    mainCategoryName, 
+                    SUM(timeSpent) AS totalTimeSpent
+                FROM 
+                    subcategory
+                WHERE 
+                    currentLoggedInUser = ? AND date = ?
+                GROUP BY 
+                    mainCategoryName
+                ORDER BY totalTimeSpent DESC
+            );
+
+        ''', [currentUser, targetDate]);
+
+      return resultLJOMXP;
+    } catch (e) {
+      logger.e("(getLeftJoinOnMainAndXP) Error: $e");
+      return [];
+    }
+  }
+
   // get the totals for all 5 main categories
   Future<List<Map<String, dynamic>>> getAllMainCategoryTotals(
       {required String currentUser}) async {

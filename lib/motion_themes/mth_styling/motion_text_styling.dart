@@ -51,6 +51,12 @@ class AppTextStyle {
         fontSize: 14, fontWeight: FontWeight.w600, color: Colors.blueGrey);
   }
 
+  // section title style (main title)
+  static alertDialogElevatedButtonTextStyle() {
+    return _baseStyle.copyWith(
+        fontSize: 12, fontWeight: FontWeight.w600, color: Colors.blueGrey);
+  }
+
   // section title style
   static special1SectionTitleTextStyle() {
     return _baseStyle.copyWith(
@@ -60,8 +66,8 @@ class AppTextStyle {
   // home page highlight element textStyle
   static TextStyle tileElementTextStyle() {
     return _baseStyle.copyWith(
-        color: const Color(0xffededed),
-        fontSize: 11.5,
+        color: const Color.fromARGB(255, 232, 232, 232),
+        fontSize: 11,
         fontWeight: FontWeight.w600);
   }
 
@@ -90,6 +96,12 @@ class AppTextStyle {
   // home page subtitle list tile style
   static TextStyle leadingTextLTStyle() {
     return _baseStyle.copyWith(fontSize: 14);
+  }
+  static TextStyle leadingTextLTStyle2() {
+    return _baseStyle.copyWith(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.blueGrey);
+  }
+  static TextStyle leadingTextLTStyle3() {
+    return _baseStyle.copyWith(fontSize: 12.5);
   }
 
   // home page subtitle list tile style

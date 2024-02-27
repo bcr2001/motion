@@ -21,6 +21,14 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // retrieve the main category name, total for a specific day,
+  // and xp earned
+  Future<List<Map<String, dynamic>>> retrieveMCTotalAndXPEarned(
+      {required String currentUser, required String targetDate}) async {
+    return await trackDbInstance.getMCTotalAndXPEarned(
+        currentUser: currentUser, targetDate: targetDate);
+  }
+
   // Retrieve the entire total from the main category table.
   Future<double> retrieveEntireTotalMainCategoryTable(
       String currentUser, bool isUnaccounted) async {
@@ -71,9 +79,13 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
 
   // retrieve the total number of days in the main_category table
   Future<int> retrievedNumberOfDays(
-      {required String currentUser, String currentYear = "", bool getAllDays = true}) async {
+      {required String currentUser,
+      String currentYear = "",
+      bool getAllDays = true}) async {
     int numberOfDays = await trackDbInstance.getNumberOfDays(
-        currentUser: currentUser, currentYear: currentYear, getAllDays: getAllDays);
+        currentUser: currentUser,
+        currentYear: currentYear,
+        getAllDays: getAllDays);
 
     return numberOfDays;
   }
@@ -158,9 +170,13 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
 
   // get the daily intensity scores
   Future<List<Map<String, dynamic>>> retrieveDailyAccountedAndIntensities(
-      {required String currentUser, String year = "", bool getEntireIntensity = true}) async {
+      {required String currentUser,
+      String year = "",
+      bool getEntireIntensity = true}) async {
     return await trackDbInstance.getDailyAccountedAndIntensities(
-        currentUser: currentUser, year: year, getEntireIntensity: getEntireIntensity);
+        currentUser: currentUser,
+        year: year,
+        getEntireIntensity: getEntireIntensity);
   }
 }
 

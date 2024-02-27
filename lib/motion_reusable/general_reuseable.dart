@@ -29,7 +29,8 @@ Future circularIndicator(context) {
 }
 
 // snack bar for sign in and sign out error messages
-snackBarMessage(BuildContext context, {required String errorMessage, bool requiresColor = false}) {
+snackBarMessage(BuildContext context,
+    {required String errorMessage, bool requiresColor = false}) {
   final snackBarTheme = Theme.of(context).snackBarTheme;
 
   return ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -37,11 +38,10 @@ snackBarMessage(BuildContext context, {required String errorMessage, bool requir
     backgroundColor: snackBarTheme.backgroundColor,
     content: Text(
       errorMessage,
-      style: requiresColor? const TextStyle(
-        color: Colors.red,
-        fontSize: 14
-      ) 
-      : AppTextStyle.snackBarTextStyle, // Use the contentTextStyle from the theme.
+      style: requiresColor
+          ? const TextStyle(color: Colors.red, fontSize: 14)
+          : AppTextStyle
+              .snackBarTextStyle, // Use the contentTextStyle from the theme.
     ),
   ));
 }
@@ -72,7 +72,10 @@ class AlertDialogConst extends StatelessWidget {
     return AlertDialog(
       backgroundColor: Theme.of(context).dialogTheme.backgroundColor,
       insetPadding: EdgeInsets.zero,
-      title: Text(alertDialogTitle, style: AppTextStyle.sectionTitleTextStyle(),),
+      title: Text(
+        alertDialogTitle,
+        style: AppTextStyle.sectionTitleTextStyle(),
+      ),
       content: Builder(builder: (BuildContext context) {
         return SizedBox(
           height: screenHeight * heightFactor!,
@@ -80,6 +83,83 @@ class AlertDialogConst extends StatelessWidget {
           child: alertDialogContent,
         );
       }),
+    );
+  }
+}
+
+class DynamicHeightAlertDialog extends StatelessWidget {
+  final double maxHeightFactor; // Maximum height factor
+  final double widthFactor;
+  final String alertDialogTitle;
+  final Widget alertDialogContent;
+
+  const DynamicHeightAlertDialog({
+    super.key,
+    required this.alertDialogTitle,
+    required this.alertDialogContent,
+    this.maxHeightFactor = 0.5, // Default maximum height factor
+    this.widthFactor = 0.80,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    return AlertDialog(
+      backgroundColor: Theme.of(context).dialogTheme.backgroundColor,
+      insetPadding: EdgeInsets.zero,
+      title:
+          Text(alertDialogTitle, style: AppTextStyle.sectionTitleTextStyle()),
+      content: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: screenHeight * maxHeightFactor, // Set the maximum height
+        ),
+        child: SingleChildScrollView(
+          // Make it scrollable
+          child: SizedBox(
+            width: screenWidth * widthFactor,
+            child: alertDialogContent,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Custome List tile
+class CustomeListTile1 extends StatelessWidget {
+  final String leadingName;
+  final String titleName;
+  final String trailingName;
+
+  const CustomeListTile1(
+      {super.key, required this.leadingName, required this.titleName, required this.trailingName});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Text(
+        leadingName,
+        style: AppTextStyle.leadingTextLTStyle3(),
+      ),
+      title: Container(
+        width: 130,
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color: AppColor.tileBackgroundColor),
+        child: Center(
+          child: Text(
+            titleName,
+            textAlign: TextAlign.center,
+            style: AppTextStyle.tileElementTextStyle(),
+          ),
+        ),
+      ),
+      trailing: Text(
+        trailingName,
+        style: AppTextStyle.leadingTextLTStyle2(),
+      ),
     );
   }
 }

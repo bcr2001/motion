@@ -260,8 +260,8 @@ class ProductiveDayBuilder extends StatelessWidget {
             return Padding(
               padding: const EdgeInsets.all(10.0),
               child: Text(
-                "$productiveMessage .............................................. $date",
-                style: AppTextStyle.tileElementTextStyle(),
+                "$productiveMessage ....................................... $date",
+                style: AppTextStyle.alertDialogElevatedButtonTextStyle(),
               ),
             );
           }
