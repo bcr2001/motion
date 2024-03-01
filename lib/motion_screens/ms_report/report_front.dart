@@ -174,6 +174,7 @@ class PieChartAndValuesAccountedAndUnaccounted extends StatelessWidget {
 
               // accounted month total
               Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // accounted total for the current month
                   entireTimeAccountedAndUnaccounted(
@@ -342,6 +343,7 @@ class InfoAboutNoData extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         // no data image
         AppImages.noDataAvailableYet,

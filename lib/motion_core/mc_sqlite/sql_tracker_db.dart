@@ -1441,7 +1441,7 @@ class TrackerDatabaseHelper {
 
       // the most and least productive days result
       final resultMALPD = getMostProductiveDay ? await db.rawQuery("""
-      SELECT date, MAX(totalMostXP) AS most_productive
+      SELECT COALESCE(date, 'TBD') AS date, COALESCE(MAX(totalMostXP),0) AS most_productive
       FROM (
         SELECT date, COALESCE(SUM(educationXP), 0) + COALESCE(SUM(skillsXP), 0) + 
              COALESCE(SUM(sdXP), 0) + COALESCE(SUM(sleepXP), 0) AS totalMostXP
@@ -1450,7 +1450,7 @@ class TrackerDatabaseHelper {
         GROUP BY date
       ) AS totalMostXP
         """, [currentUser, firstDay, lastDay]) : await db.rawQuery("""
-      SELECT date, MIN(totalLeastXP) AS least_productive
+      SELECT COALESCE(date, 'TBD') AS date, COALESCE(MIN(totalLeastXP),0) AS least_productive
       FROM (
         SELECT date, COALESCE(SUM(educationXP), 0) + COALESCE(SUM(skillsXP), 0) + 
              COALESCE(SUM(sdXP), 0) + COALESCE(SUM(sleepXP), 0) AS totalLeastXP

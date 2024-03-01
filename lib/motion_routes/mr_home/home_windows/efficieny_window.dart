@@ -40,7 +40,7 @@ class EfficienyScoreSelectedDay extends StatelessWidget {
             } else if (snapshot.hasError) {
               return const Text("N/A");
             } else {
-              final resultSnapShot = snapshot.data!;
+              final resultSnapShot = snapshot.data ?? 0;
               final String resultString = resultSnapShot.toString();
 
               logger.i("xp earned = $resultSnapShot");
@@ -252,7 +252,9 @@ class ProductiveDayBuilder extends StatelessWidget {
           } else if (snapshot.hasError) {
             return const Text("N/A");
           } else {
-            final resultSnapShot = snapshot.data;
+            final resultSnapShot = snapshot.data ?? [];
+
+            logger.i(resultSnapShot);
 
             // (most/least) productive date
             final String date = resultSnapShot[0]["date"];
