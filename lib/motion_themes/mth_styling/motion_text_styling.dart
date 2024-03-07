@@ -44,6 +44,10 @@ class AppTextStyle {
   static subSectionTitleTextStyle() {
     return _baseStyle.copyWith(fontSize: 14, fontWeight: FontWeight.w600);
   }
+  // section title style (subtitle)
+  static expansionAnswerTextStyle() {
+    return _baseStyle.copyWith(fontSize: 13);
+  }
 
   // section title style (main title)
   static specialSectionTitleTextStyle() {

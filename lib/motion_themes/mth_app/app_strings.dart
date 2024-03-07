@@ -34,15 +34,16 @@ class AppString {
   static const String logOutTitle = "Log out";
   static const String cancelTitle = "Cancel";
   static const String settingsTitle = "Settings";
-  static const String tipsTitle = "Tips";
+  static const String tipsTitle = "FAQ";
   static const String themeSettingsTitle = "Theme Settings";
+  static const String subcategoryExampleTitles = "Subcategory Examples";
 
   static const String logOutQuestion = "Are you sure you want to log out?";
 
   // popup menu button values
   static const String logOutValue = "logout";
   static const String settingsValue = "setting";
-  static const String tipsValue = "tips";
+  static const String tipsValue = "faq";
 
   // settings page
   static const String themeTitle = "Theme";
@@ -221,21 +222,40 @@ class AppString {
   static const String infoAboutStackChartData =
       "A monthly Distribution of Main Categories";
 
-  // TIPS ROUTE
+  // FAQ ROUTE
   // notes
-  static const String tipsImportantNoteTitle = "Important Notes";
-  static const String note1TrackingGuide =
+
+  // (questions)
+  static const String faq1SubcategoryExamplesQ =
+      "1. What are some examples of subcategories I can keep track of?";
+  static const String faq2AccuracyMoneteringQ =
+      "2. How can I accurately monitor my activities and track time spent on each task?";
+  static const String faq3ForgetTimerQ =
+      "3. What should I do if I forget to start the timer when initiating an activity?";
+  static const String faq4AnyActivityQ =
+      "4. What type of activities should I track with this system?";
+  static const String faq5GeneralOrSpecificQ =
+      "5. Should I keep my subcategories specific or general when tracking activities?";
+  static const String faq6AssignToMainQ =
+      "6. How should I assign subcategories to their respective main categories?";
+  static const String faq7EFSQ =
+      "7. What does EFS stand for, and how is it used?";
+
+
+  // (answers)
+  static const String faq2AccuracyMoneteringAnswer =
       "To accurately monitor your activities, start a stopwatch on your phone or device when you begin a task. Stop it once you finish, then log the time in the app's relevant subcategory. This method ensures precise tracking of time spent on each activity.";
-  static const String note2NoEstimating =
-      "If you forget to start the timer when beginning an activity, don't guess the elapsed time. Instead, consider that period as untracked and start timing from the moment you remember, treating it as the activity's start.";
-  static const String note3IndividualUseOnly =
-      "This tracking system is intended for individual use and should only be used for specific, focused activities. Please avoid tracking activities that do not have a clear and defined purpose.";
-  static const String note4ConciseTracking =
-      "To avoid confusion and keep your tracking list clear, it's best to use broader subcategories. For example, instead of tracking each school subject separately, group them under a more general category like 'Studying.'";
-  static const String note5subcategoryAssignment =
-      "When assigning subcategories to main categories, carefully consider their placement since the categorization can be nuanced. Refer to the FOUNDERS gallery for ideas on effective organization. Remember, categorization can be subjective, so adjust as needed to fit your application's specific objectives and user preferences.";
-  static const String note6KeyExamples =
-      "Below are the main categories and key EXAMPLES of subcategories that can be tracked under each one. Tracking the main categories directly is not feasible, so corresponding subcategories must be created for each main category.";
+  static const String faq3ForgetTimerAnswer =
+      "If you initiate an activity and realize that you forgot to start the timer, do not estimate the time spent on the activity before remembering to initiate the timer. Instead, treat that initial period as untracked time and commence timing the activity as if it were the first instance of engagement.";
+  static const String faq4AnyActivityAnswer =
+      "This tracking system is designed for individual use, so it's important to track only specific, focused activities. Please refrain from tracking activities that lack a clear and focused purpose.";
+  static const String faq5GeneralOrSpecificAnswer =
+      "To prevent confusion and maintain a concise tracking list, it's advisable to keep the subcategories reasonably general. For instance, rather than tracking individual school subjects separately, you can encapsulate all the time spent under a broader category like 'Studied'";
+  static const String faq6AssignToMainAnswer =
+      "It's important to carefully consider the assignment of subcategories to their respective main categories, as there can be a fine line between which main category certain subcategories belong to. We recommend reviewing the FOUNDERS gallery for inspiration and guidance on how to organize these categories effectively. However, keep in mind that the organization can be somewhat subjective, so feel free to make adjustments as needed based on your application's unique goals and user preferences.";
+  static const String faq7EFSAnswer =
+      "EFS stands for Efficiency Score. It is a metric used to show how productive you are. The efficiency score is calculated for the current month, a specific year, and the overall efficiency score.";
+
   static const String note7BackSlashAlert =
       "Please note that the '/'symbol is used to indicate alternative names for subcategories, and you have the flexibility to name subcategories in the way that best suits your preferences.";
 

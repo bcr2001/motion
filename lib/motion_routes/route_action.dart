@@ -21,14 +21,14 @@ class MotionActionButtons extends StatelessWidget {
       children: [
         // report
         IconButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: 
-                (BuildContext context) => const MonthlyReportPage()));
-          }, 
-          icon: const Icon(Icons.bar_chart_rounded)),
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (BuildContext context) =>
+                          const MonthlyReportPage()));
+            },
+            icon: const Icon(Icons.bar_chart_rounded)),
 
         // popup menu button
         const MainRoutePopUpMenu()
@@ -61,7 +61,7 @@ showAlertDialog(BuildContext context) {
                 const Divider(),
 
                 // log out query
-                 Text(
+                Text(
                   AppString.logOutQuestion,
                   style: AppTextStyle.infoTextStyle(),
                 ),
@@ -121,7 +121,7 @@ class MainRoutePopUpMenu extends StatelessWidget {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (BuildContext context) => const TipsPage()));
+                    builder: (BuildContext context) => const FAQPage()));
           } else {
             Navigator.push(
               context,
