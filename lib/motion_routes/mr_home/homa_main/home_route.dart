@@ -91,6 +91,7 @@ class MotionHomeRoute extends StatelessWidget {
               const TrackedSubcategories(),
 
 
+
               // SECTION FIVE: SUMMARY WINDOW
               sectionTitle(titleName: 
               AppString.summaryTitle),

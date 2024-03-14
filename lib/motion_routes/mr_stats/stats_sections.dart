@@ -171,24 +171,4 @@ class YearMainCategoryOveriew extends StatelessWidget {
 }
 
 // SECTION 4: HIGHEST TRACKED TIME
-// highest time tracked per subcategory
-// for the entire year.
-class YearHighestTrackedTimePerSubcategory extends StatelessWidget {
-  final String year;
 
-  const YearHighestTrackedTimePerSubcategory({super.key, required this.year});
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer2<UserUidProvider, SubcategoryTrackerDatabaseProvider>(
-        builder: (context, user, sub, child) {
-      final String currentUserUid = user.userUid!;
-
-      return GridHighestTrackedSubcategory(
-          future: sub.retrieveHighestTrackedTimePerSubcategory(
-              currentUser: currentUserUid,
-              firstDay: "$year-01-01",
-              lastDay: "$year-12-31"));
-    });
-  }
-}

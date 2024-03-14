@@ -38,7 +38,9 @@ class YearsWorthOfSummaryStatitics extends StatelessWidget {
           // SECTION 0(new): Efficiency Score
           // This section displays the efficieny score for the
           // selected year
-          EfficienyScoreSelectedYearOrMont(selectedYear: year, getSelectedYearEfs: true,),
+          EfficienyScoreSelectedYearOrMont(
+            selectedYear: year, 
+            getSelectedYearEfs: true,),
 
           // SECTION 1(new): Contributions
           // This section displays to the user a HeatMap
@@ -49,7 +51,8 @@ class YearsWorthOfSummaryStatitics extends StatelessWidget {
 
           // SECTION 1: ACCOUNTED VS UNACCOUNTED
           // Accounted vs Unaccounted
-          sectionTitle(titleName: AppString.accountedVsUnaccounterTitle),
+          sectionTitle
+          (titleName: AppString.accountedVsUnaccounterTitle),
 
           Padding(
             padding: const EdgeInsets.only(bottom: 30.0),
@@ -98,19 +101,7 @@ class YearsWorthOfSummaryStatitics extends StatelessWidget {
             year: year,
           ),
 
-          // SECTION 4: HIGHEST TRACKED TIME PER SUBCATEGORY
 
-          // section title
-          specialSectionTitle(
-              mainTitleName: AppString.highestTrackedTimeTitleMain,
-              elevatedTitleName: AppString.highestTrackedTimeTitleSpecial),
-          // information to the user regarding this section
-          const InfoToTheUser(
-              sectionInformation: AppString.infoAboutHighestTimeTracked),
-
-          YearHighestTrackedTimePerSubcategory(
-            year: year,
-          ),
 
           // SECTION 5: CHARTING A YEAR IN LINES
 

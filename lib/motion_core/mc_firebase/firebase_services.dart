@@ -27,6 +27,12 @@ class AuthServices {
         final userUidProvider =
             Provider.of<UserUidProvider>(context, listen: false);
 
+        // Check if user UID is saved in SharedPreferences
+        while (!(await userUidProvider.isUserUidSaved())) {
+          // Keep displaying the circular progress indicator until user UID is saved
+          await Future.delayed(const Duration(milliseconds: 100));
+        }
+
         // Set the user's UID in the UserUidProvider.
         userUidProvider.setUserUid(_auth.currentUser!.uid);
       }
@@ -50,11 +56,12 @@ class AuthServices {
             errorMessage: AppString.firebaseIncorrectPassword);
       } else {
         // Handle other FirebaseAuth exceptions.
-        logger.e("(signInUser): something went wrong during the sign in process");
+        logger
+            .e("(signInUser): something went wrong during the sign in process");
 
         // Display an error message using a snack bar.
         snackBarMessage(context,
-          requiresColor: true,
+            requiresColor: true,
             errorMessage: AppString.firebaseSomethingWentWrong);
       }
     } finally {
@@ -77,11 +84,11 @@ class AuthServices {
     } on FirebaseAuthException catch (e) {
       if (e.code == "email-already-in-use") {
         // Handle the case where the email is already in use.
-        logger.e("(signUpUser): something went wrong during the sign up process $e");
+        logger.e(
+            "(signUpUser): something went wrong during the sign up process $e");
         // Display an error message using a snack bar.
         snackBarMessage(context,
-        requiresColor: true,
-        errorMessage: AppString.firebaseEmailInUse);
+            requiresColor: true, errorMessage: AppString.firebaseEmailInUse);
       }
     } finally {
       // Dispose of the circular loading indicator upon sign-up completion.
@@ -103,10 +110,8 @@ class AuthServices {
       logger.e("(signOutUser): unable to sign out $e");
 
       // Display an error message using a snack bar.
-      snackBarMessage(
-        context,
-        requiresColor: true,
-      errorMessage: AppString.firebaseUnableToSignOut);
+      snackBarMessage(context,
+          requiresColor: true, errorMessage: AppString.firebaseUnableToSignOut);
     } finally {
       // Dispose of the circular loading indicator upon sign-out completion.
       navigationKey.currentState!.pop();

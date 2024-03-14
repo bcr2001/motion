@@ -147,33 +147,6 @@ class MonthlyReportPage extends StatelessWidget {
                               lastDay: day.lastDay),
                         );
                       }),
-
-                      // SECTION 4:
-                      // Highest Tracked time per subcategory section
-                      specialSectionTitle(
-                        mainTitleName: AppString.highestTrackedTimeTitleMain,
-                        elevatedTitleName:
-                            AppString.highestTrackedTimeTitleSpecial,
-                      ),
-                      // information about this section
-                      const InfoAboutHightesTrackedTime(),
-
-                      Consumer3<FirstAndLastDay, UserUidProvider,
-                              SubcategoryTrackerDatabaseProvider>(
-                          builder: (context, day, user, sub, child) {
-                        // current logged in user
-                        final String currentUserUid = user.userUid!;
-
-                        logger.i(day.firstDay);
-                        logger.i(day.lastDay);
-
-                        return GridHighestTrackedSubcategory(
-                          future: sub.retrieveHighestTrackedTimePerSubcategory(
-                              currentUser: currentUserUid,
-                              firstDay: day.firstDay,
-                              lastDay: day.lastDay),
-                        );
-                      })
                     ]);
               }
             }

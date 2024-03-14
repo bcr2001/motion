@@ -39,4 +39,10 @@ class UserUidProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  // Check if user UID is saved in SharedPreferences
+  Future<bool> isUserUidSaved() async {
+    final savedUid = _pref?.getString(uidKey);
+    return savedUid != null;
+  }
 }

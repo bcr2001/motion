@@ -46,7 +46,7 @@ class TrackerDatabaseHelper {
     logger.i("Database _onUpgradeDatabase function called");
     if (oldVersion < 10) {
       // await db.execute('DROP TABLE IF EXISTS experience_points');
-      // // Upgrade the database schema here
+      // Upgrade the database schema here
       // await db.execute('''
       //   CREATE TABLE experience_points(
       //     date TEXT,
@@ -55,26 +55,75 @@ class TrackerDatabaseHelper {
       //     sdXP INTEGER,
       //     sleepXP INTEGER,
       //     currentLoggedInUser TEXT,
-      //     PRIMARY KEY (date, currentLoggedInUser),
+      //     PRIMARY KEY (date, currentLoggedInUser),hi
       //     FOREIGN KEY (date, currentLoggedInUser)
       //     REFERENCES main_category(date, currentLoggedInUser)
       //   )
       // ''');
 
-      // Trigger: update_experience_points_after_insert
-      // Purpose: Updates the experience_points table after a new entry is
-      //          inserted into the subcategory table.
-      // Functionality:
-      // -- 1. Triggered after an INSERT operation on the subcategory table.
-      // -- 2. For each main category(Education, Skills, Personal Growth, Sleep)
-      //       it sums the timeSpent from the subcategory table.
-      // -- 3. Applies a CASE statement for each category to determine the
-      //       appropriate experience points based on the total timeSpent.
-      // -- 4. Updates the experience_points table with the calculated
-      //       experience points for each category.
-      // -- 5. Ensures the update is for the specific date and user matching
-      //       the new entry in the subcategory table.
-      await db.execute('''
+      // logger.i("Database _onUpgradeDatabase COMPLETED");
+    }
+  }
+
+  void _createDatabase(Database db, int version) async {
+    // create the experience point table
+    await db.execute('''
+        CREATE TABLE experience_points(
+          date TEXT,
+          educationXP INTEGER,
+          skillsXP INTEGER,
+          sdXP INTEGER,
+          sleepXP INTEGER,
+          currentLoggedInUser TEXT,
+          PRIMARY KEY (date, currentLoggedInUser),
+          FOREIGN KEY (date, currentLoggedInUser)
+          REFERENCES main_category(date, currentLoggedInUser)
+        )
+      ''');
+
+    // creation of the main_category table
+    await db.execute('''
+      CREATE TABLE main_category(
+        date TEXT,
+        education REAL,
+        skills REAL,
+        entertainment REAL,
+        selfDevelopment REAL,
+        sleep REAL,
+        currentLoggedInUser TEXT,
+        PRIMARY KEY (date, currentLoggedInUser)
+      )
+    ''');
+
+    // creation of the subcategory table
+    await db.execute('''
+    CREATE TABLE subcategory(
+      id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
+      date TEXT,
+      mainCategoryName TEXT,
+      subcategoryName TEXT,
+      timeRecorded TEXT,
+      timeSpent REAL,
+      currentLoggedInUser TEXT,
+      FOREIGN KEY (date, currentLoggedInUser) 
+      REFERENCES main_category(date, 	currentLoggedInUser)
+    )
+  ''');
+
+    // Trigger: update_experience_points_after_insert
+    // Purpose: Updates the experience_points table after a new entry is
+    //          inserted into the subcategory table.
+    // Functionality:
+    // -- 1. Triggered after an INSERT operation on the subcategory table.
+    // -- 2. For each main category(Education, Skills, Personal Growth, Sleep)
+    //       it sums the timeSpent from the subcategory table.
+    // -- 3. Applies a CASE statement for each category to determine the
+    //       appropriate experience points based on the total timeSpent.
+    // -- 4. Updates the experience_points table with the calculated
+    //       experience points for each category.
+    // -- 5. Ensures the update is for the specific date and user matching
+    //       the new entry in the subcategory table.
+    await db.execute('''
         CREATE TRIGGER IF NOT EXISTS update_experience_points
         AFTER INSERT ON subcategory
         BEGIN
@@ -135,8 +184,9 @@ class TrackerDatabaseHelper {
           END;  
         ''');
 
-      // trigger to update the experience point table if a deletion is made in the subcategory table
-      await db.execute('''
+    // trigger to update the experience point table if 
+    // a deletion is made in the subcategory table
+    await db.execute('''
         CREATE TRIGGER IF NOT EXISTS update_experience_points_after_delete
         AFTER DELETE ON subcategory
         BEGIN
@@ -194,39 +244,6 @@ class TrackerDatabaseHelper {
           WHERE date = OLD.date AND currentLoggedInUser = OLD.currentLoggedInUser;
         END;
         ''');
-
-      logger.i("Database _onUpgradeDatabase COMPLETED");
-    }
-  }
-
-  void _createDatabase(Database db, int version) async {
-    // creation of the main_category table
-    await db.execute('''
-      CREATE TABLE main_category(
-        date TEXT,
-        education REAL,
-        skills REAL,
-        entertainment REAL,
-        selfDevelopment REAL,
-        sleep REAL,
-        currentLoggedInUser TEXT,
-        PRIMARY KEY (date, currentLoggedInUser)
-      )
-    ''');
-    // creation of the subcategory table
-    await db.execute('''
-    CREATE TABLE subcategory(
-      id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
-      date TEXT,
-      mainCategoryName TEXT,
-      subcategoryName TEXT,
-      timeRecorded TEXT,
-      timeSpent REAL,
-      currentLoggedInUser TEXT,
-      FOREIGN KEY (date, currentLoggedInUser) 
-      REFERENCES main_category(date, 	currentLoggedInUser)
-    )
-  ''');
     // a trigger to update the main_category table
     // calculate the sums from the subcategory table
     // and updates the main_category table depending on the aggregation
@@ -1164,44 +1181,6 @@ class TrackerDatabaseHelper {
     }
   }
 
-  // get the highest time tracked for a subcategory for a particular
-  // period of time
-  Future<List<Map<String, dynamic>>> getHighestTrackedTimePerSubcategory(
-      {required String currentUser,
-      required String firstDay,
-      required String lastDay}) async {
-    try {
-      final db = await database;
-
-      // the result from the comman table expression
-      final resultHTTPS = await db.rawQuery('''
-        WITH RankedData AS (
-            SELECT 
-                date,
-                subcategoryName,
-                COALESCE(SUM(timeSpent)/60, 0) AS timeSpent,
-                ROW_NUMBER() OVER (PARTITION BY subcategoryName ORDER 
-                BY timeSpent DESC) AS rk
-            FROM subcategory
-            WHERE currentLoggedInUser = ? 
-            AND date BETWEEN ? AND ? AND timeSpent > 0
-            GROUP BY date, subcategoryName
-        )
-        SELECT 
-            date,
-            subcategoryName,
-            timeSpent
-        FROM RankedData
-        WHERE rk = 1
-        ORDER BY timeSpent DESC;
-        ''', [currentUser, firstDay, lastDay]);
-
-      return resultHTTPS;
-    } catch (e) {
-      logger.e("Error: $e");
-      return [];
-    }
-  }
 
   // get the subcetegory totals for a specific date
   Future<List<Map<String, dynamic>>> getSubcategoryTotalsForSpecificDate(
