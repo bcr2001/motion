@@ -208,7 +208,7 @@ class AppString {
   static const String entireLifeInSlicesTitle = "in slices";
 
   static const String infoAboutAnnualOverviewEmpty =
-      "Initiate the tracking process to generate and display your comprehensive yearly summary here..";
+      "Initiate the tracking process to generate and display your summary report here.";
   static const String infoAboutMonthlyReportEmpty =
       "Initiate the tracking process to generate and display your comprehensive monthly report here..";
   static const String infoAboutGalleys =

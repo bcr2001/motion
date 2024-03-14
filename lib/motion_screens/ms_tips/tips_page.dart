@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:motion/motion_routes/mr_home/home_reusable/back_home.dart';
 import 'package:motion/motion_screens/ms_tips/tips_front.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 

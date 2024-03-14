@@ -58,18 +58,21 @@ class MotionStatesRoute extends StatelessWidget {
                       final snapshotData = snapshot.data;
 
                       if (snapshotData! <= 0) {
-                        return Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            // default display image that is shown
-                            // when the page is empty
-                            AppImages.noAnalysisGallary,
-
-                            // information on why it is empty
-                            const InfoToTheUser(
-                                sectionInformation:
-                                    AppString.infoAboutAnnualOverviewEmpty)
-                          ],
+                        return SizedBox(
+                          height: MediaQuery.of(context).size.height,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // default display image that is shown
+                              // when the page is empty
+                              AppImages.noAnalysisGallary,
+                          
+                              // information on why it is empty
+                              const InfoToTheUser(
+                                  sectionInformation:
+                                      AppString.infoAboutAnnualOverviewEmpty)
+                            ],
+                          ),
                         );
                       } else {
                         // if data is available,the analysis

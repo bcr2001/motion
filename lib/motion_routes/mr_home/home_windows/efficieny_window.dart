@@ -94,11 +94,11 @@ class XPForTheCurrentDay extends StatelessWidget {
 }
 
 // Get's the efficiency score of the selected year or month
-class EfficienyScoreSelectedYearOrMont extends StatelessWidget {
+class EfficienyScoreSelectedYearOrMonth extends StatelessWidget {
   final String selectedYear;
   final bool getSelectedYearEfs;
 
-  const EfficienyScoreSelectedYearOrMont(
+  const EfficienyScoreSelectedYearOrMonth(
       {super.key,
       required this.selectedYear,
       required this.getSelectedYearEfs});

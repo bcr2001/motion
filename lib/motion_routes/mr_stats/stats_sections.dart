@@ -1,9 +1,10 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_heatmap_calendar/flutter_heatmap_calendar.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_reusable/db_re/sub_logic.dart';
-import 'package:motion/motion_screens/ms_report/report_back.dart';
 import 'package:motion/motion_screens/ms_report/report_heat_map.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
@@ -81,10 +82,14 @@ class YearMainCategoryOveriew extends StatelessWidget {
 
   const YearMainCategoryOveriew({super.key, required this.year});
 
+   // calculates the approriate height of the alert dialog
+  // based on the number of items in the list view item count
+  double calculateContainerHeight(int itemCount, double itemHeight) {
+    return itemCount * itemHeight;
+  }
+
   @override
   Widget build(BuildContext context) {
-    // get the screen height of the device
-    final screenHeight = MediaQuery.of(context).size.height;
 
     return Consumer2<UserUidProvider, SubcategoryTrackerDatabaseProvider>(
         builder: (context, user, sub, child) {
@@ -110,14 +115,23 @@ class YearMainCategoryOveriew extends StatelessWidget {
             } else {
               final snapshotData = snapshot.data;
 
+              double maxHeight = 380.0; // Maximum height for the container
+              double containerHeight = min(
+                  calculateContainerHeight(snapshotData!.length, 80), maxHeight);
+
+              
+
               return Container(
                 margin: const EdgeInsets.only(bottom: 25.0),
-                height: screenHeight * 0.42,
+                padding: const EdgeInsets.only(top: 12),
+                height: containerHeight,
                 child: Card(
                   child: ListView.builder(
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: snapshotData!.length,
+                      itemCount: snapshotData.length,
                       itemBuilder: (BuildContext context, index) {
+
+                        
                         // single item index
                         final singleItem = snapshotData[index];
 
