@@ -17,6 +17,7 @@ import 'package:provider/provider.dart';
 import 'motion_core/motion_providers/date_pvd/current_date_pvd.dart';
 import 'motion_core/motion_providers/sql_pvd/assigner_pvd.dart';
 import 'motion_core/motion_providers/web_api_pvd/zen_quotes_pvd.dart';
+import 'motion_reusable/general_reuseable.dart';
 import 'motion_themes/mth_theme/dark_theme.dart';
 import 'motion_themes/mth_theme/light_theme.dart';
 import 'motion_core/mc_sqlite/sql_tracker_db.dart';
@@ -34,7 +35,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize the database helper
-  // final TrackerDatabaseHelper databaseHelper = TrackerDatabaseHelper();
+  final TrackerDatabaseHelper databaseHelper = TrackerDatabaseHelper();
   // final dbHelper = AssignerDatabaseHelper();
 
   // databaseHelper.updateCurrentUser();
@@ -66,7 +67,7 @@ void main() async {
   final trackMainCategoryDatabaseProvider = MainCategoryTrackerProvider();
 
   // final allMain = await dbHelper.getAllItems();
-  // final allMain = await databaseHelper.getLeftJoinOnMainAndXP(targetDate: "2024-02-25");
+  // final allMain = await databaseHelper.getMostAndLeastProductiveMonths(getMostProductiveMonth: false, year: "2023");
   // final allMain = await databaseHelper.getAllExperiencePoints(date: "2024-02-14");
 
   // logger.i(allMain);

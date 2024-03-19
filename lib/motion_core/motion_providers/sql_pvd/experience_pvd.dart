@@ -64,11 +64,23 @@ class ExperiencePointTableProvider extends ChangeNotifier {
         currentUser: currentUser, selectedDate: selectedDate);
   }
 
+  // retrieves the most and least productive months
+  // based on the experience points earned for a particular year
+  Future<List<Map<String, dynamic>>> retrieveMostAndLeastProductiveMonths(
+      {required bool getMostProductiveMonth,
+      required String currentUser,
+      required String year}) async {
+    return await trackDbInstance.getMostAndLeastProductiveMonths(
+        getMostProductiveMonth: getMostProductiveMonth,
+        currentUser: currentUser,
+        year: year);
+  }
+
   // retrieve the most and least productive days based on
   // experience points earned for a particular point
   Future<List<Map<String, dynamic>>> retrieveMostAndLeastProductiveDays(
       {required String currentUser,
-        required String firstDay,
+      required String firstDay,
       required String lastDay,
       required bool getMostProductiveDay}) async {
     return await trackDbInstance.getMostAndLeastProductiveDays(

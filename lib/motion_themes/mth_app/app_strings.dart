@@ -189,6 +189,9 @@ class AppString {
   static const String mostProductiveDay = "Most Productive Day";
   static const String leastProductiveDay = "Least Productive Day";
 
+  static const String mostProductiveMonth = "Most Productive Month";
+  static const String leastProductiveMonth = "Least Productive Month";
+
   // STATS ROUTE
   static const String totalAccountedTitle = "Total Accounted";
   static const String totalUnaccountedTitle = "Total Unaccounted";

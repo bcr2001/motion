@@ -184,7 +184,7 @@ class TrackerDatabaseHelper {
           END;  
         ''');
 
-    // trigger to update the experience point table if 
+    // trigger to update the experience point table if
     // a deletion is made in the subcategory table
     await db.execute('''
         CREATE TRIGGER IF NOT EXISTS update_experience_points_after_delete
@@ -1181,7 +1181,6 @@ class TrackerDatabaseHelper {
     }
   }
 
-
   // get the subcetegory totals for a specific date
   Future<List<Map<String, dynamic>>> getSubcategoryTotalsForSpecificDate(
       {required String selectedDate, required String currentUser}) async {
@@ -1406,6 +1405,71 @@ class TrackerDatabaseHelper {
     } catch (e) {
       logger.e("(dailyExperiencePoints) ERROR: $e");
       return 0; // Return 0.0 on error
+    }
+  }
+
+  // this function get the most and least productive months
+  Future<List<Map<String, dynamic>>> getMostAndLeastProductiveMonths(
+      {required bool getMostProductiveMonth,required String currentUser,required String year}) async {
+    try {
+      final db = await database;
+
+      final resultMALPM = getMostProductiveMonth ? await db.rawQuery("""
+          SELECT CASE 
+                    WHEN month_num = 1 THEN 'January'
+                    WHEN month_num = 2 THEN 'February'
+                    WHEN month_num = 3 THEN 'March'
+                    WHEN month_num = 4 THEN 'April'
+                    WHEN month_num = 5 THEN 'May'
+                    WHEN month_num = 6 THEN 'June'
+                    WHEN month_num = 7 THEN 'July'
+                    WHEN month_num = 8 THEN 'August'
+                    WHEN month_num = 9 THEN 'September'
+                    WHEN month_num = 10 THEN 'October'
+                    WHEN month_num = 11 THEN 'November'
+                    WHEN month_num = 12 THEN 'December'
+                    ELSE 'TBD'
+                END AS month, 
+                COALESCE(MAX(totalMostXP), 0) AS most_productive
+          FROM (
+              SELECT CAST(strftime('%m', date) AS INTEGER) AS month_num, 
+                    COALESCE(SUM(educationXP), 0) + COALESCE(SUM(skillsXP), 0) + 
+                    COALESCE(SUM(sdXP), 0) + COALESCE(SUM(sleepXP), 0) AS totalMostXP
+              FROM experience_points
+              WHERE currentLoggedInUser = ? AND strftime('%Y', date) = ? 
+              GROUP BY month_num
+          ) AS totalMostXP
+        """, [currentUser, year]) : await db.rawQuery(
+          """
+        SELECT CASE 
+                  WHEN month_num = 1 THEN 'January'
+                  WHEN month_num = 2 THEN 'February'
+                  WHEN month_num = 3 THEN 'March'
+                  WHEN month_num = 4 THEN 'April'
+                  WHEN month_num = 5 THEN 'May'
+                  WHEN month_num = 6 THEN 'June'
+                  WHEN month_num = 7 THEN 'July'
+                  WHEN month_num = 8 THEN 'August'
+                  WHEN month_num = 9 THEN 'September'
+                  WHEN month_num = 10 THEN 'October'
+                  WHEN month_num = 11 THEN 'November'
+                  WHEN month_num = 12 THEN 'December'
+                  ELSE 'TBD'
+              END AS month, 
+              COALESCE(MIN(totalLeastXP), 0) AS totalLeastXP
+        FROM (
+            SELECT CAST(strftime('%m', date) AS INTEGER) AS month_num, 
+                  COALESCE(SUM(educationXP), 0) + COALESCE(SUM(skillsXP), 0) + 
+                  COALESCE(SUM(sdXP), 0) + COALESCE(SUM(sleepXP), 0) AS totalLeastXP
+            FROM experience_points
+            WHERE currentLoggedInUser = ? AND strftime('%Y', date) = ? 
+            GROUP BY month_num
+        ) AS totalLeastXP
+          """, [currentUser, year]);
+      return resultMALPM;
+    } catch (e) {
+      logger.e("(getMostAndLeastProductiveMonths) ERROR: $e");
+      return [];
     }
   }
 

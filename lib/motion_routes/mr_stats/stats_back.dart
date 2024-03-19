@@ -50,6 +50,17 @@ class YearsWorthOfSummaryStatitics extends StatelessWidget {
           sectionTitle(titleName: AppString.contributionTitle),
           SummaryContributionHeatMap(year: int.parse(year)),
 
+          // SECTION 2(new): Most And Least Productive Months
+          // (most)
+          MostAndLeastProductiveMonthBuilder(
+            getMostProductiveMonth: true,
+            year: year,),
+          // (least)
+          MostAndLeastProductiveMonthBuilder(
+            getMostProductiveMonth: false, 
+            year: year),
+          
+
           // SECTION 1: ACCOUNTED VS UNACCOUNTED
           // Accounted vs Unaccounted
           sectionTitle(titleName: AppString.accountedVsUnaccounterTitle),

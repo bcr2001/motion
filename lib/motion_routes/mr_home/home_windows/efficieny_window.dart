@@ -238,9 +238,37 @@ Widget efficiencySection({required String score, required bool getEntire}) {
 class ProductiveDayBuilder extends StatelessWidget {
   final String productiveMessage;
   final Future<dynamic>? future;
+  final String varableName;
 
   const ProductiveDayBuilder(
-      {super.key, required this.productiveMessage, this.future});
+      {super.key, required this.productiveMessage, this.future, required this.varableName});
+
+  Widget _productiveDisplay(
+      {required String productiveMessage, required String date}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // productive message
+        Text(
+          productiveMessage,
+          style: AppTextStyle.alertDialogElevatedButtonTextStyle(),
+        ),
+
+        // dots separator
+        Text(
+          " ....................................... ",
+          style: AppTextStyle.alertDialogElevatedButtonTextStyle(),
+        ),
+
+        // date
+        Text(
+          date,
+          style: AppTextStyle.alertDialogElevatedButtonTextStyle(),
+        )
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -257,15 +285,17 @@ class ProductiveDayBuilder extends StatelessWidget {
             logger.i(resultSnapShot);
 
             // (most/least) productive date
-            final String date = resultSnapShot[0]["date"];
+            final String date = resultSnapShot[0][varableName];
 
             return Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Text(
-                "$productiveMessage ....................................... $date",
-                style: AppTextStyle.alertDialogElevatedButtonTextStyle(),
-              ),
-            );
+                padding: const EdgeInsets.all(10.0),
+                child: _productiveDisplay(
+                    productiveMessage: productiveMessage, date: date)
+                // Text(
+                //   "$productiveMessage ....................................... $date",
+                //   style: AppTextStyle.alertDialogElevatedButtonTextStyle(),
+                // ),
+                );
           }
         });
   }
@@ -304,7 +334,7 @@ class MostAndLeastProductiveDayBuilder extends StatelessWidget {
                   currentUser: currentUserUid,
                   firstDay: firstDayOfMonth,
                   lastDay: lastDayOfMonth,
-                  getMostProductiveDay: true),
+                  getMostProductiveDay: true), varableName: 'date',
             );
           })
         : Consumer3<ExperiencePointTableProvider, UserUidProvider,
@@ -322,7 +352,47 @@ class MostAndLeastProductiveDayBuilder extends StatelessWidget {
                   currentUser: currentUserUid,
                   firstDay: firstDayOfMonth,
                   lastDay: lastDayOfMonth,
-                  getMostProductiveDay: false),
+                  getMostProductiveDay: false), varableName: 'date',
+            );
+          });
+  }
+}
+
+// Most and Least Productive Month Builder
+class MostAndLeastProductiveMonthBuilder extends StatelessWidget {
+  final bool getMostProductiveMonth;
+  final String year;
+
+  const MostAndLeastProductiveMonthBuilder(
+      {super.key, required this.getMostProductiveMonth, required this.year});
+
+  @override
+  Widget build(BuildContext context) {
+    return getMostProductiveMonth
+        ? Consumer2<ExperiencePointTableProvider, UserUidProvider>(
+            builder: (context, xp, user, child) {
+            // currently logged in user uid
+            final String currentUserUid = user.userUid!;
+
+            return ProductiveDayBuilder(
+              productiveMessage: AppString.mostProductiveMonth,
+              future: xp.retrieveMostAndLeastProductiveMonths(
+                  getMostProductiveMonth: getMostProductiveMonth,
+                  currentUser: currentUserUid,
+                  year: year), varableName: 'month',
+            );
+          })
+        : Consumer2<ExperiencePointTableProvider, UserUidProvider>(
+            builder: (context, xp, user, child) {
+            // currently logged in user uid
+            final String currentUserUid = user.userUid!;
+
+            return ProductiveDayBuilder(
+              productiveMessage: AppString.leastProductiveMonth,
+              future: xp.retrieveMostAndLeastProductiveMonths(
+                  getMostProductiveMonth: getMostProductiveMonth,
+                  currentUser: currentUserUid,
+                  year: year), varableName: 'month',
             );
           });
   }
