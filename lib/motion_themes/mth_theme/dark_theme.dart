@@ -28,9 +28,12 @@ ThemeData darkThemeData = ThemeData(
       const AppBarTheme(centerTitle: true, backgroundColor: Colors.black),
 
   // card theme
-  cardTheme: const CardTheme(
+  cardTheme:  CardTheme(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(25.0)
+      ),
       elevation: 1,
-      margin: EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
+      margin: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
       color: AppColor.darkModeContentWidget),
 
   // floating action button

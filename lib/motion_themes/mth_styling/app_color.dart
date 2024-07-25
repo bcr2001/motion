@@ -51,5 +51,5 @@ class AppColor {
 
   // app content widget background color
   static const Color lightModeContentWidget = Color(0xFFF5F5FF);
-  static const Color darkModeContentWidget = Color(0xFF1B2135);
+  static const Color darkModeContentWidget = Color(0xFF1B202E);
 }
