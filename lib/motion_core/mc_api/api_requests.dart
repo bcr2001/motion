@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-
 import '../../motion_reusable/general_reuseable.dart';
 import '../../motion_themes/mth_app/app_strings.dart';
 

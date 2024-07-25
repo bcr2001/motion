@@ -17,7 +17,6 @@ import 'package:provider/provider.dart';
 import 'motion_core/motion_providers/date_pvd/current_date_pvd.dart';
 import 'motion_core/motion_providers/sql_pvd/assigner_pvd.dart';
 import 'motion_core/motion_providers/web_api_pvd/zen_quotes_pvd.dart';
-import 'motion_reusable/general_reuseable.dart';
 import 'motion_themes/mth_theme/dark_theme.dart';
 import 'motion_themes/mth_theme/light_theme.dart';
 import 'motion_core/mc_sqlite/sql_tracker_db.dart';
@@ -35,7 +34,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize the database helper
-  final TrackerDatabaseHelper databaseHelper = TrackerDatabaseHelper();
+  // final TrackerDatabaseHelper databaseHelper = TrackerDatabaseHelper();
   // final dbHelper = AssignerDatabaseHelper();
 
   // databaseHelper.updateCurrentUser();

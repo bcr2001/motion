@@ -58,6 +58,7 @@ dependencies:
   csv: ^5.0.2
   flutter_charts: ^0.5.2
   flutter_heatmap_calendar: ^1.0.5
+  connectivity_plus: ^5.0.2
 
 
 dev_dependencies:
