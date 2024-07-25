@@ -73,7 +73,7 @@ class MotionHomeRoute extends StatelessWidget {
               // quote from the zenQuotes API
               quoteOfTheDay(),
 
-              // SECTION TWO: EFFICENCY SCORE
+              // SECTION TWO: EFFICENCY SCORE AND NUMBER OF DAYS
               // This section displays the users entire efficieny score
               // total number of days in the main_category table
               const EfficiencyAndNumberOfDays(

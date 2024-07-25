@@ -12,6 +12,7 @@ import 'package:motion/motion_routes/mr_home/home_reusable/back_home.dart';
 import 'package:motion/motion_screens/ms_routes/manual_tracking.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:provider/provider.dart';
+import '../../../motion_reusable/general_reuseable.dart';
 import '../../../motion_themes/mth_styling/motion_text_styling.dart';
 import '../home_windows/efficieny_window.dart';
 
@@ -86,6 +87,37 @@ class NumberOfDaysMainCategory extends StatelessWidget {
   final bool getAllDays;
   const NumberOfDaysMainCategory({super.key, required this.getAllDays});
 
+  // displayes the number of days and the percent of the year completed
+  Widget _numberOfDaysAndPercentCompleted(
+      {required String numberOfDays, required String percentCompleted}) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8.0),
+      child: Column(
+        children: [
+          // percent completed
+          Text(
+            "$percentCompleted%",
+            style: AppTextStyle.resultTitleStyleHome(false),
+            textAlign: TextAlign.right,
+          ),
+
+          // number of days
+          Text(
+            "Day: $numberOfDays/365",
+            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+          ),
+
+          // completed
+          Text(
+            "Completed",
+            style: AppTextStyle.resultTitleStyleHome(false),
+            textAlign: TextAlign.left,
+          )
+        ],
+      ),
+    );
+  }
+
   // A helper method that creates a FutureBuilder to fetch and display the data.
   // It shows a loading indicator while waiting, an error message in case of
   // an error, and the total number of days when data is available.
@@ -102,13 +134,15 @@ class NumberOfDaysMainCategory extends StatelessWidget {
         } else {
           // Extract and display the total number of days
           final totalNumberOfDays = snapshot.data ?? 0;
-          return Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: Text(
-              "Day: $totalNumberOfDays",
-              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
-            ),
-          );
+
+          // percent of days completed
+          final percentCompleted = (totalNumberOfDays / 365) * 100;
+          final percentCompletedFormatted2 =
+              double.parse(percentCompleted.toStringAsFixed(2)).toString();
+
+          return _numberOfDaysAndPercentCompleted(
+              numberOfDays: totalNumberOfDays.toString(),
+              percentCompleted: percentCompletedFormatted2);
         }
       },
     );
@@ -173,13 +207,14 @@ Widget timeAccountedCurrentDateXP() {
       String formattedDate = date.getFormattedDate();
 
       return Padding(
-        padding: const EdgeInsets.only(top: 15, left: 10, right: 10, bottom: 10),
+        padding:
+            const EdgeInsets.only(top: 15, left: 10, right: 10, bottom: 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // current (today's) date
             Padding(
-              padding: const EdgeInsets.only(top:10.0, bottom: 15),
+              padding: const EdgeInsets.only(top: 10.0, bottom: 15),
               child: Text(
                 formattedDate,
                 style: AppTextStyle.specialSectionTitleTextStyle(),
@@ -221,7 +256,6 @@ Widget timeAccountedCurrentDateXP() {
                 // total XP earned (today)
                 const XPForTheCurrentDay()
               ],
-
             ),
             const SizedBox.shrink(), // Add some spacing
           ],
