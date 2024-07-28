@@ -396,7 +396,7 @@ class MLTitleAndCard extends StatelessWidget {
             padding: const EdgeInsets.only(left: 10.0),
             child: Text(
               mlTitle,
-              style: AppTextStyle.categoryTitleTextStyle(),
+              style: AppTextStyle.mainCategoryTotalTitle(),
             ),
           ),
 

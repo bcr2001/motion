@@ -9,6 +9,7 @@ import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 
 import '../motion_screens/ms_report/report.dart';
+import '../motion_themes/mth_app/app_images.dart';
 
 // app bar action button
 class MotionActionButtons extends StatelessWidget {
@@ -19,16 +20,16 @@ class MotionActionButtons extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // report
-        IconButton(
-            onPressed: () {
-              Navigator.push(
+        // report gif
+        GestureDetector(
+          onTap: (){
+            Navigator.push(
                   context,
                   MaterialPageRoute(
                       builder: (BuildContext context) =>
                           const MonthlyReportPage()));
-            },
-            icon: const Icon(Icons.bar_chart_rounded)),
+          },
+          child: AppImages.animatedBarChart),
 
         // popup menu button
         const MainRoutePopUpMenu()

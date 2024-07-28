@@ -16,7 +16,6 @@ class AppImages {
   // report page no distribution data
   static final chartNoData = getSvgAsset("chartNotAvailable.svg");
 
-  
   // no data available yet
   static final noDataAvailableYet = getSvgAsset("noData.svg");
 
@@ -33,15 +32,14 @@ class AppImages {
   // google icon
   static final continueWithGoogleImage = getAssetImage("google_1.png", 30, 30);
 
-
   // no data available yet
   static final noTrackListAvailable = getAssetImage("trackInfo.png", 200, 200);
-
 
   // analytics summary education gallery image
   static final educationImageAS = getAssetImage("education.png");
 
-
+  // animated bar chart
+  static final animatedBarChart = getAssetImage("ani_chart.gif", 30, 30);
 }
 
 // png images
