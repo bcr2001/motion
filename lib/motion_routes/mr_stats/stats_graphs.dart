@@ -205,7 +205,8 @@ class AYearInSummaryPieChartDistribution extends StatelessWidget {
 class GroupedPieChartAccountedUnaccounted extends StatelessWidget {
   final String year;
 
-  const GroupedPieChartAccountedUnaccounted({super.key, required this.year});
+  const GroupedPieChartAccountedUnaccounted.groupedBarChartAccountedUnaccounted(
+      {super.key, required this.year});
 
   final double width = 10;
 

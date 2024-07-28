@@ -54,14 +54,13 @@ class YearsWorthOfSummaryStatitics extends StatelessWidget {
           // (most)
           MostAndLeastProductiveMonthBuilder(
             getMostProductiveMonth: true,
-            year: year,),
+            year: year,
+          ),
           // (least)
           MostAndLeastProductiveMonthBuilder(
-            getMostProductiveMonth: false, 
-            year: year),
-          
+              getMostProductiveMonth: false, year: year),
 
-          // SECTION 1: ACCOUNTED VS UNACCOUNTED
+          // SECTION 3: ACCOUNTED VS UNACCOUNTED
           // Accounted vs Unaccounted
           sectionTitle(titleName: AppString.accountedVsUnaccounterTitle),
 
@@ -87,7 +86,8 @@ class YearsWorthOfSummaryStatitics extends StatelessWidget {
                       unAccountedTotalHours: unaccountedHours),
 
                   // accounted and unaccounted grouped bar chart distribution
-                  GroupedPieChartAccountedUnaccounted(
+                  GroupedPieChartAccountedUnaccounted
+                      .groupedBarChartAccountedUnaccounted(
                     year: year,
                   )
                 ],
@@ -236,7 +236,7 @@ class YearTotalsAccountedUnaccountedBuilder extends StatelessWidget {
       required TextStyle sectionDataValueStyle,
       required Color lineChartIconColor}) {
     return SizedBox(
-      height: 120,
+      height: 160,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [

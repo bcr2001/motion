@@ -1,7 +1,9 @@
+import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_routes/mr_home/home_reusable/back_home.dart';
+import 'package:motion/motion_routes/mr_stats/stats_back.dart';
 import 'package:motion/motion_screens/ms_report/report_back.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
@@ -16,18 +18,70 @@ import '../../motion_themes/mth_app/app_strings.dart';
 class CategorySummaryReport extends StatelessWidget {
   const CategorySummaryReport({super.key});
 
+  // button that takes users to the subcategory totals page
+  // page that contains the all time totals for the subcategory
+  Widget _subcategoryViewTotals() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 12.0, left: 12, bottom: 15),
+      child: GestureDetector(
+        child: Row(
+          children: [
+            // view subcategory totals
+            Text(
+              AppString.viewSubcategoryTotalsTitle,
+              style: AppTextStyle.mainCategoryTotalTitle(),
+            ),
+
+            // click icon
+            AvatarGlow(
+              glowColor: AppColor.accountedColor,
+              child: const Padding(
+                padding: EdgeInsets.only(left: 8.0),
+                child: Icon(Icons.ads_click_rounded),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
         child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Main Category Totals Title
+        Padding(
+          padding: const EdgeInsets.only(top: 12.0, left: 12),
+          child: Text(
+            AppString.mainCategoryTotalTitle,
+            style: AppTextStyle.mainCategoryTotalTitle(),
+          ),
+        ),
         // entire data
         const EntireDataStatistic(),
 
+        // view subcategory totals route
+        _subcategoryViewTotals(),
+
         // Pie Chart Title
-        specialSectionTitle(
-            mainTitleName: AppString.entireLifeTitle,
-            elevatedTitleName: AppString.entireLifeInSlicesTitle),
+        Padding(
+          padding: const EdgeInsets.only(left: 10.0, top: 10),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              makeTransactionsIcon(),
+              const SizedBox(
+                width: 10,
+              ),
+              specialSectionTitle(
+                mainTitleName: AppString.entireLifeTitle,
+                elevatedTitleName: AppString.entireLifeInSlicesTitle),
+            ],
+          ),
+        ),
 
         // pie chart
         const AnalyticsMainCategoryDistributionPieChart()
@@ -215,7 +269,7 @@ class CategoryBuilder extends StatelessWidget {
           // main category name and image
           Text(
             mainCategoryName,
-            style: AppTextStyle.subSectionTitleTextStyle(),
+            style: AppTextStyle.subSectionTitleTextStyle1(),
           ),
 
           // hours, days, and average

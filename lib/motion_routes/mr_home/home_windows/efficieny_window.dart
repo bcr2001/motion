@@ -85,7 +85,7 @@ class XPForTheCurrentDay extends StatelessWidget {
                 style: const TextStyle(
                     fontSize: 21,
                     fontWeight: FontWeight.w600,
-                    color: AppColor.tileBackgroundColor),
+                    color: AppColor.accountedColor),
               );
             }
           });

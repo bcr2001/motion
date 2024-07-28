@@ -42,8 +42,16 @@ class AppTextStyle {
 
   // section title style (subtitle)
   static subSectionTitleTextStyle() {
-    return _baseStyle.copyWith(fontSize: 14, fontWeight: FontWeight.w600);
+    return _baseStyle.copyWith(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        color: AppColor.accountedColor);
   }
+  static subSectionTitleTextStyle1() {
+    return _baseStyle.copyWith(
+        fontSize: 14);
+  }
+
   // section title style (subtitle)
   static expansionAnswerTextStyle() {
     return _baseStyle.copyWith(fontSize: 13);
@@ -77,19 +85,25 @@ class AppTextStyle {
 
   // stats page highlight element textStyle
   static TextStyle statsElementTextStyle() {
-    return _baseStyle.copyWith(
-        fontSize: 11.5,
-        fontWeight: FontWeight.w600);
+    return _baseStyle.copyWith(fontSize: 11.5, fontWeight: FontWeight.w600);
   }
 
   // stats page accounted and unaccounted gallary style
   static TextStyle accountedAndUnaccountedGallaryStyle() {
-    return _baseStyle.copyWith(fontWeight: FontWeight.w600, fontSize: 14.5);
+    return _baseStyle.copyWith(fontWeight: FontWeight.w600, fontSize: 14, color: AppColor.accountedColor);
   }
 
   // stats page accounted and unaccounted gallary style
   static TextStyle overviewDataValueTextStyle() {
     return _baseStyle.copyWith(fontWeight: FontWeight.w500, fontSize: 13);
+  }
+
+  // stats page Main Category Totals title
+  static mainCategoryTotalTitle() {
+    return _baseStyle.copyWith(
+        color: AppColor.accountedColor,
+        fontSize: 13,
+        fontWeight: FontWeight.w600);
   }
 
   // home page subtitle list tile style
@@ -101,9 +115,12 @@ class AppTextStyle {
   static TextStyle leadingTextLTStyle() {
     return _baseStyle.copyWith(fontSize: 14);
   }
+
   static TextStyle leadingTextLTStyle2() {
-    return _baseStyle.copyWith(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.blueGrey);
+    return _baseStyle.copyWith(
+        fontSize: 12, fontWeight: FontWeight.w600, color: Colors.blueGrey);
   }
+
   static TextStyle leadingTextLTStyle3() {
     return _baseStyle.copyWith(fontSize: 12.5);
   }

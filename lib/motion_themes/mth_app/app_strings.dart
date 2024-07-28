@@ -202,7 +202,9 @@ class AppString {
   static const String statusTitle = "Status";
   static const String statusUpTitle = "Up";
   static const String mainCategorySummaryTitle = "Category Summary Report";
+  static const String mainCategoryTotalTitle = "Main Category Totals";
   static const String yearlyReportTitle = "Annual Overview";
+  static const String viewSubcategoryTotalsTitle = "View Subcategory Totals";
 
   static const String chartingAYearInLinesTitle = "Graphing a Year in Lines";
   static const String stackingAYearInLinesTitle = "Stacking Up Your Year";

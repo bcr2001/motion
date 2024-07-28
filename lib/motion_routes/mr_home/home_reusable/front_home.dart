@@ -97,7 +97,7 @@ class NumberOfDaysMainCategory extends StatelessWidget {
           // percent completed
           Text(
             "$percentCompleted%",
-            style: AppTextStyle.resultTitleStyleHome(false),
+            style: AppTextStyle.resultTitleStyle(false),
             textAlign: TextAlign.right,
           ),
 
@@ -110,7 +110,7 @@ class NumberOfDaysMainCategory extends StatelessWidget {
           // completed
           Text(
             "Completed",
-            style: AppTextStyle.resultTitleStyleHome(false),
+            style: AppTextStyle.resultTitleStyle(false),
             textAlign: TextAlign.left,
           )
         ],
@@ -121,7 +121,7 @@ class NumberOfDaysMainCategory extends StatelessWidget {
   // A helper method that creates a FutureBuilder to fetch and display the data.
   // It shows a loading indicator while waiting, an error message in case of
   // an error, and the total number of days when data is available.
-  Widget _futureData({Future<dynamic>? future}) {
+  Widget _futureData({Future<dynamic>? future, required bool percent}) {
     return FutureBuilder(
       future: future,
       builder: (BuildContext context, snapshot) {
@@ -140,9 +140,18 @@ class NumberOfDaysMainCategory extends StatelessWidget {
           final percentCompletedFormatted2 =
               double.parse(percentCompleted.toStringAsFixed(2)).toString();
 
-          return _numberOfDaysAndPercentCompleted(
-              numberOfDays: totalNumberOfDays.toString(),
-              percentCompleted: percentCompletedFormatted2);
+          return percent
+              ? _numberOfDaysAndPercentCompleted(
+                  numberOfDays: totalNumberOfDays.toString(),
+                  percentCompleted: percentCompletedFormatted2)
+              : Padding(
+                padding: const EdgeInsets.only(right:10.0),
+                child: Text(
+                    "Day: $totalNumberOfDays",
+                    style: const TextStyle(
+                        fontSize: 17, fontWeight: FontWeight.w600),
+                  ),
+              );
         }
       },
     );
@@ -162,12 +171,14 @@ class NumberOfDaysMainCategory extends StatelessWidget {
         return getAllDays
             ? _futureData(
                 future: main.retrievedNumberOfDays(currentUser: userUid!),
+                percent: false
               )
             : _futureData(
                 future: main.retrievedNumberOfDays(
                     currentUser: userUid!,
                     currentYear: currentYear,
                     getAllDays: false),
+                percent: true
               );
       },
     );
