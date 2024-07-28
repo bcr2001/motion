@@ -212,35 +212,32 @@ class CategoryBuilder extends StatelessWidget {
   final String totalHours;
   final String totalDays;
   final String average;
+  final double? dividerWidth;
 
-  const CategoryBuilder(
-      {super.key,
-      required this.mainCategoryName,
-      required this.galleryInitials,
-      required this.totalHours,
-      required this.totalDays,
-      required this.average});
+  const CategoryBuilder({
+    super.key,
+    required this.mainCategoryName,
+    required this.galleryInitials,
+    required this.totalHours,
+    required this.totalDays,
+    required this.average,
+    this.dividerWidth = 120, // Default value
+  });
 
   // days and average text layout
-  Widget _daysAndAverageTextLayout(bool isdays) {
-    return isdays
-        ? Padding(
-            padding: const EdgeInsets.only(left: 50),
-            child: Text(
-              totalDays,
-              style: AppTextStyle.daysTextStyleCSR(),
-            ),
-          )
-        : Padding(
-            padding: const EdgeInsets.only(right: 50),
-            child: Text(
-              average,
-              style: AppTextStyle.daysTextStyleCSR(),
-            ),
-          );
+  Widget _daysAndAverageTextLayout(bool isDays) {
+    return Padding(
+      padding: isDays
+          ? const EdgeInsets.only(left: 50)
+          : const EdgeInsets.only(right: 50),
+      child: Text(
+        isDays ? totalDays : average,
+        style: AppTextStyle.daysTextStyleCSR(),
+      ),
+    );
   }
 
-  // hours text layour
+  // hours text layout
   Widget _hoursTextLayout() {
     return Text(
       totalHours,
@@ -251,6 +248,8 @@ class CategoryBuilder extends StatelessWidget {
   // hours, days, and average
   Widget _hoursDaysAverage() {
     return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         // days
         _daysAndAverageTextLayout(true),
@@ -259,7 +258,7 @@ class CategoryBuilder extends StatelessWidget {
         _hoursTextLayout(),
 
         // average
-        _daysAndAverageTextLayout(false)
+        _daysAndAverageTextLayout(false),
       ],
     );
   }
@@ -267,7 +266,6 @@ class CategoryBuilder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 170,
       padding: const EdgeInsets.all(10.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -284,14 +282,18 @@ class CategoryBuilder extends StatelessWidget {
 
           // main category image representation
           Align(
-              alignment: Alignment.bottomRight,
-              child: Text(
-                galleryInitials,
-                style: AppTextStyle.statsElementTextStyle(),
-              )),
+            alignment: Alignment.bottomLeft,
+            child: Text(
+              galleryInitials,
+              style: AppTextStyle.statsElementTextStyle(),
+            ),
+          ),
 
           // gallery divider
-          const SizedBox(width: 120, child: Divider())
+          SizedBox(
+            width: dividerWidth,
+            child: const Divider(),
+          ),
         ],
       ),
     );
