@@ -994,6 +994,29 @@ class TrackerDatabaseHelper {
     }
   }
 
+  // gets all the subcategory totals
+  Future<List<Map<String, dynamic>>> getAllSubcategoryTotals(
+      {required String currentUser}) async {
+    try {
+      final db = await database;
+
+      final allSubTotals = await db.rawQuery("""
+        SELECT subcategoryName, COALESCE(SUM(timeSpent), 0) AS total, 
+        COALESCE(AVG(timeSpent), 0) AS average
+        FROM subcategory
+        WHERE currentLoggedInUser = ?
+        GROUP BY subcategoryName
+        ORDER BY total DESC
+        """, [currentUser]);
+
+      return allSubTotals;
+    } catch (e) {
+      logger.e("getAllSubcategoryTotals Error $e");
+
+      return [];
+    }
+  }
+
   // gets all the subcategories depending on the current date
   Future<List<Subcategories>> getCurrentDateSubcategory(
       String currentDate, String currentUser, String subcategoryName) async {
@@ -1410,7 +1433,9 @@ class TrackerDatabaseHelper {
 
   // this function get the most and least productive months
   Future<List<Map<String, dynamic>>> getMostAndLeastProductiveMonths(
-      {required bool getMostProductiveMonth,required String currentUser,required String year}) async {
+      {required bool getMostProductiveMonth,
+      required String currentUser,
+      required String year}) async {
     try {
       final db = await database;
 
@@ -1439,8 +1464,7 @@ class TrackerDatabaseHelper {
               WHERE currentLoggedInUser = ? AND strftime('%Y', date) = ? 
               GROUP BY month_num
           ) AS totalMostXP
-        """, [currentUser, year]) : await db.rawQuery(
-          """
+        """, [currentUser, year]) : await db.rawQuery("""
         SELECT CASE 
                   WHEN month_num = 1 THEN 'January'
                   WHEN month_num = 2 THEN 'February'

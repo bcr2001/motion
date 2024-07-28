@@ -5,6 +5,7 @@ import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_routes/mr_home/home_reusable/back_home.dart';
 import 'package:motion/motion_routes/mr_stats/stats_back.dart';
 import 'package:motion/motion_screens/ms_report/report_back.dart';
+import 'package:motion/motion_screens/ms_subcategory/sub_totals.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:provider/provider.dart';
@@ -20,10 +21,16 @@ class CategorySummaryReport extends StatelessWidget {
 
   // button that takes users to the subcategory totals page
   // page that contains the all time totals for the subcategory
-  Widget _subcategoryViewTotals() {
+  Widget _subcategoryViewTotals(context) {
     return Padding(
       padding: const EdgeInsets.only(top: 12.0, left: 12, bottom: 15),
       child: GestureDetector(
+        onTap: (() {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (BuildContext context) => const SubTotalsPage()));
+        }),
         child: Row(
           children: [
             // view subcategory totals
@@ -64,7 +71,7 @@ class CategorySummaryReport extends StatelessWidget {
         const EntireDataStatistic(),
 
         // view subcategory totals route
-        _subcategoryViewTotals(),
+        _subcategoryViewTotals(context),
 
         // Pie Chart Title
         Padding(
@@ -77,8 +84,8 @@ class CategorySummaryReport extends StatelessWidget {
                 width: 10,
               ),
               specialSectionTitle(
-                mainTitleName: AppString.entireLifeTitle,
-                elevatedTitleName: AppString.entireLifeInSlicesTitle),
+                  mainTitleName: AppString.entireLifeTitle,
+                  elevatedTitleName: AppString.entireLifeInSlicesTitle),
             ],
           ),
         ),

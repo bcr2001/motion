@@ -199,6 +199,13 @@ class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // retrieve the entire totals of subcategories
+  Future<List<Map<String, dynamic>>> retrieveAllSubcategoryTotals(
+      {required currentUser}) async {
+    return await trackDbInstance.getAllSubcategoryTotals(
+        currentUser: currentUser);
+  }
+
   // retrive the total and average for each subcategory for a specific month
   Future<List<Map<String, dynamic>>> retrieveMonthTotalAndAverage(
       String currentUser,
@@ -242,8 +249,6 @@ class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
         currentUser: currentUser,
         isMost: isMost);
   }
-
-
 
   // get the subcategory totals for a specific date
   Future<List<Map<String, dynamic>>> retrieveSubcategoryTotalsForSpecificDate(
