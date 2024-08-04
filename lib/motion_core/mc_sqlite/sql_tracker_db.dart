@@ -1268,7 +1268,7 @@ class TrackerDatabaseHelper {
     final result = await db.rawQuery('''
       SELECT *
       FROM experience_points
-      WHERE date = ?;
+      WHERE strftime('%Y', date) = ?;
       ''', [date]);
 
     return result.map((map) => ExperiencePoints.fromMap(map)).toList();
@@ -1397,6 +1397,48 @@ class TrackerDatabaseHelper {
     } catch (e) {
       logger.e("(monthlyEfficiencyScore) ERROR: $e");
       return 0.0;
+    }
+  }
+
+  // Gets the all time total XP points
+  // or XP points for the current year
+  Future<int> getTotalXP(
+      {required String currentUser,
+      required bool isEntire,
+      String? year}) async {
+    try {
+      final db = await database;
+
+      final resultGTXP = isEntire ? await db.rawQuery("""
+        SELECT (COALESCE(SUM(educationXP), 0) + 
+                COALESCE(SUM(skillsXP), 0) + 
+                COALESCE(SUM(sdXP), 0) + 
+                COALESCE(SUM(sleepXP), 0)) AS entireTotalXP
+        FROM experience_points
+        WHERE currentLoggedInUser = ?
+        """, [currentUser]) : await db.rawQuery("""
+        SELECT (COALESCE(SUM(educationXP), 0) + 
+                COALESCE(SUM(skillsXP), 0) + 
+                COALESCE(SUM(sdXP), 0) + 
+                COALESCE(SUM(sleepXP), 0)) AS entireTotalXP
+        FROM experience_points
+        WHERE currentLoggedInUser = ? AND strftime('%Y', date) = ?
+          """, [currentUser, year]);
+
+      if (resultGTXP.isNotEmpty) {
+        // first row and column
+        final totalGTXP = resultGTXP.first['entireTotalXP'];
+        if (totalGTXP is int) {
+          return totalGTXP;
+        } else {
+          return 0; // Handle the case where the result is not a int
+        }
+      } else {
+        return 0; // Return 0 if no matching records are found
+      }
+    } catch (e) {
+      logger.i("getTotalXP error: $e");
+      return 0;
     }
   }
 

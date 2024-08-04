@@ -30,7 +30,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  smooth_page_indicator: ^1.1.0
   sqflite: ^2.2.8+4
   path: ^1.8.2
   provider: ^6.0.5
@@ -48,17 +47,14 @@ dependencies:
   firebase_core: ^2.15.0
   cloud_firestore: ^4.8.3
   google_fonts: ^4.0.4
-  image_picker: ^1.0.1
   firebase_storage: ^11.2.5
   google_nav_bar: ^5.0.6
   shimmer: ^3.0.0
   fl_chart: ^0.62.0
   google_sign_in: ^6.1.5
   path_provider: ^2.1.1
-  csv: ^5.0.2
   flutter_charts: ^0.5.2
   flutter_heatmap_calendar: ^1.0.5
-  connectivity_plus: ^5.0.2
   avatar_glow: ^3.0.1
 
 
@@ -88,9 +84,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/motion_icons/
-    - assets/data_csv/main_category.csv
-    - assets/data_csv/subcategory.csv
-    - assets/data_csv/to_assign.csv
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

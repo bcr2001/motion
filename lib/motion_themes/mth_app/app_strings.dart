@@ -138,6 +138,7 @@ class AppString {
   static const String manualRangeValueError = "Keep entries within range!!";
 
   // HOME ROUTE
+  static const String badgeTitle = "Badge";
   static const String homeSubcategoryTitle = "Subcategories";
   static const String trackingWindowTitle = "Tracking Window";
   static const String summaryTitle = "Summary";

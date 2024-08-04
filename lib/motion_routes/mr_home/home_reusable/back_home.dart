@@ -94,7 +94,7 @@ Widget specialSectionTitleSelectedYear({required String mainTitleName}){
 Widget specialSectionTitleEFS(
     {required String mainTitleName, required bool getEntire}) {
   return Padding(
-    padding: const EdgeInsets.only(left: 10, top: 10, bottom: 10),
+    padding: const EdgeInsets.only(top: 10, bottom: 10),
     child: Row(
       children: [
         // main title

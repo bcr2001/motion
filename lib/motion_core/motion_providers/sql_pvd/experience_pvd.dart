@@ -89,4 +89,14 @@ class ExperiencePointTableProvider extends ChangeNotifier {
         lastDay: lastDay,
         getMostProductiveDay: getMostProductiveDay);
   }
+
+  // retreieves either the total XP for the current year
+  // or the all time total XP
+  Future<int> retrieveTotalXP(
+      {required String currentUser,
+      required bool isEntire,
+      String? year}) async {
+    return await trackDbInstance.getTotalXP(
+        currentUser: currentUser, isEntire: isEntire, year: year);
+  }
 }

@@ -37,7 +37,7 @@ class AppTextStyle {
 
   // section title style (ef score)
   static sectionTitleTextStyleEF2() {
-    return _baseStyle.copyWith(fontSize: 20.5, fontWeight: FontWeight.w600);
+    return _baseStyle.copyWith(fontSize: 22.5, fontWeight: FontWeight.w600);
   }
 
   // section title style (subtitle)
@@ -60,13 +60,13 @@ class AppTextStyle {
   // section title style (main title)
   static specialSectionTitleTextStyle() {
     return _baseStyle.copyWith(
-        fontSize: 14, fontWeight: FontWeight.w600, color: Colors.blueGrey);
+        fontSize: 12, fontWeight: FontWeight.w600, color: Colors.blueGrey);
   }
 
   // section title style (main title)
   static alertDialogElevatedButtonTextStyle() {
     return _baseStyle.copyWith(
-        fontSize: 12, fontWeight: FontWeight.w600, color: Colors.blueGrey);
+        fontSize: 12, fontWeight: FontWeight.bold, color: Colors.blueGrey);
   }
 
   // section title style
@@ -89,8 +89,8 @@ class AppTextStyle {
   }
 
   // stats page accounted and unaccounted gallary style
-  static TextStyle accountedAndUnaccountedGallaryStyle() {
-    return _baseStyle.copyWith(fontWeight: FontWeight.w600, fontSize: 14, color: AppColor.accountedColor);
+  static TextStyle accountedAndUnaccountedGallaryStyle({double fontsize = 14}) {
+    return _baseStyle.copyWith(fontWeight: FontWeight.w600, fontSize: fontsize, color: AppColor.accountedColor);
   }
 
   // stats page accounted and unaccounted gallary style

@@ -1,37 +1,28 @@
-
 import 'dart:async';
-
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:motion/motion_core/mc_api/api_requests.dart';
 import 'package:flutter/material.dart';
-
 import '../../../motion_reusable/general_reuseable.dart';
+import '../../../motion_core/mc_api/api_requests.dart';
 import '../../../motion_themes/mth_app/app_strings.dart';
 
 // this class handles fetching and
 // persisting the Zen Quote of the day
 class ZenQuoteProvider extends ChangeNotifier {
-  // todays quote
+  // today's quote
   String _todaysQuote = AppString.zenQuotesDefault;
 
-  // get todays quote
+  // get today's quote
   String get todaysQuote => _todaysQuote;
 
   // shared preferences instance
   SharedPreferences? _prefs;
 
-  // shared prefence keys
-  static const quotekey = "zenQuote";
+  // shared preference keys
+  static const quoteKey = "zenQuote";
   static const dateKey = "zenQuoteDate";
-
-  // Stream subscription to listen for connectivity changes
-  late StreamSubscription<ConnectivityResult> _connectivitySubscription;
-
 
   ZenQuoteProvider() {
     initializeSharedPreferences();
-    _initializeConnectivityListener();
   }
 
   // initializeSharedPreferences function
@@ -40,19 +31,8 @@ class ZenQuoteProvider extends ChangeNotifier {
     _loadSavedQuote();
   }
 
-  // Initialize the connectivity listener
-  void _initializeConnectivityListener() {
-    _connectivitySubscription = Connectivity()
-        .onConnectivityChanged
-        .listen((ConnectivityResult result) {
-      if (result != ConnectivityResult.none) {
-        _checkAndFetchNewQuote();
-      }
-    });
-  }
-
-   // Check the date and fetch a new quote if it's a new day
-   Future<void> _checkAndFetchNewQuote() async {
+  // Check the date and fetch a new quote if it's a new day
+  Future<void> _checkAndFetchNewQuote() async {
     final savedDate = _prefs?.getString(dateKey);
     if (savedDate == null || !_isToday(DateTime.parse(savedDate))) {
       await fetchTodaysQuote();
@@ -66,10 +46,10 @@ class ZenQuoteProvider extends ChangeNotifier {
       _todaysQuote = await fetchZenQuote();
 
       // save preferences
-      _prefs?.setString(quotekey, _todaysQuote);
+      _prefs?.setString(quoteKey, _todaysQuote);
       _prefs?.setString(dateKey, DateTime.now().toIso8601String());
 
-      // notifty listeners of changes
+      // notify listeners of changes
       notifyListeners();
     } catch (e) {
       logger.e("Error: $e");
@@ -81,7 +61,7 @@ class ZenQuoteProvider extends ChangeNotifier {
 
   // load saved quote
   Future<void> _loadSavedQuote() async {
-    final savedQuote = _prefs?.getString(quotekey);
+    final savedQuote = _prefs?.getString(quoteKey);
     final savedDate = _prefs?.getString(dateKey);
 
     if (savedQuote != null &&
@@ -93,7 +73,7 @@ class ZenQuoteProvider extends ChangeNotifier {
     } else {
       // if it's the next day, a new quote
       // of the day is fetched
-      fetchTodaysQuote();
+      _checkAndFetchNewQuote();
       notifyListeners();
     }
   }
@@ -105,12 +85,5 @@ class ZenQuoteProvider extends ChangeNotifier {
     return now.year == date.year &&
         now.month == date.month &&
         now.day == date.day;
-  }
-
-  // Dispose of the connectivity subscription to avoid memory leaks
-  @override
-  void dispose() {
-    _connectivitySubscription.cancel();
-    super.dispose();
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_date_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_year_pvd.dart';
@@ -6,6 +8,7 @@ import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_routes/mr_home/home_reusable/back_home.dart';
+import 'package:motion/motion_themes/mth_app/app_images.dart';
 import 'package:provider/provider.dart';
 import '../../../motion_core/motion_providers/sql_pvd/experience_pvd.dart';
 import '../../../motion_themes/mth_app/app_strings.dart';
@@ -161,8 +164,8 @@ class EfficienyScoreSelectedYearOrMonth extends StatelessWidget {
   }
 }
 
-// Gets the entire efficieny score or the efficiency score of the
-// current year
+// Gets the entire efficieny score or the
+// efficiency score of the current year
 class EfficienyScoreWindow extends StatelessWidget {
   final bool getEntireScore;
   const EfficienyScoreWindow({super.key, required this.getEntireScore});
@@ -209,18 +212,134 @@ class EfficienyScoreWindow extends StatelessWidget {
 
                   logger.i("Total Efficiency Score: $resultSnapShot");
 
-                  return efficiencySection(
-                      score: "$efficientResults", getEntire: true);
+                  return CurrentYearEFSDisplay(
+                      score: efficientResults, isEntire: false);
                 }
               });
     }));
   }
 }
 
+// EFS Current Year Display
+// Displays the current year EFS, and correnponding badge
+class CurrentYearEFSDisplay extends StatelessWidget {
+  final double score;
+  final bool isEntire;
+
+  const CurrentYearEFSDisplay(
+      {super.key, required this.score, required this.isEntire});
+
+  // efs and total XP strcuture
+  Widget _efsAndTotalXp(context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // efs score for the current year
+        efficiencySection(score: "$score", getEntire: isEntire),
+
+        // total XP for the current year
+        Consumer3<ExperiencePointTableProvider, UserUidProvider,
+            CurrentYearProvider>(builder: (context, xps, user, year, child) {
+          // current user that's logged in
+          final String currentUser = user.userUid!;
+          final String currentYear = year.currentYear;
+
+          return FutureBuilder(
+              future: xps.retrieveTotalXP(
+                  currentUser: currentUser,
+                  isEntire: isEntire,
+                  year: currentYear),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const ShimmerWidget.rectangular(
+                      width: 100, height: 30);
+                } else if (snapshot.hasError) {
+                  return const Text("N/A");
+                } else {
+                  final snapResults = snapshot.data!;
+
+                  logger.i("Total XP for Current Year: $snapResults");
+
+                  return Text(
+                  "$snapResults XP", 
+                  style: AppTextStyle.accountedAndUnaccountedGallaryStyle(fontsize: 20),);
+                }
+              });
+        })
+      ],
+    );
+  }
+
+  // badge and name
+  Widget _badgetAndName({required Image badge}) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        // badge
+        badge,
+
+        // name
+        Padding(
+          padding: const EdgeInsets.only(top:8.0),
+          child: Text(AppString.badgeTitle, style: AppTextStyle.navigationTextLTStyle(),),
+        )
+      ],
+    );
+  }
+
+  // badge assignment depending on score
+  Widget _getBadge(double score) {
+    // the reason for converting the score is to get
+    // the appropriate score categories to assign badges
+    final double standardScore = score * 100;
+
+    if (standardScore >= 0 && standardScore <= 24) {
+      return _badgetAndName(badge: AppImages.sloth);
+    } else if (standardScore >= 25 && standardScore <= 49) {
+      return _badgetAndName(badge: AppImages.dolphine);
+    } else if (standardScore >= 50 && standardScore <= 74) {
+      return _badgetAndName(badge: AppImages.eagle);
+    } else if (standardScore >= 75 && standardScore <= 99) {
+      return _badgetAndName(badge: AppImages.dragon);
+    } else if (standardScore == 100) {
+      return const Text("Time Wizard");
+    } else {
+      return const Text("Error :()");
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    final screenWidth = MediaQuery.of(context).size.width; 
+    final screenHeight = MediaQuery.of(context).size.height; 
+
+
+    return Card(
+      elevation: 0,
+      child: SizedBox(
+        width: screenWidth*0.58,
+        height: screenHeight*0.15,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            // efs and total XP for current year
+            _efsAndTotalXp(context),
+
+            // BADGE depending on score
+            _getBadge(score)
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 // database calculated efficiency score and title
 Widget efficiencySection({required String score, required bool getEntire}) {
   return Container(
-    margin: const EdgeInsets.only(left: 10),
     alignment: Alignment.topLeft,
     child: specialSectionTitleEFS(
       getEntire: getEntire,
@@ -241,7 +360,10 @@ class ProductiveDayBuilder extends StatelessWidget {
   final String varableName;
 
   const ProductiveDayBuilder(
-      {super.key, required this.productiveMessage, this.future, required this.varableName});
+      {super.key,
+      required this.productiveMessage,
+      this.future,
+      required this.varableName});
 
   Widget _productiveDisplay(
       {required String productiveMessage, required String date}) {
@@ -334,7 +456,8 @@ class MostAndLeastProductiveDayBuilder extends StatelessWidget {
                   currentUser: currentUserUid,
                   firstDay: firstDayOfMonth,
                   lastDay: lastDayOfMonth,
-                  getMostProductiveDay: true), varableName: 'date',
+                  getMostProductiveDay: true),
+              varableName: 'date',
             );
           })
         : Consumer3<ExperiencePointTableProvider, UserUidProvider,
@@ -352,7 +475,8 @@ class MostAndLeastProductiveDayBuilder extends StatelessWidget {
                   currentUser: currentUserUid,
                   firstDay: firstDayOfMonth,
                   lastDay: lastDayOfMonth,
-                  getMostProductiveDay: false), varableName: 'date',
+                  getMostProductiveDay: false),
+              varableName: 'date',
             );
           });
   }
@@ -379,7 +503,8 @@ class MostAndLeastProductiveMonthBuilder extends StatelessWidget {
               future: xp.retrieveMostAndLeastProductiveMonths(
                   getMostProductiveMonth: getMostProductiveMonth,
                   currentUser: currentUserUid,
-                  year: year), varableName: 'month',
+                  year: year),
+              varableName: 'month',
             );
           })
         : Consumer2<ExperiencePointTableProvider, UserUidProvider>(
@@ -392,7 +517,8 @@ class MostAndLeastProductiveMonthBuilder extends StatelessWidget {
               future: xp.retrieveMostAndLeastProductiveMonths(
                   getMostProductiveMonth: getMostProductiveMonth,
                   currentUser: currentUserUid,
-                  year: year), varableName: 'month',
+                  year: year),
+              varableName: 'month',
             );
           });
   }
