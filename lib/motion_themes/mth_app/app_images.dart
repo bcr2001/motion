@@ -39,16 +39,16 @@ class AppImages {
   static final animatedBarChart = getImageAsset("ani_chart.gif", 30, 30);
 
   // 0-24 EFS badge (sloth)
-  static final sloth = getImageAsset("sloth.png", 60, 60);
+  static final sloth = getImageAsset("sloth.png", 70, 70);
 
   // 25-49 EFS badge (Dolphine)
   static final dolphine = getImageAsset("dolphin.png", 70, 70);
 
   // 50-74 EFS badge (Eagle)
-  static final eagle = getImageAsset("eagle.png", 60, 60);
+  static final eagle = getImageAsset("eagle.png", 70, 70);
 
   // 75-99 EFS badge (Dragon)
-  static final dragon = getImageAsset("dragon.png", 60, 60);
+  static final dragon = getImageAsset("dragon.png", 70, 70);
 
   
 }

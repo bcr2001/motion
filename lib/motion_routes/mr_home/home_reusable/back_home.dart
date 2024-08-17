@@ -58,7 +58,7 @@ Widget specialSectionTitle(
 
 // special title used to display efficiency score for
 // the selected year
-Widget specialSectionTitleSelectedYear({required String mainTitleName}){
+Widget specialSectionTitleSelectedYear({required String mainTitleName}) {
   return Container(
     margin: const EdgeInsets.only(left: 10),
     child: Padding(
@@ -73,23 +73,20 @@ Widget specialSectionTitleSelectedYear({required String mainTitleName}){
           ),
 
           // efs titel
-           Padding(
+          Padding(
             padding: const EdgeInsets.only(bottom: 10.0, left: 5.0),
             child: Text(
               AppString.efficiencyScoreTitle,
               style: AppTextStyle.specialSectionTitleTextStyle(),
             ),
           ),
-
-
         ],
       ),
     ),
   );
-
 }
 
-// special title used to display efficiency scores for 
+// special title used to display efficiency scores for
 // the  current year and the overrall total efs
 Widget specialSectionTitleEFS(
     {required String mainTitleName, required bool getEntire}) {
@@ -116,22 +113,27 @@ Widget specialSectionTitleEFS(
             ),
 
             // year
-            getEntire? Consumer<CurrentYearProvider>(
-              builder: (BuildContext context, year, child) {
-                final currentYear = year.currentYear;
-                
-                return Padding(
-                  padding: const EdgeInsets.only(left:2.0),
-                  child: Text(
-                    currentYear,
-                    style: AppTextStyle.specialSectionTitleTextStyle(),
-                  ),
-                );
-              },
-            ): Padding(
-              padding: const EdgeInsets.only(left: 2.0),
-              child: Text(AppString.entireTitle, style: AppTextStyle.specialSectionTitleTextStyle(),),
-            )
+            getEntire
+                ? Padding(
+                    padding: const EdgeInsets.only(left: 2.0),
+                    child: Text(
+                      AppString.entireTitle,
+                      style: AppTextStyle.specialSectionTitleTextStyle(),
+                    ),
+                  )
+                : Consumer<CurrentYearProvider>(
+                    builder: (BuildContext context, year, child) {
+                      final currentYear = year.currentYear;
+
+                      return Padding(
+                        padding: const EdgeInsets.only(left: 2.0),
+                        child: Text(
+                          currentYear,
+                          style: AppTextStyle.specialSectionTitleTextStyle(),
+                        ),
+                      );
+                    },
+                  )
           ],
         )
       ],
@@ -213,10 +215,11 @@ class _ScrollingListBuilderState extends State<ScrollingListBuilder> {
                             )
                           : Padding(
                               padding: const EdgeInsets.symmetric(vertical: 5),
-                              child: CustomeListTile1(leadingName: item[widget.columnName],
-                              titleName: convertedTotal,
-                              trailingName:convertedAverage,)
-                            );
+                              child: CustomeListTile1(
+                                leadingName: item[widget.columnName],
+                                titleName: convertedTotal,
+                                trailingName: convertedAverage,
+                              ));
                     }));
           }
         });

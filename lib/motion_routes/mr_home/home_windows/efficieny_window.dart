@@ -194,7 +194,7 @@ class EfficienyScoreWindow extends StatelessWidget {
                   logger.i("Total Efficiency Score: $resultSnapShot");
 
                   return efficiencySection(
-                      score: "$efficientResults", getEntire: false);
+                      score: "$efficientResults", getEntire: true);
                 }
               })
           : FutureBuilder(
