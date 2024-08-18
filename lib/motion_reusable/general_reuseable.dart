@@ -80,7 +80,7 @@ class AlertDialogConst extends StatelessWidget {
         return SizedBox(
           height: screenHeight * heightFactor!,
           width: screenWidth * widthFactor!,
-          child: alertDialogContent,
+          child: SingleChildScrollView(child: alertDialogContent),
         );
       }),
     );

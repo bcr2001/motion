@@ -79,7 +79,7 @@ class SettingsPage extends StatelessWidget {
                 children: [
                   // date of birth widget
                   _pickDateOfBirth(),
-
+              
                   // button to confirm date of birth
                   Align(
                       alignment: Alignment.bottomRight,

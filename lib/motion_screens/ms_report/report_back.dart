@@ -61,14 +61,16 @@ class AccountedUnaccountedReportPieChart extends StatelessWidget {
                   return PieChartBuilder(sections: [
                     // Accounted proportion
                     PieChartSectionData(
-                        titleStyle: AppTextStyle.subSectionTextStyle(fontsize: 12),
+                        titleStyle:
+                            AppTextStyle.subSectionTextStyle(fontsize: 12),
                         title: "$accountedDouble%",
                         value: accountedDouble,
                         color: AppColor.accountedColor),
 
                     // Unaccounted proportion
                     PieChartSectionData(
-                        titleStyle: AppTextStyle.subSectionTextStyle(fontsize: 12),
+                        titleStyle:
+                            AppTextStyle.subSectionTextStyle(fontsize: 12),
                         title: "$unAccountedDouble%",
                         value: unAccountedDouble,
                         color: AppColor.unAccountedColor),
@@ -236,67 +238,65 @@ class MostAndLeastTrackedBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 170,
-      width: 190,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // title
-          Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Text(
-              title,
-              style: AppTextStyle.subSectionTextStyle(fontsize: 12, fontweight: FontWeight.normal),
+
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // title
+        Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Text(
+            title,
+            style: AppTextStyle.subSectionTextStyle(
+                fontsize: 12, fontweight: FontWeight.normal),
+          ),
+        ),
+
+        // row of icon, total hours, and averageHours
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // icon
+            Icon(
+              iconDirection,
+              color: iconColor,
+              size: 45,
+            ),
+
+            // totalHours and averageHours
+            totalHoursAverageHours()
+          ],
+        ),
+
+        // subcategoryName
+        Align(
+          alignment: Alignment.center,
+          child: Container(
+              margin: const EdgeInsets.all(8.0),
+              child: Padding(
+                padding: const EdgeInsets.only(top: 3.0),
+                child: Text(
+                  subcategoryName,
+                  textAlign: TextAlign.center,
+                  style: AppTextStyle.subSectionTextStyle(
+                      fontsize: 12, fontweight: FontWeight.normal),
+                ),
+              )),
+        ),
+
+        // bottom divider
+        Center(
+          child: Container(
+            margin: const EdgeInsets.only(left: 5),
+            width: 150,
+            child: const Divider(
+              thickness: 1.5,
             ),
           ),
-
-          // row of icon, total hours, and averageHours
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // icon
-              Icon(
-                iconDirection,
-                color: iconColor,
-                size: 45,
-              ),
-
-              // totalHours and averageHours
-              totalHoursAverageHours()
-            ],
-          ),
-
-          // subcategoryName
-          Align(
-            alignment: Alignment.center,
-            child: Container(
-                margin: const EdgeInsets.all(8.0),
-                height: 30,
-                width: 170,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 3.0),
-                  child: Text(
-                    subcategoryName,
-                    textAlign: TextAlign.center,
-                    style: AppTextStyle.subSectionTextStyle(fontsize: 12, fontweight: FontWeight.normal),
-                  ),
-                )),
-          ),
-
-          // bottom divider
-          Center(
-            child: Container(
-              margin: const EdgeInsets.only(left: 5),
-              width: 150,
-              child: const Divider(
-                thickness: 1.5,
-              ),
-            ),
-          )
-        ],
-      ),
+        )
+      ],
     );
   }
 }
@@ -378,7 +378,7 @@ class MostAndLeastTrackedResult extends StatelessWidget {
 // main or subcategory
 class MLTitleAndCard extends StatelessWidget {
   final String mlTitle;
-  final Card cardContent;
+  final Widget cardContent;
 
   const MLTitleAndCard(
       {super.key, required this.mlTitle, required this.cardContent});
@@ -400,9 +400,9 @@ class MLTitleAndCard extends StatelessWidget {
               style: AppTextStyle.mainCategoryTotalTitle(),
             ),
           ),
-
+    
           // card content
-          SizedBox(height: screenHeight * 0.24, child: cardContent)
+          SizedBox(height: screenHeight * 0.28, child: cardContent)
         ],
       ),
     );
@@ -477,7 +477,8 @@ class HighestTrackedSectionElement extends StatelessWidget {
         // subcategory name
         Text(
           subcategoryName,
-          style: AppTextStyle.subSectionTextStyle(fontsize: 12, fontweight: FontWeight.normal),
+          style: AppTextStyle.subSectionTextStyle(
+              fontsize: 12, fontweight: FontWeight.normal),
           textAlign: TextAlign.center,
         ),
 
@@ -490,7 +491,8 @@ class HighestTrackedSectionElement extends StatelessWidget {
         // date recorded
         Text(
           date,
-          style: AppTextStyle.subSectionTextStyle(fontsize: 12, fontweight: FontWeight.normal),
+          style: AppTextStyle.subSectionTextStyle(
+              fontsize: 12, fontweight: FontWeight.normal),
         ),
 
         // blue divider

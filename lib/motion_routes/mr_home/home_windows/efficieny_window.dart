@@ -317,21 +317,25 @@ class CurrentYearEFSDisplay extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return Card(
-      elevation: 0,
-      child: SizedBox(
-        width: screenWidth * 0.58,
-        height: screenHeight * 0.15,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            // efs and total XP for current year
-            _efsAndTotalXp(context),
-
-            // BADGE depending on score
-            _getBadge(score)
-          ],
+    return SizedBox(
+      height: screenHeight*0.20,
+      width: screenWidth*0.60,
+      child: Card(
+        elevation: 0,
+        child: Center(
+          child: SingleChildScrollView(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                // efs and total XP for current year
+                _efsAndTotalXp(context),
+              
+                // BADGE depending on score
+                _getBadge(score)
+              ],
+            ),
+          ),
         ),
       ),
     );

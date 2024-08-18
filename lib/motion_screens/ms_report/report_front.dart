@@ -22,51 +22,54 @@ class MostAndLeastTrackedMaincategorySection extends StatelessWidget {
     return MLTitleAndCard(
         mlTitle: AppString.mainCategoryTitle,
         cardContent: Card(
-          child: Padding(
-              padding: const EdgeInsets.only(top: 10, bottom: 14),
-              child: Consumer3<FirstAndLastDay, UserUidProvider,
-                  MainCategoryTrackerProvider>(
-                builder: (context, day, user, main, child) {
-                  // first and last day of the month
-                  String firstDayOfMonth = day.firstDay;
-                  String lastDayOfMonth = day.lastDay;
-
-                  // currently logged in user
-                  String currentLoggedInUser = user.userUid!;
-
-                  // the number of days in the current month
-                  // used to get the average hours per day
-                  int numberOfDaysInCurrentMonth = day.days;
-
-                  return Row(
-                    children: [
-                      // most tracked main category
-                      MostAndLeastTrackedResult(
-                          resultIcon: Icons.line_axis,
-                          resultIconColor: Colors.green,
-                          sectionTitle: AppString.mostTrackedTitle,
-                          numberOfDaysInMonth: numberOfDaysInCurrentMonth,
-                          future: main.retrieveMostAndLeastTrackedMainCategory(
-                              firstDay: firstDayOfMonth,
-                              lastDay: lastDayOfMonth,
-                              currentUser: currentLoggedInUser,
-                              isMost: true)),
-
-                      // least tracked main category
-                      MostAndLeastTrackedResult(
-                          resultIcon: Icons.line_axis,
-                          resultIconColor: Colors.red,
-                          sectionTitle: AppString.leastTrackedTitle,
-                          numberOfDaysInMonth: numberOfDaysInCurrentMonth,
-                          future: main.retrieveMostAndLeastTrackedMainCategory(
-                              firstDay: firstDayOfMonth,
-                              lastDay: lastDayOfMonth,
-                              currentUser: currentLoggedInUser,
-                              isMost: false)),
-                    ],
-                  );
-                },
-              )),
+          child: SingleChildScrollView(
+            child: Padding(
+                padding: const EdgeInsets.only(top: 10, bottom: 14),
+                child: Consumer3<FirstAndLastDay, UserUidProvider,
+                    MainCategoryTrackerProvider>(
+                  builder: (context, day, user, main, child) {
+                    // first and last day of the month
+                    String firstDayOfMonth = day.firstDay;
+                    String lastDayOfMonth = day.lastDay;
+          
+                    // currently logged in user
+                    String currentLoggedInUser = user.userUid!;
+          
+                    // the number of days in the current month
+                    // used to get the average hours per day
+                    int numberOfDaysInCurrentMonth = day.days;
+          
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        // most tracked main category
+                        MostAndLeastTrackedResult(
+                            resultIcon: Icons.line_axis,
+                            resultIconColor: Colors.green,
+                            sectionTitle: AppString.mostTrackedTitle,
+                            numberOfDaysInMonth: numberOfDaysInCurrentMonth,
+                            future: main.retrieveMostAndLeastTrackedMainCategory(
+                                firstDay: firstDayOfMonth,
+                                lastDay: lastDayOfMonth,
+                                currentUser: currentLoggedInUser,
+                                isMost: true)),
+          
+                        // least tracked main category
+                        MostAndLeastTrackedResult(
+                            resultIcon: Icons.line_axis,
+                            resultIconColor: Colors.red,
+                            sectionTitle: AppString.leastTrackedTitle,
+                            numberOfDaysInMonth: numberOfDaysInCurrentMonth,
+                            future: main.retrieveMostAndLeastTrackedMainCategory(
+                                firstDay: firstDayOfMonth,
+                                lastDay: lastDayOfMonth,
+                                currentUser: currentLoggedInUser,
+                                isMost: false)),
+                      ],
+                    );
+                  },
+                )),
+          ),
         ));
   }
 }
@@ -78,53 +81,59 @@ class MostAndLeastTrackedSubcategorySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+
     return MLTitleAndCard(
         mlTitle: AppString.subcategoryTitle,
         cardContent: Card(
-          child: Padding(
-              padding: const EdgeInsets.only(top: 10, bottom: 14),
-              child: Consumer3<FirstAndLastDay, UserUidProvider,
-                  SubcategoryTrackerDatabaseProvider>(
-                builder: (context, day, user, sub, child) {
-                  // first and last day of the month
-                  String firstDayOfMonth = day.firstDay;
-                  String lastDayOfMonth = day.lastDay;
-
-                  // currently logged in user
-                  String currentLoggedInUser = user.userUid!;
-
-                  // number of days in the current month
-                  int numberOfDaysInCurrentMonth = day.days;
-
-                  return Row(
-                    children: [
-                      // most tracked subcategory
-                      MostAndLeastTrackedResult(
-                          resultIcon: Icons.line_axis,
-                          resultIconColor: Colors.green,
-                          sectionTitle: AppString.mostTrackedTitle,
-                          numberOfDaysInMonth: numberOfDaysInCurrentMonth,
-                          future: sub.retrieveMostAndLeastTrackedSubcategory(
-                              firstDay: firstDayOfMonth,
-                              lastDay: lastDayOfMonth,
-                              currentUser: currentLoggedInUser,
-                              isMost: true)),
-
-                      // least tracked subcategory
-                      MostAndLeastTrackedResult(
-                          resultIcon: Icons.line_axis,
-                          resultIconColor: Colors.red,
-                          sectionTitle: AppString.leastTrackedTitle,
-                          numberOfDaysInMonth: numberOfDaysInCurrentMonth,
-                          future: sub.retrieveMostAndLeastTrackedSubcategory(
-                              firstDay: firstDayOfMonth,
-                              lastDay: lastDayOfMonth,
-                              currentUser: currentLoggedInUser,
-                              isMost: false)),
-                    ],
-                  );
-                },
-              )),
+          child: SingleChildScrollView(
+            child: Padding(
+                padding: const EdgeInsets.only(top: 10, bottom: 14),
+                child: Consumer3<FirstAndLastDay, UserUidProvider,
+                    SubcategoryTrackerDatabaseProvider>(
+                  builder: (context, day, user, sub, child) {
+                    // first and last day of the month
+                    String firstDayOfMonth = day.firstDay;
+                    String lastDayOfMonth = day.lastDay;
+          
+                    // currently logged in user
+                    String currentLoggedInUser = user.userUid!;
+          
+                    // number of days in the current month
+                    int numberOfDaysInCurrentMonth = day.days;
+          
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+          
+                        // most tracked subcategory
+                        MostAndLeastTrackedResult(
+                            resultIcon: Icons.line_axis,
+                            resultIconColor: Colors.green,
+                            sectionTitle: AppString.mostTrackedTitle,
+                            numberOfDaysInMonth: numberOfDaysInCurrentMonth,
+                            future: sub.retrieveMostAndLeastTrackedSubcategory(
+                                firstDay: firstDayOfMonth,
+                                lastDay: lastDayOfMonth,
+                                currentUser: currentLoggedInUser,
+                                isMost: true)),
+          
+                        // least tracked subcategory
+                        MostAndLeastTrackedResult(
+                            resultIcon: Icons.line_axis,
+                            resultIconColor: Colors.red,
+                            sectionTitle: AppString.leastTrackedTitle,
+                            numberOfDaysInMonth: numberOfDaysInCurrentMonth,
+                            future: sub.retrieveMostAndLeastTrackedSubcategory(
+                                firstDay: firstDayOfMonth,
+                                lastDay: lastDayOfMonth,
+                                currentUser: currentLoggedInUser,
+                                isMost: false)),
+                      ],
+                    );
+                  },
+                )),
+          ),
         ));
   }
 }
@@ -219,7 +228,8 @@ Widget mainCategoryPieChartLegend(
         padding: const EdgeInsets.only(left: 5.0),
         child: Text(
           mainCategoryName,
-          style: AppTextStyle.subSectionTextStyle(fontsize: 11, color: Colors.blueGrey),
+          style: AppTextStyle.subSectionTextStyle(
+              fontsize: 11, color: Colors.blueGrey),
         ),
       )
     ],
