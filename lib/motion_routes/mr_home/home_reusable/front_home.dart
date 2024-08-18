@@ -11,9 +11,90 @@ import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 import 'package:motion/motion_routes/mr_home/home_reusable/back_home.dart';
 import 'package:motion/motion_screens/ms_routes/manual_tracking.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
+import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:provider/provider.dart';
+import '../../../motion_core/motion_providers/shared_pvd/share.dart';
+import '../../../motion_reusable/general_reuseable.dart';
+import '../../../motion_themes/mth_app/app_strings.dart';
 import '../../../motion_themes/mth_styling/motion_text_styling.dart';
 import '../home_windows/efficieny_window.dart';
+
+// Display the Life Completed Progress bar
+class LifeCompleted extends StatelessWidget {
+  const LifeCompleted({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidget = MediaQuery.of(context).size.width;
+
+
+    return Consumer2<CurrentYearProvider, UserUidProvider>(
+        builder: (context, year, user, child) {
+      // current year
+      final currentYear = year.currentYear;
+
+      // user uid
+      final currentUser = user.userUid;
+
+      final dateOfBirthStorage = DateOfBirthStorage();
+
+      return FutureBuilder<DateTime?>(
+        future: dateOfBirthStorage.getDateOfBirth(currentUser!),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const ShimmerWidget.rectangular(width: 50, height: 30);
+          } else if (snapshot.hasError) {
+            return const Text("N/A");
+          } else {
+            // date
+            final date = snapshot.data;
+
+            if (date == null) {
+              return const SizedBox();
+            } else {
+              // year born
+              final yearBorn = int.parse(date.year.toString());
+
+              // age
+              final currentAge = int.parse(currentYear) - yearBorn;
+
+              // (current age/ life expectance age) = life_completed
+              final double lifeCompleted = currentAge / 72.6;
+
+              final String lifeCompletedPercent =
+                  (lifeCompleted * 100).toStringAsFixed(2);
+
+              return Padding(
+                padding: const EdgeInsets.only(top:10, bottom: 10),
+                child: Row(
+                  children: [
+                    // progress indicator
+                    LinearPercentIndicator(
+                      animation: true,
+                      center: Text(
+                        "$lifeCompletedPercent%",
+                        style: AppTextStyle.leadingTextLTStyle3(fontWieght: FontWeight.bold,  fontsize: 11),
+                      ),
+                      width: screenWidget*0.5,
+                      lineHeight: 20,
+                      barRadius: const Radius.circular(20),
+                      percent: lifeCompleted,
+                      progressColor: Colors.greenAccent,
+                      backgroundColor: Colors.grey.withAlpha(200),
+                    ),
+              
+                  // life 
+                  Text(AppString.lifeTitle, style: AppTextStyle.leadingTextLTStyle3(fontWieght: FontWeight.bold),)
+                  ],
+                ),
+              );
+            }
+          }
+        },
+      );
+    });
+  }
+}
 
 // total all time accounted for and unaccounted for
 Widget entireTimeAccountedAndUnaccounted(
@@ -144,13 +225,13 @@ class NumberOfDaysMainCategory extends StatelessWidget {
                   numberOfDays: totalNumberOfDays.toString(),
                   percentCompleted: percentCompletedFormatted2)
               : Padding(
-                padding: const EdgeInsets.only(right:10.0),
-                child: Text(
+                  padding: const EdgeInsets.only(right: 10.0),
+                  child: Text(
                     "Day: $totalNumberOfDays",
                     style: const TextStyle(
                         fontSize: 17, fontWeight: FontWeight.w600),
                   ),
-              );
+                );
         }
       },
     );
@@ -170,15 +251,13 @@ class NumberOfDaysMainCategory extends StatelessWidget {
         return getAllDays
             ? _futureData(
                 future: main.retrievedNumberOfDays(currentUser: userUid!),
-                percent: false
-              )
+                percent: false)
             : _futureData(
                 future: main.retrievedNumberOfDays(
                     currentUser: userUid!,
                     currentYear: currentYear,
                     getAllDays: false),
-                percent: true
-              );
+                percent: true);
       },
     );
   }

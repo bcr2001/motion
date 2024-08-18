@@ -47,6 +47,9 @@ class AppString {
 
   // settings page
   static const String themeTitle = "Theme";
+  static const String okTitle = "OK";
+  static const String setDateOfBirthTitle = "Set Date of Birth";
+  static const String setDateOfBirthDescription = "To see how much you have left";
   static const String downloadDataTitle = "Download Personal Data";
   static const String notificationTitle = "Notification";
   static const String importDataTitle = "Import Data";
@@ -138,6 +141,7 @@ class AppString {
   static const String manualRangeValueError = "Keep entries within range!!";
 
   // HOME ROUTE
+  static const String lifeTitle = "Life";
   static const String badgeTitle = "Badge";
   static const String homeSubcategoryTitle = "Subcategories";
   static const String trackingWindowTitle = "Tracking Window";

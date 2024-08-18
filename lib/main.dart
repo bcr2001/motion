@@ -49,7 +49,7 @@ void main() async {
   await zenQuoteProvider.initializeSharedPreferences();
 
   // UserUidProvider
-  final userUidProvider = UserUidProvider();
+  final userUidProvider = UserUidProvider();  
   userUidProvider.initializeUidSharedPreferences();
 
   // AssignerProvider

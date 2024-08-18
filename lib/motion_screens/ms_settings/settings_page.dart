@@ -1,15 +1,93 @@
 import 'package:flutter/material.dart';
+import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_pvd.dart';
+import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:provider/provider.dart';
+import '../../motion_core/motion_providers/shared_pvd/share.dart';
 import '../ms_routes/about_page.dart';
 import '../ms_reuse/screens_reusable.dart';
+import 'package:date_picker_plus/date_picker_plus.dart';
 
 // settings page
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
+
+  // date picker widget
+  Widget _pickDateOfBirth() {
+    final dateOfBirthStorage = DateOfBirthStorage();
+
+    return Consumer<UserUidProvider>(
+      builder: (context, user, child) {
+        // user uid
+        final userUID = user.userUid;
+
+        return SizedBox(
+          width: 400,
+          height: 350,
+          child: DatePicker(
+            padding: EdgeInsets.zero,
+            minDate: DateTime(1970, 1, 1),
+            maxDate: DateTime(2100, 12, 31),
+            daysOfTheWeekTextStyle: AppTextStyle.legendTextStyling(),
+            selectedCellTextStyle:
+                AppTextStyle.accountedAndUnaccountedGallaryStyle(fontsize: 15),
+            enabledCellsTextStyle: AppTextStyle.infoTextStyle(),
+            leadingDateTextStyle:
+                AppTextStyle.accountedAndUnaccountedGallaryStyle(),
+            onDateSelected: (value) async {
+              logger.i("Date Of Birth: $value");
+
+              await dateOfBirthStorage.saveDateOfBirth(userUID! ,value);
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  // button to pop the alert dialog
+  Widget _okayPopAlert(context) {
+    return GestureDetector(
+      onTap: () => Navigator.of(context).pop(),
+      child: Padding(
+        padding: const EdgeInsets.only(right: 20.0),
+        child: Text(
+          AppString.okTitle,
+          style: AppTextStyle.mainCategoryTotalTitle(fontsize: 15),
+        ),
+      ),
+    );
+  }
+
+  // alert dialog that shows up when the user
+  // clicks the Set Date of Birth option
+  void _showSetDateOfBorthAlert(context) {
+    // show the dob alert dialog
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialogConst(
+              screenHeight: null,
+              screenWidth: null,
+              heightFactor: 0.45,
+              alertDialogTitle: AppString.setDateOfBirthTitle,
+              alertDialogContent: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // date of birth widget
+                  _pickDateOfBirth(),
+
+                  // button to confirm date of birth
+                  Align(
+                      alignment: Alignment.bottomRight,
+                      child: _okayPopAlert(context))
+                ],
+              ));
+        });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +107,14 @@ class SettingsPage extends StatelessWidget {
 
             // theme mode settings
             const _ThemeModeSettingsOption(),
+
+            // set date of birth
+            SettingsOptions(
+              null,
+              settingsTitle: AppString.setDateOfBirthTitle,
+              settingsDesciption: AppString.setDateOfBirthDescription,
+              onTap: () => _showSetDateOfBorthAlert(context),
+            ),
 
             // about motion
             SettingsOptions(
@@ -142,8 +228,12 @@ class _ThemeModeSettingsOption extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AppThemeModeProviderN1>(
       builder: (context, themeValue, child) {
-        
-        String themeModeName = themeValue.currentThemeMode == ThemeModeSettingsN1.lightMode? AppString.ligthMode: themeValue.currentThemeMode == ThemeModeSettingsN1.darkMode ? AppString.darkMode: AppString.systemDefault;
+        String themeModeName =
+            themeValue.currentThemeMode == ThemeModeSettingsN1.lightMode
+                ? AppString.ligthMode
+                : themeValue.currentThemeMode == ThemeModeSettingsN1.darkMode
+                    ? AppString.darkMode
+                    : AppString.systemDefault;
 
         return GestureDetector(
           onTap: () {

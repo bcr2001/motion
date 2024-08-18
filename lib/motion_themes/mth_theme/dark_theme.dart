@@ -19,8 +19,7 @@ ThemeData darkThemeData = ThemeData(
   colorScheme: const ColorScheme.dark(primary: AppColor.darkThemeWidgetBgColor),
 
   // text form field
-  dialogTheme: DialogTheme(
-      titleTextStyle: AppTextStyle.dialogTitleTextStyle,
+  dialogTheme: const DialogTheme(
       backgroundColor: AppColor.darkModeContentWidget),
 
   // app bar theme

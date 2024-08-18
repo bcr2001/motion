@@ -69,7 +69,7 @@ class _TrailingEditButtonsState extends State<TrailingEditButtons> {
   }
 
   // this alert dialog is rendered when the user
-  // clickes on the edit icon button in the trailing
+  // clicks on the edit icon button in the trailing
   // part of the list tile
   void _showUpdateAlertDialog(context) {
     // Get screen dimensions

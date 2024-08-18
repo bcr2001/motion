@@ -48,8 +48,8 @@ snackBarMessage(BuildContext context,
 
 // alart dialog
 class AlertDialogConst extends StatelessWidget {
-  final double screenHeight;
-  final double screenWidth;
+  final double? screenHeight;
+  final double? screenWidth;
   final double? heightFactor;
   final double? widthFactor;
   final String alertDialogTitle;

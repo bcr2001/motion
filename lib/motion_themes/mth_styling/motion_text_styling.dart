@@ -32,7 +32,7 @@ class AppTextStyle {
 
   // section title style (main title)
   static sectionTitleTextStyle() {
-    return _baseStyle.copyWith(fontSize: 17.5, fontWeight: FontWeight.w600);
+    return _baseStyle.copyWith(fontSize: 18, fontWeight: FontWeight.w600);
   }
 
   // section title style (ef score)
@@ -99,10 +99,10 @@ class AppTextStyle {
   }
 
   // stats page Main Category Totals title
-  static mainCategoryTotalTitle() {
+  static mainCategoryTotalTitle({double fontsize = 13}) {
     return _baseStyle.copyWith(
         color: AppColor.accountedColor,
-        fontSize: 13,
+        fontSize: fontsize,
         fontWeight: FontWeight.w600);
   }
 
@@ -121,8 +121,8 @@ class AppTextStyle {
         fontSize: 12, fontWeight: FontWeight.w600, color: Colors.blueGrey);
   }
 
-  static TextStyle leadingTextLTStyle3() {
-    return _baseStyle.copyWith(fontSize: 12.5);
+  static TextStyle leadingTextLTStyle3({double fontsize = 12.5,fontWieght = FontWeight.normal, Color? color}) {
+    return _baseStyle.copyWith(fontSize: fontsize, fontWeight: fontWieght, color: color);
   }
 
   // home page subtitle list tile style
@@ -275,7 +275,6 @@ class AppTextStyle {
 
   // dialog title text style
   static final TextStyle dialogTitleTextStyle = _baseStyle.copyWith(
-    color: Colors.blue,
     fontSize: 23,
     fontWeight: FontWeight.w700,
   );

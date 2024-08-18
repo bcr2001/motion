@@ -22,9 +22,8 @@ ThemeData lightThemeData = ThemeData(
       headlineSmall: AppTextStyle.headingSmall(false)),
 
   // alert dialog theme
-  dialogTheme: DialogTheme(
-      backgroundColor: AppColor.lightModeContentWidget,
-      titleTextStyle: AppTextStyle.dialogTitleTextStyle),
+  dialogTheme: const DialogTheme(
+      backgroundColor: AppColor.lightModeContentWidget,),
 
   // card theme
   cardTheme: const CardTheme(

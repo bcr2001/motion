@@ -56,6 +56,8 @@ dependencies:
   flutter_charts: ^0.5.2
   flutter_heatmap_calendar: ^1.0.5
   avatar_glow: ^3.0.1
+  date_picker_plus: ^4.1.0
+  percent_indicator: ^4.2.3
 
 
 dev_dependencies:
