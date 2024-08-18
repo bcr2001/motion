@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_month_provider_pvd.dart';
 import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_pvd.dart';
 import 'package:motion/motion_core/motion_providers/web_api_pvd/zen_quotes_pvd.dart';
-import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 import 'package:motion/motion_routes/mr_home/home_windows/tracking_window.dart';
 import 'package:motion/motion_routes/mr_home/home_windows/summary_window.dart';
 import 'package:motion/motion_screens/ms_report/report_back.dart';
@@ -11,14 +10,10 @@ import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:provider/provider.dart';
 import 'package:motion/motion_routes/route_action.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
-import '../../../motion_core/motion_providers/shared_pvd/share.dart';
 import '../home_reusable/back_home.dart';
 import '../home_reusable/front_home.dart';
 import '../home_windows/efficieny_window.dart';
 import '../home_windows/total_acc_unacc.dart';
-
-
-import 'package:flutter/material.dart';
 
 
 

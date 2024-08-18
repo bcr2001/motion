@@ -14,7 +14,6 @@ import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:provider/provider.dart';
 import '../../../motion_core/motion_providers/shared_pvd/share.dart';
-import '../../../motion_reusable/general_reuseable.dart';
 import '../../../motion_themes/mth_app/app_strings.dart';
 import '../../../motion_themes/mth_styling/motion_text_styling.dart';
 import '../home_windows/efficieny_window.dart';

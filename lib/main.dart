@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:motion/firebase_options.dart';
+import 'package:motion/motion_core/mc_sql_table/sub_table.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_month_provider_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_time_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_year_pvd.dart';
@@ -12,12 +13,12 @@ import 'package:motion/motion_core/motion_providers/sql_pvd/experience_pvd.dart'
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_pvd.dart';
 import 'package:motion/motion_core/motion_providers/dropDown_pvd/drop_down_pvd.dart';
+import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_user/mu_ops/auth_page.dart';
 import 'package:provider/provider.dart';
 import 'motion_core/motion_providers/date_pvd/current_date_pvd.dart';
 import 'motion_core/motion_providers/sql_pvd/assigner_pvd.dart';
 import 'motion_core/motion_providers/web_api_pvd/zen_quotes_pvd.dart';
-import 'motion_reusable/general_reuseable.dart';
 import 'motion_themes/mth_theme/dark_theme.dart';
 import 'motion_themes/mth_theme/light_theme.dart';
 import 'motion_core/mc_sqlite/sql_tracker_db.dart';
@@ -30,12 +31,11 @@ final GlobalKey<NavigatorState> navigationKey = GlobalKey<NavigatorState>();
 // managing database operations, likely related to tracking functionality.
 final TrackerDatabaseHelper trackDbInstance = TrackerDatabaseHelper();
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize the database helper
-  // final TrackerDatabaseHelper databaseHelper = TrackerDatabaseHelper();
+  final TrackerDatabaseHelper databaseHelper = TrackerDatabaseHelper();
   // final dbHelper = AssignerDatabaseHelper();
 
   // databaseHelper.updateCurrentUser();
@@ -49,7 +49,7 @@ void main() async {
   await zenQuoteProvider.initializeSharedPreferences();
 
   // UserUidProvider
-  final userUidProvider = UserUidProvider();  
+  final userUidProvider = UserUidProvider();
   userUidProvider.initializeUidSharedPreferences();
 
   // AssignerProvider
@@ -68,7 +68,18 @@ void main() async {
 
   // final allMain = await dbHelper.getAllItems();
   // final allMain = await databaseHelper.getMostAndLeastProductiveMonths(getMostProductiveMonth: false, year: "2023");
-  // final allMain = await databaseHelper.getAllExperiencePoints(date: "2024");
+  // final allMain = await trackDbInstance.getAllSubcategories();
+
+  final subclass = Subcategories(
+      id: 10292,
+      date: "2024-08-09",
+      mainCategoryName: "Entertainment",
+      subcategoryName: "SM/Anime/MM",
+      timeRecorded: "15:10 PM",
+      timeSpent: 553.52,
+      currentLoggedInUser: "hhANBj74wiclvfuDLGfuDlFZgJ62");
+
+  final add19th = await trackDbInstance.updateSubcategory(subclass);
 
   // logger.i(allMain);
 

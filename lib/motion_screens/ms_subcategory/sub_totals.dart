@@ -4,7 +4,6 @@ import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_reusable/db_re/sub_logic.dart';
 import 'package:motion/motion_routes/mr_stats/stats_front.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
-import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:provider/provider.dart';
 
 import '../../motion_themes/mth_styling/app_color.dart';
