@@ -232,7 +232,8 @@ class CategoryBuilder extends StatelessWidget {
           : const EdgeInsets.only(right: 50),
       child: Text(
         isDays ? totalDays : average,
-        style: AppTextStyle.daysTextStyleCSR(),
+        style: AppTextStyle.subSectionTextStyle(
+            fontsize: 12, color: AppColor.tileBackgroundColor),
       ),
     );
   }
@@ -241,7 +242,7 @@ class CategoryBuilder extends StatelessWidget {
   Widget _hoursTextLayout() {
     return Text(
       totalHours,
-      style: AppTextStyle.hoursTextStyleCSR(),
+      style: AppTextStyle.sectionTitleTextStyle(fontsize: 20),
     );
   }
 
@@ -274,7 +275,8 @@ class CategoryBuilder extends StatelessWidget {
           // main category name and image
           Text(
             mainCategoryName,
-            style: AppTextStyle.subSectionTitleTextStyle1(),
+            style:
+                AppTextStyle.subSectionTextStyle(fontweight: FontWeight.normal),
           ),
 
           // hours, days, and average
@@ -285,7 +287,7 @@ class CategoryBuilder extends StatelessWidget {
             alignment: Alignment.bottomLeft,
             child: Text(
               galleryInitials,
-              style: AppTextStyle.statsElementTextStyle(),
+              style: AppTextStyle.subSectionTextStyle(fontsize: 11.5),
             ),
           ),
 

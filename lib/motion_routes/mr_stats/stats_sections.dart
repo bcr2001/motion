@@ -29,7 +29,9 @@ class SummaryContributionHeatMap extends StatelessWidget {
 
       return FutureBuilder(
           future: main.retrieveDailyAccountedAndIntensities(
-              currentUser: currentUserUid, year: targetYearData, getEntireIntensity: false),
+              currentUser: currentUserUid,
+              year: targetYearData,
+              getEntireIntensity: false),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
@@ -52,8 +54,8 @@ class SummaryContributionHeatMap extends StatelessWidget {
                         color: AppColor.tileBackgroundColor, width: 2.0),
                     borderRadius: BorderRadius.circular(10)),
                 child: HeatMap(
-                  startDate: DateTime(year,1,1),
-                  endDate: DateTime(year,12,31),
+                  startDate: DateTime(year, 1, 1),
+                  endDate: DateTime(year, 12, 31),
                   fontSize: 12,
                   scrollable: true,
                   defaultColor: AppColor.defaultHeatMapBlockColor,
@@ -82,7 +84,7 @@ class YearMainCategoryOveriew extends StatelessWidget {
 
   const YearMainCategoryOveriew({super.key, required this.year});
 
-   // calculates the approriate height of the alert dialog
+  // calculates the approriate height of the alert dialog
   // based on the number of items in the list view item count
   double calculateContainerHeight(int itemCount, double itemHeight) {
     return itemCount * itemHeight;
@@ -90,7 +92,6 @@ class YearMainCategoryOveriew extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return Consumer2<UserUidProvider, SubcategoryTrackerDatabaseProvider>(
         builder: (context, user, sub, child) {
       // currently logged in user
@@ -117,9 +118,8 @@ class YearMainCategoryOveriew extends StatelessWidget {
 
               double maxHeight = 380.0; // Maximum height for the container
               double containerHeight = min(
-                  calculateContainerHeight(snapshotData!.length, 80), maxHeight);
-
-              
+                  calculateContainerHeight(snapshotData!.length, 80),
+                  maxHeight);
 
               return Container(
                 margin: const EdgeInsets.only(bottom: 25.0),
@@ -130,8 +130,6 @@ class YearMainCategoryOveriew extends StatelessWidget {
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: snapshotData.length,
                       itemBuilder: (BuildContext context, index) {
-
-                        
                         // single item index
                         final singleItem = snapshotData[index];
 
@@ -153,7 +151,8 @@ class YearMainCategoryOveriew extends StatelessWidget {
 
                         return ListTile(
                           leading: Text(mainCatName,
-                              style: AppTextStyle.leadingTextLTStyle()),
+                              style: AppTextStyle.subSectionTextStyle(
+                                  fontsize: 14, fontweight: FontWeight.normal)),
                           title: Container(
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(20),
@@ -173,7 +172,7 @@ class YearMainCategoryOveriew extends StatelessWidget {
                                 fontWeight: FontWeight.w600),
                           ),
                           trailing: Text(convertedAverage,
-                              style: AppTextStyle.leadingStatsTextLTStyle()),
+                              style: AppTextStyle.subSectionTextStyle(fontsize: 12.5, fontweight: FontWeight.normal)),
                         );
                       }),
                 ),

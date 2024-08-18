@@ -183,7 +183,7 @@ class PieChartAndValuesAccountedAndUnaccounted extends StatelessWidget {
                       resultName: AppString.accountedTitle,
                       dayStyle: AppTextStyle.resultTitleStyle(false),
                       hoursStyle:
-                          AppTextStyle.accountRegularAndUnaccountTextStyle()),
+                          AppTextStyle.sectionTitleTextStyle(fontsize: 20)),
 
                   // unaccounted total for the current month
                   entireTimeAccountedAndUnaccounted(
@@ -192,7 +192,7 @@ class PieChartAndValuesAccountedAndUnaccounted extends StatelessWidget {
                       resultName: AppString.unAccountedTitle,
                       dayStyle: AppTextStyle.resultTitleStyle(true),
                       hoursStyle:
-                          AppTextStyle.accountRegularAndUnaccountTextStyle())
+                          AppTextStyle.sectionTitleTextStyle(fontsize: 20))
                 ],
               ),
 
@@ -219,7 +219,7 @@ Widget mainCategoryPieChartLegend(
         padding: const EdgeInsets.only(left: 5.0),
         child: Text(
           mainCategoryName,
-          style: AppTextStyle.legendTextStyling(),
+          style: AppTextStyle.subSectionTextStyle(fontsize: 11, color: Colors.blueGrey),
         ),
       )
     ],
@@ -363,7 +363,8 @@ class InfoAboutNoData extends StatelessWidget {
               // information about the specific section
               Text(
                 AppString.informationAboutNoData,
-                style: AppTextStyle.informationTextStyle(),
+                style: AppTextStyle.subSectionTextStyle(
+                    fontsize: 10, fontweight: FontWeight.normal),
               )
             ],
           ),
@@ -421,5 +422,3 @@ class GroupedBarChartOfAccountedAndUnaccountedTime extends StatelessWidget {
     });
   }
 }
-
-

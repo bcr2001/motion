@@ -16,6 +16,8 @@ import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:provider/provider.dart';
 
+import '../../motion_themes/mth_styling/app_color.dart';
+
 // this returns the page where users can add data into the database tables
 class ManualTimeRecordingRoute extends StatefulWidget {
   // main and subcategory names from the home page
@@ -72,7 +74,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
               fieldTextEditingController: textEditingController,
               fieldHintText: "00",
               fieldKeyboardType: TextInputType.number,
-              hintTextStyle: AppTextStyle.manualHintTextStyle(),
+              hintTextStyle: AppTextStyle.manualHintTextStyle(fontsize: 23),
               fieldValidator: (value) {
                 // check whether the field is empty
                 if (value == null || value.isEmpty) {
@@ -93,7 +95,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
       padding: const EdgeInsets.only(top: 20.0),
       child: Text(
         ":",
-        style: AppTextStyle.manualHintTextStyle(),
+        style: AppTextStyle.manualHintTextStyle(fontsize: 23),
       ),
     );
   }
@@ -144,9 +146,13 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                   ),
 
                   // cancel and add button
-                  Consumer5<CurrentDateProvider, UserUidProvider,
-                      CurrentTimeProvider, MainCategoryTrackerProvider, ExperiencePointTableProvider>(
-                    builder: (context, date, uid, time, mainCat, xp,child) {
+                  Consumer5<
+                      CurrentDateProvider,
+                      UserUidProvider,
+                      CurrentTimeProvider,
+                      MainCategoryTrackerProvider,
+                      ExperiencePointTableProvider>(
+                    builder: (context, date, uid, time, mainCat, xp, child) {
                       return CancelAddTextButtons(
                         firstButtonName: AppString.trackCancelTextButton,
                         secondButtonName: AppString.trackAddTextButton,
@@ -210,7 +216,8 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                               logger.i(mainCategoryExists1);
 
                               if (!experiencePointsExists2) {
-                                logger.i("a new row is being added into the experience_point table");
+                                logger.i(
+                                    "a new row is being added into the experience_point table");
                                 // Insert date and currentLoggedInUser into
                                 //the experience_point table
                                 final experiencePointInsert = ExperiencePoints(
@@ -218,7 +225,8 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                                   currentLoggedInUser: uid.userUid!,
                                 );
 
-                                await xp.insertIntoExperiencePoint(experiencePointInsert);
+                                await xp.insertIntoExperiencePoint(
+                                    experiencePointInsert);
                                 logger.i("a new row has been inserted");
                               }
 
@@ -308,7 +316,8 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                       padding: const EdgeInsets.only(left: 16),
                       child: Text(
                         AppString.blockTitle,
-                        style: AppTextStyle.subSectionTitleTextStyle(),
+                        style: AppTextStyle.subSectionTextStyle(
+                            color: AppColor.accountedColor),
                       ),
                     ),
 
@@ -325,10 +334,11 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                           return ListTile(
                             subtitle: Text(
                                 "${AppString.timeCreated} ${subsTrackedOnCurrentDay[index].timeRecorded}",
-                                style: AppTextStyle.leadingStatsTextLTStyle()),
+                                style: AppTextStyle.subSectionTextStyle(fontsize: 12.5, fontweight: FontWeight.normal)),
                             title: Text(
                               convertedTimeRecorded,
-                              style: AppTextStyle.special1SectionTitleTextStyle(),
+                              style: AppTextStyle.subSectionTextStyle(
+                                  fontsize: 16, color: Colors.blueGrey),
                             ),
                             trailing:
                                 // deletes entry in the subcategory table
@@ -337,7 +347,10 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                                 subs.deleteSubcategoryEntry(
                                     subsTrackedOnCurrentDay[index].id!);
                               },
-                              icon: const Icon(Icons.delete_outlined, size: 18,),
+                              icon: const Icon(
+                                Icons.delete_outlined,
+                                size: 18,
+                              ),
                             ),
                           );
                         })

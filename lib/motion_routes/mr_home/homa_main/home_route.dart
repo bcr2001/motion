@@ -60,7 +60,7 @@ class MotionHomeRoute extends StatelessWidget {
             return Text(
               zenQuoteValue.todaysQuote,
               textAlign: TextAlign.center,
-              style: AppTextStyle.quoteTextStyle(),
+              style: AppTextStyle.subSectionTextStyle(fontsize: 13, fontweight: FontWeight.normal),
             );
           },
         ));

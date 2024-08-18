@@ -295,7 +295,7 @@ class YearTotalsAccountedUnaccountedBuilder extends StatelessWidget {
               sectionName: AppString.totalAccountedTitle,
               sectionDays: accountedDays,
               sectionHours: accountedHours,
-              sectionDataValueStyle: AppTextStyle.pieChartTextStyling(),
+              sectionDataValueStyle: AppTextStyle.subSectionTextStyle(fontsize: 12),
               lineChartIconColor: Colors.green),
 
           // unaccounted with data
@@ -303,7 +303,7 @@ class YearTotalsAccountedUnaccountedBuilder extends StatelessWidget {
               sectionName: AppString.totalUnaccountedTitle,
               sectionDays: unaccountedDays,
               sectionHours: unaccountedHours,
-              sectionDataValueStyle: AppTextStyle.pieChartTextStyling(),
+              sectionDataValueStyle: AppTextStyle.subSectionTextStyle(fontsize: 12),
               lineChartIconColor: Colors.red),
         ],
       ),

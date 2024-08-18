@@ -31,16 +31,16 @@ class SettingsPage extends StatelessWidget {
             padding: EdgeInsets.zero,
             minDate: DateTime(1970, 1, 1),
             maxDate: DateTime(2100, 12, 31),
-            daysOfTheWeekTextStyle: AppTextStyle.legendTextStyling(),
+            daysOfTheWeekTextStyle: AppTextStyle.subSectionTextStyle(fontsize: 11, color: Colors.blueGrey),
             selectedCellTextStyle:
                 AppTextStyle.accountedAndUnaccountedGallaryStyle(fontsize: 15),
-            enabledCellsTextStyle: AppTextStyle.infoTextStyle(),
+            enabledCellsTextStyle: AppTextStyle.subSectionTextStyle(fontsize: 15, fontweight: FontWeight.normal),
             leadingDateTextStyle:
                 AppTextStyle.accountedAndUnaccountedGallaryStyle(),
             onDateSelected: (value) async {
               logger.i("Date Of Birth: $value");
 
-              await dateOfBirthStorage.saveDateOfBirth(userUID! ,value);
+              await dateOfBirthStorage.saveDateOfBirth(userUID!, value);
             },
           ),
         );
@@ -176,7 +176,7 @@ class _ThemeModeSettingsWindow extends StatelessWidget {
                     padding: const EdgeInsets.only(top: .0, bottom: 10.0),
                     child: Text(
                       AppString.themeSettingPageMessage,
-                      style: AppTextStyle.leadingStatsTextLTStyle(),
+                      style: AppTextStyle.subSectionTextStyle(fontsize: 12.5, fontweight: FontWeight.normal),
                     ),
                   ),
 
@@ -246,11 +246,12 @@ class _ThemeModeSettingsOption extends StatelessWidget {
           child: ListTile(
               title: Text(
                 AppString.themeTitle,
-                style: AppTextStyle.leadingTextLTStyle(),
+                style: AppTextStyle.subSectionTextStyle(
+                    fontsize: 14, fontweight: FontWeight.normal),
               ),
               subtitle: Text(
                 themeModeName,
-                style: AppTextStyle.settingSubtitleStyling,
+                style: AppTextStyle.manualHintTextStyle(),
               )),
         );
       },

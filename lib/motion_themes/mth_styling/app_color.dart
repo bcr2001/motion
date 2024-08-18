@@ -10,6 +10,12 @@ class AppColor {
   static const intensity20 = Color.fromRGBO(0, 128, 0, 0.8);
   static const intensity25 = Color.fromRGBO(0, 100, 0, 1);
 
+  // manual hint text color
+  static const manualHintTextColor = Color(0xff777777);
+
+  // tile element color
+  static const tileElementColor = Color.fromARGB(255, 232, 232, 232);
+
   // home page element background color
   static const tileBackgroundColor = Color(0xFF00A7A7);
 
@@ -38,10 +44,6 @@ class AppColor {
 
   // Self Development color
   static const Color selfDevelopmentPieChartColor = Color(0xFF37AA85);
-
-  // most tracked color
-  static const Color mostTrackedBorderColor = Color(0XFF52D726);
-  static const Color leastTrackedBorderColor = Color(0XFFFF0000);
 
   // dark theme widget background
   static const Color darkThemeWidgetBgColor = Color(0xFF1A1D26);

@@ -40,8 +40,8 @@ snackBarMessage(BuildContext context,
       errorMessage,
       style: requiresColor
           ? const TextStyle(color: Colors.red, fontSize: 14)
-          : AppTextStyle
-              .snackBarTextStyle, // Use the contentTextStyle from the theme.
+          : AppTextStyle.subSectionTextStyle(
+              color: Colors.blue), // Use the contentTextStyle from the theme.
     ),
   ));
 }
@@ -134,14 +134,17 @@ class CustomeListTile1 extends StatelessWidget {
   final String trailingName;
 
   const CustomeListTile1(
-      {super.key, required this.leadingName, required this.titleName, required this.trailingName});
+      {super.key,
+      required this.leadingName,
+      required this.titleName,
+      required this.trailingName});
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       leading: Text(
         leadingName,
-        style: AppTextStyle.leadingTextLTStyle3(),
+        style: AppTextStyle.subSectionTextStyle(fontsize: 12.5, fontweight: FontWeight.normal),
       ),
       title: Container(
         width: 130,
@@ -158,7 +161,7 @@ class CustomeListTile1 extends StatelessWidget {
       ),
       trailing: Text(
         trailingName,
-        style: AppTextStyle.leadingTextLTStyle2(),
+        style: AppTextStyle.subSectionTextStyle(fontsize: 12, color: Colors.blueGrey),
       ),
     );
   }

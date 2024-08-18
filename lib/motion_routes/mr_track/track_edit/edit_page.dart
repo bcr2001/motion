@@ -31,7 +31,7 @@ class TrackEditingPage extends StatelessWidget {
                 children: [
                   // what the edit page is (an explanation)
                   const InfoToTheUser(
-                    sectionInformation: AppString.editPageDescription),
+                      sectionInformation: AppString.editPageDescription),
 
                   // all the items in the to_assign table
                   // for a particular user
@@ -52,10 +52,14 @@ class TrackEditingPage extends StatelessWidget {
                                 leading: Text((index + 1).toString()),
                                 title: Text(
                                   item.subcategoryName,
-                                  style: AppTextStyle.trailingTextLTStyle(),),
+                                  style: AppTextStyle.subSectionTextStyle(),
+                                ),
                                 subtitle: Text(
-                                  item.mainCategoryName, 
-                                  style: AppTextStyle.subtitleLTStyle(),),
+                                  item.mainCategoryName,
+                                  style: AppTextStyle.subSectionTextStyle(
+                                      fontsize: 14,
+                                      fontweight: FontWeight.normal),
+                                ),
                                 trailing: TrailingEditButtons(
                                   // Pass item details to the TrailingEditButtons widget
                                   itemIndexDateCreated: item.dateCreated,
@@ -73,7 +77,6 @@ class TrackEditingPage extends StatelessWidget {
                             // If the current user is not the owner, hide the item
                             : const SizedBox.shrink();
                       })
-
                 ],
               );
             },

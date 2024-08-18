@@ -216,7 +216,8 @@ class _SpecificDaySummaryHeatMapState extends State<SpecificDaySummaryHeatMap> {
         ),
         child: Text(
           buttonName,
-          style: AppTextStyle.alertDialogElevatedButtonTextStyle(),
+          style: AppTextStyle.subSectionTextStyle(
+              fontsize: 12, color: Colors.blueGrey),
         ));
   }
 
@@ -377,7 +378,9 @@ class _SpecificDaySummaryHeatMapState extends State<SpecificDaySummaryHeatMap> {
                             return ListTile(
                               title: Text(
                                   snapShotData[index]["subcategoryName"],
-                                  style: AppTextStyle.leadingTextLTStyle()),
+                                  style: AppTextStyle.subSectionTextStyle(
+                                      fontsize: 14,
+                                      fontweight: FontWeight.normal)),
                               trailing: Container(
                                 width: 105,
                                 height: 23,
@@ -388,7 +391,7 @@ class _SpecificDaySummaryHeatMapState extends State<SpecificDaySummaryHeatMap> {
                                 child: Center(
                                     child: Text(
                                   convertedTotalTimeSpent1,
-                                  style: AppTextStyle.tileElementTextStyle(),
+                                  style: AppTextStyle.subSectionTextStyle(fontsize: 11, color: AppColor.tileElementColor),
                                 )),
                               ),
                             );

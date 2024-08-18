@@ -27,7 +27,6 @@ class LifeCompleted extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidget = MediaQuery.of(context).size.width;
 
-
     return Consumer2<CurrentYearProvider, UserUidProvider>(
         builder: (context, year, user, child) {
       // current year
@@ -65,7 +64,7 @@ class LifeCompleted extends StatelessWidget {
                   (lifeCompleted * 100).toStringAsFixed(2);
 
               return Padding(
-                padding: const EdgeInsets.only(top:10, bottom: 10),
+                padding: const EdgeInsets.only(top: 10, bottom: 10),
                 child: Row(
                   children: [
                     // progress indicator
@@ -73,18 +72,21 @@ class LifeCompleted extends StatelessWidget {
                       animation: true,
                       center: Text(
                         "$lifeCompletedPercent%",
-                        style: AppTextStyle.leadingTextLTStyle3(fontWieght: FontWeight.bold,  fontsize: 11),
+                        style: AppTextStyle.subSectionTextStyle(fontsize: 11),
                       ),
-                      width: screenWidget*0.5,
+                      width: screenWidget * 0.5,
                       lineHeight: 20,
                       barRadius: const Radius.circular(20),
                       percent: lifeCompleted,
                       progressColor: Colors.greenAccent,
                       backgroundColor: Colors.grey.withAlpha(200),
                     ),
-              
-                  // life 
-                  Text(AppString.lifeTitle, style: AppTextStyle.leadingTextLTStyle3(fontWieght: FontWeight.bold),)
+
+                    // life
+                    Text(
+                      AppString.lifeTitle,
+                      style: AppTextStyle.subSectionTextStyle(fontsize: 12.5),
+                    )
                   ],
                 ),
               );
@@ -306,7 +308,8 @@ Widget timeAccountedCurrentDateXP() {
               padding: const EdgeInsets.only(top: 10.0, bottom: 15),
               child: Text(
                 formattedDate,
-                style: AppTextStyle.specialSectionTitleTextStyle(),
+                style: AppTextStyle.subSectionTextStyle(
+                    fontsize: 12, color: Colors.blueGrey),
               ),
             ),
 
@@ -448,12 +451,14 @@ class _SubcategoryAndCurrentDayTotalsState
                             return ListTile(
                               title: Text(
                                 activeItems[index].subcategoryName,
-                                style: AppTextStyle.leadingTextLTStyle(),
+                                style: AppTextStyle.subSectionTextStyle(
+                                    fontsize: 14,
+                                    fontweight: FontWeight.normal),
                               ),
                               subtitle: Text(
                                 activeItems[index].mainCategoryName,
-                                style:
-                                    AppTextStyle.specialSectionTitleTextStyle(),
+                                style: AppTextStyle.subSectionTextStyle(
+                                    fontsize: 12, color: Colors.blueGrey),
                               ),
                               trailing: Container(
                                 width: 105,
@@ -548,7 +553,7 @@ class InfoAboutHomePageSections extends StatelessWidget {
             Flexible(
                 child: Text(
               infoText,
-              style: AppTextStyle.infoTextStyle(),
+              style: AppTextStyle.subSectionTextStyle(fontsize: 15, fontweight: FontWeight.normal),
             ))
           ],
         ),

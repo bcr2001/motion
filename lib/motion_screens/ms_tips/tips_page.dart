@@ -3,6 +3,7 @@ import 'package:motion/motion_screens/ms_tips/tips_front.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 
 import '../../motion_themes/mth_app/app_strings.dart';
+import '../../motion_themes/mth_styling/app_color.dart';
 
 class FAQPage extends StatelessWidget {
   const FAQPage({super.key});
@@ -16,7 +17,8 @@ class FAQPage extends StatelessWidget {
         iconColor: Colors.blueGrey,
         title: Text(
           expansionTitle,
-          style: AppTextStyle.subSectionTitleTextStyle(),
+          style:
+              AppTextStyle.subSectionTextStyle(color: AppColor.accountedColor),
         ),
         children: [
           // answer to the faq
@@ -24,7 +26,8 @@ class FAQPage extends StatelessWidget {
             padding: const EdgeInsets.only(left: 15.0, right: 15.0, bottom: 10),
             child: Text(
               expansionAnswer,
-              style: AppTextStyle.expansionAnswerTextStyle(),
+              style: AppTextStyle.subSectionTextStyle(
+                  fontsize: 13, fontweight: FontWeight.normal),
             ),
           )
         ],
@@ -59,7 +62,8 @@ class FAQPage extends StatelessWidget {
                       left: 15.0, right: 15.0, top: 15, bottom: 10),
                   child: Text(
                     AppString.faq1SubcategoryExamplesQ,
-                    style: AppTextStyle.subSectionTitleTextStyle(),
+                    style: AppTextStyle.subSectionTextStyle(
+                        color: AppColor.accountedColor),
                   ),
                 ),
               ),

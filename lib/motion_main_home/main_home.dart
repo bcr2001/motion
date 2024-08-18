@@ -33,7 +33,7 @@ class _MotionHome extends State<MainMotionHome> {
     return GButton(
         icon: gIcon,
         text: gText,
-        textStyle: AppTextStyle.navigationTextLTStyle(),
+        textStyle: AppTextStyle.subSectionTextStyle(fontsize: 12),
         iconSize: 20,
         iconColor: Theme.of(context).iconTheme.color);
   }

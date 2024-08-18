@@ -262,8 +262,10 @@ class CurrentYearEFSDisplay extends StatelessWidget {
                   logger.i("Total XP for Current Year: $snapResults");
 
                   return Text(
-                  "$snapResults XP", 
-                  style: AppTextStyle.accountedAndUnaccountedGallaryStyle(fontsize: 20),);
+                    "$snapResults XP",
+                    style: AppTextStyle.accountedAndUnaccountedGallaryStyle(
+                        fontsize: 20),
+                  );
                 }
               });
         })
@@ -281,8 +283,11 @@ class CurrentYearEFSDisplay extends StatelessWidget {
 
         // name
         Padding(
-          padding: const EdgeInsets.only(top:8.0),
-          child: Text(AppString.badgeTitle, style: AppTextStyle.navigationTextLTStyle(),),
+          padding: const EdgeInsets.only(top: 8.0),
+          child: Text(
+            AppString.badgeTitle,
+            style: AppTextStyle.subSectionTextStyle(fontsize: 14),
+          ),
         )
       ],
     );
@@ -311,16 +316,14 @@ class CurrentYearEFSDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    final screenWidth = MediaQuery.of(context).size.width; 
-    final screenHeight = MediaQuery.of(context).size.height; 
-
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
 
     return Card(
       elevation: 0,
       child: SizedBox(
-        width: screenWidth*0.58,
-        height: screenHeight*0.15,
+        width: screenWidth * 0.58,
+        height: screenHeight * 0.15,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -374,19 +377,22 @@ class ProductiveDayBuilder extends StatelessWidget {
         // productive message
         Text(
           productiveMessage,
-          style: AppTextStyle.alertDialogElevatedButtonTextStyle(),
+          style: AppTextStyle.subSectionTextStyle(
+              fontsize: 12, color: Colors.blueGrey),
         ),
 
         // dots separator
         Text(
           " ....................................... ",
-          style: AppTextStyle.alertDialogElevatedButtonTextStyle(),
+          style: AppTextStyle.subSectionTextStyle(
+              fontsize: 12, color: Colors.blueGrey),
         ),
 
         // date
         Text(
           date,
-          style: AppTextStyle.alertDialogElevatedButtonTextStyle(),
+          style: AppTextStyle.subSectionTextStyle(
+              fontsize: 12, color: Colors.blueGrey),
         )
       ],
     );

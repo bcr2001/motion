@@ -191,7 +191,7 @@ class _TrailingEditButtonsState extends State<TrailingEditButtons> {
               // Alert dialog message
               Text(
                   "Are you sure you want to delete ${widget.itemIndexSubcategoryName}?",
-                  style: AppTextStyle.infoTextStyle(),),
+                  style: AppTextStyle.subSectionTextStyle(fontsize: 15, fontweight: FontWeight.normal),),
 
               // Buttons
               CancelAddTextButtons(

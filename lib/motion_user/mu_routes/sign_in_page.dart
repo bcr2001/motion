@@ -59,7 +59,8 @@ class _SignInPageState extends State<SignInPage> {
                     child: Text(
                       AppString.logInWelcomeMessage,
                       textAlign: TextAlign.center,
-                      style: AppTextStyle.special1SectionTitleTextStyle(),
+                      style: AppTextStyle.subSectionTextStyle(
+                          fontsize: 16, color: Colors.blueGrey),
                     ),
                   ),
                   // continue with google widget and or widget

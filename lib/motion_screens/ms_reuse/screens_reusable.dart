@@ -25,11 +25,12 @@ class SettingsOptions extends StatelessWidget {
         onTap: onTap, // Assign the onTap callback when the tile is tapped
         title: Text(
           settingsTitle,
-          style: AppTextStyle.leadingTextLTStyle(),
+          style: AppTextStyle.subSectionTextStyle(
+              fontsize: 14, fontweight: FontWeight.normal),
         ),
         subtitle: Text(
           settingsDesciption,
-          style: AppTextStyle.settingSubtitleStyling,
+          style: AppTextStyle.manualHintTextStyle(),
         ),
         trailing: trailing, // Assign the trailing widget
       ),

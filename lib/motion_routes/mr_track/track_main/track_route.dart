@@ -80,7 +80,7 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
     return ListTile(
       title: Text(
         tileTitle,
-        style: AppTextStyle.trailingTextLTStyle(),
+        style: AppTextStyle.subSectionTextStyle(),
       ), // Display the provided title text
       trailing: IconButton(
         onPressed: () async {

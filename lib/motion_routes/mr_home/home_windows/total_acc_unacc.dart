@@ -44,7 +44,7 @@ class TotalAccountedAndUnaccounted extends StatelessWidget {
                       resultName: AppString.accountedTitle,
                       dayStyle: AppTextStyle.resultTitleStyleHome(false),
                       hoursStyle:
-                          AppTextStyle.accountRegularAndUnaccountTextStyle()),
+                          AppTextStyle.sectionTitleTextStyle(fontsize: 20)),
 
                   // Unaccounted total
                   entireTimeAccountedAndUnaccounted(
@@ -53,7 +53,7 @@ class TotalAccountedAndUnaccounted extends StatelessWidget {
                       resultName: AppString.unAccountedTitle,
                       dayStyle: AppTextStyle.resultTitleStyleHome(true),
                       hoursStyle:
-                          AppTextStyle.accountRegularAndUnaccountTextStyle())
+                          AppTextStyle.sectionTitleTextStyle(fontsize: 20))
                 ],
               )
             : _totalsDisplay(displayContent: [
@@ -64,7 +64,7 @@ class TotalAccountedAndUnaccounted extends StatelessWidget {
                     resultName: AppString.accountedTitle,
                     dayStyle: AppTextStyle.resultTitleStyleHome(false),
                     hoursStyle:
-                        AppTextStyle.accountRegularAndUnaccountTextStyle()),
+                        AppTextStyle.sectionTitleTextStyle(fontsize: 20)),
 
                 // Unaccounted total
                 entireTimeAccountedAndUnaccounted(
@@ -73,7 +73,7 @@ class TotalAccountedAndUnaccounted extends StatelessWidget {
                     resultName: AppString.unAccountedTitle,
                     dayStyle: AppTextStyle.resultTitleStyleHome(true),
                     hoursStyle:
-                        AppTextStyle.accountRegularAndUnaccountTextStyle())
+                        AppTextStyle.sectionTitleTextStyle(fontsize: 20))
               ]);
       },
     );

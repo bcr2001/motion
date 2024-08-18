@@ -64,7 +64,7 @@ showAlertDialog(BuildContext context) {
                 // log out query
                 Text(
                   AppString.logOutQuestion,
-                  style: AppTextStyle.infoTextStyle(),
+                  style: AppTextStyle.subSectionTextStyle(fontsize: 15, fontweight: FontWeight.normal),
                 ),
 
                 // Custom widget for displaying two buttons: cancel and log out

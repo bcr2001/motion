@@ -92,7 +92,7 @@ class YearPieChartDistributionAccountedUnaccounted extends StatelessWidget {
         ),
 
         // legend name
-        Text(legendName, style: AppTextStyle.legendTextStyling())
+        Text(legendName, style: AppTextStyle.subSectionTextStyle(fontsize: 11, color: Colors.blueGrey))
       ],
     );
   }
@@ -142,14 +142,14 @@ class YearPieChartDistributionAccountedUnaccounted extends StatelessWidget {
           PieChartBuilder(sections: [
             // accounted proportions
             PieChartSectionData(
-                titleStyle: AppTextStyle.pieChartTextStyling(),
+                titleStyle: AppTextStyle.subSectionTextStyle(fontsize: 12),
                 title: "${accountedDoublePercent.toStringAsFixed(1)}%",
                 value: accountedDoublePercent,
                 color: AppColor.galleryPieChartAccountedColor),
 
             // Unaccounted proportion
             PieChartSectionData(
-                titleStyle: AppTextStyle.pieChartTextStyling(),
+                titleStyle: AppTextStyle.subSectionTextStyle(fontsize: 12),
                 title: "${unAccountedDoublePercent.toStringAsFixed(1)}%",
                 value: unAccountedDoublePercent,
                 color: AppColor.galleryPieChartUnaccountedColor)

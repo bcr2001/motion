@@ -25,7 +25,7 @@ Widget subSectionTitle2({required String titleName}) {
     padding: const EdgeInsets.only(left: 25, top: 10, bottom: 10),
     child: Text(
       titleName,
-      style: AppTextStyle.subSectionTitleTextStyle(),
+      style: AppTextStyle.subSectionTextStyle(color: AppColor.accountedColor),
     ),
   );
 }
@@ -48,7 +48,8 @@ Widget specialSectionTitle(
           padding: const EdgeInsets.only(bottom: 10.0, left: 5.0),
           child: Text(
             elevatedTitleName,
-            style: AppTextStyle.specialSectionTitleTextStyle(),
+            style: AppTextStyle.subSectionTextStyle(
+                fontsize: 12, color: Colors.blueGrey),
           ),
         )
       ],
@@ -69,7 +70,7 @@ Widget specialSectionTitleSelectedYear({required String mainTitleName}) {
           // main title
           Text(
             mainTitleName,
-            style: AppTextStyle.sectionTitleTextStyleEF2(),
+            style: AppTextStyle.sectionTitleTextStyle(fontsize: 22.5),
           ),
 
           // efs titel
@@ -77,7 +78,8 @@ Widget specialSectionTitleSelectedYear({required String mainTitleName}) {
             padding: const EdgeInsets.only(bottom: 10.0, left: 5.0),
             child: Text(
               AppString.efficiencyScoreTitle,
-              style: AppTextStyle.specialSectionTitleTextStyle(),
+              style: AppTextStyle.subSectionTextStyle(
+                  fontsize: 12, color: Colors.blueGrey),
             ),
           ),
         ],
@@ -97,7 +99,7 @@ Widget specialSectionTitleEFS(
         // main title
         Text(
           mainTitleName,
-          style: AppTextStyle.sectionTitleTextStyleEF2(),
+          style: AppTextStyle.sectionTitleTextStyle(fontsize: 22.5),
         ),
 
         // elevated title name
@@ -108,7 +110,8 @@ Widget specialSectionTitleEFS(
               padding: const EdgeInsets.only(bottom: 10.0, left: 5.0),
               child: Text(
                 AppString.efficiencyScoreTitle,
-                style: AppTextStyle.specialSectionTitleTextStyle(),
+                style: AppTextStyle.subSectionTextStyle(
+                    fontsize: 12, color: Colors.blueGrey),
               ),
             ),
 
@@ -118,7 +121,8 @@ Widget specialSectionTitleEFS(
                     padding: const EdgeInsets.only(left: 2.0),
                     child: Text(
                       AppString.entireTitle,
-                      style: AppTextStyle.specialSectionTitleTextStyle(),
+                      style: AppTextStyle.subSectionTextStyle(
+                          fontsize: 12, color: Colors.blueGrey),
                     ),
                   )
                 : Consumer<CurrentYearProvider>(
@@ -129,7 +133,8 @@ Widget specialSectionTitleEFS(
                         padding: const EdgeInsets.only(left: 2.0),
                         child: Text(
                           currentYear,
-                          style: AppTextStyle.specialSectionTitleTextStyle(),
+                          style: AppTextStyle.subSectionTextStyle(
+                              fontsize: 12, color: Colors.blueGrey),
                         ),
                       );
                     },
@@ -193,12 +198,14 @@ class _ScrollingListBuilderState extends State<ScrollingListBuilder> {
                           ? ListTile(
                               title: Text(
                                 item[widget.columnName],
-                                style: AppTextStyle.leadingTextLTStyle(),
+                                style: AppTextStyle.subSectionTextStyle(
+                                    fontsize: 14,
+                                    fontweight: FontWeight.normal),
                               ),
                               trailing: Text(
                                 convertedTotal,
                                 textAlign: TextAlign.center,
-                                style: AppTextStyle.leadingStatsTextLTStyle(),
+                                style: AppTextStyle.subSectionTextStyle(fontsize: 12.5, fontweight: FontWeight.normal),
                               ),
                               subtitle: Container(
                                 decoration: BoxDecoration(

@@ -63,7 +63,8 @@ class _SignUpPageState extends State<SignUpPage> {
                     child: Text(
                       AppString.signUpWelcomeMessage,
                       textAlign: TextAlign.center,
-                      style: AppTextStyle.special1SectionTitleTextStyle(),
+                      style: AppTextStyle.subSectionTextStyle(
+                          fontsize: 16, color: Colors.blueGrey),
                     ),
                   ),
 

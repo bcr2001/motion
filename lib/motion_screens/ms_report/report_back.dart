@@ -61,14 +61,14 @@ class AccountedUnaccountedReportPieChart extends StatelessWidget {
                   return PieChartBuilder(sections: [
                     // Accounted proportion
                     PieChartSectionData(
-                        titleStyle: AppTextStyle.pieChartTextStyling(),
+                        titleStyle: AppTextStyle.subSectionTextStyle(fontsize: 12),
                         title: "$accountedDouble%",
                         value: accountedDouble,
                         color: AppColor.accountedColor),
 
                     // Unaccounted proportion
                     PieChartSectionData(
-                        titleStyle: AppTextStyle.pieChartTextStyling(),
+                        titleStyle: AppTextStyle.subSectionTextStyle(fontsize: 12),
                         title: "$unAccountedDouble%",
                         value: unAccountedDouble,
                         color: AppColor.unAccountedColor),
@@ -144,7 +144,7 @@ class MainCategoryDistributionPieChart extends StatelessWidget {
 
               sections.add(
                 PieChartSectionData(
-                  titleStyle: AppTextStyle.pieChartTextStyling(),
+                  titleStyle: AppTextStyle.subSectionTextStyle(fontsize: 12),
                   title: "$formattedValue%",
                   value: categoryValue,
                   color: getCategoryColorByName(categoryName),
@@ -221,13 +221,14 @@ class MostAndLeastTrackedBuilder extends StatelessWidget {
         // totalHours
         Text(
           totalHours,
-          style: AppTextStyle.mostAndLestTextStyleTotalHours(),
+          style: AppTextStyle.sectionTitleTextStyle(fontsize: 24),
         ),
 
         // averageHours
         Text(
           averageHours,
-          style: AppTextStyle.mostAndLestTextStyleAverageHours(),
+          style: AppTextStyle.subSectionTextStyle(
+              fontweight: FontWeight.normal, fontsize: 11),
         )
       ],
     );
@@ -247,7 +248,7 @@ class MostAndLeastTrackedBuilder extends StatelessWidget {
             padding: const EdgeInsets.all(10.0),
             child: Text(
               title,
-              style: AppTextStyle.topAndBottomTextStyle(),
+              style: AppTextStyle.subSectionTextStyle(fontsize: 12, fontweight: FontWeight.normal),
             ),
           ),
 
@@ -279,7 +280,7 @@ class MostAndLeastTrackedBuilder extends StatelessWidget {
                   child: Text(
                     subcategoryName,
                     textAlign: TextAlign.center,
-                    style: AppTextStyle.topAndBottomTextStyle(),
+                    style: AppTextStyle.subSectionTextStyle(fontsize: 12, fontweight: FontWeight.normal),
                   ),
                 )),
           ),
@@ -444,7 +445,8 @@ class InfoToTheUser extends StatelessWidget {
           Flexible(
             child: Text(
               sectionInformation,
-              style: AppTextStyle.informationTextStyle(),
+              style: AppTextStyle.subSectionTextStyle(
+                  fontsize: 10, fontweight: FontWeight.normal),
             ),
           )
         ],
@@ -475,20 +477,20 @@ class HighestTrackedSectionElement extends StatelessWidget {
         // subcategory name
         Text(
           subcategoryName,
-          style: AppTextStyle.topAndBottomTextStyle(),
+          style: AppTextStyle.subSectionTextStyle(fontsize: 12, fontweight: FontWeight.normal),
           textAlign: TextAlign.center,
         ),
 
         // total time tracked
         Text(
           timeSpent,
-          style: AppTextStyle.mostAndLestTextStyleTotalHours(),
+          style: AppTextStyle.sectionTitleTextStyle(fontsize: 24),
         ),
 
         // date recorded
         Text(
           date,
-          style: AppTextStyle.topAndBottomTextStyle(),
+          style: AppTextStyle.subSectionTextStyle(fontsize: 12, fontweight: FontWeight.normal),
         ),
 
         // blue divider

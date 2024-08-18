@@ -64,7 +64,8 @@ class CardConstructor extends StatelessWidget {
             padding: const EdgeInsets.only(top: 8.0, left: 8.0),
             child: Text(
               cardTitle,
-              style: AppTextStyle.specialSectionTitleTextStyle(),
+              style: AppTextStyle.subSectionTextStyle(
+                  fontsize: 12, color: Colors.blueGrey),
             ),
           ),
 
@@ -90,15 +91,16 @@ class TrackListViewBuiler extends StatelessWidget {
   final int? itemCount;
   final Widget? Function(BuildContext, int) itemBuilder;
 
-  const TrackListViewBuiler({super.key, this.itemCount, required this.itemBuilder});
+  const TrackListViewBuiler(
+      {super.key, this.itemCount, required this.itemBuilder});
 
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      physics: const NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
-      itemCount: itemCount,
-      itemBuilder: itemBuilder);
+        physics: const NeverScrollableScrollPhysics(),
+        shrinkWrap: true,
+        itemCount: itemCount,
+        itemBuilder: itemBuilder);
   }
 }
 

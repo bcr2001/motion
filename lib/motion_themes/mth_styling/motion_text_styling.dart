@@ -31,72 +31,35 @@ class AppTextStyle {
   }
 
   // section title style (main title)
-  static sectionTitleTextStyle() {
-    return _baseStyle.copyWith(fontSize: 18, fontWeight: FontWeight.w600);
-  }
-
-  // section title style (ef score)
-  static sectionTitleTextStyleEF2() {
-    return _baseStyle.copyWith(fontSize: 22.5, fontWeight: FontWeight.w600);
+  static sectionTitleTextStyle({double fontsize = 18}) {
+    return _baseStyle.copyWith(fontSize: fontsize, fontWeight: FontWeight.w600);
   }
 
   // section title style (subtitle)
-  static subSectionTitleTextStyle() {
+  static subSectionTextStyle(
+      {double fontsize = 14,
+      FontWeight fontweight = FontWeight.w600,
+      Color? color}) {
     return _baseStyle.copyWith(
-        fontSize: 14,
-        fontWeight: FontWeight.w600,
-        color: AppColor.accountedColor);
-  }
-  static subSectionTitleTextStyle1() {
-    return _baseStyle.copyWith(
-        fontSize: 14);
-  }
-
-  // section title style (subtitle)
-  static expansionAnswerTextStyle() {
-    return _baseStyle.copyWith(fontSize: 13);
-  }
-
-  // section title style (main title)
-  static specialSectionTitleTextStyle() {
-    return _baseStyle.copyWith(
-        fontSize: 12, fontWeight: FontWeight.w600, color: Colors.blueGrey);
-  }
-
-  // section title style (main title)
-  static alertDialogElevatedButtonTextStyle() {
-    return _baseStyle.copyWith(
-        fontSize: 12, fontWeight: FontWeight.bold, color: Colors.blueGrey);
-  }
-
-  // section title style
-  static special1SectionTitleTextStyle() {
-    return _baseStyle.copyWith(
-        fontSize: 16, fontWeight: FontWeight.w600, color: Colors.blueGrey);
+        fontSize: fontsize, fontWeight: fontweight, color: color);
   }
 
   // home page highlight element textStyle
   static TextStyle tileElementTextStyle() {
     return _baseStyle.copyWith(
-        color: const Color.fromARGB(255, 232, 232, 232),
+        color: AppColor.tileElementColor,
         fontSize: 11,
         fontWeight: FontWeight.w600);
   }
 
-  // stats page highlight element textStyle
-  static TextStyle statsElementTextStyle() {
-    return _baseStyle.copyWith(fontSize: 11.5, fontWeight: FontWeight.w600);
-  }
-
   // stats page accounted and unaccounted gallary style
   static TextStyle accountedAndUnaccountedGallaryStyle({double fontsize = 14}) {
-    return _baseStyle.copyWith(fontWeight: FontWeight.w600, fontSize: fontsize, color: AppColor.accountedColor);
+    return _baseStyle.copyWith(
+        fontWeight: FontWeight.w600,
+        fontSize: fontsize,
+        color: AppColor.accountedColor);
   }
 
-  // stats page accounted and unaccounted gallary style
-  static TextStyle overviewDataValueTextStyle() {
-    return _baseStyle.copyWith(fontWeight: FontWeight.w500, fontSize: 13);
-  }
 
   // stats page Main Category Totals title
   static mainCategoryTotalTitle({double fontsize = 13}) {
@@ -106,73 +69,6 @@ class AppTextStyle {
         fontWeight: FontWeight.w600);
   }
 
-  // home page subtitle list tile style
-  static TextStyle subtitleLTStyle() {
-    return _baseStyle.copyWith(fontSize: 14, fontWeight: FontWeight.w500);
-  }
-
-  // home page subtitle list tile style
-  static TextStyle leadingTextLTStyle() {
-    return _baseStyle.copyWith(fontSize: 14);
-  }
-
-  static TextStyle leadingTextLTStyle2() {
-    return _baseStyle.copyWith(
-        fontSize: 12, fontWeight: FontWeight.w600, color: Colors.blueGrey);
-  }
-
-  static TextStyle leadingTextLTStyle3({double fontsize = 12.5,fontWieght = FontWeight.normal, Color? color}) {
-    return _baseStyle.copyWith(fontSize: fontsize, fontWeight: fontWieght, color: color);
-  }
-
-  // home page subtitle list tile style
-  static TextStyle leadingStatsTextLTStyle() {
-    return _baseStyle.copyWith(fontSize: 12.5);
-  }
-
-  // home page subtitle list tile style
-  static TextStyle trailingTextLTStyle() {
-    return _baseStyle.copyWith(fontSize: 14, fontWeight: FontWeight.w600);
-  }
-
-  // home page subtitle list tile style
-  static TextStyle navigationTextLTStyle() {
-    return _baseStyle.copyWith(fontSize: 12, fontWeight: FontWeight.w600);
-  }
-
-  // home page tracking window information text style
-  static TextStyle infoTextStyle() {
-    return _baseStyle.copyWith(fontSize: 15);
-  }
-
-  // zen quote text styling
-  static TextStyle quoteTextStyle() {
-    return _baseStyle.copyWith(fontSize: 13);
-  }
-
-  // pie chart text styling
-  static TextStyle pieChartTextStyling() {
-    return _baseStyle.copyWith(fontSize: 12, fontWeight: FontWeight.w600);
-  }
-
-  // legend text style
-  static TextStyle legendTextStyling() {
-    return _baseStyle.copyWith(
-        fontSize: 11, fontWeight: FontWeight.w600, color: Colors.blueGrey);
-  }
-
-  // report page most and least tracked title style
-  static TextStyle categoryTitleTextStyle() {
-    return _baseStyle.copyWith(
-        fontSize: 14,
-        fontWeight: FontWeight.w600,
-        color: AppColor.blueMainColor);
-  }
-
-  // section information text style
-  static TextStyle informationTextStyle() {
-    return _baseStyle.copyWith(fontSize: 10);
-  }
 
   // account and unaccounted section style
   static TextStyle accountAndUnaccountTextStyle(bool isUnaccounted) {
@@ -182,26 +78,6 @@ class AppTextStyle {
         color: isUnaccounted
             ? AppColor.unAccountedColor
             : AppColor.accountedColor);
-  }
-
-  // account and unaccounted section style
-  static TextStyle accountRegularAndUnaccountTextStyle() {
-    return _baseStyle.copyWith(
-      fontSize: 20,
-      fontWeight: FontWeight.w600,
-    );
-  }
-
-  // most and least tracked style (totalHours)
-  static TextStyle mostAndLestTextStyleTotalHours() {
-    return _baseStyle.copyWith(fontSize: 24, fontWeight: FontWeight.bold);
-  }
-
-  // most and least tracked style (avergaeHours)
-  static TextStyle mostAndLestTextStyleAverageHours() {
-    return _baseStyle.copyWith(
-      fontSize: 11,
-    );
   }
 
   // result title text style
@@ -214,11 +90,6 @@ class AppTextStyle {
             : AppColor.accountedColor);
   }
 
-  // top and bottom information text style
-  static TextStyle topAndBottomTextStyle() {
-    return _baseStyle.copyWith(fontSize: 12, fontWeight: FontWeight.w500);
-  }
-
   // result title text style (home)
   static TextStyle resultTitleStyleHome(bool isUnaccounted) {
     return _baseStyle.copyWith(
@@ -229,66 +100,15 @@ class AppTextStyle {
             : AppColor.tileBackgroundColor);
   }
 
-  // category summary report (days)
-  static TextStyle daysTextStyleCSR() {
-    return _baseStyle.copyWith(
-        fontWeight: FontWeight.w600,
-        fontSize: 12,
-        color: AppColor.tileBackgroundColor);
-  }
-
-  // category summary report (average)
-  static TextStyle averageTextStyleCSR() {
-    return _baseStyle.copyWith(
-      fontWeight: FontWeight.w600,
-      fontSize: 12,
-    );
-  }
-
-  // category summary report (hours)
-  static TextStyle hoursTextStyleCSR() {
-    return _baseStyle.copyWith(
-      fontSize: 20,
-      fontWeight: FontWeight.w600,
-    );
-  }
-
-  // result text style regular
-  static TextStyle resultRegularTitleStyle() {
-    return _baseStyle.copyWith(fontWeight: FontWeight.w700, fontSize: 13);
-  }
-
   // manual recording hint text style
-  static TextStyle manualHintTextStyle() {
+  static TextStyle manualHintTextStyle(
+      {double fontsize = 15, Color color = AppColor.manualHintTextColor}) {
     return _baseStyle.copyWith(
-      fontSize: 23,
-      color: const Color(0xff777777),
+      fontSize: fontsize,
+      color: color,
     );
   }
 
-  // route appbar title text style
-  static final TextStyle appTitleStyle = _baseStyle.copyWith(
-    color: const Color(0xFF00B0F0),
-    fontSize: 23,
-    fontWeight: FontWeight.w500,
-  );
-
-  // dialog title text style
-  static final TextStyle dialogTitleTextStyle = _baseStyle.copyWith(
-    fontSize: 23,
-    fontWeight: FontWeight.w700,
-  );
-
-  // dialog title text style
-  static final TextStyle snackBarTextStyle = _baseStyle.copyWith(
-    color: Colors.blue,
-    fontSize: 14,
-    fontWeight: FontWeight.w700,
-  );
-
-  // settings page subtitle fontstyle
-  static final TextStyle settingSubtitleStyling =
-      _baseStyle.copyWith(color: const Color(0xff777777), fontSize: 15);
 
   // THEME DATA FONT STYLING
 
