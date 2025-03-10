@@ -1,0 +1,2 @@
+C:/Users/ROTICH/Desktop/motion_app/motion/android/app/.cxx/Debug/26t2z161/x86_64/CMakeFiles/edit_cache.dir
+C:/Users/ROTICH/Desktop/motion_app/motion/android/app/.cxx/Debug/26t2z161/x86_64/CMakeFiles/rebuild_cache.dir
