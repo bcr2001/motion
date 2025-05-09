@@ -257,7 +257,7 @@ class NumberOfDaysMainCategory extends StatelessWidget {
         // and call _futureData to build the UI accordingly
         return getAllDays
             ? _futureData(
-                future: main.retrievedNumberOfDays(currentUser: userUid!),
+                future: main.retrievedNumberOfDays(currentUser: userUid),
                 percent: false)
             : _futureData(
                 future: main.retrievedNumberOfDays(

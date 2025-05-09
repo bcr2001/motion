@@ -1666,6 +1666,25 @@ Future<int> getUserStreak({required String currentUser}) async {
     }
   }
 
+  /// Fetches *all* experience_points rows for [currentUser].
+Future<List<ExperiencePoints>> getAllExperiencePointsForUser({
+  required String currentUser,
+}) async {
+  final db = await database;
+  // Query every column in the table, filtered by the user
+  final result = await db.query(
+    'experience_points',
+    where: 'currentLoggedInUser = ?',
+    whereArgs: [currentUser],
+  );
+
+  // Map each row to your model
+  return result
+      .map((row) => ExperiencePoints.fromMap(row))
+      .toList();
+}
+
+
   // Delete the entire database
   // Future<void> deleteDb() async {
   //   try {
