@@ -69,11 +69,10 @@ void main() async {
 
   final trackMainCategoryDatabaseProvider = MainCategoryTrackerProvider();
 
-  final allMain = await databaseHelper.getAllExperiencePointsForUser(currentUser: 'hhANBj74wiclvfuDLGfuDlFZgJ62');
+  await databaseHelper.backfillXpForExistingUser();
   // final allMain = await databaseHelper.getMostAndLeastProductiveMonths(getMostProductiveMonth: false, year: "2023");
   // final allMain = await trackDbInstance.getMonthTotalAndAverage("gmIUkJzvrOQp3wltZm6IIxULcjj2", "01/02/2025","28/02/2025", true);
 
-  logger.i(allMain);
 
   runApp(MultiProvider(
     providers: [

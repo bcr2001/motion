@@ -1685,6 +1685,87 @@ Future<List<ExperiencePoints>> getAllExperiencePointsForUser({
 }
 
 
+   /// Back-fills experience_points for every date the user already has in main_category.
+  ///
+  /// 1) Inserts a zeroed row for each date (if it doesn’t exist).  
+  /// 2) Runs the same UPDATE logic your trigger uses to compute XP from subcategory.
+  Future<void> backfillXpForExistingUser() async {
+    final db = await database;
+    const currentUser = 'hhANBj74wiclvfuDLGfuDlFZgJ62';
+
+    // 1) Insert any missing (date,user) rows with zero XP
+    await db.execute('''
+      INSERT OR IGNORE INTO experience_points
+        (date, currentLoggedInUser, educationXP, skillsXP, sdXP, sleepXP)
+      SELECT date, currentLoggedInUser, 0, 0, 0, 0
+        FROM main_category
+      WHERE currentLoggedInUser = ?;
+    ''', [currentUser]);
+
+    // 2) Recompute XP per row exactly as your trigger does
+    await db.execute('''
+      UPDATE experience_points
+        SET
+          educationXP = (
+            SELECT CASE
+              WHEN COALESCE(SUM(timeSpent),0) <  15 THEN 0
+              WHEN COALESCE(SUM(timeSpent),0) <  60 THEN 5
+              WHEN COALESCE(SUM(timeSpent),0) < 120 THEN 10
+              WHEN COALESCE(SUM(timeSpent),0) < 180 THEN 15
+              WHEN COALESCE(SUM(timeSpent),0) < 240 THEN 20
+              ELSE 25
+            END
+            FROM subcategory
+            WHERE mainCategoryName   = 'Education'
+              AND date               = experience_points.date
+              AND currentLoggedInUser= experience_points.currentLoggedInUser
+          ),
+          skillsXP = (
+            SELECT CASE
+              WHEN COALESCE(SUM(timeSpent),0) <  15 THEN 0
+              WHEN COALESCE(SUM(timeSpent),0) <  60 THEN 5
+              WHEN COALESCE(SUM(timeSpent),0) < 120 THEN 10
+              WHEN COALESCE(SUM(timeSpent),0) < 180 THEN 15
+              WHEN COALESCE(SUM(timeSpent),0) < 240 THEN 20
+              ELSE 25
+            END
+            FROM subcategory
+            WHERE mainCategoryName   = 'Skills'
+              AND date               = experience_points.date
+              AND currentLoggedInUser= experience_points.currentLoggedInUser
+          ),
+          sdXP = (
+            SELECT CASE
+              WHEN COALESCE(SUM(timeSpent),0) <  15 THEN 0
+              WHEN COALESCE(SUM(timeSpent),0) <  60 THEN 10
+              WHEN COALESCE(SUM(timeSpent),0) < 120 THEN 15
+              WHEN COALESCE(SUM(timeSpent),0) < 180 THEN 20
+              ELSE 25
+            END
+            FROM subcategory
+            WHERE mainCategoryName   = 'Self Development'
+              AND date               = experience_points.date
+              AND currentLoggedInUser= experience_points.currentLoggedInUser
+          ),
+          sleepXP = (
+            SELECT CASE
+              WHEN COALESCE(SUM(timeSpent),0) < 300 THEN 0
+              WHEN COALESCE(SUM(timeSpent),0) < 360 THEN 5
+              WHEN COALESCE(SUM(timeSpent),0) < 420 THEN 10
+              WHEN COALESCE(SUM(timeSpent),0) < 480 THEN 20
+              ELSE 25
+            END
+            FROM subcategory
+            WHERE mainCategoryName   = 'Sleep'
+              AND date               = experience_points.date
+              AND currentLoggedInUser= experience_points.currentLoggedInUser
+          )
+      WHERE currentLoggedInUser = ?;
+    ''', [currentUser]);
+
+    logger.i('🔄 Back-filled experience_points for all existing dates.');
+  }
+
   // Delete the entire database
   // Future<void> deleteDb() async {
   //   try {
