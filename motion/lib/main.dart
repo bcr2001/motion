@@ -50,43 +50,137 @@ double _parseDouble(String? value) {
   return double.tryParse(value.trim()) ?? 0.0;
 }
 
-Future<void> insertMainCategoryCsvData() async {
+Future<void> insertTempCsvData() async {
   try {
-    final csvString = await rootBundle.loadString('assets/data_csv/main_category.csv');
-    final lines = LineSplitter().convert(csvString);
+    final csvRaw = await rootBundle.loadString('assets/data_csv/to_assign.csv');
+
+    final List<String> lines = const LineSplitter().convert(csvRaw);
     final headers = lines.first.split(',');
 
     for (int i = 1; i < lines.length; i++) {
-      final values = lines[i].split(',');
+      final row = lines[i].split(',');
 
-      final map = <String, String>{};
-      for (int j = 0; j < headers.length; j++) {
-        map[headers[j]] = values[j];
-      }
-
-      final mainCategory = MainCategory(
-        date: map['date']!,
-        education: _parseDouble(map['education']),
-        skills: _parseDouble(map['skills']),
-        entertainment: _parseDouble(map['entertainment']),
-        selfDevelopment: _parseDouble(map['selfDevelopment']),
-        sleep: _parseDouble(map['sleep']),
-        currentLoggedInUser: map['currentLoggedInUser']!,
+      final assigner = Assigner(
+        currentLoggedInUser: row[headers.indexOf("currentLoggedInUser")],
+        subcategoryName: row[headers.indexOf("subcategoryName")],
+        mainCategoryName: row[headers.indexOf("mainCategoryName")],
+        isActive: int.parse(row[headers.indexOf("isActive")]),
+        isArchive: int.parse(row[headers.indexOf("isArchive")]),
+        dateCreated: _convertToIsoDate(row[headers.indexOf("dateCreated")]),
       );
 
-      await databaseHelper.insertMainCategory(mainCategory);
+      await AssignerDatabaseHelper().assignInsert(assigner);
     }
 
-    print('✅ main_category.csv data inserted successfully!');
+    logger.i("✅ ASSIGNER: CSV data successfully inserted!");
   } catch (e) {
-    print('❌ Error inserting main_category.csv: $e');
+    logger.i("⛔  ASSIGNER: Error importing CSV data: $e");
   }
 }
+
+// // Convert MM/DD/YYYY to YYYY-MM-DD format
+// String _convertToIsoDate(String input) {
+//   try {
+//     // Try M/d/yyyy first (e.g., 9/1/2023)
+//     return DateFormat("yyyy-MM-dd").format(DateFormat("M/d/yyyy").parseStrict(input));
+//   } catch (_) {
+//     try {
+//       // Fallback to d/M/yyyy (e.g., 25/4/2025)
+//       return DateFormat("yyyy-MM-dd").format(DateFormat("d/M/yyyy").parseStrict(input));
+//     } catch (e) {
+//       logger.e("Date parsing failed for input: $input — Error: $e");
+//       return ""; // or throw, or default value
+//     }
+//   }
+// }
+
+
+// -----------------------------------------------------------------------------
+// Helper: convert “M/d/yyyy” or “d/M/yyyy” → ISO “yyyy-MM-dd”
+// -----------------------------------------------------------------------------
+String _convertToIsoDate(String input) {
+  input = input.trim();
+  try {
+    // Try M/d/yyyy first (e.g. “1/1/2022”)
+    final dt = DateFormat("M/d/yyyy").parseStrict(input);
+    return DateFormat("yyyy-MM-dd").format(dt);
+  } catch (_) {
+    try {
+      // Fallback to d/M/yyyy (e.g. “25/4/2025”)
+      final dt = DateFormat("d/M/yyyy").parseStrict(input);
+      return DateFormat("yyyy-MM-dd").format(dt);
+    } catch (e) {
+      // If it still fails, log & return empty so we can skip it
+      logger.i("⚠️ _convertToIsoDate failed for “$input”: $e");
+      return "";
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Updated insertMainCategoryCsvData WITH date normalization
+// -----------------------------------------------------------------------------
+Future<void> insertMainCategoryCsvData() async {
+  final db = TrackerDatabaseHelper(); // or however you get your helper
+  try {
+    final csvString = await rootBundle.loadString('assets/data_csv/main_category.csv');
+    final lines = const LineSplitter().convert(csvString);
+    final headers = lines.first.split(',');
+
+    for (var i = 1; i < lines.length; i++) {
+      final values = lines[i].split(',');
+      if (values.length != headers.length) {
+        logger.i("⚠️ Skipping line $i: column count mismatch");
+        continue;
+      }
+
+      // Build a map of header→value
+      final row = <String, String>{};
+      for (var j = 0; j < headers.length; j++) {
+        row[headers[j].trim()] = values[j].trim();
+      }
+
+      // 1) Normalize date
+      final rawDate = row['date']!;
+      final isoDate = _convertToIsoDate(rawDate);
+      if (isoDate.isEmpty) {
+        logger.i("⚠️ Skipping line $i: invalid date “$rawDate”");
+        continue;
+      }
+
+      // 2) Parse numeric fields safely
+      double parseDouble(String? v) {
+        if (v == null || v.isEmpty) return 0.0;
+        return double.tryParse(v) ?? 0.0;
+      }
+
+      // 3) Construct and insert
+      final mainCategory = MainCategory(
+        date: isoDate,                              // “2022-01-01”
+        education: parseDouble(row['education']),
+        // NOTE: your CSV header is “skill” (singular), not “skills”
+        skills: parseDouble(row['skill']),
+        entertainment: parseDouble(row['entertainment']),
+        selfDevelopment: parseDouble(row['selfDevelopment']),
+        sleep: parseDouble(row['sleep']),
+        currentLoggedInUser: row['currentLoggedInUser']!,
+      );
+
+      await db.insertMainCategory(mainCategory);
+      logger.i("✅ Inserted MainCategory($isoDate)");
+    }
+
+    logger.i("🎉 All main_category.csv rows processed.");
+  } catch (e, st) {
+    logger.i("❌ Error inserting main_category.csv: $e\n$st");
+  }
+}
+
 
 Future<void> insertSubcategoryCsvData() async {
   try {
     final csvString = await rootBundle.loadString('assets/data_csv/subcategory.csv');
-    final lines = LineSplitter().convert(csvString);
+    final lines = const LineSplitter().convert(csvString);
     final headers = lines.first.split(',');
 
     for (int i = 1; i < lines.length; i++) {
@@ -109,17 +203,18 @@ Future<void> insertSubcategoryCsvData() async {
       await databaseHelper.insertSubcategory(subcategory);
     }
 
-    print('✅ subcategory.csv data inserted successfully!');
+    logger.i('✅ subcategory.csv data inserted successfully!');
   } catch (e) {
-    print('❌ Error inserting subcategory.csv: $e');
+    logger.i('❌ Error inserting subcategory.csv: $e');
   }
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await insertMainCategoryCsvData();
-  await insertSubcategoryCsvData();
+  await insertTempCsvData();
+  // await insertMainCategoryCsvData();
+  // await insertSubcategoryCsvData();
 
    
   // Initialize the database helper
