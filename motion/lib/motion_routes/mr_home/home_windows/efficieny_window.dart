@@ -31,7 +31,11 @@ class EfficienyScoreSelectedDay extends StatelessWidget {
     return Consumer2<ExperiencePointTableProvider, UserUidProvider>(
         builder: (context, xp, user, child) {
       // currently logged in user uid
-      final String userUID = user.userUid!;
+        final String? userUID = user.userUid;
+        if (userUID == null) {
+          // still loading SharedPreferences, or not signed in yet
+          return const ShimmerWidget.rectangular(width: 50, height: 30);
+        }
 
       return FutureBuilder(
           future: xp.retrieveDailyExperiencePoints(
@@ -69,7 +73,11 @@ class XPForTheCurrentDay extends StatelessWidget {
       final today = date.currentDate;
 
       // currently logged in user uid
-      final currentUserUid = user.userUid!;
+        final String? currentUserUid = user.userUid;
+        if (currentUserUid == null) {
+          // still loading or not signed in—show same shimmer
+          return const ShimmerWidget.rectangular(width: 120, height: 40);
+        }
 
       return FutureBuilder(
           future: xp.retrieveDailyExperiencePoints(
@@ -109,8 +117,13 @@ class EfficienyScoreSelectedYearOrMonth extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer3<ExperiencePointTableProvider, UserUidProvider,
         FirstAndLastDay>(builder: (context, xp, user, fal, child) {
+
       // currently logged in user uid
-      final String currentUserUid = user.userUid!;
+        final String? currentUserUid = user.userUid;
+      if (currentUserUid == null) {
+        // still loading or not signed in—show placeholder
+        return const ShimmerWidget.rectangular(width: 50, height: 30);
+      }
 
       // the first and last day of the current month
       String firstDayOfMonth = fal.firstDay;
@@ -172,7 +185,13 @@ class EfficienyScoreSelectedYearOrMonth extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer3<ExperiencePointTableProvider, UserUidProvider,
         CurrentYearProvider>(builder: ((context, xp, user, year, child) {
-      final String currentUser = user.userUid!;
+
+      final String? currentUser = user.userUid;
+      if (currentUser == null) {
+          // still loading or not signed in — show placeholder
+          return const ShimmerWidget.rectangular(width: 50, height: 30);
+      }
+
       final String currentYear = year.currentYear;
 
       return getEntireScore
@@ -240,7 +259,13 @@ class CurrentYearEFSDisplay extends StatelessWidget {
         Consumer3<ExperiencePointTableProvider, UserUidProvider,
             CurrentYearProvider>(builder: (context, xps, user, year, child) {
           // current user that's logged in
-          final String currentUser = user.userUid!;
+          final String? currentUser = user.userUid;
+          if (currentUser == null) {
+            // still loading or not signed in—show placeholder
+            return const ShimmerWidget.rectangular(
+                width: 100, height: 30);
+          }
+
           final String currentYear = year.currentYear;
 
           return FutureBuilder(
@@ -255,7 +280,7 @@ class CurrentYearEFSDisplay extends StatelessWidget {
                 } else if (snapshot.hasError) {
                   return const Text("N/A");
                 } else {
-                  final snapResults = snapshot.data!;
+                  final snapResults = snapshot.data ?? 0;
 
                   logger.i("Total XP for Current Year: $snapResults");
 
@@ -483,7 +508,11 @@ class MostAndLeastProductiveDayBuilder extends StatelessWidget {
         : Consumer3<ExperiencePointTableProvider, UserUidProvider,
             FirstAndLastDay>(builder: (context, xp, user, firstAndLast, child) {
             // currently logged in user uid
-            final String currentUserUid = user.userUid!;
+            final String? currentUserUid = user.userUid;
+            if (currentUserUid == null) {
+              return const ShimmerWidget.rectangular(
+                  width: 100, height: 30);
+            }
 
             // first and last day of the current month
             final String firstDayOfMonth = firstAndLast.firstDay;
@@ -530,7 +559,11 @@ class MostAndLeastProductiveMonthBuilder extends StatelessWidget {
         : Consumer2<ExperiencePointTableProvider, UserUidProvider>(
             builder: (context, xp, user, child) {
             // currently logged in user uid
-            final String currentUserUid = user.userUid!;
+             final String? currentUserUid = user.userUid;
+            if (currentUserUid == null) {
+                return const ShimmerWidget.rectangular(
+                    width: 100, height: 30);
+            }
 
             return ProductiveDayBuilder(
               productiveMessage: AppString.leastProductiveMonth,

@@ -244,7 +244,13 @@ class NumberOfDaysMainCategory extends StatelessWidget {
     return Consumer3<MainCategoryTrackerProvider, UserUidProvider,
         CurrentYearProvider>(
       builder: (context, main, user, year, child) {
-        final userUid = user.userUid; // Firebase user UID
+        final String? userUid = user.userUid;
+
+        // ✂️ Changed: check for null UID before proceeding
+        if (userUid == null) {
+          // show placeholder until UID is available
+          return const ShimmerWidget.rectangular(width: 50, height: 30);
+        }
         final currentYear = year.currentYear; // Current year
 
         // Decide which future to use based on the value of getAllDays
@@ -255,7 +261,7 @@ class NumberOfDaysMainCategory extends StatelessWidget {
                 percent: false)
             : _futureData(
                 future: main.retrievedNumberOfDays(
-                    currentUser: userUid!,
+                    currentUser: userUid,
                     currentYear: currentYear,
                     getAllDays: false),
                 percent: true);
@@ -294,6 +300,13 @@ Widget timeAccountedCurrentDateXP() {
     builder: (context, sub, date, user, child) {
       String formattedDate = date.getFormattedDate();
 
+      final String? currentUser = user.userUid;
+      // ✂️ add null-check guard for currentUser
+      if (currentUser == null) {
+        return const ShimmerWidget.rectangular(width: 120, height: 40);
+      }
+
+
       return Padding(
         padding:
             const EdgeInsets.only(top: 15, left: 10, right: 10, bottom: 10),
@@ -317,7 +330,7 @@ Widget timeAccountedCurrentDateXP() {
                 FutureBuilder<double>(
                   future: sub.retrieveTotalTimeSpentAllSubs(
                     date.currentDate,
-                    user.userUid!,
+                    currentUser,
                   ),
                   builder: (BuildContext context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
@@ -359,11 +372,17 @@ Widget totalMonthTimeSpent() {
   return Consumer4<SubcategoryTrackerDatabaseProvider, UserUidProvider,
           FirstAndLastDay, CurrentMonthProvider>(
       builder: (context, sub, user, dayPvd, month, child) {
+
+    final String? currentUser = user.userUid;
+      if (currentUser == null) {
+        return const ShimmerWidget.rectangular(width: 120, height: 40);
+    }
+
     return Padding(
       padding: const EdgeInsets.only(top: 15, left: 10, right: 10),
       child: FutureBuilder<double>(
           future: sub.retrieveMonthTotalTimeSpent(
-              user.userUid!, dayPvd.firstDay, dayPvd.lastDay),
+              currentUser, dayPvd.firstDay, dayPvd.lastDay),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const ShimmerWidget.rectangular(width: 120, height: 40);
@@ -405,6 +424,13 @@ class _SubcategoryAndCurrentDayTotalsState
         Consumer4<AssignerMainProvider, SubcategoryTrackerDatabaseProvider,
             CurrentDateProvider, UserUidProvider>(
       builder: (context, active, sub, date, user, child) {
+
+         final String? currentUser = user.userUid;
+        if (currentUser == null) {
+          // show placeholder while UID loads
+          return buildShimmerProgress();
+        }
+
         var activeItems = active.assignerItems;
 
         // generates list tiles of categories where
@@ -422,7 +448,7 @@ class _SubcategoryAndCurrentDayTotalsState
               itemBuilder: (BuildContext context, index) {
                 return (activeItems[index].isActive == 1 &&
                         activeItems[index].currentLoggedInUser ==
-                            user.userUid &&
+                            currentUser &&
                         activeItems[index].isArchive == 0)
                     ? FutureBuilder<double>(
                         future: sub.retrieveTotalTimeSpentSubSpecific(
@@ -516,14 +542,21 @@ class _SubcategoryMonthTotalsAndAveragesState
   Widget build(BuildContext context) {
     return Consumer3<SubcategoryTrackerDatabaseProvider, UserUidProvider,
         FirstAndLastDay>(builder: (context, sub, user, day, child) {
+
+      final String? currentUser = user.userUid;
+        // ✂️ Changed: check for null UID before using
+        if (currentUser == null) {
+          return const ShimmerWidget.rectangular(width: 100, height: 30);
+      }
+   
       return widget.isSubcategory
           ? ScrollingListBuilder(
               future: sub.retrieveMonthTotalAndAverage(
-                  user.userUid!, day.firstDay, day.lastDay, true),
+                  currentUser, day.firstDay, day.lastDay, true),
               columnName: "subcategoryName")
           : ScrollingListBuilder(
               future: sub.retrieveMonthTotalAndAverage(
-                  user.userUid!, day.firstDay, day.lastDay, false),
+                  currentUser, day.firstDay, day.lastDay, false),
               columnName: "mainCategoryName");
     });
   }
