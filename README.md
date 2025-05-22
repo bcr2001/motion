@@ -11,4 +11,4 @@ Comprehensive Reports – Generate detailed summaries for productivity assessmen
 User-Friendly Interface – Simple, clean, and easy to navigate.
 
 Motion ensures you stay on top of your time efficiently.
-![Stats UI](https://github.com/user-attachments/assets/75b7fe82-bc89-41c1-a583-4f4453814698) ![(New User) Home UI](https://github.com/user-attachments/assets/39865ecd-cb28-4751-adf4-794466f6a737)
+![Stats UI](https://github.com/user-attachments/assets/75b7fe82-bc89-41c1-a583-4f4453814698)![(New User) Home UI](https://github.com/user-attachments/assets/39865ecd-cb28-4751-adf4-794466f6a737)
