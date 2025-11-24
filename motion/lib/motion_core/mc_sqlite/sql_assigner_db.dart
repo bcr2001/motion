@@ -232,6 +232,8 @@ class AssignerDatabaseHelper {
       // Delete the database file from the filesystem.
       await deleteDatabase(join(dbPath, "assigner.db"));
 
+      logger.i("Assigner DB Successfully Deleted");
+
       // Set the database instance to null, indicating that the database 
       // is no longer available.
       _database = null;

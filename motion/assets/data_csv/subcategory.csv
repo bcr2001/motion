@@ -13549,72 +13549,834 @@ date,mainCategoryName,subcategoryName,timeSpent,currentLoggedInUser
 5/1/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/1/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/1/2025,Entertainment,SM/Anime/MM,147,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/1/2025,Entertainment,Video Games,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/1/2025,Skills,Video Editing,151.9666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/1/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/1/2025,Skills,Case Practice,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/1/2025,Skills,Spanish Comms,3,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/1/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
-5/1/2025,Skills,Data Science,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/1/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/1/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/1/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/1/2025,Sleep,Sleep,366.9166667,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/2/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/2/2025,Education,Studied/Revised,120.7333333,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/2/2025,Entertainment,SM/Anime/MM,202,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/2/2025,Entertainment,Video Games,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/2/2025,Skills,Video Editing,120,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/2/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/2/2025,Skills,Case Practice,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/2/2025,Skills,Spanish Comms,8,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/2/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
-5/2/2025,Skills,Data Science,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/2/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/2/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/2/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/2/2025,Sleep,Sleep,460.2333333,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/3/2025,Education,Lec/Exams/Assign,21,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/3/2025,Education,Studied/Revised,102.4333333,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/3/2025,Entertainment,SM/Anime/MM,108,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/3/2025,Entertainment,Video Games,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/3/2025,Skills,Video Editing,160,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/3/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/3/2025,Skills,Case Practice,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/3/2025,Skills,Spanish Comms,1,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/3/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
-5/3/2025,Skills,Data Science,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/3/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/3/2025,Self Development,Bible Study,25,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/3/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/3/2025,Sleep,Sleep,411.1,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/4/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/4/2025,Education,Studied/Revised,216.7333333,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/4/2025,Entertainment,SM/Anime/MM,299,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/4/2025,Entertainment,Video Games,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/4/2025,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/4/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/4/2025,Skills,Case Practice,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/4/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/4/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
-5/4/2025,Skills,Data Science,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/4/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/4/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/4/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/4/2025,Sleep,Sleep,471.6,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/5/2025,Education,Lec/Exams/Assign,292.9166667,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/5/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/5/2025,Entertainment,SM/Anime/MM,224,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/5/2025,Entertainment,Video Games,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/5/2025,Skills,Video Editing,207.1666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/5/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/5/2025,Skills,Case Practice,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/5/2025,Skills,Spanish Comms,12,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/5/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
-5/5/2025,Skills,Data Science,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/5/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/5/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/5/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/5/2025,Sleep,Sleep,450.2666667,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/6/2025,Education,Lec/Exams/Assign,22.03333333,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/6/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/6/2025,Entertainment,SM/Anime/MM,461,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/6/2025,Entertainment,Video Games,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/6/2025,Skills,Video Editing,184.8333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/6/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/6/2025,Skills,Case Practice,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/6/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/6/2025,Skills,Programming,55.83333333,hhANBj74wiclvfuDLGfuDlFZgJ62
-5/6/2025,Skills,Data Science,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/6/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/6/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/6/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/6/2025,Sleep,Sleep,285.6333333,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/7/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/7/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/7/2025,Entertainment,SM/Anime/MM,145.3666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/7/2025,Entertainment,Video Games,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/7/2025,Skills,Video Editing,142.45,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/7/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/7/2025,Skills,Case Practice,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/7/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/7/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
-5/7/2025,Skills,Data Science,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/7/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/7/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/7/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/7/2025,Sleep,Sleep,368.8833333,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/8/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/8/2025,Education,Studied/Revised,348.4666667,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/8/2025,Entertainment,SM/Anime/MM,53,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/8/2025,Entertainment,Video Games,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/8/2025,Skills,Video Editing,146.2,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/8/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/8/2025,Skills,Case Practice,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/8/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/8/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
-5/8/2025,Skills,Data Science,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/8/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/8/2025,Self Development,Bible Study,34,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/8/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/8/2025,Sleep,Sleep,356.55,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/9/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/9/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/9/2025,Entertainment,SM/Anime/MM,167,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/9/2025,Entertainment,Video Games,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/9/2025,Skills,Video Editing,63.18333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/9/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/9/2025,Skills,Case Practice,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/9/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/9/2025,Skills,Programming,271.05,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/9/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/9/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/9/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/9/2025,Sleep,Sleep,347.2833333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/10/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/10/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/10/2025,Entertainment,SM/Anime/MM,270,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/10/2025,Entertainment,Video Games,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/10/2025,Skills,Video Editing,80.13333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/10/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/10/2025,Skills,Case Practice,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/10/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/10/2025,Skills,Programming,14.26666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/10/2025,Skills,English Comms,48.31666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/10/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/10/2025,Self Development,Reading,20.46666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/10/2025,Sleep,Sleep,320,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/11/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/11/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/11/2025,Entertainment,SM/Anime/MM,153,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/11/2025,Entertainment,Video Games,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/11/2025,Skills,Video Editing,296.3333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/11/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/11/2025,Skills,Case Practice,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/11/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/11/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/11/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/11/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/11/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/11/2025,Sleep,Sleep,483.4,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/12/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/12/2025,Education,Studied/Revised,254.5333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/12/2025,Entertainment,SM/Anime/MM,95,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/12/2025,Entertainment,Video Games,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/12/2025,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/12/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/12/2025,Skills,Case Practice,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/12/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/12/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/12/2025,Skills,English Comms,28.01666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/12/2025,Self Development,Bible Study,31,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/12/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/12/2025,Sleep,Sleep,333.55,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/13/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/13/2025,Education,Studied/Revised,107.4,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/13/2025,Entertainment,SM/Anime/MM,95,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/13/2025,Entertainment,Video Games,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/13/2025,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/13/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/13/2025,Skills,Case Practice,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/13/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/13/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/13/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/13/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/13/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/13/2025,Sleep,Sleep,396.7166667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/14/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/14/2025,Education,Studied/Revised,362.3333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/14/2025,Entertainment,SM/Anime/MM,463,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/14/2025,Entertainment,Video Games,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/14/2025,Skills,Video Editing,158.15,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/14/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/14/2025,Skills,Case Practice,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/14/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/14/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/14/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/14/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/14/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/14/2025,Sleep,Sleep,376.35,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/15/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/15/2025,Education,Studied/Revised,104,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/15/2025,Entertainment,SM/Anime/MM,35,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/15/2025,Entertainment,Video Games,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/15/2025,Skills,Video Editing,142.0666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/15/2025,Skills,Mental Math,3.9,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/15/2025,Skills,Case Practice,98.51666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/15/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/15/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/15/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/15/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/15/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/15/2025,Sleep,Sleep,291.75,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/16/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/16/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/16/2025,Entertainment,SM/Anime/MM,141,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/16/2025,Entertainment,Video Games,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/16/2025,Skills,Video Editing,116.9,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/16/2025,Skills,Mental Math,58.63333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/16/2025,Skills,Case Practice,108.98,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/16/2025,Skills,Spanish Comms,7.133333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/16/2025,Skills,Programming,39,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/16/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/16/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/16/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/16/2025,Sleep,Sleep,329.25,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/17/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/17/2025,Education,Studied/Revised,264.15,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/17/2025,Entertainment,SM/Anime/MM,75,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/17/2025,Entertainment,Video Games,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/17/2025,Skills,Video Editing,61.11666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/17/2025,Skills,Mental Math,29,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/17/2025,Skills,Case Practice,120.8333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/17/2025,Skills,Spanish Comms,6.5,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/17/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/17/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/17/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/17/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/17/2025,Sleep,Sleep,354.35,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/18/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/18/2025,Education,Studied/Revised,4.783333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/18/2025,Entertainment,SM/Anime/MM,361,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/18/2025,Entertainment,Video Games,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/18/2025,Skills,Video Editing,66.65,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/18/2025,Skills,Mental Math,42,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/18/2025,Skills,Case Practice,80.18333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/18/2025,Skills,Spanish Comms,8.416666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/18/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/18/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/18/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/18/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/18/2025,Sleep,Sleep,412.9333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/19/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/19/2025,Education,Studied/Revised,469,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/19/2025,Entertainment,SM/Anime/MM,99,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/19/2025,Entertainment,Video Games,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/19/2025,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/19/2025,Skills,Mental Math,24,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/19/2025,Skills,Case Practice,73.78333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/19/2025,Skills,Spanish Comms,6.983333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/19/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/19/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/19/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/19/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/19/2025,Sleep,Sleep,335.0833333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/20/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/20/2025,Education,Studied/Revised,128.6,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/20/2025,Entertainment,SM/Anime/MM,226,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/20/2025,Entertainment,Video Games,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/20/2025,Skills,Video Editing,117.9666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/20/2025,Skills,Mental Math,72,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/20/2025,Skills,Case Practice,11.2,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/20/2025,Skills,Spanish Comms,10.01511628,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/20/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/20/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/20/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/20/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/20/2025,Sleep,Sleep,345.4166667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/21/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/21/2025,Education,Studied/Revised,412.65,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/21/2025,Entertainment,SM/Anime/MM,162,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/21/2025,Entertainment,Video Games,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/21/2025,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/21/2025,Skills,Mental Math,18,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/21/2025,Skills,Case Practice,37.93333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/21/2025,Skills,Spanish Comms,8,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/21/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/21/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/21/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/21/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/21/2025,Sleep,Sleep,344.25,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/22/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/22/2025,Education,Studied/Revised,490.6333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/22/2025,Entertainment,SM/Anime/MM,73,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/22/2025,Entertainment,Video Games,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/22/2025,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/22/2025,Skills,Mental Math,13.66666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/22/2025,Skills,Case Practice,31.63333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/22/2025,Skills,Spanish Comms,10.73333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/22/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/22/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/22/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/22/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/22/2025,Sleep,Sleep,336.1333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/23/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/23/2025,Education,Studied/Revised,55,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/23/2025,Entertainment,SM/Anime/MM,193,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/23/2025,Entertainment,Video Games,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/23/2025,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/23/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/23/2025,Skills,Case Practice,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/23/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/23/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/23/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/23/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/23/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/23/2025,Sleep,Sleep,358,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/24/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/24/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/24/2025,Entertainment,SM/Anime/MM,213,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/24/2025,Entertainment,Video Games,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/24/2025,Skills,Video Editing,113.4666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/24/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/24/2025,Skills,Case Practice,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/24/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/24/2025,Skills,Programming,22.06666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/24/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/24/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/24/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/24/2025,Sleep,Sleep,462.65,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/25/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/25/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/25/2025,Entertainment,SM/Anime/MM,251,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/25/2025,Entertainment,Video Games,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/25/2025,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/25/2025,Skills,Mental Math,41.5,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/25/2025,Skills,Case Practice,231.1666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/25/2025,Skills,Spanish Comms,12.35,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/25/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/25/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/25/2025,Self Development,Bible Study,61,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/25/2025,Self Development,Reading,24.45,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/25/2025,Sleep,Sleep,450.65,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/26/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/26/2025,Education,Studied/Revised,122.9833333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/26/2025,Entertainment,SM/Anime/MM,97,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/26/2025,Entertainment,Video Games,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/26/2025,Skills,Video Editing,100.25,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/26/2025,Skills,Mental Math,17,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/26/2025,Skills,Case Practice,259.2333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/26/2025,Skills,Spanish Comms,7.966666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/26/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/26/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/26/2025,Self Development,Bible Study,6,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/26/2025,Self Development,Reading,9.533333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/26/2025,Sleep,Sleep,352.1666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/27/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/27/2025,Education,Studied/Revised,57.3,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/27/2025,Entertainment,SM/Anime/MM,226,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/27/2025,Entertainment,Video Games,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/27/2025,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/27/2025,Skills,Mental Math,15,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/27/2025,Skills,Case Practice,88.3,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/27/2025,Skills,Spanish Comms,7.666666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/27/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/27/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/27/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/27/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/27/2025,Sleep,Sleep,438.05,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/28/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/28/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/28/2025,Entertainment,SM/Anime/MM,215,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/28/2025,Entertainment,Video Games,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/28/2025,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/28/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/28/2025,Skills,Case Practice,257.2,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/28/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/28/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/28/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/28/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/28/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/28/2025,Sleep,Sleep,321.6333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/29/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/29/2025,Education,Studied/Revised,95.21666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/29/2025,Entertainment,SM/Anime/MM,519,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/29/2025,Entertainment,Video Games,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/29/2025,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/29/2025,Skills,Mental Math,8,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/29/2025,Skills,Case Practice,66.93,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/29/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/29/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/29/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/29/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/29/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/29/2025,Sleep,Sleep,346,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/30/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/30/2025,Education,Studied/Revised,71,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/30/2025,Entertainment,SM/Anime/MM,171,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/30/2025,Entertainment,Video Games,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/30/2025,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/30/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/30/2025,Skills,Case Practice,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/30/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/30/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/30/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/30/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/30/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/30/2025,Sleep,Sleep,362.6833333,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/1/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/1/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/1/2025,Entertainment,SM/Anime/MM,317,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/1/2025,Entertainment,Video Games,161,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/1/2025,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/1/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/1/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/1/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/1/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/1/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/1/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/1/2025,Sleep,Sleep,570,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/2/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/2/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/2/2025,Entertainment,SM/Anime/MM,237,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/2/2025,Entertainment,Video Games,97,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/2/2025,Skills,Video Editing,123.1166667,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/2/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/2/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/2/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/2/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/2/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/2/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/2/2025,Sleep,Sleep,494.2666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/3/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/3/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/3/2025,Entertainment,SM/Anime/MM,512,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/3/2025,Entertainment,Video Games,376,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/3/2025,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/3/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/3/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/3/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/3/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/3/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/3/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/3/2025,Sleep,Sleep,407,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/4/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/4/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/4/2025,Entertainment,SM/Anime/MM,293,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/4/2025,Entertainment,Video Games,76,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/4/2025,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/4/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/4/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/4/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/4/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/4/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/4/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/4/2025,Sleep,Sleep,504,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/5/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/5/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/5/2025,Entertainment,SM/Anime/MM,436,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/5/2025,Entertainment,Video Games,175,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/5/2025,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/5/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/5/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/5/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/5/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/5/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/5/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/5/2025,Sleep,Sleep,405,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/6/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/6/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/6/2025,Entertainment,SM/Anime/MM,113,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/6/2025,Entertainment,Video Games,144,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/6/2025,Skills,Video Editing,102,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/6/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/6/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/6/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/6/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/6/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/6/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/6/2025,Sleep,Sleep,440,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/7/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/7/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/7/2025,Entertainment,SM/Anime/MM,385.3166667,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/7/2025,Entertainment,Video Games,333,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/7/2025,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/7/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/7/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/7/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/7/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/7/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/7/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/7/2025,Sleep,Sleep,440,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/8/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/8/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/8/2025,Entertainment,SM/Anime/MM,591,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/8/2025,Entertainment,Video Games,334,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/8/2025,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/8/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/8/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/8/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/8/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/8/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/8/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/8/2025,Sleep,Sleep,604.2166667,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/9/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/9/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/9/2025,Entertainment,SM/Anime/MM,111.7833333,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/9/2025,Entertainment,Video Games,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/9/2025,Skills,Video Editing,235.1833333,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/9/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/9/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/9/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/9/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/9/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/9/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/9/2025,Sleep,Sleep,323.45,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/10/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/10/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/10/2025,Entertainment,SM/Anime/MM,308,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/10/2025,Entertainment,Video Games,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/10/2025,Skills,Video Editing,442.4166667,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/10/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/10/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/10/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/10/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/10/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/10/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/10/2025,Sleep,Sleep,485.0333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/11/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/11/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/11/2025,Entertainment,SM/Anime/MM,328,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/11/2025,Entertainment,Video Games,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/11/2025,Skills,Video Editing,235.6666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/11/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/11/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/11/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/11/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/11/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/11/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/11/2025,Sleep,Sleep,274.8833333,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/12/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/12/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/12/2025,Entertainment,SM/Anime/MM,724.4,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/12/2025,Entertainment,Video Games,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/12/2025,Skills,Video Editing,86.41666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/12/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/12/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/12/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/12/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/12/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/12/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/12/2025,Sleep,Sleep,465.5666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/13/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/13/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/13/2025,Entertainment,SM/Anime/MM,277,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/13/2025,Entertainment,Video Games,133,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/13/2025,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/13/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/13/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/13/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/13/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/13/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/13/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/13/2025,Sleep,Sleep,483.6166667,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/14/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/14/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/14/2025,Entertainment,SM/Anime/MM,354.8166667,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/14/2025,Entertainment,Video Games,107,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/14/2025,Skills,Video Editing,457.85,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/14/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/14/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/14/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/14/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/14/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/14/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/14/2025,Sleep,Sleep,483.6166667,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/15/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/15/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/15/2025,Entertainment,SM/Anime/MM,152.1333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/15/2025,Entertainment,Video Games,105,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/15/2025,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/15/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/15/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/15/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/15/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/15/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/15/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/15/2025,Sleep,Sleep,442.6333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/16/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/16/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/16/2025,Entertainment,SM/Anime/MM,331,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/16/2025,Entertainment,Video Games,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/16/2025,Skills,Video Editing,117.3333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/16/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/16/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/16/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/16/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/16/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/16/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/16/2025,Sleep,Sleep,450.3333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/17/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/17/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/17/2025,Entertainment,SM/Anime/MM,630.7,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/17/2025,Entertainment,Video Games,129,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/17/2025,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/17/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/17/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/17/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/17/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/17/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/17/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/17/2025,Sleep,Sleep,386.0166667,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/18/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/18/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/18/2025,Entertainment,SM/Anime/MM,724,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/18/2025,Entertainment,Video Games,69,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/18/2025,Skills,Video Editing,113.6,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/18/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/18/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/18/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/18/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/18/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/18/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/18/2025,Sleep,Sleep,450,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/19/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/19/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/19/2025,Entertainment,SM/Anime/MM,305.2833333,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/19/2025,Entertainment,Video Games,256,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/19/2025,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/19/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/19/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/19/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/19/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/19/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/19/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/19/2025,Sleep,Sleep,474.1166667,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/20/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/20/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/20/2025,Entertainment,SM/Anime/MM,203,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/20/2025,Entertainment,Video Games,65,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/20/2025,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/20/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/20/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/20/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/20/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/20/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/20/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/20/2025,Sleep,Sleep,484.4666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/21/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/21/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/21/2025,Entertainment,SM/Anime/MM,230,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/21/2025,Entertainment,Video Games,309,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/21/2025,Skills,Video Editing,62,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/21/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/21/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/21/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/21/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/21/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/21/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/21/2025,Sleep,Sleep,526.6,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/22/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/22/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/22/2025,Entertainment,SM/Anime/MM,685,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/22/2025,Entertainment,Video Games,170,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/22/2025,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/22/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/22/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/22/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/22/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/22/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/22/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/22/2025,Sleep,Sleep,440.0833333,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/23/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/23/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/23/2025,Entertainment,SM/Anime/MM,496,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/23/2025,Entertainment,Video Games,66,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/23/2025,Skills,Video Editing,44.36666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/23/2025,Skills,Mental Math,16,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/23/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/23/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/23/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/23/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/23/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/23/2025,Sleep,Sleep,408.3166667,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/24/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/24/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/24/2025,Entertainment,SM/Anime/MM,454,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/24/2025,Entertainment,Video Games,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/24/2025,Skills,Video Editing,127.7,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/24/2025,Skills,Mental Math,35.31666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/24/2025,Skills,Spanish Comms,17.06666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/24/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/24/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/24/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/24/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/24/2025,Sleep,Sleep,408.8833333,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/25/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/25/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/25/2025,Entertainment,SM/Anime/MM,508,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/25/2025,Entertainment,Video Games,91,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/25/2025,Skills,Video Editing,112.1666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/25/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/25/2025,Skills,Spanish Comms,4.483333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/25/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/25/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/25/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/25/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/25/2025,Sleep,Sleep,549.1,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/26/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/26/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/26/2025,Entertainment,SM/Anime/MM,506.2666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/26/2025,Entertainment,Video Games,251,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/26/2025,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/26/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/26/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/26/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/26/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/26/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/26/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/26/2025,Sleep,Sleep,318.6166667,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/27/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/27/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/27/2025,Entertainment,SM/Anime/MM,148.8166667,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/27/2025,Entertainment,Video Games,84,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/27/2025,Skills,Video Editing,126.9666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/27/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/27/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/27/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/27/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/27/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/27/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/27/2025,Sleep,Sleep,600,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/28/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/28/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/28/2025,Entertainment,SM/Anime/MM,253.8666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/28/2025,Entertainment,Video Games,24,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/28/2025,Skills,Video Editing,65.43333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/28/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/28/2025,Skills,Spanish Comms,47,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/28/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/28/2025,Skills,English Comms,6.333333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/28/2025,Self Development,Bible Study,37,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/28/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/28/2025,Sleep,Sleep,477.5333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/29/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/29/2025,Education,Studied/Revised,270.6666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/29/2025,Entertainment,SM/Anime/MM,59.5,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/29/2025,Entertainment,Video Games,26,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/29/2025,Skills,Video Editing,107.6666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/29/2025,Skills,Mental Math,12,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/29/2025,Skills,Spanish Comms,25.35,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/29/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/29/2025,Skills,English Comms,6.7,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/29/2025,Self Development,Bible Study,44,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/29/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/29/2025,Sleep,Sleep,506.6833333,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/30/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/30/2025,Education,Studied/Revised,300.8333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/30/2025,Entertainment,SM/Anime/MM,146,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/30/2025,Entertainment,Video Games,43,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/30/2025,Skills,Video Editing,57.28333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/30/2025,Skills,Mental Math,14.91666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/30/2025,Skills,Spanish Comms,35.6,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/30/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/30/2025,Skills,English Comms,5.016666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/30/2025,Self Development,Bible Study,10,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/30/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/30/2025,Sleep,Sleep,483.55,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/1/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/1/2025,Education,Studied/Revised,195.15,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/1/2025,Entertainment,SM/Anime/MM,282,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/1/2025,Entertainment,Video Games,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/1/2025,Skills,Video Editing,100.9833333,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/1/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/1/2025,Skills,Spanish Comms,21.31666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/1/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/1/2025,Skills,English Comms,3.666666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/1/2025,Self Development,Bible Study,21,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/1/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/1/2025,Sleep,Sleep,452.9833333,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/2/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/2/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/2/2025,Entertainment,SM/Anime/MM,422.5,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/2/2025,Entertainment,Video Games,15,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/2/2025,Skills,Video Editing,104,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/2/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/2/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/2/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/2/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/2/2025,Self Development,Bible Study,74,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/2/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/2/2025,Sleep,Sleep,401.3333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/3/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/3/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/3/2025,Entertainment,SM/Anime/MM,490,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/3/2025,Entertainment,Video Games,251,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/3/2025,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/3/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/3/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/3/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/3/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/3/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/3/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/3/2025,Sleep,Sleep,277.5,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/4/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/4/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/4/2025,Entertainment,SM/Anime/MM,455,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/4/2025,Entertainment,Video Games,226,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/4/2025,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/4/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/4/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/4/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/4/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/4/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/4/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/4/2025,Sleep,Sleep,469.1166667,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/5/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/5/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/5/2025,Entertainment,SM/Anime/MM,542,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/5/2025,Entertainment,Video Games,239,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/5/2025,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/5/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/5/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/5/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/5/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/5/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/5/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/5/2025,Sleep,Sleep,204.4,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/6/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/6/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/6/2025,Entertainment,SM/Anime/MM,590,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/6/2025,Entertainment,Video Games,316,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/6/2025,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/6/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/6/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/6/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/6/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/6/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/6/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/6/2025,Sleep,Sleep,494.3,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/7/2025,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/7/2025,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/7/2025,Entertainment,SM/Anime/MM,277,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/7/2025,Entertainment,Video Games,61,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/7/2025,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/7/2025,Skills,Mental Math,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/7/2025,Skills,Spanish Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/7/2025,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/7/2025,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/7/2025,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/7/2025,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+7/7/2025,Sleep,Sleep,428.9166667,hhANBj74wiclvfuDLGfuDlFZgJ62

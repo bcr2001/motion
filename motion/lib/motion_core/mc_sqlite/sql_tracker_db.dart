@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:motion/motion_core/mc_sql_table/experience_table.dart';
 import 'package:motion/motion_core/mc_sql_table/main_table.dart';
 import 'package:motion/motion_core/mc_sql_table/sub_table.dart';
@@ -80,6 +81,7 @@ class TrackerDatabaseHelper {
           REFERENCES main_category(date, currentLoggedInUser)
         )
       ''');
+      
 
     // creation of the main_category table
     await db.execute('''
@@ -1766,6 +1768,23 @@ Future<List<ExperiencePoints>> getAllExperiencePointsForUser({
     logger.i('🔄 Back-filled experience_points for all existing dates.');
   }
 
+  Future<void> deleteSubcategoriesByDate(String date) async {
+
+    final db = await database;
+    
+    try {
+      await db.delete(
+        "subcategory",
+        where: "date = ?",
+        whereArgs: [date],
+      );
+      debugPrint("✅ Subcategories with date $date deleted successfully");
+    } catch (e) {
+      debugPrint("❌ Error deleting subcategories: $e");
+    }
+  }
+
+
   // Delete the entire database
   // Future<void> deleteDb() async {
   //   try {
@@ -1781,3 +1800,5 @@ Future<List<ExperiencePoints>> getAllExperiencePointsForUser({
   //   }
   // }
 }
+
+

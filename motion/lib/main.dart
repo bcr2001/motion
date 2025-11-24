@@ -1,7 +1,15 @@
+import 'dart:convert';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:motion/firebase_options.dart';
+import 'package:motion/motion_core/mc_sql_table/assign_table.dart';
+import 'package:motion/motion_core/mc_sql_table/main_table.dart';
+import 'package:motion/motion_core/mc_sql_table/sub_table.dart' show Subcategories;
+import 'package:motion/motion_core/mc_sqlite/sql_assigner_db.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_month_provider_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_time_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_year_pvd.dart';
@@ -31,6 +39,10 @@ final GlobalKey<NavigatorState> navigationKey = GlobalKey<NavigatorState>();
 // This instantiates a database helper class (TrackerDatabaseHelper) for
 // managing database operations, likely related to tracking functionality.
 final TrackerDatabaseHelper trackDbInstance = TrackerDatabaseHelper();
+
+
+final TrackerDatabaseHelper databaseHelper = TrackerDatabaseHelper();
+
 
 
 
@@ -69,9 +81,32 @@ void main() async {
 
   final trackMainCategoryDatabaseProvider = MainCategoryTrackerProvider();
 
-  await databaseHelper.backfillXpForExistingUser();
   // final allMain = await databaseHelper.getMostAndLeastProductiveMonths(getMostProductiveMonth: false, year: "2023");
   // final allMain = await trackDbInstance.getMonthTotalAndAverage("gmIUkJzvrOQp3wltZm6IIxULcjj2", "01/02/2025","28/02/2025", true);
+
+  // CODE FOR MANUALLY ADDING DATA TO THE SUBCATEGORY DATABASE
+  final now = DateTime.now();
+  const date = "2025-08-15";  // "2025-08-07"
+  final formattedTime = DateFormat('HH:mm:ss').format(now);    // "22:30:00"
+
+  final subcategory = Subcategories(
+    date: date,
+    mainCategoryName: "Entertainment",
+    subcategoryName: "SM/Anime/MM",
+    timeRecorded: formattedTime,
+    timeSpent: 924.0,
+    currentLoggedInUser: "hhANBj74wiclvfuDLGfuDlFZgJ62",
+  );
+
+  await databaseHelper.insertSubcategory(subcategory);
+  debugPrint("✅ Correctly formatted subcategory inserted.");
+
+  // await databaseHelper.deleteSubcategoriesByDate("07/08/2025");
+
+
+  // final allSubs = await databaseHelper.getAllSubcategories();
+
+  // logger.i(allSubs);
 
 
   runApp(MultiProvider(
