@@ -22,14 +22,15 @@ ThemeData lightThemeData = ThemeData(
       headlineSmall: AppTextStyle.headingSmall(false)),
 
   // alert dialog theme
-  dialogTheme: const DialogTheme(
+  dialogTheme: const DialogThemeData(
       backgroundColor: AppColor.lightModeContentWidget,),
 
   // card theme
-  cardTheme: const CardTheme(
-      elevation: 1,
-      margin: EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
-      color: AppColor.lightModeContentWidget),
+  cardTheme: const CardThemeData(
+    elevation: 1,
+    margin: EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
+    color: AppColor.lightModeContentWidget,
+  ),
 
   // floating action button
   floatingActionButtonTheme: FloatingActionButtonThemeData(
