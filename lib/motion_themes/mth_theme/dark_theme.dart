@@ -19,7 +19,7 @@ ThemeData darkThemeData = ThemeData(
   colorScheme: const ColorScheme.dark(primary: AppColor.darkThemeWidgetBgColor),
 
   // text form field
-  dialogTheme: const DialogTheme(
+  dialogTheme: const DialogThemeData(
       backgroundColor: AppColor.darkModeContentWidget),
 
   // app bar theme
@@ -27,7 +27,7 @@ ThemeData darkThemeData = ThemeData(
       const AppBarTheme(centerTitle: true, backgroundColor: Colors.black),
 
   // card theme
-  cardTheme:  CardTheme(
+  cardTheme:  CardThemeData(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25.0)
       ),
