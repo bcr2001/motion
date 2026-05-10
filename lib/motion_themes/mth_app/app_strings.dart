@@ -76,9 +76,9 @@ class AppString {
   static const String confirmPasswordHintText = "Confirm Password";
 
   static const String logInWelcomeMessage =
-      "Welcome back to Motion! Log in to track your time, stay organized, and boost productivity !!";
+      "Welcome back to Motion!";
   static const String signUpWelcomeMessage =
-      "Join Motion and unlock the power of time management. Sign up today to start tracking your time efficiently and achieving your goals";
+      "Join Motion and unlock the power of time management.";
 
   static const String or = "Or";
   static const String continueWithGoogle = "Continue with Google";
@@ -92,7 +92,7 @@ class AppString {
       "please confirm password";
   static const String emptyUserNameValidatorMessage = "please enter a username";
 
-  static const String areYouAMemeber = "Are you not a member?";
+  static const String areYouAMemeber = "Hey, are you a member? ";
   static const String registerHere = " Register Here";
   static const String alreadyMember = "Already a memeber? ";
   static const String confirmNotEqual = "does not match password";

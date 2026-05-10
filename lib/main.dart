@@ -35,22 +35,12 @@ final TrackerDatabaseHelper trackDbInstance = TrackerDatabaseHelper();
 final TrackerDatabaseHelper databaseHelper = TrackerDatabaseHelper();
 
 
+
 void main() async {
 
    // Ensures that the Flutter framework is fully initialized before running the app.
   WidgetsFlutterBinding.ensureInitialized();
 
-  // ADDING THE EXPERIENCE POINTS TO THE DATABASE
-  // final dbHelper = TrackerDatabaseHelper(); // Your DB helper class
-  // final db = await dbHelper.database;
-
-  
-  // Initialize the database helper
-  // final TrackerDatabaseHelper databaseHelper = TrackerDatabaseHelper();
-
-  // databaseHelper.updateCurrentUser();
-
-  // await databaseHelper.populateExperiencePointsFromMainCategory();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
@@ -75,33 +65,6 @@ void main() async {
   final trackSubcategoryDatabaseProvider = SubcategoryTrackerDatabaseProvider();
 
   final trackMainCategoryDatabaseProvider = MainCategoryTrackerProvider();
-
-  // final allMain = await databaseHelper.getMostAndLeastProductiveMonths(getMostProductiveMonth: false, year: "2023");
-  // final allMain = await trackDbInstance.getMonthTotalAndAverage("gmIUkJzvrOQp3wltZm6IIxULcjj2", "01/02/2025","28/02/2025", true);
-
-  // // CODE FOR MANUALLY ADDING DATA TO THE SUBCATEGORY DATABASE
-  // final now = DateTime.now();
-  // const date = "2025-08-15";  // "2025-08-07"
-  // final formattedTime = DateFormat('HH:mm:ss').format(now);    // "22:30:00"
-
-  // final subcategory = Subcategories(
-  //   date: date,
-  //   mainCategoryName: "Entertainment",
-  //   subcategoryName: "SM/Anime/MM",
-  //   timeRecorded: formattedTime,
-  //   timeSpent: 924.0,
-  //   currentLoggedInUser: "hhANBj74wiclvfuDLGfuDlFZgJ62",
-  // );
-
-  // await databaseHelper.insertSubcategory(subcategory);
-  // debugPrint("✅ Correctly formatted subcategory inserted.");
-
-  // await databaseHelper.deleteSubcategoriesByDate("07/08/2025");
-
-
-  // final allSubs = await databaseHelper.getAllSubcategories();
-
-  // logger.i(allSubs);
 
 
   runApp(MultiProvider(
