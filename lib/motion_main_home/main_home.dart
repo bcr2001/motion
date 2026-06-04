@@ -56,6 +56,8 @@ class _MotionHome extends State<MainMotionHome> {
   Widget build(BuildContext context) {
     return Consumer<AppThemeModeProviderN1>(
         builder: (context, themeValue, child) {
+      final isLightMode = Theme.of(context).brightness == Brightness.light;
+
       return Scaffold(
         // the app body of the current index
         body: Stack(
@@ -67,8 +69,7 @@ class _MotionHome extends State<MainMotionHome> {
                 right: 0,
                 child: SafeArea(
                     child: GNav(
-                  backgroundColor: themeValue.currentThemeMode ==
-                          ThemeModeSettingsN1.lightMode
+                  backgroundColor: isLightMode
                       ? Colors.white.withValues(alpha: 0.5)
                       : Colors.black.withValues(alpha: 0.5),
                   haptic: true,
