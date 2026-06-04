@@ -37,6 +37,9 @@ class AppColor {
   // education color
   static const Color educationPieChartColor = Color(0xFF80CA32);
 
+  // work color
+  static const Color workPieChartColor = Color(0xFFE0A100);
+
   // skills color
   static const Color skillsPieChartColor = Color(0xFF9BA9B4);
 

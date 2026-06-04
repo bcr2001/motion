@@ -12,6 +12,7 @@ void main() {
 
     test('category names match persisted category values', () {
       expect(MotionCategories.education, 'Education');
+      expect(MotionCategories.work, 'Work');
       expect(MotionCategories.skills, 'Skills');
       expect(MotionCategories.entertainment, 'Entertainment');
       expect(MotionCategories.selfDevelopment, 'Self Development');

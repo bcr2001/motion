@@ -49,7 +49,8 @@ class AppString {
   static const String themeTitle = "Theme";
   static const String okTitle = "OK";
   static const String setDateOfBirthTitle = "Set Date of Birth";
-  static const String setDateOfBirthDescription = "To see how much you have left";
+  static const String setDateOfBirthDescription =
+      "To see how much you have left";
   static const String downloadDataTitle = "Download Personal Data";
   static const String notificationTitle = "Notification";
   static const String importDataTitle = "Import Data";
@@ -75,8 +76,7 @@ class AppString {
   static const String passwordHintText = "Password";
   static const String confirmPasswordHintText = "Confirm Password";
 
-  static const String logInWelcomeMessage =
-      "Welcome back to Motion!";
+  static const String logInWelcomeMessage = "Welcome back to Motion!";
   static const String signUpWelcomeMessage =
       "Join Motion and unlock the power of time management.";
 
@@ -111,6 +111,7 @@ class AppString {
   static const String efficiencyScoreTitle = "EFS";
   static const String entireTitle = "Entire";
   static const String educationMainCategory = "Education";
+  static const String workMainCategory = "Work";
   static const String skillMainCategory = "Skills";
   static const String entertainmentMainCategory = "Entertainment";
   static const String selfDevelopmentMainCategory = "Self Development";
@@ -245,7 +246,6 @@ class AppString {
   static const String viewSubcategoryTotalsTitle = "View Subcategory Totals";
   static const String subcategoryTotalsTitle = "Subcategory Totals";
 
-
   static const String chartingAYearInLinesTitle = "Graphing a Year in Lines";
   static const String stackingAYearInLinesTitle = "Stacking Up Your Year";
   static const String stackingATitle = "Stacking";
@@ -285,7 +285,6 @@ class AppString {
       "6. How should I assign subcategories to their respective main categories?";
   static const String faq7EFSQ =
       "7. What does EFS stand for, and how is it used?";
-
 
   // (answers)
   static const String faq2AccuracyMoneteringAnswer =

@@ -31,17 +31,17 @@ class MostAndLeastTrackedMaincategorySection extends StatelessWidget {
                     // first and last day of the month
                     String firstDayOfMonth = day.firstDay;
                     String lastDayOfMonth = day.lastDay;
-          
+
                     // currently logged in user
                     final currentLoggedInUser = user.userUid;
                     if (currentLoggedInUser == null) {
                       return userLoadingIndicator();
                     }
-          
+
                     // the number of days in the current month
                     // used to get the average hours per day
                     int numberOfDaysInCurrentMonth = day.days;
-          
+
                     return Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
@@ -51,23 +51,25 @@ class MostAndLeastTrackedMaincategorySection extends StatelessWidget {
                             resultIconColor: Colors.green,
                             sectionTitle: AppString.mostTrackedTitle,
                             numberOfDaysInMonth: numberOfDaysInCurrentMonth,
-                            future: main.retrieveMostAndLeastTrackedMainCategory(
-                                firstDay: firstDayOfMonth,
-                                lastDay: lastDayOfMonth,
-                                currentUser: currentLoggedInUser,
-                                isMost: true)),
-          
+                            future:
+                                main.retrieveMostAndLeastTrackedMainCategory(
+                                    firstDay: firstDayOfMonth,
+                                    lastDay: lastDayOfMonth,
+                                    currentUser: currentLoggedInUser,
+                                    isMost: true)),
+
                         // least tracked main category
                         MostAndLeastTrackedResult(
                             resultIcon: Icons.line_axis,
                             resultIconColor: Colors.red,
                             sectionTitle: AppString.leastTrackedTitle,
                             numberOfDaysInMonth: numberOfDaysInCurrentMonth,
-                            future: main.retrieveMostAndLeastTrackedMainCategory(
-                                firstDay: firstDayOfMonth,
-                                lastDay: lastDayOfMonth,
-                                currentUser: currentLoggedInUser,
-                                isMost: false)),
+                            future:
+                                main.retrieveMostAndLeastTrackedMainCategory(
+                                    firstDay: firstDayOfMonth,
+                                    lastDay: lastDayOfMonth,
+                                    currentUser: currentLoggedInUser,
+                                    isMost: false)),
                       ],
                     );
                   },
@@ -84,8 +86,6 @@ class MostAndLeastTrackedSubcategorySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-
     return MLTitleAndCard(
         mlTitle: AppString.subcategoryTitle,
         cardContent: Card(
@@ -98,20 +98,19 @@ class MostAndLeastTrackedSubcategorySection extends StatelessWidget {
                     // first and last day of the month
                     String firstDayOfMonth = day.firstDay;
                     String lastDayOfMonth = day.lastDay;
-          
+
                     // currently logged in user
                     final currentLoggedInUser = user.userUid;
                     if (currentLoggedInUser == null) {
                       return userLoadingIndicator();
                     }
-          
+
                     // number of days in the current month
                     int numberOfDaysInCurrentMonth = day.days;
-          
+
                     return Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-          
                         // most tracked subcategory
                         MostAndLeastTrackedResult(
                             resultIcon: Icons.line_axis,
@@ -123,7 +122,7 @@ class MostAndLeastTrackedSubcategorySection extends StatelessWidget {
                                 lastDay: lastDayOfMonth,
                                 currentUser: currentLoggedInUser,
                                 isMost: true)),
-          
+
                         // least tracked subcategory
                         MostAndLeastTrackedResult(
                             resultIcon: Icons.line_axis,
@@ -256,6 +255,8 @@ class PieChartDataMainCategoryDistribution extends StatelessWidget {
     switch (categoryName) {
       case AppString.educationMainCategory:
         return AppColor.educationPieChartColor;
+      case AppString.workMainCategory:
+        return AppColor.workPieChartColor;
       case AppString.entertainmentMainCategory:
         return AppColor.entertainmentPieChartColor;
       case AppString.selfDevelopmentMainCategory:
@@ -286,6 +287,11 @@ class PieChartDataMainCategoryDistribution extends StatelessWidget {
           mainCategoryPieChartLegend(
               color: getCategoryColorByName(AppString.educationMainCategory),
               mainCategoryName: AppString.educationMainCategory),
+
+          // Work
+          mainCategoryPieChartLegend(
+              color: getCategoryColorByName(AppString.workMainCategory),
+              mainCategoryName: AppString.workMainCategory),
 
           // Skills
           mainCategoryPieChartLegend(

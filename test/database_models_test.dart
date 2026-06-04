@@ -11,10 +11,11 @@ void main() {
       final category = MainCategory(
         date: '2026-06-04',
         education: 10,
-        skills: 20,
-        entertainment: 30,
-        selfDevelopment: 40,
-        sleep: 50,
+        work: 20,
+        skills: 30,
+        entertainment: 40,
+        selfDevelopment: 50,
+        sleep: 60,
         currentLoggedInUser: 'user-1',
       );
 
@@ -22,10 +23,11 @@ void main() {
 
       expect(map[MotionDbColumns.date], '2026-06-04');
       expect(map[MotionDbColumns.education], 10);
-      expect(map[MotionDbColumns.skills], 20);
-      expect(map[MotionDbColumns.entertainment], 30);
-      expect(map[MotionDbColumns.selfDevelopment], 40);
-      expect(map[MotionDbColumns.sleep], 50);
+      expect(map[MotionDbColumns.work], 20);
+      expect(map[MotionDbColumns.skills], 30);
+      expect(map[MotionDbColumns.entertainment], 40);
+      expect(map[MotionDbColumns.selfDevelopment], 50);
+      expect(map[MotionDbColumns.sleep], 60);
       expect(map[MotionDbColumns.currentLoggedInUser], 'user-1');
       expect(MainCategory.fromMap(map).toMap(), map);
     });
@@ -58,18 +60,20 @@ void main() {
       final xp = ExperiencePoints(
         date: '2026-06-04',
         educationXP: 5,
-        skillsXP: 10,
-        sdXP: 15,
-        sleepXP: 20,
+        workXP: 10,
+        skillsXP: 15,
+        sdXP: 20,
+        sleepXP: 25,
         currentLoggedInUser: 'user-1',
       );
 
       final map = xp.toMap();
 
       expect(map[MotionDbColumns.educationXp], 5);
-      expect(map[MotionDbColumns.skillsXp], 10);
-      expect(map[MotionDbColumns.selfDevelopmentXp], 15);
-      expect(map[MotionDbColumns.sleepXp], 20);
+      expect(map[MotionDbColumns.workXp], 10);
+      expect(map[MotionDbColumns.skillsXp], 15);
+      expect(map[MotionDbColumns.selfDevelopmentXp], 20);
+      expect(map[MotionDbColumns.sleepXp], 25);
       expect(ExperiencePoints.fromMap(map).toMap(), map);
     });
 

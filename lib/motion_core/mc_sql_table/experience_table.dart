@@ -4,6 +4,7 @@ import 'package:motion/motion_core/mc_sqlite/database_constants.dart';
 class ExperiencePoints {
   final String date;
   int educationXP;
+  int workXP;
   int skillsXP;
   int sdXP;
   int sleepXP;
@@ -12,6 +13,7 @@ class ExperiencePoints {
   ExperiencePoints(
       {required this.date,
       this.educationXP = 0,
+      this.workXP = 0,
       this.skillsXP = 0,
       this.sdXP = 0,
       this.sleepXP = 0,
@@ -22,6 +24,7 @@ class ExperiencePoints {
     return ExperiencePoints(
         date: map[MotionDbColumns.date],
         educationXP: map[MotionDbColumns.educationXp] ?? 0,
+        workXP: map[MotionDbColumns.workXp] ?? 0,
         skillsXP: map[MotionDbColumns.skillsXp] ?? 0,
         sdXP: map[MotionDbColumns.selfDevelopmentXp] ?? 0,
         sleepXP: map[MotionDbColumns.sleepXp] ?? 0,
@@ -33,6 +36,7 @@ class ExperiencePoints {
     return {
       MotionDbColumns.date: date,
       MotionDbColumns.educationXp: educationXP,
+      MotionDbColumns.workXp: workXP,
       MotionDbColumns.skillsXp: skillsXP,
       MotionDbColumns.selfDevelopmentXp: sdXP,
       MotionDbColumns.sleepXp: sleepXP,
@@ -42,6 +46,6 @@ class ExperiencePoints {
 
   @override
   String toString() {
-    return 'Experience Points{date: $date, educationXP": $educationXP, skillsXP: $skillsXP, sdXP: $sdXP, sleepXP: $sleepXP, currentLoggedInUser: $currentLoggedInUser}';
+    return 'Experience Points{date: $date, educationXP": $educationXP, workXP: $workXP, skillsXP: $skillsXP, sdXP: $sdXP, sleepXP: $sleepXP, currentLoggedInUser: $currentLoggedInUser}';
   }
 }

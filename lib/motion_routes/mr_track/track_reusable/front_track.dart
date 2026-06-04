@@ -20,11 +20,12 @@ class MyDropdownButton extends StatefulWidget {
 
 class _MyDropdownButtonState extends State<MyDropdownButton> {
   List<String> listItems = [
-    "Education",
-    "Skills",
-    "Entertainment",
-    "Self Development",
-    "Sleep"
+    AppString.educationMainCategory,
+    AppString.workMainCategory,
+    AppString.skillMainCategory,
+    AppString.entertainmentMainCategory,
+    AppString.selfDevelopmentMainCategory,
+    AppString.sleepMainCategory,
   ];
 
   @override

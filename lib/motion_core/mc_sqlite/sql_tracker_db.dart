@@ -82,62 +82,43 @@ class TrackerDatabaseHelper {
       final db = await database;
 
       final resultLJOMXP = await db.rawQuery('''
-        SELECT 
-            mainCategoryName, 
+        SELECT
+            mainCategoryName,
             totalTimeSpent,
             CASE
-                WHEN mainCategoryName = 'Education' THEN
-                    CASE 
-                        WHEN totalTimeSpent < 15 THEN '0'
-                        WHEN totalTimeSpent < 60 THEN '5'
-                        WHEN totalTimeSpent < 120 THEN '10'
-                        WHEN totalTimeSpent < 180 THEN '15'
-                        WHEN totalTimeSpent < 240 THEN '20'
-                        WHEN totalTimeSpent >= 240 THEN '25'
-                        ELSE '0'
-                    END
-                WHEN mainCategoryName = 'Skills' THEN
-                    CASE 
-                        WHEN totalTimeSpent < 15 THEN '0'
-                        WHEN totalTimeSpent >= 15 AND totalTimeSpent < 60 THEN '5'
-                        WHEN totalTimeSpent >= 60 AND totalTimeSpent < 120 THEN '10'
-                        WHEN totalTimeSpent >= 120 AND totalTimeSpent < 180 THEN '15'
-                        WHEN totalTimeSpent >= 180 AND totalTimeSpent < 240 THEN '20'
-                        WHEN totalTimeSpent >= 240 THEN '25'
-                        ELSE '0'
-                    END
-                WHEN mainCategoryName = 'Self Development' THEN
-                    CASE 
-                        WHEN totalTimeSpent < 15 THEN '0'
-                        WHEN totalTimeSpent >= 15 AND totalTimeSpent < 60 THEN '10'
-                        WHEN totalTimeSpent >= 60 AND totalTimeSpent < 120 THEN '15'
-                        WHEN totalTimeSpent >= 120 AND totalTimeSpent < 180 THEN '20'
-                        WHEN totalTimeSpent >= 180 THEN '25'
-                        ELSE '0'
-                    END
+                WHEN mainCategoryName = 'Work' THEN
+                    CAST(CASE
+                        WHEN CAST(totalTimeSpent / 15 AS INTEGER) > 25 THEN 25
+                        ELSE CAST(totalTimeSpent / 15 AS INTEGER)
+                    END AS TEXT)
+                WHEN mainCategoryName IN ('Education', 'Skills', 'Self Development') THEN
+                    CAST(CASE
+                        WHEN CAST(totalTimeSpent / 15 AS INTEGER) > 20 THEN 20
+                        ELSE CAST(totalTimeSpent / 15 AS INTEGER)
+                    END AS TEXT)
                 WHEN mainCategoryName = 'Sleep' THEN
-                    CASE 
+                    CASE
                         WHEN totalTimeSpent < 300 THEN '0'
-                        WHEN totalTimeSpent >= 300 AND totalTimeSpent < 360 THEN '5'
-                        WHEN totalTimeSpent >= 360 AND totalTimeSpent < 420 THEN '10'
-                        WHEN totalTimeSpent >= 420 AND totalTimeSpent < 480 THEN '20'
-                        WHEN totalTimeSpent >= 480 THEN '25'
-                        ELSE '0'
+                        WHEN totalTimeSpent < 360 THEN '8'
+                        WHEN totalTimeSpent < 420 THEN '15'
+                        WHEN totalTimeSpent <= 540 THEN '25'
+                        WHEN totalTimeSpent <= 600 THEN '15'
+                        ELSE '5'
                     END
                 WHEN mainCategoryName = 'Entertainment' THEN
                     'N/A'
                 ELSE '0'
             END AS xp_earned
-        FROM 
+        FROM
             (
-                SELECT 
-                    mainCategoryName, 
+                SELECT
+                    mainCategoryName,
                     SUM(timeSpent) AS totalTimeSpent
-                FROM 
+                FROM
                     subcategory
-                WHERE 
+                WHERE
                     currentLoggedInUser = ? AND date = ?
-                GROUP BY 
+                GROUP BY
                     mainCategoryName
                 ORDER BY totalTimeSpent DESC
             );
@@ -157,10 +138,13 @@ class TrackerDatabaseHelper {
       final db = await database;
 
       final resultAMCT = await db.rawQuery("""
-          SELECT 
+          SELECT
               CAST(ROUND(COALESCE(SUM(education)/60, 0), 2) AS VARCHAR) AS "educationHours",
               CAST(ROUND(COALESCE(SUM(education)/1440, 0), 2) AS VARCHAR) AS "educationDays",
               CAST(ROUND(COALESCE(AVG(education)/60, 0), 2) AS VARCHAR) AS "educationAverage",
+              CAST(ROUND(COALESCE(SUM(work)/60, 0), 2) AS VARCHAR) AS "workHours",
+              CAST(ROUND(COALESCE(SUM(work)/1440, 0), 2) AS VARCHAR) AS "workDays",
+              CAST(ROUND(COALESCE(AVG(work)/60, 0), 2) AS VARCHAR) AS "workAverage",
               CAST(ROUND(COALESCE(SUM(skills)/60, 0), 2) AS VARCHAR) AS "skillHours",
               CAST(ROUND(COALESCE(SUM(skills)/1440, 0), 2) AS VARCHAR) AS "skillDays",
               CAST(ROUND(COALESCE(AVG(skills)/60, 0), 2) AS VARCHAR) AS "skillAverage",
@@ -183,7 +167,7 @@ class TrackerDatabaseHelper {
   }
 
   // count the number of days in the main_category table
-Future<int> getNumberOfDays(
+  Future<int> getNumberOfDays(
       {required String currentUser,
       bool getAllDays = true,
       String currentYear = ""}) async {
@@ -250,7 +234,7 @@ Future<int> getNumberOfDays(
       final db = await database;
 
       final allMainCats = await db.rawQuery('''
-      SELECT * 
+      SELECT *
       FROM main_category;
       ''');
 
@@ -272,15 +256,14 @@ Future<int> getNumberOfDays(
       // if it's false the accounted time
 
       final resultETMCT = isUnaccounted ? await db.rawQuery('''
-        SELECT ((COUNT(date) * 24)*60) - (COALESCE(SUM(education), 0) 
-        + COALESCE(SUM(skills), 0) + COALESCE(SUM(entertainment), 0) + 
-        COALESCE(SUM(selfDevelopment), 0) + COALESCE(SUM(sleep), 0)) 
+        SELECT ((COUNT(date) * 24)*60) - (COALESCE(SUM(education), 0) + COALESCE(SUM(work), 0) + COALESCE(SUM(skills), 0) + COALESCE(SUM(entertainment), 0) +
+        COALESCE(SUM(selfDevelopment), 0) + COALESCE(SUM(sleep), 0))
         AS EntireTotalResult
         FROM main_category
         WHERE currentLoggedInUser = ?
         ''', [currentUser]) : await db.rawQuery('''
-        SELECT COALESCE(SUM(education), 0) + COALESCE(SUM(skills), 0) 
-        + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(selfDevelopment), 0) 
+        SELECT COALESCE(SUM(education), 0) + COALESCE(SUM(work), 0) + COALESCE(SUM(skills), 0)
+        + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(selfDevelopment), 0)
         + COALESCE(SUM(sleep), 0) AS EntireTotalResult
         FROM main_category
         WHERE currentLoggedInUser = ?
@@ -298,10 +281,8 @@ Future<int> getNumberOfDays(
         return 0.0;
       }
     } catch (e, stackTrace) {
-      logDatabaseError(
-          "TrackerDatabaseHelper.getEntireTotalMainCategoryTable",
-          e,
-          stackTrace);
+      logDatabaseError("TrackerDatabaseHelper.getEntireTotalMainCategoryTable",
+          e, stackTrace);
     }
   }
 
@@ -314,16 +295,15 @@ Future<int> getNumberOfDays(
 
       final query = isUnaccounted
           ? '''
-        SELECT ((COUNT(date) * 24)*60) - (COALESCE(SUM(education), 0) 
-        + COALESCE(SUM(skills), 0) + COALESCE(SUM(entertainment), 0) + 
-        COALESCE(SUM(selfDevelopment), 0) + COALESCE(SUM(sleep), 0)) 
+        SELECT ((COUNT(date) * 24)*60) - (COALESCE(SUM(education), 0) + COALESCE(SUM(work), 0) + COALESCE(SUM(skills), 0) + COALESCE(SUM(entertainment), 0) +
+        COALESCE(SUM(selfDevelopment), 0) + COALESCE(SUM(sleep), 0))
         AS EntireTotalResult
         FROM main_category
         WHERE currentLoggedInUser = ? AND strftime('%Y', date) = ?
         '''
           : '''
-        SELECT COALESCE(SUM(education), 0) + COALESCE(SUM(skills), 0) 
-        + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(selfDevelopment), 0) 
+        SELECT COALESCE(SUM(education), 0) + COALESCE(SUM(work), 0) + COALESCE(SUM(skills), 0)
+        + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(selfDevelopment), 0)
         + COALESCE(SUM(sleep), 0) AS EntireTotalResult
         FROM main_category
         WHERE currentLoggedInUser = ? AND strftime('%Y', date) = ?
@@ -356,11 +336,10 @@ Future<int> getNumberOfDays(
       // this query returns a table of accounted and unaccounte
       // totals grouped by the year
       final resultAAUBBY = await db.rawQuery('''
-        SELECT  (COALESCE(SUM(education), 0.0) + COALESCE(SUM(skills), 0.0)
+        SELECT  (COALESCE(SUM(education), 0.0) + COALESCE(SUM(work), 0.0) + COALESCE(SUM(skills), 0.0)
                 + COALESCE(SUM(entertainment), 0.0) + COALESCE(SUM(selfDevelopment), 0.0)
                 + COALESCE(SUM(sleep), 0.0))/60 AS Accounted,
-                (((COUNT(date) * 24)*60) - (COALESCE(SUM(education), 0.0)
-                + COALESCE(SUM(skills), 0.0) + COALESCE(SUM(entertainment), 0.0)
+                (((COUNT(date) * 24)*60) - (COALESCE(SUM(education), 0.0) + COALESCE(SUM(work), 0.0) + COALESCE(SUM(skills), 0.0) + COALESCE(SUM(entertainment), 0.0)
                 + COALESCE(SUM(selfDevelopment), 0.0) + COALESCE(SUM(sleep), 0.0)))/60
                 AS Unaccounted,
                 strftime('%Y', date) AS Year
@@ -384,16 +363,14 @@ Future<int> getNumberOfDays(
       final db = await database;
 
       final resultMDAUA = await db.rawQuery('''
-          SELECT  strftime('%m', date) AS Month, 
-                (COALESCE(SUM(education), 0) + 
-                COALESCE(SUM(skills), 0)
-              + COALESCE(SUM(entertainment), 0) + 
+          SELECT  strftime('%m', date) AS Month,
+                (COALESCE(SUM(education), 0) + COALESCE(SUM(work), 0) + COALESCE(SUM(skills), 0)
+              + COALESCE(SUM(entertainment), 0) +
               COALESCE(SUM(selfDevelopment), 0)
               + COALESCE(SUM(sleep), 0))/60 AS Accounted,
-              (((COUNT(date) * 24)*60) - (COALESCE(SUM(education), 0)
-                + COALESCE(SUM(skills), 0) + 
+              (((COUNT(date) * 24)*60) - (COALESCE(SUM(education), 0) + COALESCE(SUM(work), 0) + COALESCE(SUM(skills), 0) +
                 COALESCE(SUM(entertainment), 0)
-          + COALESCE(SUM(selfDevelopment), 0) + 
+          + COALESCE(SUM(selfDevelopment), 0) +
           COALESCE(SUM(sleep), 0)))/60 AS Unaccounted
       FROM main_category
       WHERE currentLoggedInUser = ? AND strftime('%Y', date) = ?
@@ -417,14 +394,13 @@ Future<int> getNumberOfDays(
       final db = await database;
 
       final resultEMTMC = isUnaccounted ? await db.rawQuery('''
-        SELECT ((COUNT(date) * 24)*60) - (COALESCE(SUM(education), 0) 
-        + COALESCE(SUM(skills), 0) + COALESCE(SUM(entertainment), 0) 
-        + COALESCE(SUM(selfDevelopment), 0) + COALESCE(SUM(sleep), 0)) 
+        SELECT ((COUNT(date) * 24)*60) - (COALESCE(SUM(education), 0) + COALESCE(SUM(work), 0) + COALESCE(SUM(skills), 0) + COALESCE(SUM(entertainment), 0)
+        + COALESCE(SUM(selfDevelopment), 0) + COALESCE(SUM(sleep), 0))
         AS EntireTotalResult
         FROM main_category
         WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
             ''', [currentUser, firstDay, lastDay]) : await db.rawQuery('''
-        SELECT COALESCE(SUM(education), 0) + COALESCE(SUM(skills), 0) 
+        SELECT COALESCE(SUM(education), 0) + COALESCE(SUM(work), 0) + COALESCE(SUM(skills), 0)
         + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(selfDevelopment), 0)
         + COALESCE(SUM(sleep), 0) AS EntireTotalResult
         FROM main_category
@@ -457,13 +433,13 @@ Future<int> getNumberOfDays(
       final db = await database;
 
       final resultAWAAD = await db.rawQuery('''
-        SELECT 
-            date, 
-            (COALESCE(education, 0) + COALESCE(skills, 0) + 
-            COALESCE(entertainment, 0) + COALESCE(selfDevelopment, 0) + 
-            COALESCE(sleep, 0))/60 AS Accounted, 
-            24 - (COALESCE(education, 0) + COALESCE(skills, 0) + 
-            COALESCE(entertainment, 0) + COALESCE(selfDevelopment, 0) + 
+        SELECT
+            date,
+            (COALESCE(education, 0) + COALESCE(work, 0) + COALESCE(skills, 0) +
+            COALESCE(entertainment, 0) + COALESCE(selfDevelopment, 0) +
+            COALESCE(sleep, 0))/60 AS Accounted,
+            24 - (COALESCE(education, 0) + COALESCE(work, 0) + COALESCE(skills, 0) +
+            COALESCE(entertainment, 0) + COALESCE(selfDevelopment, 0) +
             COALESCE(sleep, 0))/60 AS Unaccounted
         FROM main_category
         WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
@@ -483,10 +459,10 @@ Future<int> getNumberOfDays(
       final db = await database;
 
       final resultMAT = await db.rawQuery('''
-        SELECT COALESCE(SUM(education), 0) + COALESCE(SUM(skills), 0)
+        SELECT COALESCE(SUM(education), 0) + COALESCE(SUM(work), 0) + COALESCE(SUM(skills), 0)
         + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(selfDevelopment), 0)
         + COALESCE(SUM(sleep), 0) AS Accounted, ((COUNT(date) * 24)*60)
-         - (COALESCE(SUM(education), 0) + COALESCE(SUM(skills), 0) 
+         - (COALESCE(SUM(education), 0) + COALESCE(SUM(work), 0) + COALESCE(SUM(skills), 0)
          + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(selfDevelopment), 0)
          + COALESCE(SUM(sleep), 0)) AS Unaccounted
         FROM main_category
@@ -512,16 +488,16 @@ Future<int> getNumberOfDays(
       // for the most tracked main category if isMost is false
       // then the least tracked main category is returned
       final resultMLTMC = isMost ? await db.rawQuery('''
-      SELECT mainCategoryName AS result_tracked_category, COALESCE(SUM(timeSpent), 0) 
+      SELECT mainCategoryName AS result_tracked_category, COALESCE(SUM(timeSpent), 0)
       AS time_spent
       FROM subcategory
-      WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ? AND 
+      WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ? AND
       mainCategoryName != 'Sleep'
       GROUP BY mainCategoryName
       ORDER BY time_spent DESC
       LIMIT 1
       ''', [currentUser, firstDay, lastDay]) : await db.rawQuery('''
-      SELECT mainCategoryName AS result_tracked_category, COALESCE(SUM(timeSpent), 0) 
+      SELECT mainCategoryName AS result_tracked_category, COALESCE(SUM(timeSpent), 0)
       AS time_spent
       FROM subcategory
       WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
@@ -556,8 +532,10 @@ Future<int> getNumberOfDays(
 
       return resultMTTSSD;
     } catch (e, stackTrace) {
-      logDatabaseError("TrackerDatabaseHelper.getMainTotalTimeSpentSpecificDates",
-          e, stackTrace);
+      logDatabaseError(
+          "TrackerDatabaseHelper.getMainTotalTimeSpentSpecificDates",
+          e,
+          stackTrace);
     }
   }
 
@@ -593,6 +571,7 @@ Future<int> getNumberOfDays(
         SELECT
           strftime('%m', date) AS Month,
           ROUND(COALESCE(SUM(education) / 60.0, 0), 2) AS education,
+          ROUND(COALESCE(SUM(work) / 60.0, 0), 2) AS work,
           ROUND(COALESCE(SUM(skills) / 60.0, 0), 2) AS skills,
           ROUND(COALESCE(SUM(entertainment) / 60.0, 0), 2) AS entertainment,
           ROUND(COALESCE(SUM(selfDevelopment) / 60.0, 0), 2) AS selfDevelopment,
@@ -617,24 +596,24 @@ Future<int> getNumberOfDays(
       final db = await database;
 
       final resultDAAI = getEntireIntensity ? await db.rawQuery('''
-            SELECT date, 
-                  ROUND((COALESCE(education, 0) + COALESCE(skills, 0) + 
+            SELECT date,
+                  ROUND((COALESCE(education, 0) + COALESCE(work, 0) + COALESCE(skills, 0) +
                           COALESCE(selfDevelopment, 0) + COALESCE(entertainment, 0) +
                           COALESCE(sleep, 0)) / 60, 2) AS accounted,
                   CASE
-                      WHEN ROUND((COALESCE(education, 0) + COALESCE(skills, 0) + 
+                      WHEN ROUND((COALESCE(education, 0) + COALESCE(work, 0) + COALESCE(skills, 0) +
                                   COALESCE(selfDevelopment, 0) + COALESCE(entertainment, 0) +
                                   COALESCE(sleep, 0)) / 60, 2) <= 0 THEN 0
-                      WHEN ROUND((COALESCE(education, 0) + COALESCE(skills, 0) + 
+                      WHEN ROUND((COALESCE(education, 0) + COALESCE(work, 0) + COALESCE(skills, 0) +
                                   COALESCE(selfDevelopment, 0) + COALESCE(entertainment, 0) +
                                   COALESCE(sleep, 0)) / 60, 2) <= 5 THEN 5
-                      WHEN ROUND((COALESCE(education, 0) + COALESCE(skills, 0) + 
+                      WHEN ROUND((COALESCE(education, 0) + COALESCE(work, 0) + COALESCE(skills, 0) +
                                   COALESCE(selfDevelopment, 0) + COALESCE(entertainment, 0) +
                                   COALESCE(sleep, 0)) / 60, 2) <= 10 THEN 10
-                      WHEN ROUND((COALESCE(education, 0) + COALESCE(skills, 0) + 
+                      WHEN ROUND((COALESCE(education, 0) + COALESCE(work, 0) + COALESCE(skills, 0) +
                                   COALESCE(selfDevelopment, 0) + COALESCE(entertainment, 0) +
                                   COALESCE(sleep, 0)) / 60, 2) <= 15 THEN 15
-                      WHEN ROUND((COALESCE(education, 0) + COALESCE(skills, 0) + 
+                      WHEN ROUND((COALESCE(education, 0) + COALESCE(work, 0) + COALESCE(skills, 0) +
                                   COALESCE(selfDevelopment, 0) + COALESCE(entertainment, 0) +
                                   COALESCE(sleep, 0)) / 60, 2) <= 20 THEN 20
                       ELSE 25
@@ -643,24 +622,24 @@ Future<int> getNumberOfDays(
             WHERE currentLoggedInUser = ?
 
         ''', [currentUser]) : await db.rawQuery('''
-            SELECT date, 
-                  ROUND((COALESCE(education, 0) + COALESCE(skills, 0) + 
+            SELECT date,
+                  ROUND((COALESCE(education, 0) + COALESCE(work, 0) + COALESCE(skills, 0) +
                           COALESCE(selfDevelopment, 0) + COALESCE(entertainment, 0) +
                           COALESCE(sleep, 0)) / 60, 2) AS accounted,
                   CASE
-                      WHEN ROUND((COALESCE(education, 0) + COALESCE(skills, 0) + 
+                      WHEN ROUND((COALESCE(education, 0) + COALESCE(work, 0) + COALESCE(skills, 0) +
                                   COALESCE(selfDevelopment, 0) + COALESCE(entertainment, 0) +
                                   COALESCE(sleep, 0)) / 60, 2) <= 0 THEN 0
-                      WHEN ROUND((COALESCE(education, 0) + COALESCE(skills, 0) + 
+                      WHEN ROUND((COALESCE(education, 0) + COALESCE(work, 0) + COALESCE(skills, 0) +
                                   COALESCE(selfDevelopment, 0) + COALESCE(entertainment, 0) +
                                   COALESCE(sleep, 0)) / 60, 2) <= 5 THEN 5
-                      WHEN ROUND((COALESCE(education, 0) + COALESCE(skills, 0) + 
+                      WHEN ROUND((COALESCE(education, 0) + COALESCE(work, 0) + COALESCE(skills, 0) +
                                   COALESCE(selfDevelopment, 0) + COALESCE(entertainment, 0) +
                                   COALESCE(sleep, 0)) / 60, 2) <= 10 THEN 10
-                      WHEN ROUND((COALESCE(education, 0) + COALESCE(skills, 0) + 
+                      WHEN ROUND((COALESCE(education, 0) + COALESCE(work, 0) + COALESCE(skills, 0) +
                                   COALESCE(selfDevelopment, 0) + COALESCE(entertainment, 0) +
                                   COALESCE(sleep, 0)) / 60, 2) <= 15 THEN 15
-                      WHEN ROUND((COALESCE(education, 0) + COALESCE(skills, 0) + 
+                      WHEN ROUND((COALESCE(education, 0) + COALESCE(work, 0) + COALESCE(skills, 0) +
                                   COALESCE(selfDevelopment, 0) + COALESCE(entertainment, 0) +
                                   COALESCE(sleep, 0)) / 60, 2) <= 20 THEN 20
                       ELSE 25
@@ -744,7 +723,7 @@ Future<int> getNumberOfDays(
       final db = await database;
 
       final allSubTotals = await db.rawQuery("""
-        SELECT subcategoryName, COALESCE(SUM(timeSpent), 0) AS total, 
+        SELECT subcategoryName, COALESCE(SUM(timeSpent), 0) AS total,
         COALESCE(AVG(timeSpent), 0) AS average
         FROM subcategory
         WHERE currentLoggedInUser = ?
@@ -830,50 +809,46 @@ Future<int> getNumberOfDays(
     }
   }
 
+  /// Returns a list of maps containing category names, total time spent, average time per day,
+  /// and for subcategories, the streak of consecutive days with nonzero timeSpent.
+  ///
+  /// This revised function calculates:
+  ///  1. Daily totals (per day and subcategory) for the given date range.
+  ///  2. Totals and averages per subcategory.
+  ///  3. For streaks, it fetches relevant dates and calculates the streak in Dart logic
+  ///     by iterating backwards from the most recent date.
+  /// Retrieves total and average time spent on subcategories or main categories for a user.
+  /// If isSubcategory is true, it also calculates the streak for each subcategory.
+  ///
+  /// - currentUser: The ID of the user.
+  /// - startingDate, endingDate: The date range for fetching data.
+  /// - isSubcategory: If true, fetches data for subcategories; otherwise, fetches for main categories.
+  ///
+  /// Returns a list of maps containing category names, total time spent, average time per day,
+  /// and for subcategories, the streak of consecutive days with nonzero timeSpent.
+  /// Retrieves the total and average time spent for each category (main or subcategory)
+  /// within a given date range for the specified user.
+  ///
+  /// - `currentUser`: The ID of the currently logged-in user.
+  /// - `startingDate`: The start date for filtering records.
+  /// - `endingDate`: The end date for filtering records.
+  /// - `isSubcategory`: If true, retrieves data for subcategories; otherwise, retrieves for main categories.
+  ///
+  /// Returns a list of maps containing category names, total time spent, and average time spent.
+  Future<List<Map<String, dynamic>>> getMonthTotalAndAverage(String currentUser,
+      String startingDate, String endingDate, bool isSubcategory) async {
+    final db = await database;
 
-
-/// Returns a list of maps containing category names, total time spent, average time per day,
-/// and for subcategories, the streak of consecutive days with nonzero timeSpent.
-///
-/// This revised function calculates:
-///  1. Daily totals (per day and subcategory) for the given date range.
-///  2. Totals and averages per subcategory.
-///  3. For streaks, it fetches relevant dates and calculates the streak in Dart logic
-///     by iterating backwards from the most recent date.
-/// Retrieves total and average time spent on subcategories or main categories for a user.
-/// If isSubcategory is true, it also calculates the streak for each subcategory.
-///
-/// - currentUser: The ID of the user.
-/// - startingDate, endingDate: The date range for fetching data.
-/// - isSubcategory: If true, fetches data for subcategories; otherwise, fetches for main categories.
-///
-/// Returns a list of maps containing category names, total time spent, average time per day,
-/// and for subcategories, the streak of consecutive days with nonzero timeSpent.
-/// Retrieves the total and average time spent for each category (main or subcategory)
-/// within a given date range for the specified user.
-/// 
-/// - `currentUser`: The ID of the currently logged-in user.
-/// - `startingDate`: The start date for filtering records.
-/// - `endingDate`: The end date for filtering records.
-/// - `isSubcategory`: If true, retrieves data for subcategories; otherwise, retrieves for main categories.
-/// 
-/// Returns a list of maps containing category names, total time spent, and average time spent.
-Future<List<Map<String, dynamic>>> getMonthTotalAndAverage(
-    String currentUser, String startingDate, String endingDate, bool isSubcategory) async {
-  final db = await database;
-
-  try {
-    final resultMTA = isSubcategory
-        ? await db.rawQuery('''
-      SELECT subcategoryName, COALESCE(SUM(timeSpent), 0) AS total, 
+    try {
+      final resultMTA = isSubcategory ? await db.rawQuery('''
+      SELECT subcategoryName, COALESCE(SUM(timeSpent), 0) AS total,
       COALESCE(AVG(timeSpent), 0) AS average
       FROM subcategory
       WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
       GROUP BY subcategoryName
       ORDER BY total DESC;
-    ''', [currentUser, startingDate, endingDate])
-        : await db.rawQuery('''
-      SELECT mainCategoryName, COALESCE(SUM(dailyTotal),0) AS total, 
+    ''', [currentUser, startingDate, endingDate]) : await db.rawQuery('''
+      SELECT mainCategoryName, COALESCE(SUM(dailyTotal),0) AS total,
       COALESCE(AVG(dailyTotal), 0) AS average
       FROM (
         SELECT date, mainCategoryName, COALESCE(SUM(timeSpent), 0) AS dailyTotal
@@ -885,81 +860,67 @@ Future<List<Map<String, dynamic>>> getMonthTotalAndAverage(
       ORDER BY total DESC;
     ''', [currentUser, startingDate, endingDate]);
 
-    return resultMTA;
-  } catch (e, stackTrace) {
-    logDatabaseError(
-        "TrackerDatabaseHelper.getMonthTotalAndAverage", e, stackTrace);
+      return resultMTA;
+    } catch (e, stackTrace) {
+      logDatabaseError(
+          "TrackerDatabaseHelper.getMonthTotalAndAverage", e, stackTrace);
+    }
   }
-}
 
+  /// Calculates the user's current tracking streak.
+  ///
+  /// A streak is a run of consecutive calendar days where the user logged at
+  /// least one subcategory with timeSpent greater than zero. The streak is
+  /// counted backward from the latest tracked day. If the user has not tracked
+  /// today yet, yesterday can still keep the streak alive.
+  Future<int> getUserStreak({required String currentUser}) async {
+    final db = await database;
 
-/// Calculates the user's streak based on tracked activities.
-/// 
-/// A streak is defined as consecutive days where at least one subcategory 
-/// (education, skills, entertainment, self-development, or sleep) has been tracked.
-/// 
-/// - If the user tracks any subcategory on a given day, the streak increases.
-/// - If there is a gap (a day with no tracked subcategories), the streak resets.
-/// - Future dates are ignored.
-/// - The streak is counted correctly based on past tracked activity.
-/// 
-/// This function queries the database for all tracked records of the current user, 
-/// processes them in chronological order, and determines the streak count.
-Future<int> getUserStreak({required String currentUser}) async {
-  // Get a reference to the database
-  final db = await database;
+    final List<Map<String, dynamic>> records = await db.rawQuery('''
+      SELECT ${MotionDbColumns.date}
+      FROM ${MotionDbTables.subcategory}
+      WHERE ${MotionDbColumns.currentLoggedInUser} = ?
+      GROUP BY ${MotionDbColumns.date}
+      HAVING COALESCE(SUM(${MotionDbColumns.timeSpent}), 0) > 0
+      ORDER BY ${MotionDbColumns.date} DESC
+    ''', [currentUser]);
 
-  // Fetch all records for the current user, summing up category values for each date
-  // The records are ordered by date in ascending order
-  final List<Map<String, dynamic>> records = await db.rawQuery('''
-    SELECT date, (education + skills + entertainment + selfDevelopment + sleep) AS total
-    FROM main_category
-    WHERE currentLoggedInUser = ?
-    ORDER BY date ASC
-  ''', [currentUser]);
+    if (records.isEmpty) return 0;
 
-  // If there are no records, return a streak of 0
-  if (records.isEmpty) return 0;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final trackedDates = records
+        .map((record) => DateTime.parse(record[MotionDbColumns.date] as String))
+        .where((date) => !date.isAfter(today))
+        .toList();
 
-  int streak = 0; // Keeps track of the user's streak
-  DateTime? previousDate; // Stores the last recorded date for comparison
-  DateTime now = DateTime.now();
-  DateTime currentDate = DateTime(now.year, now.month, now.day); // Normalize to start of the day
+    if (trackedDates.isEmpty) return 0;
 
-  // Iterate through each record in the database
-  for (var record in records) {
-    DateTime recordDate = DateTime.parse(record['date']); // Convert date from string to DateTime
-    double total = record['total']; // Sum of all tracked subcategories for that date
+    final latestTrackedDate = trackedDates.first;
+    final daysSinceLatestTrackedDate =
+        today.difference(latestTrackedDate).inDays;
 
-    if (recordDate.isAfter(currentDate)) {
-      continue; // Skip future dates
+    if (daysSinceLatestTrackedDate > 1) {
+      return 0;
     }
 
-    if (total > 0) { // If any subcategory was tracked on this date
-      if (previousDate == null) {
-        // First tracked day, start the streak at 1
-        streak = 1;
-      } else if (recordDate.difference(previousDate).inDays == 1) {
-        // If the current record is exactly one day after the previous, continue the streak
+    var streak = 1;
+    var expectedPreviousDate =
+        latestTrackedDate.subtract(const Duration(days: 1));
+
+    for (final trackedDate in trackedDates.skip(1)) {
+      if (trackedDate == expectedPreviousDate) {
         streak++;
-      } else if (recordDate.difference(previousDate).inDays > 1) {
-        // If there's a gap of more than one day, reset the streak to 1
-        streak = 1;
+        expectedPreviousDate =
+            expectedPreviousDate.subtract(const Duration(days: 1));
+      } else if (trackedDate.isBefore(expectedPreviousDate)) {
+        break;
       }
-      previousDate = recordDate; // Update previousDate for the next iteration
     }
+
+    return streak;
   }
 
-  // **NEW LOGIC: Reset streak if today is not the next day after the last recorded date**
-  if (previousDate != null) {
-    int daysSinceLastRecord = currentDate.difference(previousDate).inDays;
-    if (daysSinceLastRecord > 1) {
-      return 0; // Streak resets because there was a skipped day
-    }
-  }
-
-  return streak;
-}
   // calculates and returns the total time spent on a particular subcategory
   Future<double> getTotalTimeSpentPerSubcategory(
       String currentDate, String currentUser, String subcategoryName) async {
@@ -1002,19 +963,19 @@ Future<int> getUserStreak({required String currentUser}) async {
 
       //currentUserget
       final resultMLTS = isMost ? await db.rawQuery('''
-      SELECT subcategoryName AS result_tracked_category, 
+      SELECT subcategoryName AS result_tracked_category,
       COALESCE(SUM(timeSpent), 0) AS time_spent
-      FROM subcategory 
-      WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ? 
+      FROM subcategory
+      WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
       AND mainCategoryName != 'Sleep'
       GROUP BY result_tracked_category
       ORDER BY time_spent DESC
       LIMIT 1;
       ''', [currentUser, firstDay, lastDay]) : await db.rawQuery('''
-      SELECT subcategoryName AS result_tracked_category, 
+      SELECT subcategoryName AS result_tracked_category,
       COALESCE(SUM(timeSpent), 0) AS time_spent
-      FROM subcategory 
-      WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ? 
+      FROM subcategory
+      WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
       AND mainCategoryName != 'Sleep'
       GROUP BY result_tracked_category
       ORDER BY time_spent ASC
@@ -1112,9 +1073,8 @@ Future<int> getUserStreak({required String currentUser}) async {
 
       final resultEPES = await db.rawQuery('''
           SELECT ROUND((
-            COALESCE(SUM(educationXP), 0) + 
-            COALESCE(SUM(skillsXP), 0) + 
-            COALESCE(SUM(sdXP), 0) + 
+            COALESCE(SUM(educationXP), 0) + COALESCE(SUM(workXP), 0) + COALESCE(SUM(skillsXP), 0) +
+            COALESCE(SUM(sdXP), 0) +
             COALESCE(SUM(sleepXP), 0)
           ) / COUNT(DISTINCT date), 2) AS efficiencyScore
           FROM experience_points
@@ -1146,9 +1106,8 @@ Future<int> getUserStreak({required String currentUser}) async {
       final resultEPES = await db.rawQuery('''
           SELECT ROUND(
             (
-              COALESCE(SUM(educationXP), 0) + 
-              COALESCE(SUM(skillsXP), 0) + 
-              COALESCE(SUM(sdXP), 0) + 
+              COALESCE(SUM(educationXP), 0) + COALESCE(SUM(workXP), 0) + COALESCE(SUM(skillsXP), 0) +
+              COALESCE(SUM(sdXP), 0) +
               COALESCE(SUM(sleepXP), 0)
             ) / COUNT(DISTINCT date), 2
           ) AS efficiencyScore
@@ -1195,9 +1154,8 @@ Future<int> getUserStreak({required String currentUser}) async {
 
       final resultMES = await db.rawQuery('''
       SELECT ROUND((
-        COALESCE(SUM(educationXP), 0) + 
-        COALESCE(SUM(skillsXP), 0) + 
-        COALESCE(SUM(sdXP), 0) + 
+        COALESCE(SUM(educationXP), 0) + COALESCE(SUM(workXP), 0) + COALESCE(SUM(skillsXP), 0) +
+        COALESCE(SUM(sdXP), 0) +
         COALESCE(SUM(sleepXP), 0)
       ) / COUNT(DISTINCT date), 2) AS efficiencyScore
       FROM experience_points
@@ -1230,16 +1188,14 @@ Future<int> getUserStreak({required String currentUser}) async {
       final db = await database;
 
       final resultGTXP = isEntire ? await db.rawQuery("""
-        SELECT (COALESCE(SUM(educationXP), 0) + 
-                COALESCE(SUM(skillsXP), 0) + 
-                COALESCE(SUM(sdXP), 0) + 
+        SELECT (COALESCE(SUM(educationXP), 0) + COALESCE(SUM(workXP), 0) + COALESCE(SUM(skillsXP), 0) +
+                COALESCE(SUM(sdXP), 0) +
                 COALESCE(SUM(sleepXP), 0)) AS entireTotalXP
         FROM experience_points
         WHERE currentLoggedInUser = ?
         """, [currentUser]) : await db.rawQuery("""
-        SELECT (COALESCE(SUM(educationXP), 0) + 
-                COALESCE(SUM(skillsXP), 0) + 
-                COALESCE(SUM(sdXP), 0) + 
+        SELECT (COALESCE(SUM(educationXP), 0) + COALESCE(SUM(workXP), 0) + COALESCE(SUM(skillsXP), 0) +
+                COALESCE(SUM(sdXP), 0) +
                 COALESCE(SUM(sleepXP), 0)) AS entireTotalXP
         FROM experience_points
         WHERE currentLoggedInUser = ? AND strftime('%Y', date) = ?
@@ -1269,7 +1225,7 @@ Future<int> getUserStreak({required String currentUser}) async {
       final db = await database;
 
       final resultDES = await db.rawQuery('''
-      SELECT COALESCE(SUM(educationXP), 0) + COALESCE(SUM(skillsXP), 0) + 
+      SELECT COALESCE(SUM(educationXP), 0) + COALESCE(SUM(workXP), 0) + COALESCE(SUM(skillsXP), 0) +
              COALESCE(SUM(sdXP), 0) + COALESCE(SUM(sleepXP), 0) AS totalXP
       FROM experience_points
       WHERE currentLoggedInUser = ? AND date = ?
@@ -1301,7 +1257,7 @@ Future<int> getUserStreak({required String currentUser}) async {
       final db = await database;
 
       final resultMALPM = getMostProductiveMonth ? await db.rawQuery("""
-          SELECT CASE 
+          SELECT CASE
                     WHEN month_num = 1 THEN 'January'
                     WHEN month_num = 2 THEN 'February'
                     WHEN month_num = 3 THEN 'March'
@@ -1315,18 +1271,18 @@ Future<int> getUserStreak({required String currentUser}) async {
                     WHEN month_num = 11 THEN 'November'
                     WHEN month_num = 12 THEN 'December'
                     ELSE 'TBD'
-                END AS month, 
+                END AS month,
                 COALESCE(MAX(totalMostXP), 0) AS most_productive
           FROM (
-              SELECT CAST(strftime('%m', date) AS INTEGER) AS month_num, 
-                    COALESCE(SUM(educationXP), 0) + COALESCE(SUM(skillsXP), 0) + 
+              SELECT CAST(strftime('%m', date) AS INTEGER) AS month_num,
+                    COALESCE(SUM(educationXP), 0) + COALESCE(SUM(workXP), 0) + COALESCE(SUM(skillsXP), 0) +
                     COALESCE(SUM(sdXP), 0) + COALESCE(SUM(sleepXP), 0) AS totalMostXP
               FROM experience_points
-              WHERE currentLoggedInUser = ? AND strftime('%Y', date) = ? 
+              WHERE currentLoggedInUser = ? AND strftime('%Y', date) = ?
               GROUP BY month_num
           ) AS totalMostXP
         """, [currentUser, year]) : await db.rawQuery("""
-        SELECT CASE 
+        SELECT CASE
                   WHEN month_num = 1 THEN 'January'
                   WHEN month_num = 2 THEN 'February'
                   WHEN month_num = 3 THEN 'March'
@@ -1340,14 +1296,14 @@ Future<int> getUserStreak({required String currentUser}) async {
                   WHEN month_num = 11 THEN 'November'
                   WHEN month_num = 12 THEN 'December'
                   ELSE 'TBD'
-              END AS month, 
+              END AS month,
               COALESCE(MIN(totalLeastXP), 0) AS totalLeastXP
         FROM (
-            SELECT CAST(strftime('%m', date) AS INTEGER) AS month_num, 
-                  COALESCE(SUM(educationXP), 0) + COALESCE(SUM(skillsXP), 0) + 
+            SELECT CAST(strftime('%m', date) AS INTEGER) AS month_num,
+                  COALESCE(SUM(educationXP), 0) + COALESCE(SUM(workXP), 0) + COALESCE(SUM(skillsXP), 0) +
                   COALESCE(SUM(sdXP), 0) + COALESCE(SUM(sleepXP), 0) AS totalLeastXP
             FROM experience_points
-            WHERE currentLoggedInUser = ? AND strftime('%Y', date) = ? 
+            WHERE currentLoggedInUser = ? AND strftime('%Y', date) = ?
             GROUP BY month_num
         ) AS totalLeastXP
           """, [currentUser, year]);
@@ -1370,7 +1326,7 @@ Future<int> getUserStreak({required String currentUser}) async {
       final resultMALPD = getMostProductiveDay ? await db.rawQuery("""
       SELECT COALESCE(date, 'TBD') AS date, COALESCE(MAX(totalMostXP),0) AS most_productive
       FROM (
-        SELECT date, COALESCE(SUM(educationXP), 0) + COALESCE(SUM(skillsXP), 0) + 
+        SELECT date, COALESCE(SUM(educationXP), 0) + COALESCE(SUM(workXP), 0) + COALESCE(SUM(skillsXP), 0) +
              COALESCE(SUM(sdXP), 0) + COALESCE(SUM(sleepXP), 0) AS totalMostXP
         FROM experience_points
         WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
@@ -1379,7 +1335,7 @@ Future<int> getUserStreak({required String currentUser}) async {
         """, [currentUser, firstDay, lastDay]) : await db.rawQuery("""
       SELECT COALESCE(date, 'TBD') AS date, COALESCE(MIN(totalLeastXP),0) AS least_productive
       FROM (
-        SELECT date, COALESCE(SUM(educationXP), 0) + COALESCE(SUM(skillsXP), 0) + 
+        SELECT date, COALESCE(SUM(educationXP), 0) + COALESCE(SUM(workXP), 0) + COALESCE(SUM(skillsXP), 0) +
              COALESCE(SUM(sdXP), 0) + COALESCE(SUM(sleepXP), 0) AS totalLeastXP
         FROM experience_points
         WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
@@ -1394,27 +1350,24 @@ Future<int> getUserStreak({required String currentUser}) async {
   }
 
   /// Fetches *all* experience_points rows for [currentUser].
-Future<List<ExperiencePoints>> getAllExperiencePointsForUser({
-  required String currentUser,
-}) async {
-  final db = await database;
-  // Query every column in the table, filtered by the user
-  final result = await db.query(
-    MotionDbTables.experiencePoints,
-    where: '${MotionDbColumns.currentLoggedInUser} = ?',
-    whereArgs: [currentUser],
-  );
+  Future<List<ExperiencePoints>> getAllExperiencePointsForUser({
+    required String currentUser,
+  }) async {
+    final db = await database;
+    // Query every column in the table, filtered by the user
+    final result = await db.query(
+      MotionDbTables.experiencePoints,
+      where: '${MotionDbColumns.currentLoggedInUser} = ?',
+      whereArgs: [currentUser],
+    );
 
-  // Map each row to your model
-  return result
-      .map((row) => ExperiencePoints.fromMap(row))
-      .toList();
-}
+    // Map each row to your model
+    return result.map((row) => ExperiencePoints.fromMap(row)).toList();
+  }
 
-
-   /// Back-fills experience_points for every date the user already has in main_category.
+  /// Back-fills experience_points for every date the user already has in main_category.
   ///
-  /// 1) Inserts a zeroed row for each date (if it doesn’t exist).  
+  /// 1) Inserts a zeroed row for each date (if it doesn’t exist).
   /// 2) Runs the same UPDATE logic your trigger uses to compute XP from subcategory.
   Future<void> backfillXpForExistingUser() async {
     final db = await database;
@@ -1423,8 +1376,8 @@ Future<List<ExperiencePoints>> getAllExperiencePointsForUser({
     // 1) Insert any missing (date,user) rows with zero XP
     await db.execute('''
       INSERT OR IGNORE INTO experience_points
-        (date, currentLoggedInUser, educationXP, skillsXP, sdXP, sleepXP)
-      SELECT date, currentLoggedInUser, 0, 0, 0, 0
+        (date, currentLoggedInUser, educationXP, workXP, skillsXP, sdXP, sleepXP)
+      SELECT date, currentLoggedInUser, 0, 0, 0, 0, 0
         FROM main_category
       WHERE currentLoggedInUser = ?;
     ''', [currentUser]);
@@ -1435,26 +1388,28 @@ Future<List<ExperiencePoints>> getAllExperiencePointsForUser({
         SET
           educationXP = (
             SELECT CASE
-              WHEN COALESCE(SUM(timeSpent),0) <  15 THEN 0
-              WHEN COALESCE(SUM(timeSpent),0) <  60 THEN 5
-              WHEN COALESCE(SUM(timeSpent),0) < 120 THEN 10
-              WHEN COALESCE(SUM(timeSpent),0) < 180 THEN 15
-              WHEN COALESCE(SUM(timeSpent),0) < 240 THEN 20
-              ELSE 25
+              WHEN CAST(COALESCE(SUM(timeSpent), 0) / 15 AS INTEGER) > 20 THEN 20
+              ELSE CAST(COALESCE(SUM(timeSpent), 0) / 15 AS INTEGER)
             END
             FROM subcategory
             WHERE mainCategoryName   = 'Education'
               AND date               = experience_points.date
               AND currentLoggedInUser= experience_points.currentLoggedInUser
           ),
+          workXP = (
+            SELECT CASE
+              WHEN CAST(COALESCE(SUM(timeSpent), 0) / 15 AS INTEGER) > 25 THEN 25
+              ELSE CAST(COALESCE(SUM(timeSpent), 0) / 15 AS INTEGER)
+            END
+            FROM subcategory
+            WHERE mainCategoryName   = 'Work'
+              AND date               = experience_points.date
+              AND currentLoggedInUser= experience_points.currentLoggedInUser
+          ),
           skillsXP = (
             SELECT CASE
-              WHEN COALESCE(SUM(timeSpent),0) <  15 THEN 0
-              WHEN COALESCE(SUM(timeSpent),0) <  60 THEN 5
-              WHEN COALESCE(SUM(timeSpent),0) < 120 THEN 10
-              WHEN COALESCE(SUM(timeSpent),0) < 180 THEN 15
-              WHEN COALESCE(SUM(timeSpent),0) < 240 THEN 20
-              ELSE 25
+              WHEN CAST(COALESCE(SUM(timeSpent), 0) / 15 AS INTEGER) > 20 THEN 20
+              ELSE CAST(COALESCE(SUM(timeSpent), 0) / 15 AS INTEGER)
             END
             FROM subcategory
             WHERE mainCategoryName   = 'Skills'
@@ -1463,11 +1418,8 @@ Future<List<ExperiencePoints>> getAllExperiencePointsForUser({
           ),
           sdXP = (
             SELECT CASE
-              WHEN COALESCE(SUM(timeSpent),0) <  15 THEN 0
-              WHEN COALESCE(SUM(timeSpent),0) <  60 THEN 10
-              WHEN COALESCE(SUM(timeSpent),0) < 120 THEN 15
-              WHEN COALESCE(SUM(timeSpent),0) < 180 THEN 20
-              ELSE 25
+              WHEN CAST(COALESCE(SUM(timeSpent), 0) / 15 AS INTEGER) > 20 THEN 20
+              ELSE CAST(COALESCE(SUM(timeSpent), 0) / 15 AS INTEGER)
             END
             FROM subcategory
             WHERE mainCategoryName   = 'Self Development'
@@ -1477,10 +1429,11 @@ Future<List<ExperiencePoints>> getAllExperiencePointsForUser({
           sleepXP = (
             SELECT CASE
               WHEN COALESCE(SUM(timeSpent),0) < 300 THEN 0
-              WHEN COALESCE(SUM(timeSpent),0) < 360 THEN 5
-              WHEN COALESCE(SUM(timeSpent),0) < 420 THEN 10
-              WHEN COALESCE(SUM(timeSpent),0) < 480 THEN 20
-              ELSE 25
+              WHEN COALESCE(SUM(timeSpent),0) < 360 THEN 8
+              WHEN COALESCE(SUM(timeSpent),0) < 420 THEN 15
+              WHEN COALESCE(SUM(timeSpent),0) <= 540 THEN 25
+              WHEN COALESCE(SUM(timeSpent),0) <= 600 THEN 15
+              ELSE 5
             END
             FROM subcategory
             WHERE mainCategoryName   = 'Sleep'
@@ -1494,9 +1447,8 @@ Future<List<ExperiencePoints>> getAllExperiencePointsForUser({
   }
 
   Future<void> deleteSubcategoriesByDate(String date) async {
-
     final db = await database;
-    
+
     try {
       await db.delete(
         MotionDbTables.subcategory,
@@ -1509,7 +1461,6 @@ Future<List<ExperiencePoints>> getAllExperiencePointsForUser({
           "TrackerDatabaseHelper.deleteSubcategoriesByDate", e, stackTrace);
     }
   }
-
 
   // Delete the entire database
   // Future<void> deleteDb() async {

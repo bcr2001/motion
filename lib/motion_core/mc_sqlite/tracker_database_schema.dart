@@ -2,7 +2,7 @@ import 'package:motion/motion_core/mc_sqlite/database_constants.dart';
 import 'package:sqflite/sqflite.dart';
 
 class TrackerDatabaseSchema {
-  static const int version = 10;
+  static const int version = 11;
 
   static const String mainCategoryTable = MotionDbTables.mainCategory;
   static const String subcategoryTable = MotionDbTables.subcategory;
@@ -37,6 +37,7 @@ class TrackerDatabaseSchema {
       CREATE TABLE IF NOT EXISTS $mainCategoryTable(
         ${MotionDbColumns.date} TEXT,
         ${MotionDbColumns.education} REAL DEFAULT 0,
+        ${MotionDbColumns.work} REAL DEFAULT 0,
         ${MotionDbColumns.skills} REAL DEFAULT 0,
         ${MotionDbColumns.entertainment} REAL DEFAULT 0,
         ${MotionDbColumns.selfDevelopment} REAL DEFAULT 0,
@@ -50,6 +51,7 @@ class TrackerDatabaseSchema {
       CREATE TABLE IF NOT EXISTS $experiencePointsTable(
         ${MotionDbColumns.date} TEXT,
         ${MotionDbColumns.educationXp} INTEGER DEFAULT 0,
+        ${MotionDbColumns.workXp} INTEGER DEFAULT 0,
         ${MotionDbColumns.skillsXp} INTEGER DEFAULT 0,
         ${MotionDbColumns.selfDevelopmentXp} INTEGER DEFAULT 0,
         ${MotionDbColumns.sleepXp} INTEGER DEFAULT 0,
@@ -81,6 +83,8 @@ class TrackerDatabaseSchema {
     await _addColumnIfMissing(
         db, mainCategoryTable, MotionDbColumns.education, 'REAL DEFAULT 0');
     await _addColumnIfMissing(
+        db, mainCategoryTable, MotionDbColumns.work, 'REAL DEFAULT 0');
+    await _addColumnIfMissing(
         db, mainCategoryTable, MotionDbColumns.skills, 'REAL DEFAULT 0');
     await _addColumnIfMissing(
         db, mainCategoryTable, MotionDbColumns.entertainment, 'REAL DEFAULT 0');
@@ -108,6 +112,8 @@ class TrackerDatabaseSchema {
         db, experiencePointsTable, MotionDbColumns.date, 'TEXT');
     await _addColumnIfMissing(db, experiencePointsTable,
         MotionDbColumns.educationXp, 'INTEGER DEFAULT 0');
+    await _addColumnIfMissing(
+        db, experiencePointsTable, MotionDbColumns.workXp, 'INTEGER DEFAULT 0');
     await _addColumnIfMissing(db, experiencePointsTable,
         MotionDbColumns.skillsXp, 'INTEGER DEFAULT 0');
     await _addColumnIfMissing(db, experiencePointsTable,
@@ -214,6 +220,7 @@ class TrackerDatabaseSchema {
   static String _experiencePointAssignments(String rowAlias) {
     return '''
           ${MotionDbColumns.educationXp} = (${_standardXpFor(MotionCategories.education, rowAlias)}),
+          ${MotionDbColumns.workXp} = (${_workXpFor(rowAlias)}),
           ${MotionDbColumns.skillsXp} = (${_standardXpFor(MotionCategories.skills, rowAlias)}),
           ${MotionDbColumns.selfDevelopmentXp} = (${_selfDevelopmentXpFor(rowAlias)}),
           ${MotionDbColumns.sleepXp} = (${_sleepXpFor(rowAlias)})
@@ -223,27 +230,28 @@ class TrackerDatabaseSchema {
   static String _standardXpFor(String category, String rowAlias) {
     return '''
       SELECT CASE
-        WHEN total < 15 THEN 0
-        WHEN total < 60 THEN 5
-        WHEN total < 120 THEN 10
-        WHEN total < 180 THEN 15
-        WHEN total < 240 THEN 20
-        WHEN total >= 240 THEN 25
-        ELSE 0
+        WHEN CAST(total / 15 AS INTEGER) > 20 THEN 20
+        ELSE CAST(total / 15 AS INTEGER)
       END
       FROM (${_trackedTotal(category, rowAlias)})
+    ''';
+  }
+
+  static String _workXpFor(String rowAlias) {
+    return '''
+      SELECT CASE
+        WHEN CAST(total / 15 AS INTEGER) > 25 THEN 25
+        ELSE CAST(total / 15 AS INTEGER)
+      END
+      FROM (${_trackedTotal(MotionCategories.work, rowAlias)})
     ''';
   }
 
   static String _selfDevelopmentXpFor(String rowAlias) {
     return '''
       SELECT CASE
-        WHEN total < 15 THEN 0
-        WHEN total < 60 THEN 10
-        WHEN total < 120 THEN 15
-        WHEN total < 180 THEN 20
-        WHEN total >= 180 THEN 25
-        ELSE 0
+        WHEN CAST(total / 15 AS INTEGER) > 20 THEN 20
+        ELSE CAST(total / 15 AS INTEGER)
       END
       FROM (${_trackedTotal(MotionCategories.selfDevelopment, rowAlias)})
     ''';
@@ -253,11 +261,11 @@ class TrackerDatabaseSchema {
     return '''
       SELECT CASE
         WHEN total < 300 THEN 0
-        WHEN total < 360 THEN 5
-        WHEN total < 420 THEN 10
-        WHEN total < 480 THEN 20
-        WHEN total >= 480 THEN 25
-        ELSE 0
+        WHEN total < 360 THEN 8
+        WHEN total < 420 THEN 15
+        WHEN total <= 540 THEN 25
+        WHEN total <= 600 THEN 15
+        ELSE 5
       END
       FROM (${_trackedTotal(MotionCategories.sleep, rowAlias)})
     ''';
@@ -266,6 +274,7 @@ class TrackerDatabaseSchema {
   static String _mainCategoryAssignments(String rowAlias) {
     return '''
           ${MotionDbColumns.education} = (${_categoryTotal(MotionCategories.education, rowAlias)}),
+          ${MotionDbColumns.work} = (${_categoryTotal(MotionCategories.work, rowAlias)}),
           ${MotionDbColumns.skills} = (${_categoryTotal(MotionCategories.skills, rowAlias)}),
           ${MotionDbColumns.entertainment} = (${_categoryTotal(MotionCategories.entertainment, rowAlias)}),
           ${MotionDbColumns.selfDevelopment} = (${_categoryTotal(MotionCategories.selfDevelopment, rowAlias)}),

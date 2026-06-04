@@ -39,6 +39,11 @@ Widget chartLegend() {
                 color: AppColor.educationPieChartColor,
                 mainCategoryName: AppString.educationMainCategory),
 
+            // work
+            mainCategoryPieChartLegend(
+                color: AppColor.workPieChartColor,
+                mainCategoryName: AppString.workMainCategory),
+
             // skills
             mainCategoryPieChartLegend(
                 color: AppColor.skillsPieChartColor,
@@ -93,7 +98,9 @@ class YearPieChartDistributionAccountedUnaccounted extends StatelessWidget {
         ),
 
         // legend name
-        Text(legendName, style: AppTextStyle.subSectionTextStyle(fontsize: 11, color: Colors.blueGrey))
+        Text(legendName,
+            style: AppTextStyle.subSectionTextStyle(
+                fontsize: 11, color: Colors.blueGrey))
       ],
     );
   }
@@ -184,7 +191,7 @@ class AYearInSummaryPieChartDistribution extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 30.0),
       child: Consumer2<UserUidProvider, MainCategoryTrackerProvider>(
-        builder: (context, user, main, child) {
+          builder: (context, user, main, child) {
         // user uid
         final currentUser = user.userUid;
         if (currentUser == null) {
@@ -445,6 +452,11 @@ class LineChartOfMainCategoryYearlyDistribution extends StatelessWidget {
                   data: currentYearData!,
                   getCategoryValues: (data) => data["education"],
                   color: AppColor.educationPieChartColor,
+                ),
+                createLineChartBarData(
+                  data: currentYearData,
+                  getCategoryValues: (data) => data["work"],
+                  color: AppColor.workPieChartColor,
                 ),
                 createLineChartBarData(
                   data: currentYearData,
@@ -717,6 +729,7 @@ class StackedBarChartOfMainCategoryDistribution extends StatelessWidget {
   BarChartGroupData generateGroupData(
     int x,
     double education,
+    double work,
     double skills,
     double entertainment,
     double selfDevelopment,
@@ -734,18 +747,37 @@ class StackedBarChartOfMainCategoryDistribution extends StatelessWidget {
           width: barWidthInd,
         ),
 
-        // skills bar
+        // work bar
         BarChartRodData(
           fromY: education + betweenSpace,
-          toY: education + betweenSpace + skills,
+          toY: education + betweenSpace + work,
+          color: AppColor.workPieChartColor,
+          width: barWidthInd,
+        ),
+
+        // skills bar
+        BarChartRodData(
+          fromY: education + betweenSpace + work + betweenSpace,
+          toY: education + betweenSpace + work + betweenSpace + skills,
           color: AppColor.skillsPieChartColor,
           width: barWidthInd,
         ),
 
         // entertainment bar
         BarChartRodData(
-          fromY: education + betweenSpace + skills + betweenSpace,
-          toY: education + betweenSpace + skills + betweenSpace + entertainment,
+          fromY: education +
+              betweenSpace +
+              work +
+              betweenSpace +
+              skills +
+              betweenSpace,
+          toY: education +
+              betweenSpace +
+              work +
+              betweenSpace +
+              skills +
+              betweenSpace +
+              entertainment,
           color: AppColor.entertainmentPieChartColor,
           width: barWidthInd,
         ),
@@ -754,11 +786,15 @@ class StackedBarChartOfMainCategoryDistribution extends StatelessWidget {
         BarChartRodData(
           fromY: education +
               betweenSpace +
+              work +
+              betweenSpace +
               skills +
               betweenSpace +
               entertainment +
               betweenSpace,
           toY: education +
+              betweenSpace +
+              work +
               betweenSpace +
               skills +
               betweenSpace +
@@ -773,6 +809,8 @@ class StackedBarChartOfMainCategoryDistribution extends StatelessWidget {
         BarChartRodData(
           fromY: education +
               betweenSpace +
+              work +
+              betweenSpace +
               skills +
               betweenSpace +
               entertainment +
@@ -780,6 +818,8 @@ class StackedBarChartOfMainCategoryDistribution extends StatelessWidget {
               selfDevelopment +
               betweenSpace,
           toY: education +
+              betweenSpace +
+              work +
               betweenSpace +
               skills +
               betweenSpace +
@@ -826,6 +866,9 @@ class StackedBarChartOfMainCategoryDistribution extends StatelessWidget {
                 // education
                 final double educationValue = currentYearData[i]["education"];
 
+                // work
+                final double workValue = currentYearData[i]["work"];
+
                 // skills
                 final double skillValue = currentYearData[i]["skills"];
 
@@ -843,6 +886,7 @@ class StackedBarChartOfMainCategoryDistribution extends StatelessWidget {
                 final stackBarGroup = generateGroupData(
                     month,
                     educationValue,
+                    workValue,
                     skillValue,
                     entertainmentValue,
                     selfDevelopmentValue,
