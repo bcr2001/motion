@@ -4,6 +4,10 @@ import 'package:motion/motion_core/mc_sqlite/xp_policy.dart';
 
 void main() {
   group('MotionXpPolicy', () {
+    test('defines the maximum daily XP used to normalize EFS', () {
+      expect(MotionXpPolicy.maxDailyXp, 110);
+    });
+
     test('awards Work XP at one point per 15 minutes up to 25 XP', () {
       expect(MotionXpPolicy.categoryXp(MotionCategories.work, 120), 8);
       expect(MotionXpPolicy.categoryXp(MotionCategories.work, 375), 25);

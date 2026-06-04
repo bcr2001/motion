@@ -31,11 +31,11 @@ class EfficienyScoreSelectedDay extends StatelessWidget {
     return Consumer2<ExperiencePointTableProvider, UserUidProvider>(
         builder: (context, xp, user, child) {
       // currently logged in user uid
-        final String? userUID = user.userUid;
-        if (userUID == null) {
-          // still loading SharedPreferences, or not signed in yet
-          return const ShimmerWidget.rectangular(width: 50, height: 30);
-        }
+      final String? userUID = user.userUid;
+      if (userUID == null) {
+        // still loading SharedPreferences, or not signed in yet
+        return const ShimmerWidget.rectangular(width: 50, height: 30);
+      }
 
       return FutureBuilder(
           future: xp.retrieveDailyExperiencePoints(
@@ -73,11 +73,11 @@ class XPForTheCurrentDay extends StatelessWidget {
       final today = date.currentDate;
 
       // currently logged in user uid
-        final String? currentUserUid = user.userUid;
-        if (currentUserUid == null) {
-          // still loading or not signed in—show same shimmer
-          return const ShimmerWidget.rectangular(width: 120, height: 40);
-        }
+      final String? currentUserUid = user.userUid;
+      if (currentUserUid == null) {
+        // still loading or not signed in—show same shimmer
+        return const ShimmerWidget.rectangular(width: 120, height: 40);
+      }
 
       return FutureBuilder(
           future: xp.retrieveDailyExperiencePoints(
@@ -117,9 +117,8 @@ class EfficienyScoreSelectedYearOrMonth extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer3<ExperiencePointTableProvider, UserUidProvider,
         FirstAndLastDay>(builder: (context, xp, user, fal, child) {
-
       // currently logged in user uid
-        final String? currentUserUid = user.userUid;
+      final String? currentUserUid = user.userUid;
       if (currentUserUid == null) {
         // still loading or not signed in—show placeholder
         return const ShimmerWidget.rectangular(width: 50, height: 30);
@@ -141,13 +140,11 @@ class EfficienyScoreSelectedYearOrMonth extends StatelessWidget {
                 } else {
                   final resultSnapShot = snapshot.data ?? 0.0;
 
-                  final efficientResults = resultSnapShot / 100;
-
                   logger.i(
                       "Total Efficiency Score for $selectedYear: $resultSnapShot");
 
                   return specialSectionTitleSelectedYear(
-                      mainTitleName: efficientResults.toString());
+                      mainTitleName: resultSnapShot.toString());
                 }
               })
           : FutureBuilder(
@@ -163,13 +160,11 @@ class EfficienyScoreSelectedYearOrMonth extends StatelessWidget {
                 } else {
                   final resultSnapShot = snapshot.data ?? 0.0;
 
-                  final efficientResults = resultSnapShot / 100;
-
                   logger.i(
                       "Total Efficiency Score for $selectedYear: $resultSnapShot");
 
                   return specialSectionTitleSelectedYear(
-                      mainTitleName: efficientResults.toString());
+                      mainTitleName: resultSnapShot.toString());
                 }
               });
     });
@@ -177,7 +172,7 @@ class EfficienyScoreSelectedYearOrMonth extends StatelessWidget {
 }
 
 // Returns the overall efficiency score or the efficiency score for the current year.
- class EfficienyScoreWindow extends StatelessWidget {
+class EfficienyScoreWindow extends StatelessWidget {
   final bool getEntireScore;
   const EfficienyScoreWindow({super.key, required this.getEntireScore});
 
@@ -185,11 +180,10 @@ class EfficienyScoreSelectedYearOrMonth extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer3<ExperiencePointTableProvider, UserUidProvider,
         CurrentYearProvider>(builder: ((context, xp, user, year, child) {
-
       final String? currentUser = user.userUid;
       if (currentUser == null) {
-          // still loading or not signed in — show placeholder
-          return const ShimmerWidget.rectangular(width: 50, height: 30);
+        // still loading or not signed in — show placeholder
+        return const ShimmerWidget.rectangular(width: 50, height: 30);
       }
 
       final String currentYear = year.currentYear;
@@ -206,12 +200,10 @@ class EfficienyScoreSelectedYearOrMonth extends StatelessWidget {
                 } else {
                   final resultSnapShot = snapshot.data ?? 0.0;
 
-                  final efficientResults = resultSnapShot / 100;
-
                   logger.i("Total Efficiency Score: $resultSnapShot");
 
                   return efficiencySection(
-                      score: "$efficientResults", getEntire: true);
+                      score: "$resultSnapShot", getEntire: true);
                 }
               })
           : FutureBuilder(
@@ -225,12 +217,10 @@ class EfficienyScoreSelectedYearOrMonth extends StatelessWidget {
                 } else {
                   final resultSnapShot = snapshot.data ?? 0.0;
 
-                  final efficientResults = resultSnapShot / 100;
-
                   logger.i("Total Efficiency Score: $resultSnapShot");
 
                   return CurrentYearEFSDisplay(
-                      score: efficientResults, isEntire: false);
+                      score: resultSnapShot, isEntire: false);
                 }
               });
     }));
@@ -262,8 +252,7 @@ class CurrentYearEFSDisplay extends StatelessWidget {
           final String? currentUser = user.userUid;
           if (currentUser == null) {
             // still loading or not signed in—show placeholder
-            return const ShimmerWidget.rectangular(
-                width: 100, height: 30);
+            return const ShimmerWidget.rectangular(width: 100, height: 30);
           }
 
           final String currentYear = year.currentYear;
@@ -287,8 +276,7 @@ class CurrentYearEFSDisplay extends StatelessWidget {
                   return Text(
                     "$snapResults XP",
                     style: AppTextStyle.accountedAndUnaccountedGallaryStyle(
-                        fontsize: 22,
-                        fontweight: FontWeight.w900),
+                        fontsize: 22, fontweight: FontWeight.w900),
                   );
                 }
               });
@@ -319,19 +307,15 @@ class CurrentYearEFSDisplay extends StatelessWidget {
 
   // badge assignment depending on score
   Widget _getBadge(double score) {
-    // the reason for converting the score is to get
-    // the appropriate score categories to assign badges
-    final double standardScore = score * 100;
-
-    if (standardScore >= 0 && standardScore <= 24) {
+    if (score >= 0 && score <= 24) {
       return _badgetAndName(badge: AppImages.sloth);
-    } else if (standardScore >= 25 && standardScore <= 49) {
+    } else if (score >= 25 && score <= 49) {
       return _badgetAndName(badge: AppImages.dolphine);
-    } else if (standardScore >= 50 && standardScore <= 74) {
+    } else if (score >= 50 && score <= 74) {
       return _badgetAndName(badge: AppImages.eagle);
-    } else if (standardScore >= 75 && standardScore <= 99) {
+    } else if (score >= 75 && score <= 99) {
       return _badgetAndName(badge: AppImages.dragon);
-    } else if (standardScore == 100) {
+    } else if (score == 100) {
       return const Text("Time Wizard");
     } else {
       return const Text("Error :()");
@@ -344,8 +328,8 @@ class CurrentYearEFSDisplay extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return SizedBox(
-      height: screenHeight*0.20,
-      width: screenWidth*0.60,
+      height: screenHeight * 0.20,
+      width: screenWidth * 0.60,
       child: Card(
         elevation: 0,
         child: Center(
@@ -356,20 +340,19 @@ class CurrentYearEFSDisplay extends StatelessWidget {
               children: [
                 // efs and total XP for current year
                 _efsAndTotalXp(context),
-              
+
                 // BADGE depending on score
-                // When the badge is double tapped, it navigates to a page that displays 
-                // the badge assignment criteria 
+                // When the badge is double tapped, it navigates to a page that displays
+                // the badge assignment criteria
                 GestureDetector(
-                  onDoubleTap: (){
+                  onDoubleTap: () {
                     Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const BadgeAssignment())
-                      );
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const BadgeAssignment()));
                   },
-                  child: _getBadge(score),)
-                
+                  child: _getBadge(score),
+                )
               ],
             ),
           ),
@@ -513,8 +496,7 @@ class MostAndLeastProductiveDayBuilder extends StatelessWidget {
             // currently logged in user uid
             final String? currentUserUid = user.userUid;
             if (currentUserUid == null) {
-              return const ShimmerWidget.rectangular(
-                  width: 100, height: 30);
+              return const ShimmerWidget.rectangular(width: 100, height: 30);
             }
 
             // first and last day of the current month
@@ -565,10 +547,9 @@ class MostAndLeastProductiveMonthBuilder extends StatelessWidget {
         : Consumer2<ExperiencePointTableProvider, UserUidProvider>(
             builder: (context, xp, user, child) {
             // currently logged in user uid
-             final String? currentUserUid = user.userUid;
+            final String? currentUserUid = user.userUid;
             if (currentUserUid == null) {
-                return const ShimmerWidget.rectangular(
-                    width: 100, height: 30);
+              return const ShimmerWidget.rectangular(width: 100, height: 30);
             }
 
             return ProductiveDayBuilder(

@@ -5,6 +5,7 @@ import 'package:motion/motion_core/mc_sql_table/sub_table.dart';
 import 'package:motion/motion_core/mc_sqlite/database_constants.dart';
 import 'package:motion/motion_core/mc_sqlite/database_error.dart';
 import 'package:motion/motion_core/mc_sqlite/tracker_database_schema.dart';
+import 'package:motion/motion_core/mc_sqlite/xp_policy.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -1072,11 +1073,11 @@ class TrackerDatabaseHelper {
       final db = await database;
 
       final resultEPES = await db.rawQuery('''
-          SELECT ROUND((
+          SELECT ROUND(((
             COALESCE(SUM(educationXP), 0) + COALESCE(SUM(workXP), 0) + COALESCE(SUM(skillsXP), 0) +
             COALESCE(SUM(sdXP), 0) +
             COALESCE(SUM(sleepXP), 0)
-          ) / COUNT(DISTINCT date), 2) AS efficiencyScore
+          ) / COUNT(DISTINCT date)) * 100.0 / ${MotionXpPolicy.maxDailyXp}, 2) AS efficiencyScore
           FROM experience_points
           WHERE currentLoggedInUser = ?
         ''', [currentUser]);
@@ -1105,11 +1106,11 @@ class TrackerDatabaseHelper {
 
       final resultEPES = await db.rawQuery('''
           SELECT ROUND(
-            (
+            ((
               COALESCE(SUM(educationXP), 0) + COALESCE(SUM(workXP), 0) + COALESCE(SUM(skillsXP), 0) +
               COALESCE(SUM(sdXP), 0) +
               COALESCE(SUM(sleepXP), 0)
-            ) / COUNT(DISTINCT date), 2
+            ) / COUNT(DISTINCT date)) * 100.0 / ${MotionXpPolicy.maxDailyXp}, 2
           ) AS efficiencyScore
           FROM experience_points
           WHERE currentLoggedInUser = ? AND strftime('%Y', date) = ?
@@ -1153,11 +1154,11 @@ class TrackerDatabaseHelper {
       final db = await database;
 
       final resultMES = await db.rawQuery('''
-      SELECT ROUND((
+      SELECT ROUND(((
         COALESCE(SUM(educationXP), 0) + COALESCE(SUM(workXP), 0) + COALESCE(SUM(skillsXP), 0) +
         COALESCE(SUM(sdXP), 0) +
         COALESCE(SUM(sleepXP), 0)
-      ) / COUNT(DISTINCT date), 2) AS efficiencyScore
+      ) / COUNT(DISTINCT date)) * 100.0 / ${MotionXpPolicy.maxDailyXp}, 2) AS efficiencyScore
       FROM experience_points
       WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
     ''', [currentUser, firstDayOfMonth, lastDayOfMonth]);
