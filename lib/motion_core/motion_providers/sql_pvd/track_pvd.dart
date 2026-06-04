@@ -3,20 +3,25 @@ import 'package:motion/motion_core/mc_sql_table/main_table.dart';
 import 'package:motion/motion_core/mc_sql_table/sub_table.dart';
 
 import '../../../main.dart';
+import 'current_user_guard.dart';
 
 // MAIN CATEGORY TABLE
 //handles database operations for the main_category table
 class MainCategoryTrackerProvider extends ChangeNotifier {
   // insert data into the main_category table
   Future<void> insertIntoMainCategoryTable(MainCategory mainCategory) async {
-    await trackDbInstance.insertMainCategory(mainCategory);
+    await trackDbInstance.insertMainCategory(
+      requireMainCategoryUser(mainCategory),
+    );
 
     notifyListeners();
   }
 
   // update existing data in the main category table
   Future<void> updateExistingMainCategory(MainCategory mainCategory) async {
-    await trackDbInstance.updateMainCategory(mainCategory);
+    await trackDbInstance.updateMainCategory(
+      requireMainCategoryUser(mainCategory),
+    );
 
     notifyListeners();
   }
@@ -26,14 +31,15 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
   Future<List<Map<String, dynamic>>> retrieveMCTotalAndXPEarned(
       {required String currentUser, required String targetDate}) async {
     return await trackDbInstance.getMCTotalAndXPEarned(
-        currentUser: currentUser, targetDate: targetDate);
+        currentUser: requireCurrentUser(currentUser), targetDate: targetDate);
   }
 
   // Retrieve the entire total from the main category table.
   Future<double> retrieveEntireTotalMainCategoryTable(
       String currentUser, bool isUnaccounted) async {
-    double theEntireTotal = await trackDbInstance
-        .getEntireTotalMainCategoryTable(currentUser, isUnaccounted);
+    double theEntireTotal =
+        await trackDbInstance.getEntireTotalMainCategoryTable(
+            requireCurrentUser(currentUser), isUnaccounted);
 
     return theEntireTotal;
   }
@@ -44,7 +50,7 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
       String currentUser, bool isUnaccounted, String currentYear) async {
     double theEntireYearTotal =
         await trackDbInstance.getEntireYearTotalMainCategoryTable(
-            currentUser, isUnaccounted, currentYear);
+            requireCurrentUser(currentUser), isUnaccounted, currentYear);
 
     return theEntireYearTotal;
   }
@@ -58,7 +64,7 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
   ) async {
     double entireMonthTotal =
         await trackDbInstance.getEntireMonthlyTotalMainCategoryTable(
-            currentUser, firstDay, lastDay, isUnaccounted);
+            requireCurrentUser(currentUser), firstDay, lastDay, isUnaccounted);
 
     return entireMonthTotal;
   }
@@ -67,14 +73,14 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
   Future<double> accountedMonthTotal(String currentUser, String firstDay,
       String lastDay, bool isUnaccounted) async {
     return await trackDbInstance.getEntireMonthlyTotalMainCategoryTable(
-        currentUser, firstDay, lastDay, isUnaccounted);
+        requireCurrentUser(currentUser), firstDay, lastDay, isUnaccounted);
   }
 
   // get a table for both accounted and unaccounted values
   Future<List<Map<String, dynamic>>> retrieveMonthAccountUnaccountTable(
       String currentUser, firstDay, lastDay) async {
     return await trackDbInstance.getMonthAccountUnaccountTable(
-        currentUser, firstDay, lastDay);
+        requireCurrentUser(currentUser), firstDay, lastDay);
   }
 
   // retrieve the total number of days in the main_category table
@@ -83,7 +89,7 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
       String currentYear = "",
       bool getAllDays = true}) async {
     int numberOfDays = await trackDbInstance.getNumberOfDays(
-        currentUser: currentUser,
+        currentUser: requireCurrentUser(currentUser),
         currentYear: currentYear,
         getAllDays: getAllDays);
 
@@ -91,9 +97,9 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
   }
 
   // retrieves the users streak
-  Future<int> retrievedUserStreak(
-      {required String currentUser}) async {
-    int streak = await trackDbInstance.getUserStreak(currentUser:currentUser);
+  Future<int> retrievedUserStreak({required String currentUser}) async {
+    int streak = await trackDbInstance.getUserStreak(
+        currentUser: requireCurrentUser(currentUser));
 
     return streak;
   }
@@ -108,7 +114,7 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
         await trackDbInstance.getMostAndLeastTrackedMainCategory(
             firstDay: firstDay,
             lastDay: lastDay,
-            currentUser: currentUser,
+            currentUser: requireCurrentUser(currentUser),
             isMost: isMost);
 
     return result;
@@ -122,7 +128,9 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
       required String lastDay}) async {
     List<Map<String, dynamic>> resultMT =
         await trackDbInstance.getMainTotalTimeSpentSpecificDates(
-            currentUser: currentUser, firstDay: firstDay, lastDay: lastDay);
+            currentUser: requireCurrentUser(currentUser),
+            firstDay: firstDay,
+            lastDay: lastDay);
 
     return resultMT;
   }
@@ -134,7 +142,7 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
       required String firstDatePeriod,
       required String lastDatePeriod}) async {
     return await trackDbInstance.getAWeekOfAccountedAndAccountedData(
-        currentUser: currentUser,
+        currentUser: requireCurrentUser(currentUser),
         firstDatePeriod: firstDatePeriod,
         lastDatePeriod: lastDatePeriod);
   }
@@ -144,7 +152,7 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
       retrieveAccountedAndUnaccountedBrokenByYears(
           {required String currentUser}) async {
     return await trackDbInstance.getAccountedAndUnaccountedBrokenByYears(
-        currentUser: currentUser);
+        currentUser: requireCurrentUser(currentUser));
   }
 
   // get the accounted and unaccounted totals broken down by month
@@ -152,28 +160,28 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
       retrieveMonthDistibutionOfAccountedUnaccounted(
           {required String currentUser, required String year}) async {
     return await trackDbInstance.getMonthDistibutionOfAccountedUnaccounted(
-        currentUser: currentUser, year: year);
+        currentUser: requireCurrentUser(currentUser), year: year);
   }
 
   // get yearly totals for all the main categories
   Future<List<Map<String, dynamic>>> retrieveYearlyTotalsForAllMainCatgories(
       {required String currentUser, required String year}) async {
     return await trackDbInstance.getYearlyTotalsForAllMainCatgories(
-        currentUser: currentUser, year: year);
+        currentUser: requireCurrentUser(currentUser), year: year);
   }
 
   // get the totals for the 5 main categories
   Future<List<Map<String, dynamic>>> retrieveAllMainCategoryTotals(
       {required String currentUser}) async {
     return await trackDbInstance.getAllMainCategoryTotals(
-        currentUser: currentUser);
+        currentUser: requireCurrentUser(currentUser));
   }
 
   // get the entire total time spent for the main category
   Future<List<Map<String, dynamic>>> retrieveEntireMainTotalTimeSpent(
       {required String currentUser}) async {
     return await trackDbInstance.getEntireMainTotalTimeSpent(
-        currentUser: currentUser);
+        currentUser: requireCurrentUser(currentUser));
   }
 
   // get the daily intensity scores
@@ -182,7 +190,7 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
       String year = "",
       bool getEntireIntensity = true}) async {
     return await trackDbInstance.getDailyAccountedAndIntensities(
-        currentUser: currentUser,
+        currentUser: requireCurrentUser(currentUser),
         year: year,
         getEntireIntensity: getEntireIntensity);
   }
@@ -200,19 +208,18 @@ class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
       String currentDate, String currentUser, String subcategoryName) async {
     _currentDateSubcategories = await trackDbInstance.getCurrentDateSubcategory(
       currentDate,
-      currentUser,
+      requireCurrentUser(currentUser),
       subcategoryName,
     );
 
     notifyListeners();
   }
 
-
   // retrieve the entire totals of subcategories
   Future<List<Map<String, dynamic>>> retrieveAllSubcategoryTotals(
       {required currentUser}) async {
     return await trackDbInstance.getAllSubcategoryTotals(
-        currentUser: currentUser);
+        currentUser: requireCurrentUser(currentUser));
   }
 
   // retrive the total and average for each subcategory for a specific month
@@ -222,28 +229,31 @@ class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
       String endingDate,
       bool isSubcategory) async {
     return await trackDbInstance.getMonthTotalAndAverage(
-        currentUser, startingDate, endingDate, isSubcategory);
+        requireCurrentUser(currentUser),
+        startingDate,
+        endingDate,
+        isSubcategory);
   }
 
   // get the entire month total for all subcategories
   Future<double> retrieveMonthTotalTimeSpent(
       String currentUser, startingDate, endingDate) async {
     return await trackDbInstance.getMonthTotalTimeSpent(
-        currentUser, startingDate, endingDate);
+        requireCurrentUser(currentUser), startingDate, endingDate);
   }
 
   // gets the total time spent for all subcategories (current date)
   Future<double> retrieveTotalTimeSpentAllSubs(
       String currentDate, String currentUser) async {
     return await trackDbInstance.getTotalTimeForCurrentDate(
-        currentDate, currentUser);
+        currentDate, requireCurrentUser(currentUser));
   }
 
   // get the total time spent for a specific subcategory
   Future<double> retrieveTotalTimeSpentSubSpecific(
       String currentDate, String currentUser, String subcategoryName) async {
     return await trackDbInstance.getTotalTimeSpentPerSubcategory(
-        currentDate, currentUser, subcategoryName);
+        currentDate, requireCurrentUser(currentUser), subcategoryName);
   }
 
   // get the least and most tracked subcategory
@@ -255,7 +265,7 @@ class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
     return await trackDbInstance.getMostAndLeastTrackedSubcategory(
         firstDay: firstDay,
         lastDay: lastDay,
-        currentUser: currentUser,
+        currentUser: requireCurrentUser(currentUser),
         isMost: isMost);
   }
 
@@ -263,19 +273,24 @@ class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
   Future<List<Map<String, dynamic>>> retrieveSubcategoryTotalsForSpecificDate(
       {required String selectedDate, required String currentUser}) async {
     return await trackDbInstance.getSubcategoryTotalsForSpecificDate(
-        selectedDate: selectedDate, currentUser: currentUser);
+        selectedDate: selectedDate,
+        currentUser: requireCurrentUser(currentUser));
   }
 
   // inserting data into the subcategory table
   Future<void> insertIntoSubcategoryTable(Subcategories subcategories) async {
-    await trackDbInstance.insertSubcategory(subcategories);
+    await trackDbInstance.insertSubcategory(
+      requireSubcategoryUser(subcategories),
+    );
 
     notifyListeners();
   }
 
   // update data in the subcategory table
   Future<void> updateSubcategoryTable(Subcategories subcategories) async {
-    await trackDbInstance.updateSubcategory(subcategories);
+    await trackDbInstance.updateSubcategory(
+      requireSubcategoryUser(subcategories),
+    );
 
     notifyListeners();
   }

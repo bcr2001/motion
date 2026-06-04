@@ -10334,7 +10334,7 @@ date,mainCategoryName,subcategoryName,timeSpent,currentLoggedInUser
 6/21/2024,Education,Lec/Exams/Assign,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
 6/21/2024,Self Development,Reading,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
 6/21/2024,Entertainment,SM/Anime/MM,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
-6/21/2024,Sleep,Sleep,422.68,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/21/2024,Sleep,Sleep,450.53,hhANBj74wiclvfuDLGfuDlFZgJ62
 6/21/2024,Education,Studied/Revised,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
 6/21/2024,Entertainment,Video Games,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
 6/22/2024,Skills,English Comms,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
@@ -13936,6 +13936,19 @@ date,mainCategoryName,subcategoryName,timeSpent,currentLoggedInUser
 5/30/2025,Self Development,Bible Study,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/30/2025,Self Development,Reading,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
 5/30/2025,Sleep,Sleep,362.68,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/31/2025,Education,Lec/Exams/Assign,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/31/2025,Education,Studied/Revised,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/31/2025,Entertainment,SM/Anime/MM,273.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/31/2025,Entertainment,Video Games,169.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/31/2025,Skills,Video Editing,100.33,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/31/2025,Skills,Mental Math,14.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/31/2025,Skills,Case Practice,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/31/2025,Skills,Spanish Comms,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/31/2025,Skills,Programming,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/31/2025,Skills,English Comms,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/31/2025,Self Development,Bible Study,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/31/2025,Self Development,Reading,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/31/2025,Sleep,Sleep,427.47,hhANBj74wiclvfuDLGfuDlFZgJ62
 6/1/2025,Education,Lec/Exams/Assign,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
 6/1/2025,Education,Studied/Revised,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
 6/1/2025,Entertainment,SM/Anime/MM,317.00,hhANBj74wiclvfuDLGfuDlFZgJ62
@@ -15572,7 +15585,7 @@ date,mainCategoryName,subcategoryName,timeSpent,currentLoggedInUser
 10/24/2025,Self Development,Reading,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
 10/24/2025,Sleep,Sleep,405.08,hhANBj74wiclvfuDLGfuDlFZgJ62
 10/25/2025,Education,Lec/Exams/Assign,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
-10/25/2025,Education,Studied/Revised,0.00,
+10/25/2025,Education,Studied/Revised,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
 10/25/2025,Entertainment,SM/Anime/MM,265.00,hhANBj74wiclvfuDLGfuDlFZgJ62
 10/25/2025,Skills,Video Editing,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
 10/25/2025,Skills,Mental Math,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
@@ -17374,8 +17387,6 @@ date,mainCategoryName,subcategoryName,timeSpent,currentLoggedInUser
 4/1/2026,Skills,English Comms,45.57,hhANBj74wiclvfuDLGfuDlFZgJ62
 4/1/2026,Skills,Video Editing,130.12,hhANBj74wiclvfuDLGfuDlFZgJ62
 4/1/2026,Skills,Graphic Design,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
-4/1/2026,Skills,Programming,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
-4/1/2026,Self Development,Reading,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
 4/1/2026,Self Development,Tennis,4.62,hhANBj74wiclvfuDLGfuDlFZgJ62
 4/1/2026,Sleep,Sleep,462.62,hhANBj74wiclvfuDLGfuDlFZgJ62
 4/2/2026,Education,Lec/Exams/Assign,71.07,hhANBj74wiclvfuDLGfuDlFZgJ62
@@ -17384,7 +17395,705 @@ date,mainCategoryName,subcategoryName,timeSpent,currentLoggedInUser
 4/2/2026,Skills,English Comms,36.90,hhANBj74wiclvfuDLGfuDlFZgJ62
 4/2/2026,Skills,Video Editing,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
 4/2/2026,Skills,Graphic Design,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
-4/2/2026,Skills,Programming,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
-4/2/2026,Self Development,Reading,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
 4/2/2026,Self Development,Tennis,26.68,hhANBj74wiclvfuDLGfuDlFZgJ62
 4/2/2026,Sleep,Sleep,424.83,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/3/2026,Education,Lec/Exams/Assign,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/3/2026,Education,Studied/Revised,195.35,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/3/2026,Entertainment,SM/Anime/MM,145.70,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/3/2026,Skills,English Comms,30.30,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/3/2026,Skills,Video Editing,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/3/2026,Skills,Graphic Design,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/3/2026,Self Development,Tennis,52.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/3/2026,Sleep,Sleep,457.75,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/4/2026,Education,Lec/Exams/Assign,54.67,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/4/2026,Education,Studied/Revised,254.50,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/4/2026,Entertainment,SM/Anime/MM,209.05,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/4/2026,Skills,English Comms,29.62,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/4/2026,Skills,Video Editing,11.17,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/4/2026,Skills,Graphic Design,82.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/4/2026,Self Development,Tennis,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/4/2026,Sleep,Sleep,476.02,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/5/2026,Education,Lec/Exams/Assign,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/5/2026,Education,Studied/Revised,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/5/2026,Entertainment,SM/Anime/MM,516.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/5/2026,Skills,English Comms,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/5/2026,Skills,Video Editing,189.05,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/5/2026,Skills,Graphic Design,66.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/5/2026,Self Development,Tennis,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/5/2026,Sleep,Sleep,248.48,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/6/2026,Education,Lec/Exams/Assign,24.90,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/6/2026,Education,Studied/Revised,399.15,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/6/2026,Entertainment,SM/Anime/MM,202.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/6/2026,Skills,English Comms,42.10,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/6/2026,Skills,Video Editing,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/6/2026,Skills,Graphic Design,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/6/2026,Self Development,Tennis,15.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/6/2026,Sleep,Sleep,540.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/7/2026,Education,Lec/Exams/Assign,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/7/2026,Education,Studied/Revised,252.67,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/7/2026,Entertainment,SM/Anime/MM,489.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/7/2026,Skills,English Comms,30.28,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/7/2026,Skills,Video Editing,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/7/2026,Skills,Graphic Design,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/7/2026,Self Development,Tennis,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/7/2026,Sleep,Sleep,458.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/8/2026,Education,Lec/Exams/Assign,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/8/2026,Education,Studied/Revised,121.12,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/8/2026,Entertainment,SM/Anime/MM,424.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/8/2026,Skills,English Comms,31.82,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/8/2026,Skills,Video Editing,205.68,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/8/2026,Skills,Graphic Design,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/8/2026,Self Development,Tennis,27.97,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/8/2026,Sleep,Sleep,429.52,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/9/2026,Education,Lec/Exams/Assign,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/9/2026,Education,Studied/Revised,148.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/9/2026,Entertainment,SM/Anime/MM,264.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/9/2026,Skills,English Comms,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/9/2026,Skills,Video Editing,292.53,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/9/2026,Skills,Graphic Design,47.78,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/9/2026,Self Development,Tennis,36.77,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/9/2026,Sleep,Sleep,401.67,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/10/2026,Education,Lec/Exams/Assign,62.02,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/10/2026,Education,Studied/Revised,255.37,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/10/2026,Entertainment,SM/Anime/MM,383.33,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/10/2026,Skills,English Comms,27.25,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/10/2026,Skills,Video Editing,120.13,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/10/2026,Skills,Graphic Design,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/10/2026,Self Development,Tennis,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/10/2026,Sleep,Sleep,402.48,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/11/2026,Education,Lec/Exams/Assign,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/11/2026,Education,Studied/Revised,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/11/2026,Entertainment,SM/Anime/MM,297.67,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/11/2026,Skills,English Comms,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/11/2026,Skills,Video Editing,133.93,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/11/2026,Skills,Graphic Design,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/11/2026,Self Development,Tennis,25.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/11/2026,Sleep,Sleep,393.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/12/2026,Education,Lec/Exams/Assign,51.78,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/12/2026,Education,Studied/Revised,54.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/12/2026,Entertainment,SM/Anime/MM,337.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/12/2026,Skills,English Comms,26.18,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/12/2026,Skills,Video Editing,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/12/2026,Skills,Graphic Design,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/12/2026,Self Development,Tennis,43.05,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/12/2026,Sleep,Sleep,389.68,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/13/2026,Education,Lec/Exams/Assign,25.33,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/13/2026,Education,Studied/Revised,353.28,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/13/2026,Entertainment,SM/Anime/MM,130.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/13/2026,Skills,English Comms,30.48,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/13/2026,Skills,Video Editing,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/13/2026,Skills,Graphic Design,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/13/2026,Self Development,Tennis,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/13/2026,Sleep,Sleep,377.15,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/14/2026,Education,Lec/Exams/Assign,25.67,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/14/2026,Education,Studied/Revised,337.63,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/14/2026,Entertainment,SM/Anime/MM,353.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/14/2026,Skills,English Comms,25.47,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/14/2026,Skills,Video Editing,38.32,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/14/2026,Skills,Graphic Design,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/14/2026,Self Development,Tennis,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/14/2026,Sleep,Sleep,465.22,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/15/2026,Education,Lec/Exams/Assign,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/15/2026,Education,Studied/Revised,119.07,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/15/2026,Entertainment,SM/Anime/MM,179.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/15/2026,Skills,English Comms,30.68,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/15/2026,Skills,Video Editing,84.38,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/15/2026,Skills,Graphic Design,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/15/2026,Self Development,Tennis,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/15/2026,Sleep,Sleep,443.53,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/16/2026,Education,Lec/Exams/Assign,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/16/2026,Education,Studied/Revised,325.57,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/16/2026,Entertainment,SM/Anime/MM,80.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/16/2026,Skills,English Comms,25.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/16/2026,Skills,Video Editing,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/16/2026,Skills,Graphic Design,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/16/2026,Self Development,Tennis,180.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/16/2026,Sleep,Sleep,356.25,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/17/2026,Education,Lec/Exams/Assign,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/17/2026,Education,Studied/Revised,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/17/2026,Entertainment,SM/Anime/MM,233.60,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/17/2026,Skills,English Comms,12.63,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/17/2026,Skills,Video Editing,44.55,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/17/2026,Skills,Graphic Design,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/17/2026,Self Development,Tennis,107.17,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/17/2026,Sleep,Sleep,423.08,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/18/2026,Education,Lec/Exams/Assign,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/18/2026,Education,Studied/Revised,18.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/18/2026,Entertainment,SM/Anime/MM,219.48,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/18/2026,Skills,English Comms,19.05,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/18/2026,Skills,Video Editing,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/18/2026,Skills,Graphic Design,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/18/2026,Self Development,Tennis,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/18/2026,Sleep,Sleep,393.73,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/19/2026,Education,Lec/Exams/Assign,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/19/2026,Education,Studied/Revised,216.88,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/19/2026,Entertainment,SM/Anime/MM,136.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/19/2026,Skills,English Comms,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/19/2026,Skills,Video Editing,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/19/2026,Skills,Graphic Design,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/19/2026,Self Development,Tennis,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/19/2026,Sleep,Sleep,393.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/20/2026,Education,Lec/Exams/Assign,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/20/2026,Education,Studied/Revised,248.35,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/20/2026,Entertainment,SM/Anime/MM,177.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/20/2026,Skills,English Comms,16.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/20/2026,Skills,Video Editing,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/20/2026,Skills,Graphic Design,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/20/2026,Self Development,Tennis,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/20/2026,Sleep,Sleep,462.80,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/21/2026,Education,Lec/Exams/Assign,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/21/2026,Education,Studied/Revised,346.65,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/21/2026,Entertainment,SM/Anime/MM,362.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/21/2026,Skills,English Comms,3.47,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/21/2026,Skills,Video Editing,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/21/2026,Skills,Graphic Design,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/21/2026,Self Development,Tennis,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/21/2026,Sleep,Sleep,559.82,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/22/2026,Education,Lec/Exams/Assign,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/22/2026,Education,Studied/Revised,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/22/2026,Entertainment,SM/Anime/MM,215.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/22/2026,Skills,English Comms,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/22/2026,Skills,Video Editing,104.23,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/22/2026,Skills,Graphic Design,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/22/2026,Self Development,Tennis,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/22/2026,Sleep,Sleep,423.20,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/23/2026,Education,Lec/Exams/Assign,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/23/2026,Education,Studied/Revised,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/23/2026,Entertainment,SM/Anime/MM,248.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/23/2026,Skills,English Comms,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/23/2026,Skills,Video Editing,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/23/2026,Skills,Graphic Design,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/23/2026,Self Development,Tennis,120.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/23/2026,Sleep,Sleep,426.25,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/24/2026,Education,Lec/Exams/Assign,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/24/2026,Education,Studied/Revised,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/24/2026,Entertainment,SM/Anime/MM,254.70,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/24/2026,Skills,English Comms,16.95,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/24/2026,Skills,Video Editing,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/24/2026,Skills,Graphic Design,32.32,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/24/2026,Self Development,Tennis,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/24/2026,Sleep,Sleep,452.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/25/2026,Education,Lec/Exams/Assign,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/25/2026,Education,Studied/Revised,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/25/2026,Entertainment,SM/Anime/MM,239.98,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/25/2026,Skills,English Comms,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/25/2026,Skills,Video Editing,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/25/2026,Skills,Graphic Design,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/25/2026,Self Development,Tennis,180.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/25/2026,Sleep,Sleep,535.92,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/26/2026,Education,Lec/Exams/Assign,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/26/2026,Education,Studied/Revised,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/26/2026,Entertainment,SM/Anime/MM,133.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/26/2026,Skills,English Comms,16.25,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/26/2026,Skills,Video Editing,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/26/2026,Skills,Graphic Design,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/26/2026,Self Development,Tennis,90.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/26/2026,Sleep,Sleep,397.28,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/27/2026,Education,Lec/Exams/Assign,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/27/2026,Education,Studied/Revised,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/27/2026,Entertainment,SM/Anime/MM,346.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/27/2026,Skills,English Comms,16.08,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/27/2026,Skills,Video Editing,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/27/2026,Skills,Graphic Design,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/27/2026,Self Development,Tennis,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/27/2026,Sleep,Sleep,480.45,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/28/2026,Education,Lec/Exams/Assign,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/28/2026,Education,Studied/Revised,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/28/2026,Entertainment,SM/Anime/MM,736.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/28/2026,Skills,English Comms,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/28/2026,Skills,Video Editing,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/28/2026,Skills,Graphic Design,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/28/2026,Self Development,Tennis,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/28/2026,Sleep,Sleep,657.72,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/29/2026,Education,Lec/Exams/Assign,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/29/2026,Education,Studied/Revised,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/29/2026,Entertainment,SM/Anime/MM,148.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/29/2026,Skills,English Comms,19.73,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/29/2026,Skills,Video Editing,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/29/2026,Skills,Graphic Design,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/29/2026,Self Development,Tennis,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/29/2026,Sleep,Sleep,657.72,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/30/2026,Education,Lec/Exams/Assign,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/30/2026,Education,Studied/Revised,82.35,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/30/2026,Entertainment,SM/Anime/MM,224.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/30/2026,Skills,English Comms,9.17,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/30/2026,Skills,Video Editing,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/30/2026,Skills,Graphic Design,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/30/2026,Self Development,Tennis,0.00,hhANBj74wiclvfuDLGfuDlFZgJ62
+4/30/2026,Sleep,Sleep,358.25,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/1/2026,Education,Lec/Exams/Assign,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/1/2026,Education,Studied/Revised,91.75 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/1/2026,Entertainment,SM/Anime/MM,230.33 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/1/2026,Skills,English Comms,20.32 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/1/2026,Skills,Video Editing,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/1/2026,Skills,Graphic Design,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/1/2026,Skills,Chess,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/1/2026,Skills,Interview Prep,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/1/2026,Skills,Aptitude Practice,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/1/2026,Self Development,Exercise,20.98 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/1/2026,Self Development,Tennis,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/1/2026,Self Development,Reading,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/1/2026,Self Development,Bible Study,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/1/2026,Sleep,Sleep,420.72 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/2/2026,Education,Lec/Exams/Assign,28.77 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/2/2026,Education,Studied/Revised,74.48 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/2/2026,Entertainment,SM/Anime/MM,248.67 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/2/2026,Skills,English Comms,18.42 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/2/2026,Skills,Video Editing,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/2/2026,Skills,Graphic Design,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/2/2026,Skills,Chess,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/2/2026,Skills,Interview Prep,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/2/2026,Skills,Aptitude Practice,256.37 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/2/2026,Self Development,Exercise,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/2/2026,Self Development,Tennis,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/2/2026,Self Development,Reading,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/2/2026,Self Development,Bible Study,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/2/2026,Sleep,Sleep,422.53 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/3/2026,Education,Lec/Exams/Assign,32.48 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/3/2026,Education,Studied/Revised,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/3/2026,Entertainment,SM/Anime/MM,464.08 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/3/2026,Skills,English Comms,27.58 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/3/2026,Skills,Video Editing,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/3/2026,Skills,Graphic Design,57.52 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/3/2026,Skills,Chess,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/3/2026,Skills,Interview Prep,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/3/2026,Skills,Aptitude Practice,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/3/2026,Self Development,Exercise,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/3/2026,Self Development,Tennis,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/3/2026,Self Development,Reading,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/3/2026,Self Development,Bible Study,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/3/2026,Sleep,Sleep,480.12 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/4/2026,Education,Lec/Exams/Assign,55.50 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/4/2026,Education,Studied/Revised,131.52 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/4/2026,Entertainment,SM/Anime/MM,208.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/4/2026,Skills,English Comms,23.37 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/4/2026,Skills,Video Editing,146.45 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/4/2026,Skills,Graphic Design,43.77 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/4/2026,Skills,Chess,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/4/2026,Skills,Interview Prep,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/4/2026,Skills,Aptitude Practice,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/4/2026,Self Development,Exercise,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/4/2026,Self Development,Tennis,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/4/2026,Self Development,Reading,41.10 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/4/2026,Self Development,Bible Study,7.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/4/2026,Sleep,Sleep,426.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/5/2026,Education,Lec/Exams/Assign,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/5/2026,Education,Studied/Revised,12.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/5/2026,Entertainment,SM/Anime/MM,214.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/5/2026,Skills,English Comms,19.68 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/5/2026,Skills,Video Editing,67.57 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/5/2026,Skills,Graphic Design,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/5/2026,Skills,Chess,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/5/2026,Skills,Interview Prep,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/5/2026,Skills,Aptitude Practice,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/5/2026,Self Development,Exercise,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/5/2026,Self Development,Tennis,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/5/2026,Self Development,Reading,31.82 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/5/2026,Self Development,Bible Study,7.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/5/2026,Sleep,Sleep,466.47 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/6/2026,Education,Lec/Exams/Assign,37.92 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/6/2026,Education,Studied/Revised,219.10 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/6/2026,Entertainment,SM/Anime/MM,231.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/6/2026,Skills,English Comms,28.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/6/2026,Skills,Video Editing,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/6/2026,Skills,Graphic Design,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/6/2026,Skills,Chess,32.83 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/6/2026,Skills,Interview Prep,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/6/2026,Skills,Aptitude Practice,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/6/2026,Self Development,Exercise,20.55 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/6/2026,Self Development,Tennis,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/6/2026,Self Development,Reading,29.18 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/6/2026,Self Development,Bible Study,8.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/6/2026,Sleep,Sleep,412.22 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/7/2026,Education,Lec/Exams/Assign,1.13 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/7/2026,Education,Studied/Revised,51.65 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/7/2026,Entertainment,SM/Anime/MM,364.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/7/2026,Skills,English Comms,22.33 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/7/2026,Skills,Video Editing,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/7/2026,Skills,Graphic Design,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/7/2026,Skills,Chess,39.63 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/7/2026,Skills,Interview Prep,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/7/2026,Skills,Aptitude Practice,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/7/2026,Self Development,Exercise,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/7/2026,Self Development,Tennis,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/7/2026,Self Development,Reading,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/7/2026,Self Development,Bible Study,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/7/2026,Sleep,Sleep,414.67 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/8/2026,Education,Lec/Exams/Assign,91.85 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/8/2026,Education,Studied/Revised,114.57 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/8/2026,Entertainment,SM/Anime/MM,364.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/8/2026,Skills,English Comms,19.95 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/8/2026,Skills,Video Editing,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/8/2026,Skills,Graphic Design,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/8/2026,Skills,Chess,81.63 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/8/2026,Skills,Interview Prep,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/8/2026,Skills,Aptitude Practice,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/8/2026,Self Development,Exercise,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/8/2026,Self Development,Tennis,24.12 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/8/2026,Self Development,Reading,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/8/2026,Self Development,Bible Study,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/8/2026,Sleep,Sleep,468.95 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/9/2026,Education,Lec/Exams/Assign,41.42 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/9/2026,Education,Studied/Revised,118.42 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/9/2026,Entertainment,SM/Anime/MM,201.33 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/9/2026,Skills,English Comms,19.55 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/9/2026,Skills,Video Editing,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/9/2026,Skills,Graphic Design,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/9/2026,Skills,Chess,58.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/9/2026,Skills,Interview Prep,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/9/2026,Skills,Aptitude Practice,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/9/2026,Self Development,Exercise,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/9/2026,Self Development,Tennis,16.90 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/9/2026,Self Development,Reading,46.78 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/9/2026,Self Development,Bible Study,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/9/2026,Sleep,Sleep,409.43 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/10/2026,Education,Lec/Exams/Assign,9.55 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/10/2026,Education,Studied/Revised,112.35 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/10/2026,Entertainment,SM/Anime/MM,118.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/10/2026,Skills,English Comms,13.40 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/10/2026,Skills,Video Editing,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/10/2026,Skills,Graphic Design,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/10/2026,Skills,Chess,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/10/2026,Skills,Interview Prep,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/10/2026,Skills,Aptitude Practice,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/10/2026,Self Development,Exercise,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/10/2026,Self Development,Tennis,40.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/10/2026,Self Development,Reading,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/10/2026,Self Development,Bible Study,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/10/2026,Sleep,Sleep,394.15 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/11/2026,Education,Lec/Exams/Assign,40.45 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/11/2026,Education,Studied/Revised,163.18 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/11/2026,Entertainment,SM/Anime/MM,236.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/11/2026,Skills,English Comms,20.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/11/2026,Skills,Video Editing,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/11/2026,Skills,Graphic Design,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/11/2026,Skills,Chess,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/11/2026,Skills,Interview Prep,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/11/2026,Skills,Aptitude Practice,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/11/2026,Self Development,Exercise,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/11/2026,Self Development,Tennis,14.90 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/11/2026,Self Development,Reading,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/11/2026,Self Development,Bible Study,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/11/2026,Sleep,Sleep,431.05 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/12/2026,Education,Lec/Exams/Assign,38.87 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/12/2026,Education,Studied/Revised,188.98 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/12/2026,Entertainment,SM/Anime/MM,319.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/12/2026,Skills,English Comms,18.32 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/12/2026,Skills,Video Editing,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/12/2026,Skills,Graphic Design,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/12/2026,Skills,Chess,44.38 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/12/2026,Skills,Interview Prep,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/12/2026,Skills,Aptitude Practice,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/12/2026,Self Development,Exercise,9.18 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/12/2026,Self Development,Tennis,35.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/12/2026,Self Development,Reading,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/12/2026,Self Development,Bible Study,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/12/2026,Sleep,Sleep,549.20 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/13/2026,Education,Lec/Exams/Assign,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/13/2026,Education,Studied/Revised,138.95 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/13/2026,Entertainment,SM/Anime/MM,143.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/13/2026,Skills,English Comms,218.72 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/13/2026,Skills,Video Editing,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/13/2026,Skills,Graphic Design,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/13/2026,Skills,Chess,35.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/13/2026,Skills,Interview Prep,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/13/2026,Skills,Aptitude Practice,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/13/2026,Self Development,Exercise,18.05 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/13/2026,Self Development,Tennis,43.68 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/13/2026,Self Development,Reading,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/13/2026,Self Development,Bible Study,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/13/2026,Sleep,Sleep,459.98 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/14/2026,Education,Lec/Exams/Assign,82.60 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/14/2026,Education,Studied/Revised,143.37 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/14/2026,Entertainment,SM/Anime/MM,404.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/14/2026,Skills,English Comms,118.83 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/14/2026,Skills,Video Editing,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/14/2026,Skills,Graphic Design,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/14/2026,Skills,Chess,8.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/14/2026,Skills,Interview Prep,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/14/2026,Skills,Aptitude Practice,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/14/2026,Self Development,Exercise,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/14/2026,Self Development,Tennis,25.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/14/2026,Self Development,Reading,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/14/2026,Self Development,Bible Study,0.00 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/14/2026,Sleep,Sleep,452.63 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/15/2026,Education,Lec/Exams/Assign,36.87 mins,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/15/2026,Education,Studied/Revised,137.3,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/15/2026,Entertainment,SM/Anime/MM,365,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/15/2026,Skills,English Comms,100.4666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/15/2026,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/15/2026,Skills,Graphic Design,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/15/2026,Skills,Chess,54,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/15/2026,Skills,Interview Prep,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/15/2026,Skills,Aptitude Practice,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/15/2026,Self Development,Exercise,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/15/2026,Self Development,Tennis,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/15/2026,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/15/2026,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/15/2026,Sleep,Sleep,351.35,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/16/2026,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/16/2026,Education,Studied/Revised,83.68333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/16/2026,Entertainment,SM/Anime/MM,352,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/16/2026,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/16/2026,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/16/2026,Skills,Graphic Design,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/16/2026,Skills,Chess,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/16/2026,Skills,Interview Prep,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/16/2026,Skills,Aptitude Practice,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/16/2026,Self Development,Exercise,12.33333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/16/2026,Self Development,Tennis,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/16/2026,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/16/2026,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/16/2026,Sleep,Sleep,421.45,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/17/2026,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/17/2026,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/17/2026,Entertainment,SM/Anime/MM,640,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/17/2026,Skills,English Comms,25.41666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/17/2026,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/17/2026,Skills,Graphic Design,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/17/2026,Skills,Chess,25,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/17/2026,Skills,Interview Prep,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/17/2026,Skills,Aptitude Practice,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/17/2026,Self Development,Exercise,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/17/2026,Self Development,Tennis,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/17/2026,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/17/2026,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/17/2026,Sleep,Sleep,601.7333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/18/2026,Education,Lec/Exams/Assign,22.05,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/18/2026,Education,Studied/Revised,137.0833333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/18/2026,Entertainment,SM/Anime/MM,106,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/18/2026,Skills,English Comms,37.26666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/18/2026,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/18/2026,Skills,Graphic Design,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/18/2026,Skills,Chess,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/18/2026,Skills,Interview Prep,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/18/2026,Skills,Aptitude Practice,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/18/2026,Self Development,Exercise,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/18/2026,Self Development,Tennis,17.18333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/18/2026,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/18/2026,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/18/2026,Sleep,Sleep,454.4666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/19/2026,Education,Lec/Exams/Assign,29.88333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/19/2026,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/19/2026,Entertainment,SM/Anime/MM,234,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/19/2026,Skills,English Comms,47.65,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/19/2026,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/19/2026,Skills,Graphic Design,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/19/2026,Skills,Chess,67,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/19/2026,Skills,Interview Prep,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/19/2026,Skills,Aptitude Practice,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/19/2026,Self Development,Exercise,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/19/2026,Self Development,Tennis,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/19/2026,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/19/2026,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/19/2026,Sleep,Sleep,363.55,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/20/2026,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/20/2026,Education,Studied/Revised,144.8166667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/20/2026,Entertainment,SM/Anime/MM,307,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/20/2026,Skills,English Comms,40.33333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/20/2026,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/20/2026,Skills,Graphic Design,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/20/2026,Skills,Chess,208,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/20/2026,Skills,Interview Prep,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/20/2026,Skills,Aptitude Practice,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/20/2026,Self Development,Exercise,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/20/2026,Self Development,Tennis,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/20/2026,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/20/2026,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/20/2026,Sleep,Sleep,480,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/21/2026,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/21/2026,Education,Studied/Revised,168.4666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/21/2026,Entertainment,SM/Anime/MM,107,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/21/2026,Skills,English Comms,43.13333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/21/2026,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/21/2026,Skills,Graphic Design,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/21/2026,Skills,Chess,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/21/2026,Skills,Interview Prep,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/21/2026,Skills,Aptitude Practice,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/21/2026,Self Development,Exercise,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/21/2026,Self Development,Tennis,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/21/2026,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/21/2026,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/21/2026,Sleep,Sleep,576.2166667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/22/2026,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/22/2026,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/22/2026,Entertainment,SM/Anime/MM,558,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/22/2026,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/22/2026,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/22/2026,Skills,Graphic Design,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/22/2026,Skills,Chess,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/22/2026,Skills,Interview Prep,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/22/2026,Skills,Aptitude Practice,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/22/2026,Self Development,Exercise,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/22/2026,Self Development,Tennis,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/22/2026,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/22/2026,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/22/2026,Sleep,Sleep,439.1833333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/23/2026,Education,Lec/Exams/Assign,12.43333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/23/2026,Education,Studied/Revised,30.5,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/23/2026,Entertainment,SM/Anime/MM,76,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/23/2026,Skills,English Comms,118.4666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/23/2026,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/23/2026,Skills,Graphic Design,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/23/2026,Skills,Chess,53,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/23/2026,Skills,Interview Prep,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/23/2026,Skills,Aptitude Practice,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/23/2026,Self Development,Exercise,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/23/2026,Self Development,Tennis,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/23/2026,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/23/2026,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/23/2026,Sleep,Sleep,569.3166667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/24/2026,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/24/2026,Education,Studied/Revised,38,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/24/2026,Entertainment,SM/Anime/MM,239,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/24/2026,Skills,English Comms,91.96666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/24/2026,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/24/2026,Skills,Graphic Design,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/24/2026,Skills,Chess,43,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/24/2026,Skills,Interview Prep,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/24/2026,Skills,Aptitude Practice,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/24/2026,Self Development,Exercise,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/24/2026,Self Development,Tennis,25,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/24/2026,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/24/2026,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/24/2026,Sleep,Sleep,567.1333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/25/2026,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/25/2026,Education,Studied/Revised,136.75,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/25/2026,Entertainment,SM/Anime/MM,315,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/25/2026,Skills,English Comms,75.41666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/25/2026,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/25/2026,Skills,Graphic Design,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/25/2026,Skills,Chess,140,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/25/2026,Skills,Interview Prep,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/25/2026,Skills,Aptitude Practice,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/25/2026,Self Development,Exercise,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/25/2026,Self Development,Tennis,15.78333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/25/2026,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/25/2026,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/25/2026,Sleep,Sleep,455.85,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/26/2026,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/26/2026,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/26/2026,Entertainment,SM/Anime/MM,484,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/26/2026,Skills,English Comms,104.8,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/26/2026,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/26/2026,Skills,Graphic Design,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/26/2026,Skills,Chess,52,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/26/2026,Skills,Interview Prep,26.43333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/26/2026,Skills,Aptitude Practice,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/26/2026,Self Development,Exercise,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/26/2026,Self Development,Tennis,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/26/2026,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/26/2026,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/26/2026,Sleep,Sleep,517.65,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/27/2026,Education,Lec/Exams/Assign,22.63333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/27/2026,Education,Studied/Revised,151.85,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/27/2026,Entertainment,SM/Anime/MM,10,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/27/2026,Skills,English Comms,88.73333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/27/2026,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/27/2026,Skills,Graphic Design,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/27/2026,Skills,Chess,140,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/27/2026,Skills,Interview Prep,127.35,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/27/2026,Skills,Aptitude Practice,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/27/2026,Self Development,Exercise,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/27/2026,Self Development,Tennis,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/27/2026,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/27/2026,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/27/2026,Sleep,Sleep,512.0666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/28/2026,Education,Lec/Exams/Assign,27.18333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/28/2026,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/28/2026,Entertainment,SM/Anime/MM,654,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/28/2026,Skills,English Comms,57.01666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/28/2026,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/28/2026,Skills,Graphic Design,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/28/2026,Skills,Chess,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/28/2026,Skills,Interview Prep,18.96666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/28/2026,Skills,Aptitude Practice,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/28/2026,Self Development,Exercise,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/28/2026,Self Development,Tennis,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/28/2026,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/28/2026,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/28/2026,Sleep,Sleep,604.75,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/29/2026,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/29/2026,Education,Studied/Revised,192.6,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/29/2026,Entertainment,SM/Anime/MM,151,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/29/2026,Skills,English Comms,36.71666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/29/2026,Skills,Video Editing,52.36666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/29/2026,Skills,Graphic Design,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/29/2026,Skills,Chess,55,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/29/2026,Skills,Interview Prep,44.78333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/29/2026,Skills,Aptitude Practice,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/29/2026,Self Development,Exercise,4.266666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/29/2026,Self Development,Tennis,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/29/2026,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/29/2026,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/29/2026,Sleep,Sleep,456.1,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/30/2026,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/30/2026,Education,Studied/Revised,6,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/30/2026,Entertainment,SM/Anime/MM,280,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/30/2026,Skills,English Comms,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/30/2026,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/30/2026,Skills,Graphic Design,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/30/2026,Skills,Chess,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/30/2026,Skills,Interview Prep,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/30/2026,Skills,Aptitude Practice,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/30/2026,Self Development,Exercise,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/30/2026,Self Development,Tennis,15,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/30/2026,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/30/2026,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/30/2026,Sleep,Sleep,493.4166667,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/31/2026,Education,Lec/Exams/Assign,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/31/2026,Education,Studied/Revised,149,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/31/2026,Entertainment,SM/Anime/MM,388,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/31/2026,Skills,English Comms,105.1833333,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/31/2026,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/31/2026,Skills,Graphic Design,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/31/2026,Skills,Chess,78,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/31/2026,Skills,Interview Prep,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/31/2026,Skills,Aptitude Practice,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/31/2026,Self Development,Exercise,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/31/2026,Self Development,Tennis,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/31/2026,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/31/2026,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+5/31/2026,Sleep,Sleep,456.9333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/1/2026,Education,Lec/Exams/Assign,73.11666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/1/2026,Education,Studied/Revised,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/1/2026,Entertainment,SM/Anime/MM,514,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/1/2026,Skills,English Comms,34.46666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/1/2026,Skills,Video Editing,36.93333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/1/2026,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/1/2026,Skills,Chess,34,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/1/2026,Skills,Interview Prep,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/1/2026,Skills,Aptitude Practice,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/1/2026,Self Development,Exercise,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/1/2026,Self Development,Tennis,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/1/2026,Self Development,Reading,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/1/2026,Self Development,Bible Study,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/1/2026,Sleep,Sleep,547.5833333,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/2/2026,Education,Lec/Exams/Assign,47.03333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/2/2026,Education,Studied/Revised,100.1166667,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/2/2026,Entertainment,SM/Anime/MM,252,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/2/2026,Skills,English Comms,80.91666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/2/2026,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/2/2026,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/2/2026,Skills,Chess,46,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/2/2026,Skills,Interview Prep,66.28333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/2/2026,Skills,Aptitude Practice,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/2/2026,Self Development,Exercise,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/2/2026,Self Development,Tennis,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/2/2026,Self Development,Reading,19.7,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/2/2026,Self Development,Bible Study,8,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/2/2026,Sleep,Sleep,302.0333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/3/2026,Education,Lec/Exams/Assign,49.36666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/3/2026,Education,Studied/Revised,134.1833333,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/3/2026,Entertainment,SM/Anime/MM,232,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/3/2026,Skills,English Comms,65.48333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/3/2026,Skills,Video Editing,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/3/2026,Skills,Programming,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/3/2026,Skills,Chess,81,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/3/2026,Skills,Interview Prep,20.13333333,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/3/2026,Skills,Aptitude Practice,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/3/2026,Self Development,Exercise,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/3/2026,Self Development,Tennis,0,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/3/2026,Self Development,Reading,36.21666667,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/3/2026,Self Development,Bible Study,8,hhANBj74wiclvfuDLGfuDlFZgJ62
+6/3/2026,Sleep,Sleep,506.8166667,hhANBj74wiclvfuDLGfuDlFZgJ62

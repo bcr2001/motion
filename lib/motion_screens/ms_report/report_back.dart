@@ -103,6 +103,8 @@ class MainCategoryDistributionPieChart extends StatelessWidget {
     switch (categoryName) {
       case AppString.educationMainCategory:
         return AppColor.educationPieChartColor;
+      case AppString.workMainCategory:
+        return AppColor.workPieChartColor;
       case AppString.entertainmentMainCategory:
         return AppColor.entertainmentPieChartColor;
       case AppString.selfDevelopmentMainCategory:
@@ -243,8 +245,6 @@ class MostAndLeastTrackedBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -405,7 +405,7 @@ class MLTitleAndCard extends StatelessWidget {
               style: AppTextStyle.mainCategoryTotalTitle(),
             ),
           ),
-    
+
           // card content
           SizedBox(height: screenHeight * 0.28, child: cardContent)
         ],

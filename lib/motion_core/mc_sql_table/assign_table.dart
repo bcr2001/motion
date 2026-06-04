@@ -1,3 +1,5 @@
+import 'package:motion/motion_core/mc_sqlite/database_constants.dart';
+
 // Structure of the 'to_assign' database table
 class Assigner {
   late int id; // Unique identifier for the assignment
@@ -24,25 +26,30 @@ class Assigner {
   // from a map of database columns
   factory Assigner.fromAssignerMap(Map<String, dynamic> map) {
     return Assigner(
-      id: map["id"] ?? 0, // Extract ID from the map
-      currentLoggedInUser: map["currentLoggedInUser"] ?? "", // Extract user
-      subcategoryName: map["subcategoryName"] ?? "", // Extract subcategory
-      mainCategoryName: map["mainCategoryName"] ?? "", // Extract main category
-      isActive: map["isActive"] ?? 0, // Extract isActive (0 or 1)
-      isArchive: map["isArchive"] ?? 0, // Extract isArchive (0 or 1)
-      dateCreated: map["dateCreated"] ?? "", // Extract creation date
+      id: map[MotionDbColumns.id] ?? 0, // Extract ID from the map
+      currentLoggedInUser:
+          map[MotionDbColumns.currentLoggedInUser] ?? "", // Extract user
+      subcategoryName:
+          map[MotionDbColumns.subcategoryName] ?? "", // Extract subcategory
+      mainCategoryName:
+          map[MotionDbColumns.mainCategoryName] ?? "", // Extract main category
+      isActive: map[MotionDbColumns.isActive] ?? 0, // Extract isActive (0 or 1)
+      isArchive:
+          map[MotionDbColumns.isArchive] ?? 0, // Extract isArchive (0 or 1)
+      dateCreated:
+          map[MotionDbColumns.dateCreated] ?? "", // Extract creation date
     );
   }
 
   // Convert 'Assigner' object to a map for database insertion
   Map<String, dynamic> toMap() {
     return {
-      "currentLoggedInUser": currentLoggedInUser,
-      "subcategoryName": subcategoryName,
-      "mainCategoryName": mainCategoryName,
-      "isActive": isActive,
-      "isArchive": isArchive, // Include isArchive in the map
-      "dateCreated": dateCreated,
+      MotionDbColumns.currentLoggedInUser: currentLoggedInUser,
+      MotionDbColumns.subcategoryName: subcategoryName,
+      MotionDbColumns.mainCategoryName: mainCategoryName,
+      MotionDbColumns.isActive: isActive,
+      MotionDbColumns.isArchive: isArchive, // Include isArchive in the map
+      MotionDbColumns.dateCreated: dateCreated,
     };
   }
 

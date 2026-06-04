@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../main.dart';
 import '../../mc_sql_table/experience_table.dart';
+import 'current_user_guard.dart';
 
 // EXPERIENCE POINT TABLE
 // handles database operations for the experience_points table
@@ -14,7 +15,9 @@ class ExperiencePointTableProvider extends ChangeNotifier {
   /// Param:
   ///   - `experience`: The ExperiencePoints object to be inserted into the database.
   Future<void> insertIntoExperiencePoint(ExperiencePoints experience) async {
-    await trackDbInstance.insertExperiencePoint(experience);
+    await trackDbInstance.insertExperiencePoint(
+      requireExperienceUser(experience),
+    );
   }
 
   /// Retrieves the average daily efficiency score for a specified user.
@@ -28,14 +31,14 @@ class ExperiencePointTableProvider extends ChangeNotifier {
   Future<double> retrieveExperiencePointsEfficiencyScore(
       {required String currentUser}) async {
     return await trackDbInstance.entireExperiencePointsEfficiencyScore(
-        currentUser: currentUser);
+        currentUser: requireCurrentUser(currentUser));
   }
 
   /// (year)
   Future<double> retrieveYearExperiencePointsEfficiencyScore(
       {required String currentUser, required String currentYear}) async {
     return await trackDbInstance.entireYearExperiencePointsEfficiencyScore(
-        currentUser: currentUser, currentYear: currentYear);
+        currentUser: requireCurrentUser(currentUser), currentYear: currentYear);
   }
 
   /// Retrieves the average monthly efficiency score for a specified user within a given date range.
@@ -52,7 +55,7 @@ class ExperiencePointTableProvider extends ChangeNotifier {
       required String firstDayOfMonth,
       required String lastDayOfMonth}) async {
     return await trackDbInstance.monthlyEfficiencyScore(
-        currentUser: currentUser,
+        currentUser: requireCurrentUser(currentUser),
         firstDayOfMonth: firstDayOfMonth,
         lastDayOfMonth: lastDayOfMonth);
   }
@@ -61,7 +64,8 @@ class ExperiencePointTableProvider extends ChangeNotifier {
   Future<int> retrieveDailyExperiencePoints(
       {required currentUser, required String selectedDate}) async {
     return await trackDbInstance.dailyExperiencePoints(
-        currentUser: currentUser, selectedDate: selectedDate);
+        currentUser: requireCurrentUser(currentUser),
+        selectedDate: selectedDate);
   }
 
   // retrieves the most and least productive months
@@ -72,7 +76,7 @@ class ExperiencePointTableProvider extends ChangeNotifier {
       required String year}) async {
     return await trackDbInstance.getMostAndLeastProductiveMonths(
         getMostProductiveMonth: getMostProductiveMonth,
-        currentUser: currentUser,
+        currentUser: requireCurrentUser(currentUser),
         year: year);
   }
 
@@ -84,7 +88,7 @@ class ExperiencePointTableProvider extends ChangeNotifier {
       required String lastDay,
       required bool getMostProductiveDay}) async {
     return await trackDbInstance.getMostAndLeastProductiveDays(
-        currentUser: currentUser,
+        currentUser: requireCurrentUser(currentUser),
         firstDay: firstDay,
         lastDay: lastDay,
         getMostProductiveDay: getMostProductiveDay);
@@ -97,6 +101,8 @@ class ExperiencePointTableProvider extends ChangeNotifier {
       required bool isEntire,
       String? year}) async {
     return await trackDbInstance.getTotalXP(
-        currentUser: currentUser, isEntire: isEntire, year: year);
+        currentUser: requireCurrentUser(currentUser),
+        isEntire: isEntire,
+        year: year);
   }
 }

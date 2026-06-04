@@ -160,6 +160,18 @@ class EntireDataStatistic extends StatelessWidget {
                                 "${allMainCategoryTotals[0]["educationAverage"]} hrs/day",
                           ),
 
+                          // Work Information
+                          CategoryBuilder(
+                            mainCategoryName: AppString.workMainCategory,
+                            galleryInitials: "WK",
+                            totalHours:
+                                "${allMainCategoryTotals[0]["workHours"]} HRS",
+                            totalDays:
+                                "${allMainCategoryTotals[0]["workDays"]} days",
+                            average:
+                                "${allMainCategoryTotals[0]["workAverage"]} hrs/day",
+                          ),
+
                           // Skills Information
                           CategoryBuilder(
                             mainCategoryName: AppString.skillMainCategory,

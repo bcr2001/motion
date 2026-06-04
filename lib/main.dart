@@ -21,8 +21,6 @@ import 'motion_themes/mth_theme/dark_theme.dart';
 import 'motion_themes/mth_theme/light_theme.dart';
 import 'motion_core/mc_sqlite/sql_tracker_db.dart';
 
-
-
 // This creates a global key for managing the state of a navigator widget
 // in Flutter.
 final GlobalKey<NavigatorState> navigationKey = GlobalKey<NavigatorState>();
@@ -31,16 +29,11 @@ final GlobalKey<NavigatorState> navigationKey = GlobalKey<NavigatorState>();
 // managing database operations, likely related to tracking functionality.
 final TrackerDatabaseHelper trackDbInstance = TrackerDatabaseHelper();
 
-
 final TrackerDatabaseHelper databaseHelper = TrackerDatabaseHelper();
 
-
-
 void main() async {
-
-   // Ensures that the Flutter framework is fully initialized before running the app.
+  // Ensures that the Flutter framework is fully initialized before running the app.
   WidgetsFlutterBinding.ensureInitialized();
-
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
@@ -65,7 +58,6 @@ void main() async {
   final trackSubcategoryDatabaseProvider = SubcategoryTrackerDatabaseProvider();
 
   final trackMainCategoryDatabaseProvider = MainCategoryTrackerProvider();
-
 
   runApp(MultiProvider(
     providers: [

@@ -1,3 +1,5 @@
+import 'package:motion/motion_core/mc_sqlite/database_constants.dart';
+
 // Structure of the 'subcategories' table
 class Subcategories {
   int? id; // Unique identifier for the subcategory
@@ -21,25 +23,25 @@ class Subcategories {
   // Factory constructor to convert a map to Subcategories object
   factory Subcategories.fromMap(Map<String, dynamic> map) {
     return Subcategories(
-      id: map["id"],
-      date: map['date'],
-      mainCategoryName: map['mainCategoryName'],
-      subcategoryName: map['subcategoryName'],
-      timeRecorded: map["timeRecorded"],
-      timeSpent: map['timeSpent'],
-      currentLoggedInUser: map['currentLoggedInUser'],
+      id: map[MotionDbColumns.id],
+      date: map[MotionDbColumns.date],
+      mainCategoryName: map[MotionDbColumns.mainCategoryName],
+      subcategoryName: map[MotionDbColumns.subcategoryName],
+      timeRecorded: map[MotionDbColumns.timeRecorded],
+      timeSpent: map[MotionDbColumns.timeSpent],
+      currentLoggedInUser: map[MotionDbColumns.currentLoggedInUser],
     );
   }
 
   // Convert Subcategories object to a map
   Map<String, dynamic> toMap() {
     return {
-      'date': date,
-      'mainCategoryName': mainCategoryName,
-      'subcategoryName': subcategoryName,
-      'timeRecorded': timeRecorded,
-      'timeSpent': timeSpent,
-      'currentLoggedInUser': currentLoggedInUser,
+      MotionDbColumns.date: date,
+      MotionDbColumns.mainCategoryName: mainCategoryName,
+      MotionDbColumns.subcategoryName: subcategoryName,
+      MotionDbColumns.timeRecorded: timeRecorded,
+      MotionDbColumns.timeSpent: timeSpent,
+      MotionDbColumns.currentLoggedInUser: currentLoggedInUser,
     };
   }
 

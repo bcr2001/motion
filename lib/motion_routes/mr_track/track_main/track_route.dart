@@ -151,7 +151,7 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                         } else {
                           _formKey.currentState!.save();
 
-                            // Trim white spaces from the subcategory name
+                          // Trim white spaces from the subcategory name
                           String trimmedSubcategoryName =
                               subcategoryController.text.trim();
 
@@ -230,6 +230,23 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
                           })),
 
                   // // skills category
+                  CardConstructor(
+                      cardTitle: AppString.workMainCategory,
+                      cardListView: TrackListViewBuiler(
+                          itemCount: items.length,
+                          itemBuilder: (BuildContext context, index) {
+                            return items[index].currentLoggedInUser == user &&
+                                    items[index].mainCategoryName ==
+                                        AppString.workMainCategory &&
+                                    items[index].isArchive == 0
+                                ? _listTileBuilder(
+                                    activeStatus: items[index].isActive,
+                                    tileTitle: items[index].subcategoryName,
+                                    item: items[index])
+                                : const SizedBox.shrink();
+                          })),
+
+                  // skills category
                   CardConstructor(
                       cardTitle: AppString.skillMainCategory,
                       cardListView: TrackListViewBuiler(
