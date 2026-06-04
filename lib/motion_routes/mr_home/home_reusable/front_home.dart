@@ -453,7 +453,7 @@ class _SubcategoryAndCurrentDayTotalsState
                     ? FutureBuilder<double>(
                         future: sub.retrieveTotalTimeSpentSubSpecific(
                             date.currentDate,
-                            user.userUid!,
+                            currentUser,
                             activeItems[index].subcategoryName),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==

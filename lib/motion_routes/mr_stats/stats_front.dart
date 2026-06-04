@@ -108,7 +108,11 @@ class EntireDataStatistic extends StatelessWidget {
     return Consumer2<MainCategoryTrackerProvider, UserUidProvider>(
         builder: (context, main, user, child) {
       // current user uid
-      final String userUid = user.userUid!;
+      final userUid = user.userUid;
+
+      if (userUid == null) {
+        return userLoadingIndicator();
+      }
 
       return FutureBuilder(
           future: main.retrieveAllMainCategoryTotals(currentUser: userUid),

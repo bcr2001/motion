@@ -34,7 +34,11 @@ class MotionStatesRoute extends StatelessWidget {
           child: Consumer2<UserUidProvider, MainCategoryTrackerProvider>(
             builder: (context, user, main, child) {
               // current user uid
-              final String currentUser = user.userUid!;
+              final currentUser = user.userUid;
+
+              if (currentUser == null) {
+                return userLoadingIndicator();
+              }
 
               // depending on whether the accounted time is 0
               // or >0, a image will be shown of the screen to
@@ -136,7 +140,11 @@ class AnalysisGallery extends StatelessWidget {
       child: Consumer2<UserUidProvider, MainCategoryTrackerProvider>(
           builder: (context, user, main, child) {
         // current user uid
-        final String currentUser = user.userUid!;
+        final currentUser = user.userUid;
+
+        if (currentUser == null) {
+          return userLoadingIndicator();
+        }
     
         // returns a grid view of yearly break down gallaries
         return FutureBuilder(

@@ -166,6 +166,14 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                           secondController.text = "";
                         },
                         onPressedSecond: () async {
+                          final currentUser = uid.userUid;
+                          if (currentUser == null) {
+                            snackBarMessage(context,
+                                errorMessage: AppString.firebaseSomethingWentWrong,
+                                requiresColor: true);
+                            return;
+                          }
+
                           // adds the necessary data to the subcategory
                           // table if validation passes
                           if (_timeFormKey.currentState!.validate()) {
@@ -207,11 +215,11 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                               // exist in the main category table
                               final mainCategoryExists1 =
                                   await mainCategoryExists(
-                                      date.currentDate, uid.userUid!);
+                                      date.currentDate, currentUser);
 
                               final experiencePointsExists2 =
                                   await experiencePointsExists(
-                                      date.currentDate, uid.userUid!);
+                                      date.currentDate, currentUser);
 
                               logger.i(mainCategoryExists1);
 
@@ -222,7 +230,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                                 //the experience_point table
                                 final experiencePointInsert = ExperiencePoints(
                                   date: date.currentDate,
-                                  currentLoggedInUser: uid.userUid!,
+                                  currentLoggedInUser: currentUser,
                                 );
 
                                 await xp.insertIntoExperiencePoint(
@@ -233,12 +241,12 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                               if (!mainCategoryExists1) {
                                 logger.i("Main Category is being added");
                                 logger.i(date.currentDate);
-                                logger.i("${uid.userUid}");
+                                logger.i(currentUser);
                                 // Insert date and currentLoggedInUser into
                                 //the main category table
                                 final mainCategory = MainCategory(
                                   date: date.currentDate,
-                                  currentLoggedInUser: uid.userUid!,
+                                  currentLoggedInUser: currentUser,
                                 );
 
                                 await mainCat
@@ -250,7 +258,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                                   date: date.currentDate,
                                   mainCategoryName: widget.mainCategoryName,
                                   subcategoryName: widget.subcategoryName,
-                                  currentLoggedInUser: uid.userUid!,
+                                  currentLoggedInUser: currentUser,
                                   // timeAdder functions converts all the time components to minutes
                                   timeSpent: timeAdder(
                                       h: hourController.text,
@@ -297,10 +305,15 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
               SubcategoryTrackerDatabaseProvider,
               CurrentDateProvider,
               UserUidProvider>(builder: (context, subs, date, user, child) {
+            final currentUser = user.userUid;
+            if (currentUser == null) {
+              return userLoadingIndicator();
+            }
+
             // Call retrieveCurrentDateSubcategories
             // to fetch subcategories for the current date
             subs.retrieveCurrentDateSubcategories(
-                date.currentDate, user.userUid!, widget.subcategoryName);
+                date.currentDate, currentUser, widget.subcategoryName);
 
             // Access the fetched subcategories from the provider
             List<Subcategories> subsTrackedOnCurrentDay =

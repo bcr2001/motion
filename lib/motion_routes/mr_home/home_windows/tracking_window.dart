@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/assigner_pvd.dart';
 import 'package:motion/motion_reusable/db_re/sub_ui.dart';
+import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_routes/mr_home/home_reusable/back_home.dart';
 import 'package:motion/motion_routes/mr_home/home_reusable/front_home.dart';
 import 'package:motion/motion_themes/mth_app/app_images.dart';
@@ -14,7 +15,11 @@ class TrackedSubcategories extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer2<UserUidProvider, AssignerMainProvider>(
         builder: (context, user, assign, child) {
-      final String currentUser = user.userUid!;
+      final currentUser = user.userUid;
+
+      if (currentUser == null) {
+        return userLoadingIndicator();
+      }
 
       // if the result from the isTableEmptyOrNotBeingTracked()
       // function is True then the an instruction screen will be shown

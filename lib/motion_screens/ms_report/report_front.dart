@@ -33,7 +33,10 @@ class MostAndLeastTrackedMaincategorySection extends StatelessWidget {
                     String lastDayOfMonth = day.lastDay;
           
                     // currently logged in user
-                    String currentLoggedInUser = user.userUid!;
+                    final currentLoggedInUser = user.userUid;
+                    if (currentLoggedInUser == null) {
+                      return userLoadingIndicator();
+                    }
           
                     // the number of days in the current month
                     // used to get the average hours per day
@@ -97,7 +100,10 @@ class MostAndLeastTrackedSubcategorySection extends StatelessWidget {
                     String lastDayOfMonth = day.lastDay;
           
                     // currently logged in user
-                    String currentLoggedInUser = user.userUid!;
+                    final currentLoggedInUser = user.userUid;
+                    if (currentLoggedInUser == null) {
+                      return userLoadingIndicator();
+                    }
           
                     // number of days in the current month
                     int numberOfDaysInCurrentMonth = day.days;
@@ -164,7 +170,10 @@ class PieChartAndValuesAccountedAndUnaccounted extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer3<UserUidProvider, MainCategoryTrackerProvider,
         FirstAndLastDay>(builder: (context, user, main, day, child) {
-      final currentUser = user.userUid!;
+      final currentUser = user.userUid;
+      if (currentUser == null) {
+        return userLoadingIndicator();
+      }
       final firstDayofMonth = day.firstDay;
       final lastDayOfMonth = day.lastDay;
 
@@ -395,7 +404,10 @@ class GroupedBarChartOfAccountedAndUnaccountedTime extends StatelessWidget {
             MainCategoryTrackerProvider>(
         builder: (context, week, user, main, child) {
       // current logged in user
-      final String currentUser = user.userUid!;
+      final currentUser = user.userUid;
+      if (currentUser == null) {
+        return userLoadingIndicator();
+      }
 
       // first and last date of the week
       final String firstDayOfWeek = week.firstDay;

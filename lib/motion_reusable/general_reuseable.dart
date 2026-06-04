@@ -28,6 +28,15 @@ Future circularIndicator(context) {
       });
 }
 
+// Shown while Firebase/SharedPreferences finishes exposing the current user.
+Widget userLoadingIndicator() {
+  return const Center(
+    child: CircularProgressIndicator(
+      color: AppColor.blueMainColor,
+    ),
+  );
+}
+
 // snack bar for sign in and sign out error messages
 snackBarMessage(BuildContext context,
     {required String errorMessage, bool requiresColor = false}) {

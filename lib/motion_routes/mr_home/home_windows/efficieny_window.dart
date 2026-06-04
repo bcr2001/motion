@@ -489,7 +489,10 @@ class MostAndLeastProductiveDayBuilder extends StatelessWidget {
         ? Consumer3<ExperiencePointTableProvider, UserUidProvider,
             FirstAndLastDay>(builder: (context, xp, user, firstAndLast, child) {
             // currently logged in user uid
-            final String currentUserUid = user.userUid!;
+            final currentUserUid = user.userUid;
+            if (currentUserUid == null) {
+              return const ShimmerWidget.rectangular(width: 100, height: 30);
+            }
 
             // first and last day of the current month
             final String firstDayOfMonth = firstAndLast.firstDay;
@@ -545,7 +548,10 @@ class MostAndLeastProductiveMonthBuilder extends StatelessWidget {
         ? Consumer2<ExperiencePointTableProvider, UserUidProvider>(
             builder: (context, xp, user, child) {
             // currently logged in user uid
-            final String currentUserUid = user.userUid!;
+            final currentUserUid = user.userUid;
+            if (currentUserUid == null) {
+              return const ShimmerWidget.rectangular(width: 100, height: 30);
+            }
 
             return ProductiveDayBuilder(
               productiveMessage: AppString.mostProductiveMonth,

@@ -23,7 +23,10 @@ class ContributionsHeatMap extends StatelessWidget {
     return Consumer3<UserUidProvider, MainCategoryTrackerProvider,
         FirstAndLastDay>(builder: (context, user, main, days, child) {
       // user firebase uid
-      final String currentUserUid = user.userUid!;
+      final currentUserUid = user.userUid;
+      if (currentUserUid == null) {
+        return userLoadingIndicator();
+      }
 
       return FutureBuilder(
           future: main.retrieveDailyAccountedAndIntensities(
@@ -281,7 +284,10 @@ class _SpecificDaySummaryHeatMapState extends State<SpecificDaySummaryHeatMap> {
             MainCategoryTrackerProvider>(
         builder: (context, sub, user, main, child) {
       // current logged in user uid
-      final String currentUserUid = user.userUid!;
+      final currentUserUid = user.userUid;
+      if (currentUserUid == null) {
+        return userLoadingIndicator();
+      }
 
       return FutureBuilder(
           future: sub.retrieveSubcategoryTotalsForSpecificDate(

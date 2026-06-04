@@ -22,9 +22,14 @@ class AccountedUnaccountedReportPieChart extends StatelessWidget {
     return Consumer3<UserUidProvider, FirstAndLastDay,
             MainCategoryTrackerProvider>(
         builder: (context, user, day, main, child) {
+      final currentUser = user.userUid;
+      if (currentUser == null) {
+        return userLoadingIndicator();
+      }
+
       return FutureBuilder(
           future: main.retrieveMonthAccountUnaccountTable(
-              user.userUid!, day.firstDay, day.lastDay),
+              currentUser, day.firstDay, day.lastDay),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               // Loading state: Show a shimmer effect while data is being loaded.
@@ -614,7 +619,11 @@ class AnalyticsMainCategoryDistributionPieChart extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer2<MainCategoryTrackerProvider, UserUidProvider>(
         builder: ((context, main, user, child) {
-      final String currentUser = user.userUid!;
+      final currentUser = user.userUid;
+      if (currentUser == null) {
+        return userLoadingIndicator();
+      }
+
       return PieChartDataMainCategoryDistribution(
           future:
               main.retrieveEntireMainTotalTimeSpent(currentUser: currentUser));

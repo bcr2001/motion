@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_reusable/db_re/sub_logic.dart';
+import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_routes/mr_stats/stats_front.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:provider/provider.dart';
@@ -32,7 +33,11 @@ class SubTotalsList extends StatelessWidget {
     return Consumer2<SubcategoryTrackerDatabaseProvider, UserUidProvider>(
         builder: (context, sub, user, child) {
       // current user uid
-      final String userUid = user.userUid!;
+      final userUid = user.userUid;
+
+      if (userUid == null) {
+        return userLoadingIndicator();
+      }
 
       return FutureBuilder(
           future: sub.retrieveAllSubcategoryTotals(currentUser: userUid),

@@ -3,6 +3,7 @@ import 'package:motion/motion_core/motion_providers/date_pvd/current_month_provi
 import 'package:motion/motion_core/motion_providers/date_pvd/first_and_last_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
+import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_routes/mr_home/home_windows/efficieny_window.dart';
 import 'package:motion/motion_screens/ms_report/report_back.dart';
 import 'package:motion/motion_screens/ms_report/report_heat_map.dart';
@@ -33,7 +34,11 @@ class MonthlyReportPage extends StatelessWidget {
     ), body: Consumer2<UserUidProvider, MainCategoryTrackerProvider>(
         builder: (context, user, main, child) {
       // current user uid
-      final String currentUser = user.userUid!;
+      final currentUser = user.userUid;
+
+      if (currentUser == null) {
+        return userLoadingIndicator();
+      }
 
       // depending on whether the accounted time is 0
       // or >0, a image will be shown of the screen to
@@ -138,7 +143,10 @@ class MonthlyReportPage extends StatelessWidget {
                               MainCategoryTrackerProvider>(
                           builder: (context, user, day, main, child) {
                         // user uid
-                        final String currentUser = user.userUid!;
+                        final currentUser = user.userUid;
+                        if (currentUser == null) {
+                          return userLoadingIndicator();
+                        }
                         return PieChartDataMainCategoryDistribution(
                           future: main.retrieveMainTotalTimeSpentSpecificDates(
                               currentUser: currentUser,

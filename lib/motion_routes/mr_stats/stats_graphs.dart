@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import '../../motion_core/motion_providers/sql_pvd/track_pvd.dart';
+import '../../motion_reusable/general_reuseable.dart';
 import '../../motion_screens/ms_report/report_back.dart';
 import '../../motion_screens/ms_report/report_front.dart';
 import '../../motion_themes/mth_app/app_strings.dart';
@@ -183,9 +184,13 @@ class AYearInSummaryPieChartDistribution extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 30.0),
       child: Consumer2<UserUidProvider, MainCategoryTrackerProvider>(
-          builder: (context, user, main, child) {
+        builder: (context, user, main, child) {
         // user uid
-        final String currentUser = user.userUid!;
+        final currentUser = user.userUid;
+        if (currentUser == null) {
+          return userLoadingIndicator();
+        }
+
         return PieChartDataMainCategoryDistribution(
           future: main.retrieveMainTotalTimeSpentSpecificDates(
               currentUser: currentUser,
@@ -286,7 +291,10 @@ class GroupedPieChartAccountedUnaccounted extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer2<UserUidProvider, MainCategoryTrackerProvider>(
         builder: (context, user, main, child) {
-      final String currentLoggedInUser = user.userUid!;
+      final currentLoggedInUser = user.userUid;
+      if (currentLoggedInUser == null) {
+        return userLoadingIndicator();
+      }
 
       return FutureBuilder(
           future: main.retrieveMonthDistibutionOfAccountedUnaccounted(
@@ -413,7 +421,10 @@ class LineChartOfMainCategoryYearlyDistribution extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer2<UserUidProvider, MainCategoryTrackerProvider>(
         builder: (context, user, main, child) {
-      final String currentUser = user.userUid!;
+      final currentUser = user.userUid;
+      if (currentUser == null) {
+        return userLoadingIndicator();
+      }
 
       return FutureBuilder(
           future: main.retrieveYearlyTotalsForAllMainCatgories(
@@ -788,7 +799,10 @@ class StackedBarChartOfMainCategoryDistribution extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer2<UserUidProvider, MainCategoryTrackerProvider>(
         builder: (context, user, main, child) {
-      final String currentUser = user.userUid!;
+      final currentUser = user.userUid;
+      if (currentUser == null) {
+        return userLoadingIndicator();
+      }
 
       return FutureBuilder(
           future: main.retrieveYearlyTotalsForAllMainCatgories(

@@ -5,6 +5,7 @@ import 'package:flutter_heatmap_calendar/flutter_heatmap_calendar.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_reusable/db_re/sub_logic.dart';
+import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_screens/ms_report/report_heat_map.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
@@ -24,7 +25,11 @@ class SummaryContributionHeatMap extends StatelessWidget {
     return Consumer3<UserUidProvider, MainCategoryTrackerProvider,
         FirstAndLastDay>(builder: (context, user, main, days, child) {
       // user firebase uid
-      final String currentUserUid = user.userUid!;
+      final currentUserUid = user.userUid;
+      if (currentUserUid == null) {
+        return userLoadingIndicator();
+      }
+
       final String targetYearData = year.toString();
 
       return FutureBuilder(
@@ -95,7 +100,10 @@ class YearMainCategoryOveriew extends StatelessWidget {
     return Consumer2<UserUidProvider, SubcategoryTrackerDatabaseProvider>(
         builder: (context, user, sub, child) {
       // currently logged in user
-      final String currentUser = user.userUid!;
+      final currentUser = user.userUid;
+      if (currentUser == null) {
+        return userLoadingIndicator();
+      }
 
       // if the total amount of time for the current
       // month is 0, then the summary page info
