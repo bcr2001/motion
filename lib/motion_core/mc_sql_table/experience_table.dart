@@ -1,3 +1,5 @@
+import 'package:motion/motion_core/mc_sqlite/database_constants.dart';
+
 /// Represents experience points for different categories on a specific date.
 class ExperiencePoints {
   final String date;
@@ -18,23 +20,23 @@ class ExperiencePoints {
   // Factory constructor to convert a map to MainCategory object
   factory ExperiencePoints.fromMap(Map<String, dynamic> map) {
     return ExperiencePoints(
-        date: map["date"],
-        educationXP: map["educationXP"] ?? 0,
-        skillsXP: map["skillsXP"] ?? 0,
-        sdXP: map["sdXP"] ?? 0,
-        sleepXP: map["sleepXP"] ?? 0,
-        currentLoggedInUser: map["currentLoggedInUser"]);
+        date: map[MotionDbColumns.date],
+        educationXP: map[MotionDbColumns.educationXp] ?? 0,
+        skillsXP: map[MotionDbColumns.skillsXp] ?? 0,
+        sdXP: map[MotionDbColumns.selfDevelopmentXp] ?? 0,
+        sleepXP: map[MotionDbColumns.sleepXp] ?? 0,
+        currentLoggedInUser: map[MotionDbColumns.currentLoggedInUser]);
   }
 
   // Convert MainCategory object to a map
   Map<String, dynamic> toMap() {
     return {
-      "date": date,
-      "educationXP": educationXP,
-      "skillsXP": skillsXP,
-      "sdXP": sdXP,
-      "sleepXP": sleepXP,
-      "currentLoggedInUser": currentLoggedInUser
+      MotionDbColumns.date: date,
+      MotionDbColumns.educationXp: educationXP,
+      MotionDbColumns.skillsXp: skillsXP,
+      MotionDbColumns.selfDevelopmentXp: sdXP,
+      MotionDbColumns.sleepXp: sleepXP,
+      MotionDbColumns.currentLoggedInUser: currentLoggedInUser
     };
   }
 

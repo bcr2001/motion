@@ -1,3 +1,5 @@
+import 'package:motion/motion_core/mc_sqlite/database_constants.dart';
+
 // Structure of the 'main_category' table
 class MainCategory {
   final String date; // Date associated with the record
@@ -21,26 +23,26 @@ class MainCategory {
   // Factory constructor to convert a map to MainCategory object
   factory MainCategory.fromMap(Map<String, dynamic> map) {
     return MainCategory(
-      date: map['date'],
-      education: map['education'] ?? 0.0,
-      skills: map['skills'] ?? 0.0,
-      entertainment: map['entertainment'] ?? 0.0,
-      selfDevelopment: map['selfDevelopment'] ?? 0.0,
-      sleep: map['sleep'] ?? 0.0,
-      currentLoggedInUser: map['currentLoggedInUser'],
+      date: map[MotionDbColumns.date],
+      education: map[MotionDbColumns.education] ?? 0.0,
+      skills: map[MotionDbColumns.skills] ?? 0.0,
+      entertainment: map[MotionDbColumns.entertainment] ?? 0.0,
+      selfDevelopment: map[MotionDbColumns.selfDevelopment] ?? 0.0,
+      sleep: map[MotionDbColumns.sleep] ?? 0.0,
+      currentLoggedInUser: map[MotionDbColumns.currentLoggedInUser],
     );
   }
 
   // Convert MainCategory object to a map
   Map<String, dynamic> toMap() {
     return {
-      'date': date,
-      'education': education,
-      'skills': skills,
-      'entertainment': entertainment,
-      'selfDevelopment': selfDevelopment,
-      'sleep': sleep,
-      'currentLoggedInUser': currentLoggedInUser,
+      MotionDbColumns.date: date,
+      MotionDbColumns.education: education,
+      MotionDbColumns.skills: skills,
+      MotionDbColumns.entertainment: entertainment,
+      MotionDbColumns.selfDevelopment: selfDevelopment,
+      MotionDbColumns.sleep: sleep,
+      MotionDbColumns.currentLoggedInUser: currentLoggedInUser,
     };
   }
 

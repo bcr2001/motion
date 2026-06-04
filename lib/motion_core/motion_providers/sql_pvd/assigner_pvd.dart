@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:motion/motion_core/mc_sql_table/assign_table.dart';
 import 'package:motion/motion_core/mc_sqlite/sql_assigner_db.dart';
 
+import 'current_user_guard.dart';
+
 // database instance
 final AssignerDatabaseHelper dbInstance = AssignerDatabaseHelper();
 
@@ -23,12 +25,12 @@ class AssignerMainProvider extends ChangeNotifier {
   Future<List<Map<String, dynamic>>> retrieveIsTableEmptyOrNotBeingTracked(
       {required currentUser}) async {
     return await dbInstance.isTableEmptyOrNotBeingTracked(
-        currentUser: currentUser);
+        currentUser: requireCurrentUser(currentUser));
   }
 
   // insert items into the assigner.db database
   Future<void> insertIntoAssignerDb(Assigner categoryAssigner) async {
-    await dbInstance.assignInsert(categoryAssigner);
+    await dbInstance.assignInsert(requireAssignerUser(categoryAssigner));
     await getAllUserItems();
 
     notifyListeners();
@@ -36,7 +38,7 @@ class AssignerMainProvider extends ChangeNotifier {
 
   // update existing items in the to_assign table
   Future<void> updateAssignedItems(Assigner categoryAssigner) async {
-    await dbInstance.assignUpdate(categoryAssigner);
+    await dbInstance.assignUpdate(requireAssignerUser(categoryAssigner));
     await getAllUserItems();
 
     notifyListeners();

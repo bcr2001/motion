@@ -1,8 +1,10 @@
-import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:motion/motion_core/mc_sql_table/experience_table.dart';
 import 'package:motion/motion_core/mc_sql_table/main_table.dart';
 import 'package:motion/motion_core/mc_sql_table/sub_table.dart';
+import 'package:motion/motion_core/mc_sqlite/database_constants.dart';
+import 'package:motion/motion_core/mc_sqlite/database_error.dart';
+import 'package:motion/motion_core/mc_sqlite/tracker_database_schema.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -39,266 +41,23 @@ class TrackerDatabaseHelper {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, 'tracker.db');
 
-    return await openDatabase(path,
-        version: 10, onCreate: _createDatabase, onUpgrade: _onUpgradeDatabase);
+    return await openDatabase(
+      path,
+      version: TrackerDatabaseSchema.version,
+      onCreate: _createDatabase,
+      onUpgrade: _onUpgradeDatabase,
+      onOpen: TrackerDatabaseSchema.ensureSchema,
+    );
   }
 
-  void _onUpgradeDatabase(Database db, int oldVersion, int newVersion) async {
+  Future<void> _onUpgradeDatabase(
+      Database db, int oldVersion, int newVersion) async {
     logger.i("Database _onUpgradeDatabase function called");
-    if (oldVersion < 10) {
-      // await db.execute('DROP TABLE IF EXISTS experience_points');
-      // Upgrade the database schema here
-      // await db.execute('''
-      //   CREATE TABLE experience_points(
-      //     date TEXT,
-      //     educationXP INTEGER,
-      //     skillsXP INTEGER,
-      //     sdXP INTEGER,
-      //     sleepXP INTEGER,
-      //     currentLoggedInUser TEXT,
-      //     PRIMARY KEY (date, currentLoggedInUser),hi
-      //     FOREIGN KEY (date, currentLoggedInUser)
-      //     REFERENCES main_category(date, currentLoggedInUser)
-      //   )
-      // ''');
-
-      // logger.i("Database _onUpgradeDatabase COMPLETED");
-    }
+    await TrackerDatabaseSchema.migrate(db, oldVersion, newVersion);
   }
 
-  void _createDatabase(Database db, int version) async {
-    // create the experience point table
-    await db.execute('''
-        CREATE TABLE experience_points(
-          date TEXT,
-          educationXP INTEGER,
-          skillsXP INTEGER,
-          sdXP INTEGER,
-          sleepXP INTEGER,
-          currentLoggedInUser TEXT,
-          PRIMARY KEY (date, currentLoggedInUser),
-          FOREIGN KEY (date, currentLoggedInUser)
-          REFERENCES main_category(date, currentLoggedInUser)
-        )
-      ''');
-      
-
-    // creation of the main_category table
-    await db.execute('''
-      CREATE TABLE main_category(
-        date TEXT,
-        education REAL,
-        skills REAL,
-        entertainment REAL,
-        selfDevelopment REAL,
-        sleep REAL,
-        currentLoggedInUser TEXT,
-        PRIMARY KEY (date, currentLoggedInUser)
-      )
-    ''');
-
-    // creation of the subcategory table
-    await db.execute('''
-    CREATE TABLE subcategory(
-      id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
-      date TEXT,
-      mainCategoryName TEXT,
-      subcategoryName TEXT,
-      timeRecorded TEXT,
-      timeSpent REAL,
-      currentLoggedInUser TEXT,
-      FOREIGN KEY (date, currentLoggedInUser) 
-      REFERENCES main_category(date, 	currentLoggedInUser)
-    )
-  ''');
-
-    // Trigger: update_experience_points_after_insert
-    // Purpose: Updates the experience_points table after a new entry is
-    //          inserted into the subcategory table.
-    // Functionality:
-    // -- 1. Triggered after an INSERT operation on the subcategory table.
-    // -- 2. For each main category(Education, Skills, Personal Growth, Sleep)
-    //       it sums the timeSpent from the subcategory table.
-    // -- 3. Applies a CASE statement for each category to determine the
-    //       appropriate experience points based on the total timeSpent.
-    // -- 4. Updates the experience_points table with the calculated
-    //       experience points for each category.
-    // -- 5. Ensures the update is for the specific date and user matching
-    //       the new entry in the subcategory table.
-    await db.execute('''
-        CREATE TRIGGER IF NOT EXISTS update_experience_points
-        AFTER INSERT ON subcategory
-        BEGIN
-          UPDATE experience_points
-          SET 
-            educationXP = (SELECT 
-              CASE
-                  WHEN COALESCE(SUM(timeSpent), 0) < 15 THEN 0
-                  WHEN COALESCE(SUM(timeSpent), 0) < 60 THEN 5
-                  WHEN COALESCE(SUM(timeSpent), 0) < 120 THEN 10
-                  WHEN COALESCE(SUM(timeSpent), 0) < 180 THEN 15
-                  WHEN COALESCE(SUM(timeSpent), 0) < 240 THEN 20
-                  WHEN COALESCE(SUM(timeSpent), 0) >= 240 THEN 25
-                  ELSE 0 
-              END
-            FROM subcategory 
-            WHERE mainCategoryName = 'Education' AND date = NEW.date AND currentLoggedInUser = NEW.currentLoggedInUser),
-
-            skillsXP = (SELECT 
-              CASE
-                  WHEN COALESCE(SUM(timeSpent), 0) < 15 THEN 0
-                  WHEN COALESCE(SUM(timeSpent), 0) >= 15 AND COALESCE(SUM(timeSpent), 0) < 60 THEN 5
-                  WHEN COALESCE(SUM(timeSpent), 0) >= 60 AND COALESCE(SUM(timeSpent), 0) < 120 THEN 10
-                  WHEN COALESCE(SUM(timeSpent), 0) >= 120 AND COALESCE(SUM(timeSpent), 0) < 180 THEN 15
-                  WHEN COALESCE(SUM(timeSpent), 0) >= 180 AND COALESCE(SUM(timeSpent), 0) < 240 THEN 20
-                  WHEN COALESCE(SUM(timeSpent), 0) >= 240 THEN 25
-                  ELSE 0 
-              END
-            FROM subcategory 
-            WHERE mainCategoryName = 'Skills' AND date = NEW.date AND currentLoggedInUser = NEW.currentLoggedInUser),
-
-
-            sdXP = (SELECT 
-              CASE
-                  WHEN COALESCE(SUM(timeSpent), 0) < 15 THEN 0
-                  WHEN COALESCE(SUM(timeSpent), 0) >= 15 AND COALESCE(SUM(timeSpent), 0) < 60 THEN 10
-                  WHEN COALESCE(SUM(timeSpent), 0) >= 60 AND COALESCE(SUM(timeSpent), 0) < 120 THEN 15
-                  WHEN COALESCE(SUM(timeSpent), 0) >= 120 AND COALESCE(SUM(timeSpent), 0) < 180 THEN 20
-                  WHEN COALESCE(SUM(timeSpent), 0) >= 180 THEN 25
-                  ELSE 0 
-              END
-            FROM subcategory 
-            WHERE mainCategoryName = 'Self Development' AND date = NEW.date AND currentLoggedInUser = NEW.currentLoggedInUser),
-
-
-            sleepXP = (SELECT 
-                CASE
-                    WHEN COALESCE(SUM(timeSpent), 0) < 300 THEN 0
-                    WHEN COALESCE(SUM(timeSpent), 0) >= 300 AND COALESCE(SUM(timeSpent), 0) < 360 THEN 5
-                    WHEN COALESCE(SUM(timeSpent), 0) >= 360 AND COALESCE(SUM(timeSpent), 0) < 420 THEN 10
-                    WHEN COALESCE(SUM(timeSpent), 0) >= 420 AND COALESCE(SUM(timeSpent), 0) < 480 THEN 20
-                    WHEN COALESCE(SUM(timeSpent), 0) >= 480 THEN 25
-                    ELSE 0 
-                END
-              FROM subcategory 
-              WHERE mainCategoryName = 'Sleep' AND date = NEW.date AND currentLoggedInUser = NEW.currentLoggedInUser)
-            WHERE date = NEW.date AND currentLoggedInUser = NEW.currentLoggedInUser;
-          END;  
-        ''');
-
-    // trigger to update the experience point table if
-    // a deletion is made in the subcategory table
-    await db.execute('''
-        CREATE TRIGGER IF NOT EXISTS update_experience_points_after_delete
-        AFTER DELETE ON subcategory
-        BEGIN
-          UPDATE experience_points
-          SET 
-            educationXP = (SELECT 
-              CASE
-                  WHEN COALESCE(SUM(timeSpent), 0) < 15 THEN 0
-                  WHEN COALESCE(SUM(timeSpent), 0) < 60 THEN 5
-                  WHEN COALESCE(SUM(timeSpent), 0) < 120 THEN 10
-                  WHEN COALESCE(SUM(timeSpent), 0) < 180 THEN 15
-                  WHEN COALESCE(SUM(timeSpent), 0) < 240 THEN 20
-                  WHEN COALESCE(SUM(timeSpent), 0) >= 240 THEN 25
-                  ELSE 0 
-              END
-            FROM subcategory 
-            WHERE mainCategoryName = 'Education' AND date = OLD.date AND currentLoggedInUser = OLD.currentLoggedInUser),
-
-            skillsXP = (SELECT 
-              CASE
-                  WHEN COALESCE(SUM(timeSpent), 0) < 15 THEN 0
-                  WHEN COALESCE(SUM(timeSpent), 0) >= 15 AND COALESCE(SUM(timeSpent), 0) < 60 THEN 5
-                  WHEN COALESCE(SUM(timeSpent), 0) >= 60 AND COALESCE(SUM(timeSpent), 0) < 120 THEN 10
-                  WHEN COALESCE(SUM(timeSpent), 0) >= 120 AND COALESCE(SUM(timeSpent), 0) < 180 THEN 15
-                  WHEN COALESCE(SUM(timeSpent), 0) >= 180 AND COALESCE(SUM(timeSpent), 0) < 240 THEN 20
-                  WHEN COALESCE(SUM(timeSpent), 0) >= 240 THEN 25
-                  ELSE 0 
-              END
-            FROM subcategory 
-            WHERE mainCategoryName = 'Skills' AND date = OLD.date AND currentLoggedInUser = OLD.currentLoggedInUser),
-
-            sdXP = (SELECT 
-              CASE
-                  WHEN COALESCE(SUM(timeSpent), 0) < 15 THEN 0
-                  WHEN COALESCE(SUM(timeSpent), 0) >= 15 AND COALESCE(SUM(timeSpent), 0) < 60 THEN 10
-                  WHEN COALESCE(SUM(timeSpent), 0) >= 60 AND COALESCE(SUM(timeSpent), 0) < 120 THEN 15
-                  WHEN COALESCE(SUM(timeSpent), 0) >= 120 AND COALESCE(SUM(timeSpent), 0) < 180 THEN 20
-                  WHEN COALESCE(SUM(timeSpent), 0) >= 180 THEN 25
-                  ELSE 0 
-              END
-            FROM subcategory 
-            WHERE mainCategoryName = 'Self Development' AND date = OLD.date AND currentLoggedInUser = OLD.currentLoggedInUser),
-
-            sleepXP = (SELECT 
-              CASE
-                  WHEN COALESCE(SUM(timeSpent), 0) < 300 THEN 0
-                  WHEN COALESCE(SUM(timeSpent), 0) >= 300 AND COALESCE(SUM(timeSpent), 0) < 360 THEN 5
-                  WHEN COALESCE(SUM(timeSpent), 0) >= 360 AND COALESCE(SUM(timeSpent), 0) < 420 THEN 10
-                  WHEN COALESCE(SUM(timeSpent), 0) >= 420 AND COALESCE(SUM(timeSpent), 0) < 480 THEN 20
-                  WHEN COALESCE(SUM(timeSpent), 0) >= 480 THEN 25
-                  ELSE 0 
-              END
-            FROM subcategory 
-            WHERE mainCategoryName = 'Sleep' AND date = OLD.date AND currentLoggedInUser = OLD.currentLoggedInUser)
-          WHERE date = OLD.date AND currentLoggedInUser = OLD.currentLoggedInUser;
-        END;
-        ''');
-    // a trigger to update the main_category table
-    // calculate the sums from the subcategory table
-    // and updates the main_category table depending on the aggregation
-    await db.execute('''
-      CREATE TRIGGER IF NOT EXISTS update_main_category
-      AFTER INSERT ON subcategory
-      BEGIN
-        UPDATE main_category
-        SET education = (SELECT COALESCE(SUM(timeSpent), 0) FROM subcategory WHERE 
-        mainCategoryName = 'Education' AND date = NEW.date AND 
-        currentLoggedInUser = NEW.currentLoggedInUser),
-            skills = (SELECT COALESCE(SUM(timeSpent), 0) FROM subcategory 
-            WHERE mainCategoryName = 'Skills' AND date = NEW.date AND 
-            currentLoggedInUser = NEW.currentLoggedInUser),
-            entertainment = (SELECT COALESCE(SUM(timeSpent), 0) FROM subcategory 
-            WHERE mainCategoryName = 'Entertainment' AND date = NEW.date 
-            AND currentLoggedInUser = NEW.currentLoggedInUser),
-            selfDevelopment = (SELECT COALESCE(SUM(timeSpent), 0) FROM subcategory WHERE 
-            mainCategoryName = 'Self Development' AND date = NEW.date AND 
-            currentLoggedInUser = NEW.currentLoggedInUser),
-            sleep = (SELECT COALESCE(SUM(timeSpent), 0) FROM subcategory WHERE 
-            mainCategoryName = 'Sleep' AND date = NEW.date AND 
-            currentLoggedInUser = NEW.currentLoggedInUser)
-        WHERE date = NEW.date AND currentLoggedInUser = NEW.currentLoggedInUser;
-      END;
-      ''');
-
-    // a trigger to update the main category table
-    // when an entry in the subcategory table is deleted
-    await db.execute('''
-        CREATE TRIGGER IF NOT EXISTS update_main_category_after_delete
-        AFTER DELETE ON subcategory
-        BEGIN
-          UPDATE main_category
-          SET education = (SELECT COALESCE(SUM(timeSpent), 0) FROM subcategory WHERE 
-          mainCategoryName = 'Education' AND date = OLD.date AND 
-          currentLoggedInUser = OLD.currentLoggedInUser),
-              skills = (SELECT COALESCE(SUM(timeSpent), 0) FROM subcategory WHERE 
-              mainCategoryName = 'Skills' AND date = OLD.date AND 
-              currentLoggedInUser = OLD.currentLoggedInUser),
-              entertainment = (SELECT COALESCE(SUM(timeSpent), 0) FROM subcategory WHERE 
-              mainCategoryName = 'Entertainment' AND date = OLD.date AND 
-              currentLoggedInUser = OLD.currentLoggedInUser),
-              selfDevelopment = (SELECT COALESCE(SUM(timeSpent), 0) FROM subcategory WHERE 
-              mainCategoryName = 'Self Development' AND date = OLD.date AND 
-              currentLoggedInUser = OLD.currentLoggedInUser),
-              sleep = (SELECT COALESCE(SUM(timeSpent), 0) FROM subcategory WHERE 
-              mainCategoryName = 'Sleep' AND date = OLD.date AND 
-              currentLoggedInUser = OLD.currentLoggedInUser)
-          WHERE date = OLD.date AND 
-          currentLoggedInUser = OLD.currentLoggedInUser;
-        END;
-        ''');
+  Future<void> _createDatabase(Database db, int version) async {
+    await TrackerDatabaseSchema.create(db);
   }
 
 // CRUD operations for MainCategory
@@ -307,10 +66,10 @@ class TrackerDatabaseHelper {
   Future<void> insertMainCategory(MainCategory mainCategory) async {
     try {
       final db = await database;
-      await db.insert('main_category', mainCategory.toMap(),
+      await db.insert(MotionDbTables.mainCategory, mainCategory.toMap(),
           conflictAlgorithm: ConflictAlgorithm.replace);
-    } catch (e) {
-      logger.e("Error: $e");
+    } catch (e, stackTrace) {
+      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
   }
 
@@ -386,9 +145,8 @@ class TrackerDatabaseHelper {
         ''', [currentUser, targetDate]);
 
       return resultLJOMXP;
-    } catch (e) {
-      logger.e("(getLeftJoinOnMainAndXP) Error: $e");
-      return [];
+    } catch (e, stackTrace) {
+      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
   }
 
@@ -419,9 +177,8 @@ class TrackerDatabaseHelper {
           WHERE currentLoggedInUser = ?
           """, [currentUser]);
       return resultAMCT;
-    } catch (e) {
-      logger.e("Get All Main Category Total Error: $e");
-      return [];
+    } catch (e, stackTrace) {
+      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
   }
 
@@ -452,11 +209,11 @@ Future<int> getNumberOfDays(
           return numberOfDays;
         }
       }
-    } catch (e) {
-      logger.e("Error querying the database: $e");
+    } catch (e, stackTrace) {
+      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
 
-    return 0; // Return 0 if there's an error or no result.
+    return 0; // Return 0 if there is no result.
   }
 
   // count the number of days in the main_category table for the current year
@@ -480,11 +237,11 @@ Future<int> getNumberOfDays(
           return numberOfDays;
         }
       }
-    } catch (e) {
-      logger.e("Error querying the database: $e");
+    } catch (e, stackTrace) {
+      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
 
-    return 0; // Return 0 if there's an error or no result.
+    return 0; // Return 0 if there is no result.
   }
 
   // gets all the entries added to the main category table
@@ -498,8 +255,8 @@ Future<int> getNumberOfDays(
       ''');
 
       return allMainCats.map((map) => MainCategory.fromMap(map)).toList();
-    } catch (e) {
-      logger.e("Error: $e");
+    } catch (e, stackTrace) {
+      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
     return [];
   }
@@ -540,11 +297,11 @@ Future<int> getNumberOfDays(
       } else {
         return 0.0;
       }
-    } catch (e) {
-      // Handle any database query errors, e.g., log the error
-      //and return an empty list or throw an exception.
-      logger.e('Error in getMonthTotalAndAverage: $e');
-      rethrow;
+    } catch (e, stackTrace) {
+      logDatabaseError(
+          "TrackerDatabaseHelper.getEntireTotalMainCategoryTable",
+          e,
+          stackTrace);
     }
   }
 
@@ -585,9 +342,8 @@ Future<int> getNumberOfDays(
       } else {
         return 0.0;
       }
-    } catch (e) {
-      logger.e('Error in getMonthTotalAndAverage: $e');
-      rethrow;
+    } catch (e, stackTrace) {
+      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
   }
 
@@ -614,8 +370,8 @@ Future<int> getNumberOfDays(
         ''', [currentUser]);
 
       return resultAAUBBY;
-    } catch (e) {
-      logger.e("Error: $e");
+    } catch (e, stackTrace) {
+      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
     return [];
   }
@@ -645,9 +401,8 @@ Future<int> getNumberOfDays(
         ''', [currentUser, year]);
 
       return resultMDAUA;
-    } catch (e) {
-      logger.e("Error: $e");
-      return [];
+    } catch (e, stackTrace) {
+      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
   }
 
@@ -687,9 +442,8 @@ Future<int> getNumberOfDays(
       } else {
         return 0.0;
       }
-    } catch (e) {
-      logger.e("Error: $e");
-      rethrow;
+    } catch (e, stackTrace) {
+      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
   }
 
@@ -717,9 +471,8 @@ Future<int> getNumberOfDays(
         ''', [currentUser, firstDatePeriod, lastDatePeriod]);
 
       return resultAWAAD;
-    } catch (e) {
-      logger.e("Error: $e");
-      return [];
+    } catch (e, stackTrace) {
+      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
   }
 
@@ -741,9 +494,8 @@ Future<int> getNumberOfDays(
         ''', [currentUser, firstDay, lastDay]);
 
       return resultMAT;
-    } catch (e) {
-      logger.e("Error: $e");
-      return [];
+    } catch (e, stackTrace) {
+      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
   }
 
@@ -779,9 +531,8 @@ Future<int> getNumberOfDays(
           ''', [currentUser, firstDay, lastDay]);
 
       return resultMLTMC;
-    } catch (e) {
-      logger.e("Error: $e");
-      return [];
+    } catch (e, stackTrace) {
+      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
   }
 
@@ -804,11 +555,9 @@ Future<int> getNumberOfDays(
         ''', [currentUser, firstDay, lastDay]);
 
       return resultMTTSSD;
-    } catch (e) {
-      // if there is an error, an empty list is returned
-      // and the error is logged to the console
-      logger.i("Error: $e");
-      return [];
+    } catch (e, stackTrace) {
+      logDatabaseError("TrackerDatabaseHelper.getMainTotalTimeSpentSpecificDates",
+          e, stackTrace);
     }
   }
 
@@ -828,11 +577,9 @@ Future<int> getNumberOfDays(
         ''', [currentUser]);
 
       return resultEMTTS;
-    } catch (e) {
-      // if there is an error, an empty list is returned
-      // and the error is logged to the console
-      logger.i("Error: $e");
-      return [];
+    } catch (e, stackTrace) {
+      logDatabaseError(
+          "TrackerDatabaseHelper.getEntireMainTotalTimeSpent", e, stackTrace);
     }
   }
 
@@ -856,10 +603,8 @@ Future<int> getNumberOfDays(
         ''', [currentUser, year]);
 
       return resultYTFAMC;
-    } catch (e) {
-      logger.i("Error: $e");
-
-      return [];
+    } catch (e, stackTrace) {
+      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
   }
 
@@ -926,9 +671,8 @@ Future<int> getNumberOfDays(
         ''', [currentUser, year]);
 
       return resultDAAI;
-    } catch (e) {
-      logger.e("Daily Accounted and Intensity error: $e");
-      return [];
+    } catch (e, stackTrace) {
+      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
   }
 
@@ -936,11 +680,10 @@ Future<int> getNumberOfDays(
   Future<void> updateMainCategory(MainCategory mainCategory) async {
     try {
       final db = await database;
-      await db.update('main_category', mainCategory.toMap(),
-          where: 'date = ?', whereArgs: [mainCategory.date]);
-    } catch (e) {
-      logger.e("Error: $e");
-      throw "Error: $e";
+      await db.update(MotionDbTables.mainCategory, mainCategory.toMap(),
+          where: '${MotionDbColumns.date} = ?', whereArgs: [mainCategory.date]);
+    } catch (e, stackTrace) {
+      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
   }
 
@@ -948,10 +691,10 @@ Future<int> getNumberOfDays(
   Future<void> deleteMainCategory(String date) async {
     try {
       final db = await database;
-      await db.delete('main_category', where: 'date = ?', whereArgs: [date]);
-    } catch (e) {
-      logger.e("Error: $e");
-      throw "Error: $e";
+      await db.delete(MotionDbTables.mainCategory,
+          where: '${MotionDbColumns.date} = ?', whereArgs: [date]);
+    } catch (e, stackTrace) {
+      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
   }
 
@@ -974,11 +717,10 @@ Future<int> getNumberOfDays(
   Future<void> insertSubcategory(Subcategories subcategory) async {
     try {
       final db = await database;
-      await db.insert('subcategory', subcategory.toMap(),
+      await db.insert(MotionDbTables.subcategory, subcategory.toMap(),
           conflictAlgorithm: ConflictAlgorithm.replace);
-    } catch (e) {
-      logger.e("Error: $e");
-      throw "Error: $e";
+    } catch (e, stackTrace) {
+      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
   }
 
@@ -987,12 +729,11 @@ Future<int> getNumberOfDays(
     try {
       final db = await database;
 
-      final allSubs = await db.query("subcategory");
+      final allSubs = await db.query(MotionDbTables.subcategory);
 
       return allSubs.map((map) => Subcategories.fromMap(map)).toList();
-    } catch (e) {
-      logger.e("Error: $e");
-      return [];
+    } catch (e, stackTrace) {
+      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
   }
 
@@ -1012,10 +753,8 @@ Future<int> getNumberOfDays(
         """, [currentUser]);
 
       return allSubTotals;
-    } catch (e) {
-      logger.e("getAllSubcategoryTotals Error $e");
-
-      return [];
+    } catch (e, stackTrace) {
+      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
   }
 
@@ -1025,16 +764,16 @@ Future<int> getNumberOfDays(
     try {
       final db = await database;
 
-      final specificSubcategories = await db.query("subcategory",
-          where: "date = ? AND currentLoggedInUser = ? AND subcategoryName = ?",
+      final specificSubcategories = await db.query(MotionDbTables.subcategory,
+          where:
+              "${MotionDbColumns.date} = ? AND ${MotionDbColumns.currentLoggedInUser} = ? AND ${MotionDbColumns.subcategoryName} = ?",
           whereArgs: [currentDate, currentUser, subcategoryName]);
 
       return specificSubcategories
           .map((map) => Subcategories.fromMap(map))
           .toList();
-    } catch (e) {
-      logger.e("Error: $e");
-      return [];
+    } catch (e, stackTrace) {
+      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
   }
 
@@ -1061,9 +800,8 @@ Future<int> getNumberOfDays(
       } else {
         return 0.0; // Return 0.0 if no matching records are found
       }
-    } catch (e) {
-      logger.e("Error: $e");
-      rethrow;
+    } catch (e, stackTrace) {
+      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
   }
 
@@ -1086,10 +824,9 @@ Future<int> getNumberOfDays(
         }
       }
       return 0.0; // Return a default value if no data or invalid data is found.
-    } catch (e) {
-      // Handle the exception, e.g., log it or rethrow it for debugging.
-      logger.e('Error in getMonthTotalTimeSpent: $e');
-      return 0.0;
+    } catch (e, stackTrace) {
+      logDatabaseError(
+          "TrackerDatabaseHelper.getMonthTotalTimeSpent", e, stackTrace);
     }
   }
 
@@ -1150,8 +887,8 @@ Future<List<Map<String, dynamic>>> getMonthTotalAndAverage(
 
     return resultMTA;
   } catch (e, stackTrace) {
-    logger.e('Error in getMonthTotalAndAverage: $e\nStack Trace: $stackTrace');
-    return [];
+    logDatabaseError(
+        "TrackerDatabaseHelper.getMonthTotalAndAverage", e, stackTrace);
   }
 }
 
@@ -1223,10 +960,6 @@ Future<int> getUserStreak({required String currentUser}) async {
 
   return streak;
 }
-
-
-
-
   // calculates and returns the total time spent on a particular subcategory
   Future<double> getTotalTimeSpentPerSubcategory(
       String currentDate, String currentUser, String subcategoryName) async {
@@ -1251,9 +984,8 @@ Future<int> getUserStreak({required String currentUser}) async {
       } else {
         return 0.0; // Return 0.0 if no matching records are found
       }
-    } catch (e) {
-      logger.e("Error: $e");
-      return 0.0;
+    } catch (e, stackTrace) {
+      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
   }
 
@@ -1290,9 +1022,8 @@ Future<int> getUserStreak({required String currentUser}) async {
         ''', [currentUser, firstDay, lastDay]);
 
       return resultMLTS;
-    } catch (e) {
-      logger.e("Error: $e");
-      return [];
+    } catch (e, stackTrace) {
+      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
   }
 
@@ -1311,9 +1042,8 @@ Future<int> getUserStreak({required String currentUser}) async {
       ''', [selectedDate, currentUser]);
 
       return resultSTFSD;
-    } catch (e) {
-      logger.e("Subcategory Totals For Specific Date Error: $e");
-      return [];
+    } catch (e, stackTrace) {
+      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
   }
 
@@ -1321,12 +1051,12 @@ Future<int> getUserStreak({required String currentUser}) async {
   Future<void> updateSubcategory(Subcategories subcategory) async {
     try {
       final db = await database;
-      await db.update('subcategory', subcategory.toMap(),
-          where: 'id = ?', whereArgs: [subcategory.id]);
+      await db.update(MotionDbTables.subcategory, subcategory.toMap(),
+          where: '${MotionDbColumns.id} = ?', whereArgs: [subcategory.id]);
 
       logger.i("Update successfull");
-    } catch (e) {
-      logger.e("Error: $e");
+    } catch (e, stackTrace) {
+      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
   }
 
@@ -1334,9 +1064,10 @@ Future<int> getUserStreak({required String currentUser}) async {
   Future<void> deleteSubcategory(int id) async {
     try {
       final db = await database;
-      await db.delete('subcategory', where: 'id = ?', whereArgs: [id]);
-    } catch (e) {
-      logger.e("Error: $e");
+      await db.delete(MotionDbTables.subcategory,
+          where: '${MotionDbColumns.id} = ?', whereArgs: [id]);
+    } catch (e, stackTrace) {
+      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
   }
 
@@ -1346,10 +1077,10 @@ Future<int> getUserStreak({required String currentUser}) async {
   Future<void> insertExperiencePoint(ExperiencePoints experience) async {
     try {
       final db = await database;
-      await db.insert('experience_points', experience.toMap(),
+      await db.insert(MotionDbTables.experiencePoints, experience.toMap(),
           conflictAlgorithm: ConflictAlgorithm.replace);
-    } catch (e) {
-      logger.e("Error: $e");
+    } catch (e, stackTrace) {
+      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
   }
 
@@ -1401,9 +1132,8 @@ Future<int> getUserStreak({required String currentUser}) async {
       } else {
         return 0.0; // Return 0.0 if no matching records are found
       }
-    } catch (e) {
-      logger.e("(experiencePointsEfficiencyScore) ERROR: $e");
-      return 0.0;
+    } catch (e, stackTrace) {
+      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
   }
 
@@ -1437,9 +1167,8 @@ Future<int> getUserStreak({required String currentUser}) async {
       } else {
         return 0.0; // Return 0.0 if no matching records are found
       }
-    } catch (e) {
-      logger.e("(experiencePointsEfficiencyScore) ERROR: $e");
-      return 0.0;
+    } catch (e, stackTrace) {
+      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
   }
 
@@ -1486,9 +1215,8 @@ Future<int> getUserStreak({required String currentUser}) async {
       } else {
         return 0.0; // Return 0.0 if no matching records are found
       }
-    } catch (e) {
-      logger.e("(monthlyEfficiencyScore) ERROR: $e");
-      return 0.0;
+    } catch (e, stackTrace) {
+      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
   }
 
@@ -1528,9 +1256,8 @@ Future<int> getUserStreak({required String currentUser}) async {
       } else {
         return 0; // Return 0 if no matching records are found
       }
-    } catch (e) {
-      logger.i("getTotalXP error: $e");
-      return 0;
+    } catch (e, stackTrace) {
+      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
   }
 
@@ -1559,9 +1286,9 @@ Future<int> getUserStreak({required String currentUser}) async {
       } else {
         return 0; // Return 0.0 if no matching records are found
       }
-    } catch (e) {
-      logger.e("(dailyExperiencePoints) ERROR: $e");
-      return 0; // Return 0.0 on error
+    } catch (e, stackTrace) {
+      logDatabaseError(
+          "TrackerDatabaseHelper.dailyExperiencePoints", e, stackTrace);
     }
   }
 
@@ -1625,9 +1352,8 @@ Future<int> getUserStreak({required String currentUser}) async {
         ) AS totalLeastXP
           """, [currentUser, year]);
       return resultMALPM;
-    } catch (e) {
-      logger.e("(getMostAndLeastProductiveMonths) ERROR: $e");
-      return [];
+    } catch (e, stackTrace) {
+      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
   }
 
@@ -1662,9 +1388,8 @@ Future<int> getUserStreak({required String currentUser}) async {
         """, [currentUser, firstDay, lastDay]);
 
       return resultMALPD;
-    } catch (e) {
-      logger.e("(getMostAndLeastProductiveDays) ERROR $e");
-      return [];
+    } catch (e, stackTrace) {
+      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
   }
 
@@ -1675,8 +1400,8 @@ Future<List<ExperiencePoints>> getAllExperiencePointsForUser({
   final db = await database;
   // Query every column in the table, filtered by the user
   final result = await db.query(
-    'experience_points',
-    where: 'currentLoggedInUser = ?',
+    MotionDbTables.experiencePoints,
+    where: '${MotionDbColumns.currentLoggedInUser} = ?',
     whereArgs: [currentUser],
   );
 
@@ -1774,13 +1499,14 @@ Future<List<ExperiencePoints>> getAllExperiencePointsForUser({
     
     try {
       await db.delete(
-        "subcategory",
-        where: "date = ?",
+        MotionDbTables.subcategory,
+        where: "${MotionDbColumns.date} = ?",
         whereArgs: [date],
       );
       debugPrint("✅ Subcategories with date $date deleted successfully");
-    } catch (e) {
-      debugPrint("❌ Error deleting subcategories: $e");
+    } catch (e, stackTrace) {
+      logDatabaseError(
+          "TrackerDatabaseHelper.deleteSubcategoriesByDate", e, stackTrace);
     }
   }
 
@@ -1800,5 +1526,3 @@ Future<List<ExperiencePoints>> getAllExperiencePointsForUser({
   //   }
   // }
 }
-
-

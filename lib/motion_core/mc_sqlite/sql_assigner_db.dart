@@ -1,4 +1,6 @@
 import 'package:motion/motion_core/mc_sql_table/assign_table.dart';
+import 'package:motion/motion_core/mc_sqlite/database_constants.dart';
+import 'package:motion/motion_core/mc_sqlite/database_error.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -48,8 +50,13 @@ class AssignerDatabaseHelper {
 
     // Open the database, creating it if it doesn't exist and
     // upgrading it if necessary.
-    return await openDatabase(path,
-        version: 6, onCreate: _onCreate, onUpgrade: _onUpgrade);
+    return await openDatabase(
+      path,
+      version: 6,
+      onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
+      onOpen: _ensureSchema,
+    );
   }
 
   // Method called when the database is created for the first time.
@@ -58,23 +65,61 @@ class AssignerDatabaseHelper {
     // Execute SQL query to create a new table.
     // The 'to_assign' table will store various details about assignments.
     await db.execute("""
-      CREATE TABLE to_assign(
-        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-        currentLoggedInUser TEXT,
-        subcategoryName TEXT,
-        mainCategoryName TEXT,
-        isActive INTEGER,
-        isArchive INTEGER DEFAULT 0,
-        dateCreated TEXT
+      CREATE TABLE ${MotionDbTables.assigner}(
+        ${MotionDbColumns.id} INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+        ${MotionDbColumns.currentLoggedInUser} TEXT,
+        ${MotionDbColumns.subcategoryName} TEXT,
+        ${MotionDbColumns.mainCategoryName} TEXT,
+        ${MotionDbColumns.isActive} INTEGER,
+        ${MotionDbColumns.isArchive} INTEGER DEFAULT 0,
+        ${MotionDbColumns.dateCreated} TEXT
       )
     """);
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    if (newVersion > oldVersion) {
-      // Add the new column 'isArchive' to the table
+    await _ensureSchema(db);
+  }
+
+  Future<void> _ensureSchema(Database db) async {
+    await db.execute("""
+      CREATE TABLE IF NOT EXISTS ${MotionDbTables.assigner}(
+        ${MotionDbColumns.id} INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+        ${MotionDbColumns.currentLoggedInUser} TEXT,
+        ${MotionDbColumns.subcategoryName} TEXT,
+        ${MotionDbColumns.mainCategoryName} TEXT,
+        ${MotionDbColumns.isActive} INTEGER,
+        ${MotionDbColumns.isArchive} INTEGER DEFAULT 0,
+        ${MotionDbColumns.dateCreated} TEXT
+      )
+    """);
+
+    await _addColumnIfMissing(db, MotionDbTables.assigner,
+        MotionDbColumns.currentLoggedInUser, "TEXT");
+    await _addColumnIfMissing(
+        db, MotionDbTables.assigner, MotionDbColumns.subcategoryName, "TEXT");
+    await _addColumnIfMissing(
+        db, MotionDbTables.assigner, MotionDbColumns.mainCategoryName, "TEXT");
+    await _addColumnIfMissing(
+        db, MotionDbTables.assigner, MotionDbColumns.isActive, "INTEGER");
+    await _addColumnIfMissing(
+        db, MotionDbTables.assigner, MotionDbColumns.isArchive, "INTEGER DEFAULT 0");
+    await _addColumnIfMissing(
+        db, MotionDbTables.assigner, MotionDbColumns.dateCreated, "TEXT");
+  }
+
+  Future<void> _addColumnIfMissing(
+    Database db,
+    String tableName,
+    String columnName,
+    String columnDefinition,
+  ) async {
+    final columns = await db.rawQuery("PRAGMA table_info($tableName)");
+    final columnExists = columns.any((column) => column["name"] == columnName);
+
+    if (!columnExists) {
       await db.execute(
-          "ALTER TABLE to_assign ADD COLUMN isArchive INTEGER DEFAULT 0");
+          "ALTER TABLE $tableName ADD COLUMN $columnName $columnDefinition");
     }
   }
 
@@ -89,11 +134,11 @@ class AssignerDatabaseHelper {
       // a map format suitable for database insertion. 'conflictAlgorithm:
       // ConflictAlgorithm.replace' is used to handle conflicts by replacing
       // old data with new data.
-      await db.insert("to_assign", categoryAssigner.toMap(),
+      await db.insert(MotionDbTables.assigner, categoryAssigner.toMap(),
           conflictAlgorithm: ConflictAlgorithm.replace);
-    } catch (e) {
+    } catch (e, stackTrace) {
       // Log any errors that occur during the database insertion.
-      logger.e("(assignInsert): Error: $e");
+      logDatabaseError("assignInsert", e, stackTrace);
     }
   }
 
@@ -105,18 +150,15 @@ class AssignerDatabaseHelper {
       final db = await database;
 
       // Query the database to get all records from the 'to_assign' table.
-      final allItems = await db.query("to_assign");
+      final allItems = await db.query(MotionDbTables.assigner);
 
       // Convert each record (map) into an 'Assigner' object
       // and return the list of these objects. 'Assigner.fromAssignerMap'
       // is used to convert a map into an 'Assigner' instance.
       return allItems.map((map) => Assigner.fromAssignerMap(map)).toList();
-    } catch (e) {
+    } catch (e, stackTrace) {
       // Log any errors that occur during the database query.
-      logger.e("Assigner(getAllItems): Error => $e");
-
-      // Return an empty list in case of an error.
-      return [];
+      logDatabaseError("Assigner.getAllItems", e, stackTrace);
     }
   }
 
@@ -128,8 +170,8 @@ class AssignerDatabaseHelper {
 
       // Query the 'to_assign' table to fetch only those records where
       // 'isActive' is 1. This indicates that the items are currently active.
-      final activeItems = await db.query("to_assign",
-          where: "isActive = ?", // SQL WHERE clause to filter active items.
+      final activeItems = await db.query(MotionDbTables.assigner,
+          where: "${MotionDbColumns.isActive} = ?", // SQL WHERE clause to filter active items.
           whereArgs: [1]
           // Arguments for the WHERE clause. '1' represents
           // true for 'isActive'.
@@ -139,12 +181,9 @@ class AssignerDatabaseHelper {
       // 'Assigner' object. 'Assigner.fromAssignerMap' is a factory constructor
       // that creates an 'Assigner' instance from a Map.
       return activeItems.map((map) => Assigner.fromAssignerMap(map)).toList();
-    } catch (e) {
+    } catch (e, stackTrace) {
       // Log any errors encountered during the database query.
-      logger.e("Assigner (getAllActiveItems): Error => $e");
-
-      // Return an empty list in case of an error.
-      return [];
+      logDatabaseError("Assigner.getAllActiveItems", e, stackTrace);
     }
   }
 
@@ -166,16 +205,16 @@ class AssignerDatabaseHelper {
                 WHEN COUNT(*) > 0 THEN 'False'
                 ELSE 'True'
             END AS AllAreZero
-        FROM to_assign
-        WHERE isActive <> 0 AND currentLoggedInUser = ?;
+        FROM ${MotionDbTables.assigner}
+        WHERE ${MotionDbColumns.isActive} <> 0
+          AND ${MotionDbColumns.currentLoggedInUser} = ?;
         ''', [currentUser]);
 
       // Return the result of the query.
       return resultITEONBT;
-    } catch (e) {
+    } catch (e, stackTrace) {
       // Log any errors encountered during the database query.
-      logger.i("Assigner (isTableEmptyOrNotBeingTracked)ERROR => $e");
-      return [];
+      logDatabaseError("Assigner.isTableEmptyOrNotBeingTracked", e, stackTrace);
     }
   }
 
@@ -190,15 +229,15 @@ class AssignerDatabaseHelper {
       // converts the 'Assigner' object to a map format suitable
       // for the update operation. The 'where' clause specifies that
       // the update should only apply to the row with the matching 'id'.
-      await db.update("to_assign", categoryAssigner.toMap(), // Data to update.
-          where: "id = ?", // SQL WHERE clause to specify which row to update.
+      await db.update(MotionDbTables.assigner, categoryAssigner.toMap(), // Data to update.
+          where: "${MotionDbColumns.id} = ?", // SQL WHERE clause to specify which row to update.
           whereArgs: [
             categoryAssigner.id
           ] // Argument for the WHERE clause - the ID of the 'Assigner'.
           );
-    } catch (e) {
+    } catch (e, stackTrace) {
       // Log any errors encountered during the update operation.
-      logger.e("Assigner (assignUpdate): Error => $e");
+      logDatabaseError("Assigner.assignUpdate", e, stackTrace);
     }
   }
 
@@ -211,15 +250,15 @@ class AssignerDatabaseHelper {
       // Execute the delete operation on the 'to_assign' table.
       // The 'where' clause specifies that the delete should only apply
       // to the row with the matching 'id'.
-      await db.delete("to_assign",
-          where: "id = ?", // SQL WHERE clause to specify which row to delete.
+      await db.delete(MotionDbTables.assigner,
+          where: "${MotionDbColumns.id} = ?", // SQL WHERE clause to specify which row to delete.
           whereArgs: [
             id
           ] // Argument for the WHERE clause - the ID of the row to delete.
           );
-    } catch (e) {
+    } catch (e, stackTrace) {
       // Log any errors encountered during the delete operation.
-      logger.e("Assigner (assignDelete): Error => $e");
+      logDatabaseError("Assigner.assignDelete", e, stackTrace);
     }
   }
 
@@ -237,9 +276,9 @@ class AssignerDatabaseHelper {
       // Set the database instance to null, indicating that the database 
       // is no longer available.
       _database = null;
-    } catch (e) {
+    } catch (e, stackTrace) {
       // Log any errors encountered during the database deletion process.
-      logger.e("Error: $e");
+      logDatabaseError("Assigner.deleteDB", e, stackTrace);
     }
   }
 }
