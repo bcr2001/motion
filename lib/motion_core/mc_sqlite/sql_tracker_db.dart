@@ -686,56 +686,34 @@ class TrackerDatabaseHelper {
 
       final resultDAAI = getEntireIntensity ? await db.rawQuery('''
             SELECT date,
-                  ROUND((COALESCE(education, 0) + COALESCE(work, 0) + COALESCE(skills, 0) +
-                          COALESCE(selfDevelopment, 0) + COALESCE(entertainment, 0) +
-                          COALESCE(sleep, 0)) / 60, 2) AS accounted,
+                  ROUND(COALESCE(SUM(timeSpent), 0) / 60, 2) AS accounted,
                   CASE
-                      WHEN ROUND((COALESCE(education, 0) + COALESCE(work, 0) + COALESCE(skills, 0) +
-                                  COALESCE(selfDevelopment, 0) + COALESCE(entertainment, 0) +
-                                  COALESCE(sleep, 0)) / 60, 2) <= 0 THEN 0
-                      WHEN ROUND((COALESCE(education, 0) + COALESCE(work, 0) + COALESCE(skills, 0) +
-                                  COALESCE(selfDevelopment, 0) + COALESCE(entertainment, 0) +
-                                  COALESCE(sleep, 0)) / 60, 2) <= 5 THEN 5
-                      WHEN ROUND((COALESCE(education, 0) + COALESCE(work, 0) + COALESCE(skills, 0) +
-                                  COALESCE(selfDevelopment, 0) + COALESCE(entertainment, 0) +
-                                  COALESCE(sleep, 0)) / 60, 2) <= 10 THEN 10
-                      WHEN ROUND((COALESCE(education, 0) + COALESCE(work, 0) + COALESCE(skills, 0) +
-                                  COALESCE(selfDevelopment, 0) + COALESCE(entertainment, 0) +
-                                  COALESCE(sleep, 0)) / 60, 2) <= 15 THEN 15
-                      WHEN ROUND((COALESCE(education, 0) + COALESCE(work, 0) + COALESCE(skills, 0) +
-                                  COALESCE(selfDevelopment, 0) + COALESCE(entertainment, 0) +
-                                  COALESCE(sleep, 0)) / 60, 2) <= 20 THEN 20
+                      WHEN ROUND(COALESCE(SUM(timeSpent), 0) / 60, 2) <= 0 THEN 0
+                      WHEN ROUND(COALESCE(SUM(timeSpent), 0) / 60, 2) <= 5 THEN 5
+                      WHEN ROUND(COALESCE(SUM(timeSpent), 0) / 60, 2) <= 10 THEN 10
+                      WHEN ROUND(COALESCE(SUM(timeSpent), 0) / 60, 2) <= 15 THEN 15
+                      WHEN ROUND(COALESCE(SUM(timeSpent), 0) / 60, 2) <= 20 THEN 20
                       ELSE 25
                   END AS intensity
-            FROM main_category
+            FROM subcategory
             WHERE currentLoggedInUser = ?
+            GROUP BY date
 
         ''', [currentUser]) : await db.rawQuery('''
             SELECT date,
-                  ROUND((COALESCE(education, 0) + COALESCE(work, 0) + COALESCE(skills, 0) +
-                          COALESCE(selfDevelopment, 0) + COALESCE(entertainment, 0) +
-                          COALESCE(sleep, 0)) / 60, 2) AS accounted,
+                  ROUND(COALESCE(SUM(timeSpent), 0) / 60, 2) AS accounted,
                   CASE
-                      WHEN ROUND((COALESCE(education, 0) + COALESCE(work, 0) + COALESCE(skills, 0) +
-                                  COALESCE(selfDevelopment, 0) + COALESCE(entertainment, 0) +
-                                  COALESCE(sleep, 0)) / 60, 2) <= 0 THEN 0
-                      WHEN ROUND((COALESCE(education, 0) + COALESCE(work, 0) + COALESCE(skills, 0) +
-                                  COALESCE(selfDevelopment, 0) + COALESCE(entertainment, 0) +
-                                  COALESCE(sleep, 0)) / 60, 2) <= 5 THEN 5
-                      WHEN ROUND((COALESCE(education, 0) + COALESCE(work, 0) + COALESCE(skills, 0) +
-                                  COALESCE(selfDevelopment, 0) + COALESCE(entertainment, 0) +
-                                  COALESCE(sleep, 0)) / 60, 2) <= 10 THEN 10
-                      WHEN ROUND((COALESCE(education, 0) + COALESCE(work, 0) + COALESCE(skills, 0) +
-                                  COALESCE(selfDevelopment, 0) + COALESCE(entertainment, 0) +
-                                  COALESCE(sleep, 0)) / 60, 2) <= 15 THEN 15
-                      WHEN ROUND((COALESCE(education, 0) + COALESCE(work, 0) + COALESCE(skills, 0) +
-                                  COALESCE(selfDevelopment, 0) + COALESCE(entertainment, 0) +
-                                  COALESCE(sleep, 0)) / 60, 2) <= 20 THEN 20
+                      WHEN ROUND(COALESCE(SUM(timeSpent), 0) / 60, 2) <= 0 THEN 0
+                      WHEN ROUND(COALESCE(SUM(timeSpent), 0) / 60, 2) <= 5 THEN 5
+                      WHEN ROUND(COALESCE(SUM(timeSpent), 0) / 60, 2) <= 10 THEN 10
+                      WHEN ROUND(COALESCE(SUM(timeSpent), 0) / 60, 2) <= 15 THEN 15
+                      WHEN ROUND(COALESCE(SUM(timeSpent), 0) / 60, 2) <= 20 THEN 20
                       ELSE 25
                   END AS intensity
-            FROM main_category
+            FROM subcategory
             WHERE currentLoggedInUser = ?
               AND (strftime("%Y", date) = ? OR date LIKE ?)
+            GROUP BY date
 
         ''', [currentUser, year, '%/$year']);
 
