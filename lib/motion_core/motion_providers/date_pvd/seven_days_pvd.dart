@@ -11,15 +11,16 @@ class FirstAndLastWithSevenDaysDiff extends ChangeNotifier {
   FirstAndLastWithSevenDaysDiff() {
     _calculateFirstAndLastDay();
     timer = Timer.periodic(const Duration(days: 1), (Timer t) {
-      _calculateFirstAndLastDay();
-      notifyListeners();
+      if (_calculateFirstAndLastDay()) {
+        notifyListeners();
+      }
     });
   }
 
   String get firstDay => _firstDay;
   String get lastDay => _lastDay;
 
-  void _calculateFirstAndLastDay() {
+  bool _calculateFirstAndLastDay() {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
@@ -30,7 +31,21 @@ class FirstAndLastWithSevenDaysDiff extends ChangeNotifier {
     DateTime lastDate = firstDate.add(const Duration(days: 6));
 
     final dateFormat = DateFormat('yyyy-MM-dd');
-    _firstDay = dateFormat.format(firstDate);
-    _lastDay = dateFormat.format(lastDate);
+    final firstDay = dateFormat.format(firstDate);
+    final lastDay = dateFormat.format(lastDate);
+
+    if (firstDay == _firstDay && lastDay == _lastDay) {
+      return false;
+    }
+
+    _firstDay = firstDay;
+    _lastDay = lastDay;
+    return true;
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
   }
 }

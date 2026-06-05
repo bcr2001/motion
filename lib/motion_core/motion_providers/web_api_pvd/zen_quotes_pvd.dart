@@ -21,14 +21,12 @@ class ZenQuoteProvider extends ChangeNotifier {
   static const quoteKey = "zenQuote";
   static const dateKey = "zenQuoteDate";
 
-  ZenQuoteProvider() {
-    initializeSharedPreferences();
-  }
-
   // initializeSharedPreferences function
   Future<void> initializeSharedPreferences() async {
+    if (_prefs != null) return;
+
     _prefs = await SharedPreferences.getInstance();
-    _loadSavedQuote();
+    await _loadSavedQuote();
   }
 
   // Check the date and fetch a new quote if it's a new day
@@ -73,8 +71,7 @@ class ZenQuoteProvider extends ChangeNotifier {
     } else {
       // if it's the next day, a new quote
       // of the day is fetched
-      _checkAndFetchNewQuote();
-      notifyListeners();
+      await _checkAndFetchNewQuote();
     }
   }
 

@@ -16,8 +16,9 @@ class FirstAndLastDay extends ChangeNotifier {
     _calculateFirstAndLastDay();
     // Update the dates at the start of each month using a timer.
     timer = Timer.periodic(const Duration(days: 1), (Timer t) {
-      _calculateFirstAndLastDay();
-      notifyListeners();
+      if (_calculateFirstAndLastDay()) {
+        notifyListeners();
+      }
     });
   }
 
@@ -25,16 +26,31 @@ class FirstAndLastDay extends ChangeNotifier {
   String get lastDay => _lastDay;
   int get days => _days; // Add the getter for _days.
 
-  void _calculateFirstAndLastDay() {
+  bool _calculateFirstAndLastDay() {
     final now = DateTime.now();
     final firstDayOfMonth = DateTime(now.year, now.month, 1);
     final lastDayOfMonth = DateTime(now.year, now.month + 1, 0);
 
     final dateFormat = DateFormat('yyyy-MM-dd');
-    _firstDay = dateFormat.format(firstDayOfMonth);
-    _lastDay = dateFormat.format(lastDayOfMonth);
+    final firstDay = dateFormat.format(firstDayOfMonth);
+    final lastDay = dateFormat.format(lastDayOfMonth);
+    final days = lastDayOfMonth.day;
+
+    if (firstDay == _firstDay && lastDay == _lastDay && days == _days) {
+      return false;
+    }
+
+    _firstDay = firstDay;
+    _lastDay = lastDay;
 
     // Calculate the number of days in the current month.
-    _days = lastDayOfMonth.day;
+    _days = days;
+    return true;
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
   }
 }

@@ -42,15 +42,15 @@ void main() async {
 
   // UserUidProvider
   final userUidProvider = UserUidProvider();
-  userUidProvider.initializeUidSharedPreferences();
+  await userUidProvider.initializeUidSharedPreferences();
 
   // AssignerProvider
   final assignerProvider = AssignerMainProvider();
-  assignerProvider.getAllUserItems();
+  await assignerProvider.getAllUserItems();
 
   // theme mode provider N1
   final themeModeProviderN1 = AppThemeModeProviderN1();
-  themeModeProviderN1.initSharedPreferences();
+  await themeModeProviderN1.initSharedPreferences();
 
   // TrackDatabaseProvider
 

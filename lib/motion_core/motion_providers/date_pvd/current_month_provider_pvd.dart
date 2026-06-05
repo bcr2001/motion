@@ -11,36 +11,32 @@ class CurrentMonthProvider extends ChangeNotifier {
 
   // name of the month
   String _currentMonthName = DateFormat.MMMM().format(DateTime.now());
-  
+
   String get currentMonthName => _currentMonthName;
 
   Timer? _timer;
 
-   // Constructor that initializes the timer to update the current month daily.
+  // Constructor that initializes the timer to update the current month daily.
   CurrentMonthProvider() {
     _timer = Timer.periodic(const Duration(days: 1), (Timer t) {
-      _getCurrentMonth();
-      _getCurrentMonthNumber;
+      _updateCurrentMonth();
     });
   }
 
-  // Method to get the current month name and update it if it changes.
-  void _getCurrentMonth() {
-    final String thisMoment = DateFormat.MMMM().format(DateTime.now());
+  // Method to update the current month values if they change.
+  void _updateCurrentMonth() {
+    final now = DateTime.now();
+    final currentMonthName = DateFormat.MMMM().format(now);
+    final currentMonthNumber = now.month;
 
-    if (thisMoment != _currentMonthName) {
-      _currentMonthName = thisMoment;
-      notifyListeners();
+    if (currentMonthName == _currentMonthName &&
+        currentMonthNumber == _currentMonthNumber) {
+      return;
     }
-  }
 
-  // Method to get the current month number and update it if it changes.
-  void _getCurrentMonthNumber() {
-    final int thisMoment = DateTime.now().month;
-
-    if (thisMoment != _currentMonthNumber) {
-      _currentMonthNumber = thisMoment;
-    }
+    _currentMonthName = currentMonthName;
+    _currentMonthNumber = currentMonthNumber;
+    notifyListeners();
   }
 
   @override

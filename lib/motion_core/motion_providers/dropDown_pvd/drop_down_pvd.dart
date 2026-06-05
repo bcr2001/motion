@@ -8,6 +8,8 @@ class DropDownTrackProvider extends ChangeNotifier {
 
   // Method to change the selected value and notify listeners.
   void changeSelectedValue(String? value) {
+    if (_selectedValue == value) return;
+
     _selectedValue = value;
     notifyListeners();
   }

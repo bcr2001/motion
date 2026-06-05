@@ -9,14 +9,12 @@ class UserUidProvider extends ChangeNotifier {
 
   static const String uidKey = "uidKeys";
 
-  UserUidProvider() {
-    initializeUidSharedPreferences();
-  }
-
   // Initialize SharedPreferences for UID storage.
   Future<void> initializeUidSharedPreferences() async {
+    if (_pref != null) return;
+
     _pref = await SharedPreferences.getInstance();
-    _loadSavedUid();
+    await _loadSavedUid();
   }
 
   String? _userUid;
