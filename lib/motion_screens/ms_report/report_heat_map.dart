@@ -101,16 +101,51 @@ Map<DateTime, int> datasetFormatConverter(
   // into the correct format
   for (var entry in data) {
     // date string convertion
-    DateTime date = DateTime.parse(entry["date"]);
+    final date = parseHeatMapDate(entry["date"]);
+    if (date == null) continue;
 
     // intensity
-    int intensity = entry["intensity"];
+    final intensity = parseHeatMapIntensity(entry["intensity"]);
 
     // map of the two
     resultMap[date] = intensity;
   }
 
   return resultMap;
+}
+
+DateTime? parseHeatMapDate(dynamic value) {
+  if (value == null) return null;
+
+  if (value is DateTime) {
+    return DateTime(value.year, value.month, value.day);
+  }
+
+  final dateText = value.toString().trim();
+  if (dateText.isEmpty) return null;
+
+  final isoDate = DateTime.tryParse(dateText);
+  if (isoDate != null) {
+    return DateTime(isoDate.year, isoDate.month, isoDate.day);
+  }
+
+  for (final pattern in ['M/d/yyyy', 'd/M/yyyy']) {
+    try {
+      final parsedDate = DateFormat(pattern).parseStrict(dateText);
+      return DateTime(parsedDate.year, parsedDate.month, parsedDate.day);
+    } catch (_) {
+      continue;
+    }
+  }
+
+  return null;
+}
+
+int parseHeatMapIntensity(dynamic value) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+
+  return int.tryParse(value?.toString() ?? '') ?? 0;
 }
 
 /// Formats a date string in the format "yyyy-MM-dd" to "dd MMMM yyyy" format.
@@ -397,7 +432,9 @@ class _SpecificDaySummaryHeatMapState extends State<SpecificDaySummaryHeatMap> {
                                 child: Center(
                                     child: Text(
                                   convertedTotalTimeSpent1,
-                                  style: AppTextStyle.subSectionTextStyle(fontsize: 11, color: AppColor.tileElementColor),
+                                  style: AppTextStyle.subSectionTextStyle(
+                                      fontsize: 11,
+                                      color: AppColor.tileElementColor),
                                 )),
                               ),
                             );

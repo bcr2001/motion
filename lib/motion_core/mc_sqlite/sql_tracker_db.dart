@@ -734,9 +734,10 @@ class TrackerDatabaseHelper {
                       ELSE 25
                   END AS intensity
             FROM main_category
-            WHERE currentLoggedInUser = ? AND strftime("%Y", date) = ?
+            WHERE currentLoggedInUser = ?
+              AND (strftime("%Y", date) = ? OR date LIKE ?)
 
-        ''', [currentUser, year]);
+        ''', [currentUser, year, '%/$year']);
 
       return resultDAAI;
     } catch (e, stackTrace) {
