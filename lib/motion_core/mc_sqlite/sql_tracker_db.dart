@@ -47,6 +47,7 @@ class TrackerDatabaseHelper {
     return await openDatabase(
       path,
       version: TrackerDatabaseSchema.version,
+      onConfigure: TrackerDatabaseSchema.configure,
       onCreate: _createDatabase,
       onUpgrade: _onUpgradeDatabase,
       onOpen: TrackerDatabaseSchema.ensureSchema,
@@ -63,14 +64,93 @@ class TrackerDatabaseHelper {
     await TrackerDatabaseSchema.create(db);
   }
 
+  Future<void> _ensureDailyRows(
+    DatabaseExecutor db, {
+    required String date,
+    required String currentUser,
+  }) async {
+    await _ensureMainCategoryRow(db, date: date, currentUser: currentUser);
+    await _ensureExperiencePointRow(db, date: date, currentUser: currentUser);
+  }
+
+  Future<void> _ensureMainCategoryRow(
+    DatabaseExecutor db, {
+    required String date,
+    required String currentUser,
+  }) async {
+    await db.insert(
+      MotionDbTables.mainCategory,
+      MainCategory(date: date, currentLoggedInUser: currentUser).toMap(),
+      conflictAlgorithm: ConflictAlgorithm.ignore,
+    );
+  }
+
+  Future<void> _ensureExperiencePointRow(
+    DatabaseExecutor db, {
+    required String date,
+    required String currentUser,
+  }) async {
+    await db.insert(
+      MotionDbTables.experiencePoints,
+      ExperiencePoints(date: date, currentLoggedInUser: currentUser).toMap(),
+      conflictAlgorithm: ConflictAlgorithm.ignore,
+    );
+  }
+
+  Future<void> _upsertMainCategory(
+    DatabaseExecutor db,
+    MainCategory mainCategory,
+  ) async {
+    final values = mainCategory.toMap();
+
+    await db.insert(
+      MotionDbTables.mainCategory,
+      values,
+      conflictAlgorithm: ConflictAlgorithm.ignore,
+    );
+    await db.update(
+      MotionDbTables.mainCategory,
+      values,
+      where:
+          '${MotionDbColumns.date} = ? AND ${MotionDbColumns.currentLoggedInUser} = ?',
+      whereArgs: [mainCategory.date, mainCategory.currentLoggedInUser],
+    );
+  }
+
+  Future<void> _upsertExperiencePoint(
+    DatabaseExecutor db,
+    ExperiencePoints experience,
+  ) async {
+    final values = experience.toMap();
+
+    await db.insert(
+      MotionDbTables.experiencePoints,
+      values,
+      conflictAlgorithm: ConflictAlgorithm.ignore,
+    );
+    await db.update(
+      MotionDbTables.experiencePoints,
+      values,
+      where:
+          '${MotionDbColumns.date} = ? AND ${MotionDbColumns.currentLoggedInUser} = ?',
+      whereArgs: [experience.date, experience.currentLoggedInUser],
+    );
+  }
+
 // CRUD operations for MainCategory
 
   // insert new rows into the main category table
   Future<void> insertMainCategory(MainCategory mainCategory) async {
     try {
       final db = await database;
-      await db.insert(MotionDbTables.mainCategory, mainCategory.toMap(),
-          conflictAlgorithm: ConflictAlgorithm.replace);
+      await db.transaction((txn) async {
+        await _upsertMainCategory(txn, mainCategory);
+        await _ensureExperiencePointRow(
+          txn,
+          date: mainCategory.date,
+          currentUser: mainCategory.currentLoggedInUser,
+        );
+      });
     } catch (e, stackTrace) {
       logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
@@ -705,8 +785,15 @@ class TrackerDatabaseHelper {
   Future<void> insertSubcategory(Subcategories subcategory) async {
     try {
       final db = await database;
-      await db.insert(MotionDbTables.subcategory, subcategory.toMap(),
-          conflictAlgorithm: ConflictAlgorithm.replace);
+      await db.transaction((txn) async {
+        await _ensureDailyRows(
+          txn,
+          date: subcategory.date,
+          currentUser: subcategory.currentLoggedInUser,
+        );
+        await txn.insert(MotionDbTables.subcategory, subcategory.toMap(),
+            conflictAlgorithm: ConflictAlgorithm.abort);
+      });
     } catch (e, stackTrace) {
       logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
@@ -1073,8 +1160,14 @@ class TrackerDatabaseHelper {
   Future<void> insertExperiencePoint(ExperiencePoints experience) async {
     try {
       final db = await database;
-      await db.insert(MotionDbTables.experiencePoints, experience.toMap(),
-          conflictAlgorithm: ConflictAlgorithm.replace);
+      await db.transaction((txn) async {
+        await _ensureMainCategoryRow(
+          txn,
+          date: experience.date,
+          currentUser: experience.currentLoggedInUser,
+        );
+        await _upsertExperiencePoint(txn, experience);
+      });
     } catch (e, stackTrace) {
       logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }

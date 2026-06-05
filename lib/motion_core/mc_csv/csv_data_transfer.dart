@@ -119,34 +119,37 @@ class MotionCsvDataTransfer {
     var importedRows = 0;
 
     await db.transaction((txn) async {
-      await txn.delete(
-        MotionDbTables.mainCategory,
-        where: '${MotionDbColumns.currentLoggedInUser} = ?',
-        whereArgs: [currentUser],
-      );
-
       for (final row in csvRows.skip(1)) {
         final rowMap = _rowMap(headers, row);
         final date = _normalizeDate(rowMap[MotionDbColumns.date]);
         if (date.isEmpty) continue;
 
+        final values = {
+          MotionDbColumns.date: date,
+          MotionDbColumns.education:
+              _parseDouble(rowMap[MotionDbColumns.education]),
+          MotionDbColumns.work: _parseDouble(rowMap[MotionDbColumns.work]),
+          MotionDbColumns.skills: _parseDouble(
+              _firstValue(rowMap, [MotionDbColumns.skills, 'skill'])),
+          MotionDbColumns.entertainment:
+              _parseDouble(rowMap[MotionDbColumns.entertainment]),
+          MotionDbColumns.selfDevelopment:
+              _parseDouble(rowMap[MotionDbColumns.selfDevelopment]),
+          MotionDbColumns.sleep: _parseDouble(rowMap[MotionDbColumns.sleep]),
+          MotionDbColumns.currentLoggedInUser: currentUser,
+        };
+
         await txn.insert(
           MotionDbTables.mainCategory,
-          {
-            MotionDbColumns.date: date,
-            MotionDbColumns.education:
-                _parseDouble(rowMap[MotionDbColumns.education]),
-            MotionDbColumns.work: _parseDouble(rowMap[MotionDbColumns.work]),
-            MotionDbColumns.skills: _parseDouble(
-                _firstValue(rowMap, [MotionDbColumns.skills, 'skill'])),
-            MotionDbColumns.entertainment:
-                _parseDouble(rowMap[MotionDbColumns.entertainment]),
-            MotionDbColumns.selfDevelopment:
-                _parseDouble(rowMap[MotionDbColumns.selfDevelopment]),
-            MotionDbColumns.sleep: _parseDouble(rowMap[MotionDbColumns.sleep]),
-            MotionDbColumns.currentLoggedInUser: currentUser,
-          },
-          conflictAlgorithm: ConflictAlgorithm.replace,
+          values,
+          conflictAlgorithm: ConflictAlgorithm.ignore,
+        );
+        await txn.update(
+          MotionDbTables.mainCategory,
+          values,
+          where:
+              '${MotionDbColumns.date} = ? AND ${MotionDbColumns.currentLoggedInUser} = ?',
+          whereArgs: [date, currentUser],
         );
 
         importedRows++;

@@ -75,6 +75,7 @@ class AssignerDatabaseHelper {
         ${MotionDbColumns.dateCreated} TEXT
       )
     """);
+    await _createIndexes(db);
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -102,10 +103,31 @@ class AssignerDatabaseHelper {
         db, MotionDbTables.assigner, MotionDbColumns.mainCategoryName, "TEXT");
     await _addColumnIfMissing(
         db, MotionDbTables.assigner, MotionDbColumns.isActive, "INTEGER");
-    await _addColumnIfMissing(
-        db, MotionDbTables.assigner, MotionDbColumns.isArchive, "INTEGER DEFAULT 0");
+    await _addColumnIfMissing(db, MotionDbTables.assigner,
+        MotionDbColumns.isArchive, "INTEGER DEFAULT 0");
     await _addColumnIfMissing(
         db, MotionDbTables.assigner, MotionDbColumns.dateCreated, "TEXT");
+    await _createIndexes(db);
+  }
+
+  Future<void> _createIndexes(Database db) async {
+    await db.execute("""
+      CREATE INDEX IF NOT EXISTS idx_assigner_user_active_archive
+      ON ${MotionDbTables.assigner}(
+        ${MotionDbColumns.currentLoggedInUser},
+        ${MotionDbColumns.isActive},
+        ${MotionDbColumns.isArchive}
+      )
+    """);
+
+    await db.execute("""
+      CREATE INDEX IF NOT EXISTS idx_assigner_user_category_subcategory
+      ON ${MotionDbTables.assigner}(
+        ${MotionDbColumns.currentLoggedInUser},
+        ${MotionDbColumns.mainCategoryName},
+        ${MotionDbColumns.subcategoryName}
+      )
+    """);
   }
 
   Future<void> _addColumnIfMissing(
@@ -171,7 +193,8 @@ class AssignerDatabaseHelper {
       // Query the 'to_assign' table to fetch only those records where
       // 'isActive' is 1. This indicates that the items are currently active.
       final activeItems = await db.query(MotionDbTables.assigner,
-          where: "${MotionDbColumns.isActive} = ?", // SQL WHERE clause to filter active items.
+          where:
+              "${MotionDbColumns.isActive} = ?", // SQL WHERE clause to filter active items.
           whereArgs: [1]
           // Arguments for the WHERE clause. '1' represents
           // true for 'isActive'.
@@ -229,8 +252,10 @@ class AssignerDatabaseHelper {
       // converts the 'Assigner' object to a map format suitable
       // for the update operation. The 'where' clause specifies that
       // the update should only apply to the row with the matching 'id'.
-      await db.update(MotionDbTables.assigner, categoryAssigner.toMap(), // Data to update.
-          where: "${MotionDbColumns.id} = ?", // SQL WHERE clause to specify which row to update.
+      await db.update(
+          MotionDbTables.assigner, categoryAssigner.toMap(), // Data to update.
+          where:
+              "${MotionDbColumns.id} = ?", // SQL WHERE clause to specify which row to update.
           whereArgs: [
             categoryAssigner.id
           ] // Argument for the WHERE clause - the ID of the 'Assigner'.
@@ -251,7 +276,8 @@ class AssignerDatabaseHelper {
       // The 'where' clause specifies that the delete should only apply
       // to the row with the matching 'id'.
       await db.delete(MotionDbTables.assigner,
-          where: "${MotionDbColumns.id} = ?", // SQL WHERE clause to specify which row to delete.
+          where:
+              "${MotionDbColumns.id} = ?", // SQL WHERE clause to specify which row to delete.
           whereArgs: [
             id
           ] // Argument for the WHERE clause - the ID of the row to delete.
@@ -273,7 +299,7 @@ class AssignerDatabaseHelper {
 
       logger.i("Assigner DB Successfully Deleted");
 
-      // Set the database instance to null, indicating that the database 
+      // Set the database instance to null, indicating that the database
       // is no longer available.
       _database = null;
     } catch (e, stackTrace) {

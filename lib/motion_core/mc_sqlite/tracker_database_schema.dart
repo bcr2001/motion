@@ -8,6 +8,13 @@ class TrackerDatabaseSchema {
   static const String mainCategoryTable = MotionDbTables.mainCategory;
   static const String subcategoryTable = MotionDbTables.subcategory;
   static const String experiencePointsTable = MotionDbTables.experiencePoints;
+  static const List<String> indexNames = [
+    'idx_main_category_user_date',
+    'idx_experience_points_user_date',
+    'idx_subcategory_user_date',
+    'idx_subcategory_user_date_main_category',
+    'idx_subcategory_user_date_subcategory',
+  ];
   static const List<String> triggerNames = [
     'update_experience_points',
     'update_experience_points_after_update',
@@ -19,7 +26,12 @@ class TrackerDatabaseSchema {
 
   static Future<void> create(Database db) async {
     await _createTables(db);
+    await _createIndexes(db);
     await _createTriggers(db);
+  }
+
+  static Future<void> configure(Database db) async {
+    await db.execute('PRAGMA foreign_keys = ON');
   }
 
   static Future<void> migrate(
@@ -30,6 +42,7 @@ class TrackerDatabaseSchema {
   static Future<void> ensureSchema(Database db) async {
     await _createTables(db);
     await _ensureColumns(db);
+    await _createIndexes(db);
     await _createTriggers(db);
   }
 
@@ -136,6 +149,50 @@ class TrackerDatabaseSchema {
       await db.execute(
           'ALTER TABLE $tableName ADD COLUMN $columnName $columnDefinition');
     }
+  }
+
+  static Future<void> _createIndexes(Database db) async {
+    await db.execute('''
+      CREATE INDEX IF NOT EXISTS idx_main_category_user_date
+      ON $mainCategoryTable(
+        ${MotionDbColumns.currentLoggedInUser},
+        ${MotionDbColumns.date}
+      )
+    ''');
+
+    await db.execute('''
+      CREATE INDEX IF NOT EXISTS idx_experience_points_user_date
+      ON $experiencePointsTable(
+        ${MotionDbColumns.currentLoggedInUser},
+        ${MotionDbColumns.date}
+      )
+    ''');
+
+    await db.execute('''
+      CREATE INDEX IF NOT EXISTS idx_subcategory_user_date
+      ON $subcategoryTable(
+        ${MotionDbColumns.currentLoggedInUser},
+        ${MotionDbColumns.date}
+      )
+    ''');
+
+    await db.execute('''
+      CREATE INDEX IF NOT EXISTS idx_subcategory_user_date_main_category
+      ON $subcategoryTable(
+        ${MotionDbColumns.currentLoggedInUser},
+        ${MotionDbColumns.date},
+        ${MotionDbColumns.mainCategoryName}
+      )
+    ''');
+
+    await db.execute('''
+      CREATE INDEX IF NOT EXISTS idx_subcategory_user_date_subcategory
+      ON $subcategoryTable(
+        ${MotionDbColumns.currentLoggedInUser},
+        ${MotionDbColumns.date},
+        ${MotionDbColumns.subcategoryName}
+      )
+    ''');
   }
 
   static Future<void> _removeLegacyTimeRecordedColumn(Database db) async {

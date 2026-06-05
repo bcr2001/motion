@@ -22,5 +22,18 @@ void main() {
         ]),
       );
     });
+
+    test('includes indexes for common user and date queries', () {
+      expect(
+        TrackerDatabaseSchema.indexNames,
+        containsAll(<String>[
+          'idx_main_category_user_date',
+          'idx_experience_points_user_date',
+          'idx_subcategory_user_date',
+          'idx_subcategory_user_date_main_category',
+          'idx_subcategory_user_date_subcategory',
+        ]),
+      );
+    });
   });
 }

@@ -6,6 +6,7 @@ import 'package:motion/motion_core/motion_providers/date_pvd/first_and_last_pvd.
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/assigner_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
+import 'package:motion/motion_reusable/date_re/year_progress.dart';
 import 'package:motion/motion_reusable/db_re/sub_logic.dart';
 import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 import 'package:motion/motion_routes/mr_home/home_reusable/back_home.dart';
@@ -37,7 +38,9 @@ class LifeCompleted extends StatelessWidget {
       final dateOfBirthStorage = DateOfBirthStorage();
 
       return FutureBuilder<DateTime?>(
-        future: currentUser != null ? dateOfBirthStorage.getDateOfBirth(currentUser) : Future.value(null),
+        future: currentUser != null
+            ? dateOfBirthStorage.getDateOfBirth(currentUser)
+            : Future.value(null),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const ShimmerWidget.rectangular(width: 50, height: 30);
@@ -170,7 +173,9 @@ class NumberOfDaysMainCategory extends StatelessWidget {
 
   // displayes the number of days and the percent of the year completed
   Widget _numberOfDaysAndPercentCompleted(
-      {required String numberOfDays, required String percentCompleted}) {
+      {required String numberOfDays,
+      required String percentCompleted,
+      required String daysInYear}) {
     return Padding(
       padding: const EdgeInsets.only(right: 8.0),
       child: Column(
@@ -184,7 +189,7 @@ class NumberOfDaysMainCategory extends StatelessWidget {
 
           // number of days
           Text(
-            "Day: $numberOfDays/365",
+            "Day: $numberOfDays/$daysInYear",
             style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
           ),
 
@@ -202,7 +207,8 @@ class NumberOfDaysMainCategory extends StatelessWidget {
   // A helper method that creates a FutureBuilder to fetch and display the data.
   // It shows a loading indicator while waiting, an error message in case of
   // an error, and the total number of days when data is available.
-  Widget _futureData({Future<dynamic>? future, required bool percent}) {
+  Widget _futureData(
+      {Future<dynamic>? future, required bool percent, int? displayYear}) {
     return FutureBuilder(
       future: future,
       builder: (BuildContext context, snapshot) {
@@ -214,17 +220,22 @@ class NumberOfDaysMainCategory extends StatelessWidget {
           return Text('Error: ${snapshot.error}');
         } else {
           // Extract and display the total number of days
-          final totalNumberOfDays = snapshot.data ?? 0;
+          final totalNumberOfDays =
+              snapshot.data is int ? snapshot.data as int : 0;
+          final year = displayYear ?? DateTime.now().year;
+          final daysInYear = YearProgress.daysInYear(year);
 
           // percent of days completed
-          final percentCompleted = (totalNumberOfDays / 365) * 100;
+          final percentCompleted = YearProgress.percentComplete(
+              elapsedDays: totalNumberOfDays, year: year);
           final percentCompletedFormatted2 =
               double.parse(percentCompleted.toStringAsFixed(2)).toString();
 
           return percent
               ? _numberOfDaysAndPercentCompleted(
                   numberOfDays: totalNumberOfDays.toString(),
-                  percentCompleted: percentCompletedFormatted2)
+                  percentCompleted: percentCompletedFormatted2,
+                  daysInYear: daysInYear.toString())
               : Padding(
                   padding: const EdgeInsets.only(right: 10.0),
                   child: Text(
@@ -252,6 +263,7 @@ class NumberOfDaysMainCategory extends StatelessWidget {
           return const ShimmerWidget.rectangular(width: 50, height: 30);
         }
         final currentYear = year.currentYear; // Current year
+        final currentYearInt = int.tryParse(currentYear);
 
         // Decide which future to use based on the value of getAllDays
         // and call _futureData to build the UI accordingly
@@ -264,7 +276,8 @@ class NumberOfDaysMainCategory extends StatelessWidget {
                     currentUser: userUid,
                     currentYear: currentYear,
                     getAllDays: false),
-                percent: true);
+                percent: true,
+                displayYear: currentYearInt);
       },
     );
   }
@@ -305,7 +318,6 @@ Widget timeAccountedCurrentDateXP() {
       if (currentUser == null) {
         return const ShimmerWidget.rectangular(width: 120, height: 40);
       }
-
 
       return Padding(
         padding:
@@ -372,10 +384,9 @@ Widget totalMonthTimeSpent() {
   return Consumer4<SubcategoryTrackerDatabaseProvider, UserUidProvider,
           FirstAndLastDay, CurrentMonthProvider>(
       builder: (context, sub, user, dayPvd, month, child) {
-
     final String? currentUser = user.userUid;
-      if (currentUser == null) {
-        return const ShimmerWidget.rectangular(width: 120, height: 40);
+    if (currentUser == null) {
+      return const ShimmerWidget.rectangular(width: 120, height: 40);
     }
 
     return Padding(
@@ -424,8 +435,7 @@ class _SubcategoryAndCurrentDayTotalsState
         Consumer4<AssignerMainProvider, SubcategoryTrackerDatabaseProvider,
             CurrentDateProvider, UserUidProvider>(
       builder: (context, active, sub, date, user, child) {
-
-         final String? currentUser = user.userUid;
+        final String? currentUser = user.userUid;
         if (currentUser == null) {
           // show placeholder while UID loads
           return buildShimmerProgress();
@@ -447,8 +457,7 @@ class _SubcategoryAndCurrentDayTotalsState
               itemCount: activeItems.length,
               itemBuilder: (BuildContext context, index) {
                 return (activeItems[index].isActive == 1 &&
-                        activeItems[index].currentLoggedInUser ==
-                            currentUser &&
+                        activeItems[index].currentLoggedInUser == currentUser &&
                         activeItems[index].isArchive == 0)
                     ? FutureBuilder<double>(
                         future: sub.retrieveTotalTimeSpentSubSpecific(
@@ -542,13 +551,12 @@ class _SubcategoryMonthTotalsAndAveragesState
   Widget build(BuildContext context) {
     return Consumer3<SubcategoryTrackerDatabaseProvider, UserUidProvider,
         FirstAndLastDay>(builder: (context, sub, user, day, child) {
-
       final String? currentUser = user.userUid;
-        // ✂️ Changed: check for null UID before using
-        if (currentUser == null) {
-          return const ShimmerWidget.rectangular(width: 100, height: 30);
+      // ✂️ Changed: check for null UID before using
+      if (currentUser == null) {
+        return const ShimmerWidget.rectangular(width: 100, height: 30);
       }
-   
+
       return widget.isSubcategory
           ? ScrollingListBuilder(
               future: sub.retrieveMonthTotalAndAverage(
@@ -583,7 +591,8 @@ class InfoAboutHomePageSections extends StatelessWidget {
             Flexible(
                 child: Text(
               infoText,
-              style: AppTextStyle.subSectionTextStyle(fontsize: 15, fontweight: FontWeight.normal),
+              style: AppTextStyle.subSectionTextStyle(
+                  fontsize: 15, fontweight: FontWeight.normal),
             ))
           ],
         ),
