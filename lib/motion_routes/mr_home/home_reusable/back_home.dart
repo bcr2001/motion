@@ -94,54 +94,60 @@ Widget specialSectionTitleEFS(
     {required String mainTitleName, required bool getEntire}) {
   return Padding(
     padding: const EdgeInsets.only(top: 10, bottom: 10),
-    child: Row(
-      children: [
-        // main title
-        Text(
-          mainTitleName,
-          style: AppTextStyle.sectionTitleTextStyle(fontsize: 22.5),
-        ),
+    child: FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: Alignment.centerLeft,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // main title
+          Text(
+            mainTitleName,
+            style: AppTextStyle.sectionTitleTextStyle(fontsize: 22.5),
+          ),
 
-        // elevated title name
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 10.0, left: 5.0),
-              child: Text(
-                AppString.efficiencyScoreTitle,
-                style: AppTextStyle.subSectionTextStyle(
-                    fontsize: 12, color: Colors.blueGrey),
+          // elevated title name
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10.0, left: 5.0),
+                child: Text(
+                  AppString.efficiencyScoreTitle,
+                  style: AppTextStyle.subSectionTextStyle(
+                      fontsize: 12, color: Colors.blueGrey),
+                ),
               ),
-            ),
 
-            // year
-            getEntire
-                ? Padding(
-                    padding: const EdgeInsets.only(left: 2.0),
-                    child: Text(
-                      AppString.entireTitle,
-                      style: AppTextStyle.subSectionTextStyle(
-                          fontsize: 12, color: Colors.blueGrey),
-                    ),
-                  )
-                : Consumer<CurrentYearProvider>(
-                    builder: (BuildContext context, year, child) {
-                      final currentYear = year.currentYear;
+              // year
+              getEntire
+                  ? Padding(
+                      padding: const EdgeInsets.only(left: 2.0),
+                      child: Text(
+                        AppString.entireTitle,
+                        style: AppTextStyle.subSectionTextStyle(
+                            fontsize: 12, color: Colors.blueGrey),
+                      ),
+                    )
+                  : Consumer<CurrentYearProvider>(
+                      builder: (BuildContext context, year, child) {
+                        final currentYear = year.currentYear;
 
-                      return Padding(
-                        padding: const EdgeInsets.only(left: 2.0),
-                        child: Text(
-                          currentYear,
-                          style: AppTextStyle.subSectionTextStyle(
-                              fontsize: 12, color: Colors.blueGrey),
-                        ),
-                      );
-                    },
-                  )
-          ],
-        )
-      ],
+                        return Padding(
+                          padding: const EdgeInsets.only(left: 2.0),
+                          child: Text(
+                            currentYear,
+                            style: AppTextStyle.subSectionTextStyle(
+                                fontsize: 12, color: Colors.blueGrey),
+                          ),
+                        );
+                      },
+                    )
+            ],
+          )
+        ],
+      ),
     ),
   );
 }
@@ -192,25 +198,27 @@ class _ScrollingListBuilderState extends State<ScrollingListBuilder> {
                       final convertedTotal =
                           convertMinutesToTime(item["total"]);
 
-                      // average for the month 
+                      // average for the month
                       final convertedAverage =
                           convertMinutesToHoursOnly(item["average"]);
 
-                          logger.i("The Subcategory Name ${item[widget.columnName]}");
-
+                      logger
+                          .i("The Subcategory Name ${item[widget.columnName]}");
 
                       return widget.columnName == "subcategoryName"
                           ? ListTile(
-                              title:Text(
-                                    item[widget.columnName],
-                                    style: AppTextStyle.subSectionTextStyle(
-                                        fontsize: 14,
-                                        fontweight: FontWeight.normal),
-                                  ),
+                              title: Text(
+                                item[widget.columnName],
+                                style: AppTextStyle.subSectionTextStyle(
+                                    fontsize: 14,
+                                    fontweight: FontWeight.normal),
+                              ),
                               trailing: Text(
                                 convertedTotal,
                                 textAlign: TextAlign.center,
-                                style: AppTextStyle.subSectionTextStyle(fontsize: 12.5, fontweight: FontWeight.normal),
+                                style: AppTextStyle.subSectionTextStyle(
+                                    fontsize: 12.5,
+                                    fontweight: FontWeight.normal),
                               ),
                               subtitle: Container(
                                 decoration: BoxDecoration(

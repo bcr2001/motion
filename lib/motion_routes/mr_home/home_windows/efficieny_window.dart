@@ -344,39 +344,42 @@ class CurrentYearEFSDisplay extends StatelessWidget {
 
     return SizedBox(
       height: screenHeight * 0.20,
-      width: screenWidth * 0.60,
+      width: screenWidth * 0.64,
       child: Card(
         elevation: 0,
         child: Center(
           child: SingleChildScrollView(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                // efs and total XP for current year
-                Expanded(
-                  flex: 3,
-                  child: _efsAndTotalXp(context),
-                ),
-
-                const SizedBox(width: 8),
-
-                // BADGE depending on score
-                // When the badge is double tapped, it navigates to a page that displays
-                // the badge assignment criteria
-                Expanded(
-                  flex: 2,
-                  child: GestureDetector(
-                    onDoubleTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const BadgeAssignment()));
-                    },
-                    child: _getBadge(score),
+            child: Padding(
+              padding: const EdgeInsets.only(left: 14.0, right: 8.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  // efs and total XP for current year
+                  Expanded(
+                    flex: 4,
+                    child: _efsAndTotalXp(context),
                   ),
-                ),
-              ],
+
+                  const SizedBox(width: 8),
+
+                  // BADGE depending on score
+                  // When the badge is double tapped, it navigates to a page that displays
+                  // the badge assignment criteria
+                  Expanded(
+                    flex: 3,
+                    child: GestureDetector(
+                      onDoubleTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const BadgeAssignment()));
+                      },
+                      child: _getBadge(score),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
