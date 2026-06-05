@@ -29,9 +29,8 @@ class AppImages {
   // default pfp
   static final defaultPfp = getImageAsset("motion_pfp.jpg");
 
-
   // default pfp
-  static final streakFire = getImageAsset("fire.png",22,22);
+  static final streakFire = getImageAsset("fire.png", 22, 22);
 
   // google icon
   static final continueWithGoogleImage = getImageAsset("google_1.png", 30, 30);
@@ -54,7 +53,8 @@ class AppImages {
   // 75-99 EFS badge (Dragon)
   static final dragon = getImageAsset("dragon.png", 70, 70);
 
-  
+  // 100 EFS badge
+  static final wizard = getImageAsset("wizard.png", 70, 70);
 }
 
 // png images
@@ -66,6 +66,7 @@ Image getImageAsset(String imageName, [double? height, double? width]) {
     width: width,
   );
 }
+
 // png images
 AssetImage getAssetImage(String imageName) {
   const String imagesFileLocation = "assets/images/motion_icons/";

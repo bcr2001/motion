@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:motion/motion_core/motion_rewards/efs_badge_policy.dart';
 import '../../motion_themes/mth_app/app_strings.dart';
-
 
 // A stateless widget that displays a badge assignment table
 class BadgeAssignment extends StatelessWidget {
@@ -24,53 +24,37 @@ class BadgeAssignment extends StatelessWidget {
                 columns: const [
                   DataColumn(
                       label: Expanded(
-                        child: Text(
-                          AppString.badgeNameColumn,
-                          textAlign: TextAlign.center,
-                        ),
-                      )),
+                    child: Text(
+                      AppString.badgeNameColumn,
+                      textAlign: TextAlign.center,
+                    ),
+                  )),
                   DataColumn(
                       label: Expanded(
-                        child: Text(
-                          AppString.efsRangeColumn,
-                          textAlign: TextAlign.center,
-                        ),
-                      )),
+                    child: Text(
+                      AppString.efsRangeColumn,
+                      textAlign: TextAlign.center,
+                    ),
+                  )),
                   DataColumn(
                       label: Expanded(
-                        child: Text(
-                          AppString.descriptionColumn,
-                          textAlign: TextAlign.center,
-                        ),
-                      )),
+                    child: Text(
+                      AppString.descriptionColumn,
+                      textAlign: TextAlign.center,
+                    ),
+                  )),
                 ],
-                rows: const [
-                  DataRow(cells: [
-                    DataCell(Text(AppString.timeNoviceBadge)),
-                    DataCell(Text(AppString.timeNoviceRange)),
-                    DataCell(Text(AppString.timeNoviceDescription)),
-                  ]),
-                  DataRow(cells: [
-                    DataCell(Text(AppString.focusedBeginnerBadge)),
-                    DataCell(Text(AppString.focusedBeginnerRange)),
-                    DataCell(Text(AppString.focusedBeginnerDescription)),
-                  ]),
-                  DataRow(cells: [
-                    DataCell(Text(AppString.timeProBadge)),
-                    DataCell(Text(AppString.timeProRange)),
-                    DataCell(Text(AppString.timeProDescription)),
-                  ]),
-                  DataRow(cells: [
-                    DataCell(Text(AppString.timeMasterBadge)),
-                    DataCell(Text(AppString.timeMasterRange)),
-                    DataCell(Text(AppString.timeMasterDescription)),
-                  ]),
-                  DataRow(cells: [
-                    DataCell(Text(AppString.timeWizardBadge)),
-                    DataCell(Text(AppString.timeWizardRange)),
-                    DataCell(Text(AppString.timeWizardDescription)),
-                  ]),
-                ],
+                rows: EfsBadgePolicy.badges
+                    .map(
+                      (badge) => DataRow(
+                        cells: [
+                          DataCell(Text(badge.name)),
+                          DataCell(Text(badge.rangeLabel)),
+                          DataCell(Text(badge.description)),
+                        ],
+                      ),
+                    )
+                    .toList(),
               ),
             ),
           ),

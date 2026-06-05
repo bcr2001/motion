@@ -3,6 +3,7 @@ import 'package:motion/motion_core/motion_providers/date_pvd/current_date_pvd.da
 import 'package:motion/motion_core/motion_providers/date_pvd/current_year_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/first_and_last_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
+import 'package:motion/motion_core/motion_rewards/efs_badge_policy.dart';
 import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_routes/mr_home/home_reusable/back_home.dart';
@@ -286,40 +287,49 @@ class CurrentYearEFSDisplay extends StatelessWidget {
   }
 
   // badge and name
-  Widget _badgetAndName({required Image badge}) {
+  Widget _badgeAndName({required EfsBadge badge, required Image badgeImage}) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         // badge
-        badge,
+        badgeImage,
 
         // name
         Padding(
           padding: const EdgeInsets.only(top: 8.0),
           child: Text(
-            AppString.badgeTitle,
+            badge.name,
             style: AppTextStyle.subSectionTextStyle(fontsize: 14),
+            textAlign: TextAlign.center,
           ),
         )
       ],
     );
   }
 
+  Image _badgeImage(EfsBadgeLevel level) {
+    switch (level) {
+      case EfsBadgeLevel.timeNovice:
+        return AppImages.sloth;
+      case EfsBadgeLevel.focusedBeginner:
+        return AppImages.dolphine;
+      case EfsBadgeLevel.timePro:
+        return AppImages.eagle;
+      case EfsBadgeLevel.timeMaster:
+        return AppImages.dragon;
+      case EfsBadgeLevel.timeWizard:
+        return AppImages.wizard;
+    }
+  }
+
   // badge assignment depending on score
   Widget _getBadge(double score) {
-    if (score >= 0 && score <= 24) {
-      return _badgetAndName(badge: AppImages.sloth);
-    } else if (score >= 25 && score <= 49) {
-      return _badgetAndName(badge: AppImages.dolphine);
-    } else if (score >= 50 && score <= 74) {
-      return _badgetAndName(badge: AppImages.eagle);
-    } else if (score >= 75 && score <= 99) {
-      return _badgetAndName(badge: AppImages.dragon);
-    } else if (score == 100) {
-      return const Text("Time Wizard");
-    } else {
-      return const Text("Error :()");
-    }
+    final badge = EfsBadgePolicy.badgeForScore(score);
+
+    return _badgeAndName(
+      badge: badge,
+      badgeImage: _badgeImage(badge.level),
+    );
   }
 
   @override
