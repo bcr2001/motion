@@ -3,6 +3,10 @@ import 'package:motion/motion_core/mc_sqlite/tracker_database_schema.dart';
 
 void main() {
   group('TrackerDatabaseSchema', () {
+    test('uses version 12 after removing the subcategory timestamp column', () {
+      expect(TrackerDatabaseSchema.version, 12);
+    });
+
     test(
         'includes trigger coverage for subcategory inserts, updates, and deletes',
         () {

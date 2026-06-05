@@ -137,7 +137,6 @@ class AppString {
   static const String manualAddBlock = "Add time block";
   static const String manualSave = "Save";
   static const String blockTitle = "Today’s Blocks";
-  static const String timeCreated = "Time Created:";
   static const String manualInvalidValueError = "Please enter valid values";
   static const String manualRangeValueError = "Keep entries within range!!";
 

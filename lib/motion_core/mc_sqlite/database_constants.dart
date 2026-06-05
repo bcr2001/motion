@@ -11,7 +11,6 @@ class MotionDbColumns {
   static const String currentLoggedInUser = 'currentLoggedInUser';
   static const String mainCategoryName = 'mainCategoryName';
   static const String subcategoryName = 'subcategoryName';
-  static const String timeRecorded = 'timeRecorded';
   static const String timeSpent = 'timeSpent';
   static const String education = 'education';
   static const String work = 'work';

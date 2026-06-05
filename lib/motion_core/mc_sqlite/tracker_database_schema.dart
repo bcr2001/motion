@@ -2,7 +2,8 @@ import 'package:motion/motion_core/mc_sqlite/database_constants.dart';
 import 'package:sqflite/sqflite.dart';
 
 class TrackerDatabaseSchema {
-  static const int version = 11;
+  static const int version = 12;
+  static const String _legacyTimeRecordedColumn = 'timeRecorded';
 
   static const String mainCategoryTable = MotionDbTables.mainCategory;
   static const String subcategoryTable = MotionDbTables.subcategory;
@@ -68,7 +69,6 @@ class TrackerDatabaseSchema {
         ${MotionDbColumns.date} TEXT,
         ${MotionDbColumns.mainCategoryName} TEXT,
         ${MotionDbColumns.subcategoryName} TEXT,
-        ${MotionDbColumns.timeRecorded} TEXT,
         ${MotionDbColumns.timeSpent} REAL DEFAULT 0,
         ${MotionDbColumns.currentLoggedInUser} TEXT,
         FOREIGN KEY (${MotionDbColumns.date}, ${MotionDbColumns.currentLoggedInUser})
@@ -102,11 +102,10 @@ class TrackerDatabaseSchema {
     await _addColumnIfMissing(
         db, subcategoryTable, MotionDbColumns.subcategoryName, 'TEXT');
     await _addColumnIfMissing(
-        db, subcategoryTable, MotionDbColumns.timeRecorded, 'TEXT');
-    await _addColumnIfMissing(
         db, subcategoryTable, MotionDbColumns.timeSpent, 'REAL DEFAULT 0');
     await _addColumnIfMissing(
         db, subcategoryTable, MotionDbColumns.currentLoggedInUser, 'TEXT');
+    await _removeLegacyTimeRecordedColumn(db);
 
     await _addColumnIfMissing(
         db, experiencePointsTable, MotionDbColumns.date, 'TEXT');
@@ -137,6 +136,53 @@ class TrackerDatabaseSchema {
       await db.execute(
           'ALTER TABLE $tableName ADD COLUMN $columnName $columnDefinition');
     }
+  }
+
+  static Future<void> _removeLegacyTimeRecordedColumn(Database db) async {
+    final columns = await db.rawQuery('PRAGMA table_info($subcategoryTable)');
+    final hasLegacyColumn =
+        columns.any((column) => column['name'] == _legacyTimeRecordedColumn);
+
+    if (!hasLegacyColumn) return;
+
+    await _dropTriggers(db);
+
+    await db.transaction((txn) async {
+      const legacyTable = '${subcategoryTable}_legacy_time_recorded';
+
+      await txn.execute('ALTER TABLE $subcategoryTable RENAME TO $legacyTable');
+      await txn.execute('''
+        CREATE TABLE $subcategoryTable(
+          ${MotionDbColumns.id} INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          ${MotionDbColumns.date} TEXT,
+          ${MotionDbColumns.mainCategoryName} TEXT,
+          ${MotionDbColumns.subcategoryName} TEXT,
+          ${MotionDbColumns.timeSpent} REAL DEFAULT 0,
+          ${MotionDbColumns.currentLoggedInUser} TEXT,
+          FOREIGN KEY (${MotionDbColumns.date}, ${MotionDbColumns.currentLoggedInUser})
+          REFERENCES $mainCategoryTable(${MotionDbColumns.date}, ${MotionDbColumns.currentLoggedInUser})
+        )
+      ''');
+      await txn.execute('''
+        INSERT INTO $subcategoryTable(
+          ${MotionDbColumns.id},
+          ${MotionDbColumns.date},
+          ${MotionDbColumns.mainCategoryName},
+          ${MotionDbColumns.subcategoryName},
+          ${MotionDbColumns.timeSpent},
+          ${MotionDbColumns.currentLoggedInUser}
+        )
+        SELECT
+          ${MotionDbColumns.id},
+          ${MotionDbColumns.date},
+          ${MotionDbColumns.mainCategoryName},
+          ${MotionDbColumns.subcategoryName},
+          ${MotionDbColumns.timeSpent},
+          ${MotionDbColumns.currentLoggedInUser}
+        FROM $legacyTable
+      ''');
+      await txn.execute('DROP TABLE $legacyTable');
+    });
   }
 
   static Future<void> _createTriggers(Database db) async {

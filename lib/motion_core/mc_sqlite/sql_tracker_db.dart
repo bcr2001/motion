@@ -15,6 +15,8 @@ import 'package:path/path.dart';
 // subcategory table tracks subcategories
 // main category table tracks the aggregated subcategories
 class TrackerDatabaseHelper {
+  static final DateTime _firstTrackingDate = DateTime(2021, 7, 1);
+
   // Singleton instance
   static final TrackerDatabaseHelper _instance =
       TrackerDatabaseHelper._privateConstructor();
@@ -173,14 +175,20 @@ class TrackerDatabaseHelper {
       bool getAllDays = true,
       String currentYear = ""}) async {
     try {
+      final today = _dateOnly(DateTime.now());
+      if (getAllDays) {
+        return _inclusiveDaysBetween(_firstTrackingDate, today);
+      }
+
+      final currentYearInt = int.tryParse(currentYear);
+      if (currentYearInt == today.year) {
+        return _inclusiveDaysBetween(DateTime(today.year), today);
+      }
+
       final db = await database;
 
       // number of days
-      final resultGNOD = getAllDays ? await db.rawQuery('''
-        SELECT COUNT(DISTINCT date) AS NumberOfDays
-        FROM main_category
-        WHERE currentLoggedInUser = ?
-      ''', [currentUser]) : await db.rawQuery('''
+      final resultGNOD = await db.rawQuery('''
         SELECT COUNT(DISTINCT date) AS NumberOfDays
         FROM main_category
         WHERE currentLoggedInUser = ? AND strftime('%Y', date) = ?
@@ -868,12 +876,12 @@ class TrackerDatabaseHelper {
     }
   }
 
-  /// Calculates the user's current tracking streak.
+  /// Calculates the user's tracking streak through the latest tracked day.
   ///
   /// A streak is a run of consecutive calendar days where the user logged at
   /// least one subcategory with timeSpent greater than zero. The streak is
-  /// counted backward from the latest tracked day. If the user has not tracked
-  /// today yet, yesterday can still keep the streak alive.
+  /// counted backward from the latest tracked day in the database, which keeps
+  /// delayed CSV imports from making the streak appear as zero.
   Future<int> getUserStreak({required String currentUser}) async {
     final db = await database;
 
@@ -888,23 +896,16 @@ class TrackerDatabaseHelper {
 
     if (records.isEmpty) return 0;
 
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
     final trackedDates = records
-        .map((record) => DateTime.parse(record[MotionDbColumns.date] as String))
-        .where((date) => !date.isAfter(today))
+        .map((record) => _parseStoredDate(record[MotionDbColumns.date]))
+        .whereType<DateTime>()
+        .toSet()
         .toList();
+    trackedDates.sort((a, b) => b.compareTo(a));
 
     if (trackedDates.isEmpty) return 0;
 
     final latestTrackedDate = trackedDates.first;
-    final daysSinceLatestTrackedDate =
-        today.difference(latestTrackedDate).inDays;
-
-    if (daysSinceLatestTrackedDate > 1) {
-      return 0;
-    }
-
     var streak = 1;
     var expectedPreviousDate =
         latestTrackedDate.subtract(const Duration(days: 1));
@@ -920,6 +921,39 @@ class TrackerDatabaseHelper {
     }
 
     return streak;
+  }
+
+  static DateTime _dateOnly(DateTime date) {
+    return DateTime(date.year, date.month, date.day);
+  }
+
+  static DateTime? _parseStoredDate(Object? value) {
+    final text = value?.toString().trim();
+    if (text == null || text.isEmpty) return null;
+
+    final isoDate = DateTime.tryParse(text);
+    if (isoDate != null) return _dateOnly(isoDate);
+
+    final slashParts = text.split('/');
+    if (slashParts.length != 3) return null;
+
+    final first = int.tryParse(slashParts[0]);
+    final second = int.tryParse(slashParts[1]);
+    final year = int.tryParse(slashParts[2]);
+    if (first == null || second == null || year == null) return null;
+
+    final month = first > 12 ? second : first;
+    final day = first > 12 ? first : second;
+    if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+
+    return DateTime(year, month, day);
+  }
+
+  static int _inclusiveDaysBetween(DateTime startDate, DateTime endDate) {
+    final start = _dateOnly(startDate);
+    final end = _dateOnly(endDate);
+    if (end.isBefore(start)) return 0;
+    return end.difference(start).inDays + 1;
   }
 
   // calculates and returns the total time spent on a particular subcategory

@@ -10,6 +10,7 @@ import '../../motion_core/motion_providers/shared_pvd/share.dart';
 import '../ms_routes/about_page.dart';
 import '../ms_reuse/screens_reusable.dart';
 import 'package:date_picker_plus/date_picker_plus.dart';
+import 'data_transfer_page.dart';
 
 // settings page
 class SettingsPage extends StatelessWidget {
@@ -31,10 +32,12 @@ class SettingsPage extends StatelessWidget {
             padding: EdgeInsets.zero,
             minDate: DateTime(1970, 1, 1),
             maxDate: DateTime(2100, 12, 31),
-            daysOfTheWeekTextStyle: AppTextStyle.subSectionTextStyle(fontsize: 11, color: Colors.blueGrey),
+            daysOfTheWeekTextStyle: AppTextStyle.subSectionTextStyle(
+                fontsize: 11, color: Colors.blueGrey),
             selectedCellTextStyle:
                 AppTextStyle.accountedAndUnaccountedGallaryStyle(fontsize: 15),
-            enabledCellsTextStyle: AppTextStyle.subSectionTextStyle(fontsize: 15, fontweight: FontWeight.normal),
+            enabledCellsTextStyle: AppTextStyle.subSectionTextStyle(
+                fontsize: 15, fontweight: FontWeight.normal),
             leadingDateTextStyle:
                 AppTextStyle.accountedAndUnaccountedGallaryStyle(),
             onDateSelected: (value) async {
@@ -79,7 +82,7 @@ class SettingsPage extends StatelessWidget {
                 children: [
                   // date of birth widget
                   _pickDateOfBirth(),
-              
+
                   // button to confirm date of birth
                   Align(
                       alignment: Alignment.bottomRight,
@@ -114,6 +117,20 @@ class SettingsPage extends StatelessWidget {
               settingsTitle: AppString.setDateOfBirthTitle,
               settingsDesciption: AppString.setDateOfBirthDescription,
               onTap: () => _showSetDateOfBorthAlert(context),
+            ),
+
+            SettingsOptions(
+              null,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const DataTransferPage(),
+                  ),
+                );
+              },
+              settingsTitle: AppString.downloadDataTitle,
+              settingsDesciption: AppString.downloadDataDescription,
             ),
 
             // about motion
@@ -176,7 +193,8 @@ class _ThemeModeSettingsWindow extends StatelessWidget {
                     padding: const EdgeInsets.only(top: .0, bottom: 10.0),
                     child: Text(
                       AppString.themeSettingPageMessage,
-                      style: AppTextStyle.subSectionTextStyle(fontsize: 12.5, fontweight: FontWeight.normal),
+                      style: AppTextStyle.subSectionTextStyle(
+                          fontsize: 12.5, fontweight: FontWeight.normal),
                     ),
                   ),
 

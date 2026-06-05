@@ -28,7 +28,6 @@ void main() {
             date: '2026-06-04',
             mainCategoryName: 'Education',
             subcategoryName: 'Math',
-            timeRecorded: '09:00',
             currentLoggedInUser: 'uid-123',
           ),
         ),

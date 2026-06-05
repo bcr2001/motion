@@ -3,7 +3,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:motion/firebase_options.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_month_provider_pvd.dart';
-import 'package:motion/motion_core/motion_providers/date_pvd/current_time_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_year_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/first_and_last_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/seven_days_pvd.dart';
@@ -68,7 +67,6 @@ void main() async {
       ChangeNotifierProvider.value(value: themeModeProviderN1),
       ChangeNotifierProvider(create: (context) => FirstAndLastDay()),
       ChangeNotifierProvider(create: (context) => CurrentYearProvider()),
-      ChangeNotifierProvider(create: (context) => CurrentTimeProvider()),
       ChangeNotifierProvider.value(value: trackMainCategoryDatabaseProvider),
       ChangeNotifierProvider.value(value: trackSubcategoryDatabaseProvider),
       ChangeNotifierProvider.value(value: assignerProvider),

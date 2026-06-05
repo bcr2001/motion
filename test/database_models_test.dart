@@ -38,7 +38,6 @@ void main() {
         date: '2026-06-04',
         mainCategoryName: MotionCategories.skills,
         subcategoryName: 'Coding',
-        timeRecorded: '13:05',
         timeSpent: 90,
         currentLoggedInUser: 'user-1',
       );
@@ -49,7 +48,6 @@ void main() {
       expect(map[MotionDbColumns.date], '2026-06-04');
       expect(map[MotionDbColumns.mainCategoryName], MotionCategories.skills);
       expect(map[MotionDbColumns.subcategoryName], 'Coding');
-      expect(map[MotionDbColumns.timeRecorded], '13:05');
       expect(map[MotionDbColumns.timeSpent], 90);
       expect(map[MotionDbColumns.currentLoggedInUser], 'user-1');
       expect(Subcategories.fromMap(withId).id, 7);

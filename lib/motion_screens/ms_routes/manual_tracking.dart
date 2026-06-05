@@ -4,7 +4,6 @@ import 'package:motion/motion_core/mc_sql_table/experience_table.dart';
 import 'package:motion/motion_core/mc_sql_table/main_table.dart';
 import 'package:motion/motion_core/mc_sql_table/sub_table.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_date_pvd.dart';
-import 'package:motion/motion_core/motion_providers/date_pvd/current_time_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/experience_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
@@ -146,13 +145,12 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                   ),
 
                   // cancel and add button
-                  Consumer5<
+                  Consumer4<
                       CurrentDateProvider,
                       UserUidProvider,
-                      CurrentTimeProvider,
                       MainCategoryTrackerProvider,
                       ExperiencePointTableProvider>(
-                    builder: (context, date, uid, time, mainCat, xp, child) {
+                    builder: (context, date, uid, mainCat, xp, child) {
                       return CancelAddTextButtons(
                         firstButtonName: AppString.trackCancelTextButton,
                         secondButtonName: AppString.trackAddTextButton,
@@ -169,7 +167,8 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                           final currentUser = uid.userUid;
                           if (currentUser == null) {
                             snackBarMessage(context,
-                                errorMessage: AppString.firebaseSomethingWentWrong,
+                                errorMessage:
+                                    AppString.firebaseSomethingWentWrong,
                                 requiresColor: true);
                             return;
                           }
@@ -263,8 +262,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                                   timeSpent: timeAdder(
                                       h: hourController.text,
                                       m: minuteController.text,
-                                      s: secondController.text),
-                                  timeRecorded: time.formattedTime);
+                                      s: secondController.text));
 
                               subTrackerProvider
                                   .insertIntoSubcategoryTable(subcategory);
@@ -345,9 +343,6 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                               subsTrackedOnCurrentDay[index].timeSpent);
 
                           return ListTile(
-                            subtitle: Text(
-                                "${AppString.timeCreated} ${subsTrackedOnCurrentDay[index].timeRecorded}",
-                                style: AppTextStyle.subSectionTextStyle(fontsize: 12.5, fontweight: FontWeight.normal)),
                             title: Text(
                               convertedTimeRecorded,
                               style: AppTextStyle.subSectionTextStyle(
