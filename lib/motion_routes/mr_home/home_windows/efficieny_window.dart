@@ -288,22 +288,27 @@ class CurrentYearEFSDisplay extends StatelessWidget {
 
   // badge and name
   Widget _badgeAndName({required EfsBadge badge, required Image badgeImage}) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        // badge
-        badgeImage,
+    return SizedBox(
+      width: double.infinity,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // badge
+          badgeImage,
 
-        // name
-        Padding(
-          padding: const EdgeInsets.only(top: 8.0),
-          child: Text(
-            badge.name,
-            style: AppTextStyle.subSectionTextStyle(fontsize: 14),
-            textAlign: TextAlign.center,
+          // name
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: Text(
+              badge.name,
+              style: AppTextStyle.subSectionTextStyle(fontsize: 12),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+            ),
           ),
-        )
-      ],
+        ],
+      ),
     );
   }
 
@@ -349,20 +354,28 @@ class CurrentYearEFSDisplay extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 // efs and total XP for current year
-                _efsAndTotalXp(context),
+                Expanded(
+                  flex: 3,
+                  child: _efsAndTotalXp(context),
+                ),
+
+                const SizedBox(width: 8),
 
                 // BADGE depending on score
                 // When the badge is double tapped, it navigates to a page that displays
                 // the badge assignment criteria
-                GestureDetector(
-                  onDoubleTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const BadgeAssignment()));
-                  },
-                  child: _getBadge(score),
-                )
+                Expanded(
+                  flex: 2,
+                  child: GestureDetector(
+                    onDoubleTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const BadgeAssignment()));
+                    },
+                    child: _getBadge(score),
+                  ),
+                ),
               ],
             ),
           ),
