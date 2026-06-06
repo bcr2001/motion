@@ -12,7 +12,6 @@ import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 import 'package:motion/motion_routes/mr_home/home_reusable/back_home.dart';
 import 'package:motion/motion_screens/ms_routes/manual_tracking.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
-import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:provider/provider.dart';
 import '../../../motion_core/motion_providers/shared_pvd/share.dart';
 import '../../../motion_themes/mth_app/app_strings.dart';
@@ -25,8 +24,6 @@ class LifeCompleted extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidget = MediaQuery.of(context).size.width;
-
     return Consumer2<CurrentYearProvider, UserUidProvider>(
         builder: (context, year, user, child) {
       // current year
@@ -61,35 +58,87 @@ class LifeCompleted extends StatelessWidget {
 
               // (current age/ life expectance age) = life_completed
               final double lifeCompleted = currentAge / 72.6;
+              final double lifeCompletedProgress =
+                  lifeCompleted.clamp(0.0, 1.0).toDouble();
 
               final String lifeCompletedPercent =
                   (lifeCompleted * 100).toStringAsFixed(2);
+              final bool isDarkMode =
+                  Theme.of(context).brightness == Brightness.dark;
+              final Color borderColor = isDarkMode
+                  ? Colors.white.withValues(alpha: 0.10)
+                  : Colors.black12;
+              final Color trackColor = isDarkMode
+                  ? Colors.white.withValues(alpha: 0.08)
+                  : Colors.black.withValues(alpha: 0.07);
 
               return Padding(
-                padding: const EdgeInsets.only(top: 10, bottom: 10),
-                child: Row(
-                  children: [
-                    // progress indicator
-                    LinearPercentIndicator(
-                      animation: true,
-                      center: Text(
-                        "$lifeCompletedPercent%",
-                        style: AppTextStyle.subSectionTextStyle(fontsize: 11),
-                      ),
-                      width: screenWidget * 0.5,
-                      lineHeight: 20,
-                      barRadius: const Radius.circular(20),
-                      percent: lifeCompleted,
-                      progressColor: AppColor.accountedColor,
-                      backgroundColor: Colors.grey.withAlpha(200),
+                padding: const EdgeInsets.only(top: 10, bottom: 12),
+                child: Card(
+                  elevation: 0,
+                  margin: EdgeInsets.zero,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(color: borderColor),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 12),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    AppString.lifeTitle,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: AppTextStyle.subSectionTextStyle(
+                                      fontsize: 14,
+                                      fontweight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Age $currentAge of 72.6',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: AppTextStyle.subSectionTextStyle(
+                                      fontsize: 11,
+                                      fontweight: FontWeight.normal,
+                                      color: Colors.blueGrey,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              "$lifeCompletedPercent%",
+                              style: AppTextStyle.sectionTitleTextStyle(
+                                  fontsize: 18),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(99),
+                          child: LinearProgressIndicator(
+                            value: lifeCompletedProgress,
+                            minHeight: 9,
+                            color: AppColor.accountedColor,
+                            backgroundColor: trackColor,
+                          ),
+                        ),
+                      ],
                     ),
-
-                    // life
-                    Text(
-                      AppString.lifeTitle,
-                      style: AppTextStyle.subSectionTextStyle(fontsize: 12.5),
-                    )
-                  ],
+                  ),
                 ),
               );
             }
@@ -446,85 +495,80 @@ class _SubcategoryAndCurrentDayTotalsState
         // generates list tiles of categories where
         // isActive = 1
         // else returns an empty widget
-        return Scrollbar(
-          radius: const Radius.circular(10.0),
-          trackVisibility: true,
-          controller: _scrollController,
-          child: ListView.builder(
-              padding: EdgeInsets.zero,
+        final visibleItems = activeItems.where((item) {
+          return item.isActive == 1 &&
+              item.currentLoggedInUser == currentUser &&
+              item.isArchive == 0;
+        }).toList();
+
+        return FutureBuilder<Map<String, double>>(
+          future: sub.retrieveSubcategoryTotalsForDate(
+              date.currentDate, currentUser),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return buildShimmerProgress();
+            } else if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            }
+
+            final dailyTotals = snapshot.data ?? {};
+
+            return Scrollbar(
+              radius: const Radius.circular(10.0),
+              trackVisibility: true,
               controller: _scrollController,
-              shrinkWrap: true,
-              itemCount: activeItems.length,
-              itemBuilder: (BuildContext context, index) {
-                return (activeItems[index].isActive == 1 &&
-                        activeItems[index].currentLoggedInUser == currentUser &&
-                        activeItems[index].isArchive == 0)
-                    ? FutureBuilder<double>(
-                        future: sub.retrieveTotalTimeSpentSubSpecific(
-                            date.currentDate,
-                            currentUser,
-                            activeItems[index].subcategoryName),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            // Return a loading indicator while waiting for the data
-                            return buildShimmerProgress();
-                          } else if (snapshot.hasError) {
-                            // Handle any errors here
-                            return Text('Error: ${snapshot.error}');
-                          } else {
-                            // Data is available, use it to build the ListTile
-                            final totalTimeSpentSub = snapshot.data ?? 0.0;
+              child: ListView.builder(
+                padding: EdgeInsets.zero,
+                controller: _scrollController,
+                shrinkWrap: true,
+                itemCount: visibleItems.length,
+                itemBuilder: (BuildContext context, index) {
+                  final item = visibleItems[index];
+                  final totalTimeSpentSub =
+                      dailyTotals[item.subcategoryName] ?? 0.0;
+                  final convertedTotalTimeSpent =
+                      convertMinutesToTime(totalTimeSpentSub);
 
-                            // convert total
-                            final convertedTotalTimeSpent =
-                                convertMinutesToTime(totalTimeSpentSub);
-
-                            return ListTile(
-                              title: Text(
-                                activeItems[index].subcategoryName,
-                                style: AppTextStyle.subSectionTextStyle(
-                                    fontsize: 14,
-                                    fontweight: FontWeight.normal),
-                              ),
-                              subtitle: Text(
-                                activeItems[index].mainCategoryName,
-                                style: AppTextStyle.subSectionTextStyle(
-                                    fontsize: 12, color: Colors.blueGrey),
-                              ),
-                              trailing: Container(
-                                width: 105,
-                                height: 23,
-                                decoration: BoxDecoration(
-                                  color: AppColor.tileBackgroundColor,
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Center(
-                                    child: Text(
-                                  convertedTotalTimeSpent,
-                                  style: AppTextStyle.tileElementTextStyle(),
-                                )),
-                              ),
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        ManualTimeRecordingRoute(
-                                      subcategoryName:
-                                          activeItems[index].subcategoryName,
-                                      mainCategoryName:
-                                          activeItems[index].mainCategoryName,
-                                    ),
-                                  ),
-                                );
-                              },
-                            );
-                          }
-                        },
-                      )
-                    : const SizedBox.shrink();
-              }),
+                  return ListTile(
+                    title: Text(
+                      item.subcategoryName,
+                      style: AppTextStyle.subSectionTextStyle(
+                          fontsize: 14, fontweight: FontWeight.normal),
+                    ),
+                    subtitle: Text(
+                      item.mainCategoryName,
+                      style: AppTextStyle.subSectionTextStyle(
+                          fontsize: 12, color: Colors.blueGrey),
+                    ),
+                    trailing: Container(
+                      width: 105,
+                      height: 23,
+                      decoration: BoxDecoration(
+                        color: AppColor.tileBackgroundColor,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Center(
+                          child: Text(
+                        convertedTotalTimeSpent,
+                        style: AppTextStyle.tileElementTextStyle(),
+                      )),
+                    ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ManualTimeRecordingRoute(
+                            subcategoryName: item.subcategoryName,
+                            mainCategoryName: item.mainCategoryName,
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            );
+          },
         );
       },
     );

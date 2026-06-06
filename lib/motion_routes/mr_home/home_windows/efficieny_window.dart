@@ -20,6 +20,48 @@ import '../../../motion_themes/mth_styling/motion_text_styling.dart';
 /// and error states.
 /// On successful data retrieval, it shows the calculated efficiency score.
 
+class _CachedFutureBuilder<T> extends StatefulWidget {
+  final Object cacheKey;
+  final Future<T> Function() futureFactory;
+  final Widget Function(BuildContext context, AsyncSnapshot<T> snapshot) builder;
+
+  const _CachedFutureBuilder({
+    required this.cacheKey,
+    required this.futureFactory,
+    required this.builder,
+  });
+
+  @override
+  State<_CachedFutureBuilder<T>> createState() =>
+      _CachedFutureBuilderState<T>();
+}
+
+class _CachedFutureBuilderState<T> extends State<_CachedFutureBuilder<T>> {
+  late Future<T> _future;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = widget.futureFactory();
+  }
+
+  @override
+  void didUpdateWidget(covariant _CachedFutureBuilder<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.cacheKey != widget.cacheKey) {
+      _future = widget.futureFactory();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<T>(
+      future: _future,
+      builder: widget.builder,
+    );
+  }
+}
+
 /// Get's the efficiency score for the selected date on the report
 /// page heat map section
 class EfficienyScoreSelectedDay extends StatelessWidget {
@@ -38,8 +80,9 @@ class EfficienyScoreSelectedDay extends StatelessWidget {
         return const ShimmerWidget.rectangular(width: 50, height: 30);
       }
 
-      return FutureBuilder(
-          future: xp.retrieveDailyExperiencePoints(
+      return _CachedFutureBuilder<int>(
+          cacheKey: 'daily-xp-$userUID-$selectedDay',
+          futureFactory: () => xp.retrieveDailyExperiencePoints(
               currentUser: userUID, selectedDate: selectedDay),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -49,8 +92,6 @@ class EfficienyScoreSelectedDay extends StatelessWidget {
             } else {
               final resultSnapShot = snapshot.data ?? 0;
               final String resultString = resultSnapShot.toString();
-
-              logger.i("xp earned = $resultSnapShot");
 
               return Text(
                 "$resultString XP",
@@ -80,8 +121,9 @@ class XPForTheCurrentDay extends StatelessWidget {
         return const ShimmerWidget.rectangular(width: 120, height: 40);
       }
 
-      return FutureBuilder(
-          future: xp.retrieveDailyExperiencePoints(
+      return _CachedFutureBuilder<int>(
+          cacheKey: 'today-xp-$currentUserUid-$today',
+          futureFactory: () => xp.retrieveDailyExperiencePoints(
               currentUser: currentUserUid, selectedDate: today),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -114,6 +156,122 @@ class EfficienyScoreSelectedYearOrMonth extends StatelessWidget {
       required this.selectedYear,
       required this.getSelectedYearEfs});
 
+  Widget _compactBadgeImage(EfsBadgeLevel level) {
+    switch (level) {
+      case EfsBadgeLevel.timeNovice:
+        return getImageAsset("sloth.png", 30, 30);
+      case EfsBadgeLevel.focusedBeginner:
+        return getImageAsset("dolphin.png", 30, 30);
+      case EfsBadgeLevel.timePro:
+        return getImageAsset("eagle.png", 30, 30);
+      case EfsBadgeLevel.timeMaster:
+        return getImageAsset("dragon.png", 30, 30);
+      case EfsBadgeLevel.timeWizard:
+        return getImageAsset("wizard.png", 30, 30);
+    }
+  }
+
+  Widget _selectedYearEfsAndBadge(BuildContext context, double score) {
+    final badge = EfsBadgePolicy.badgeForScore(score);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final borderColor =
+        isDarkMode ? Colors.white.withValues(alpha: 0.10) : Colors.black12;
+    final panelColor = isDarkMode
+        ? AppColor.darkModeContentWidget
+        : AppColor.lightModeContentWidget;
+    final badgeBackground = isDarkMode
+        ? Colors.white.withValues(alpha: 0.06)
+        : AppColor.tileBackgroundColor.withValues(alpha: 0.08);
+
+    return Align(
+      alignment: Alignment.centerRight,
+      child: Padding(
+        padding: const EdgeInsets.only(left: 10, right: 12, top: 8, bottom: 10),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 280),
+          child: Card(
+            elevation: 0,
+            margin: EdgeInsets.zero,
+            color: panelColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(color: borderColor),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        AppString.efficiencyScoreTitle,
+                        style: AppTextStyle.subSectionTextStyle(
+                            fontsize: 12, color: Colors.blueGrey),
+                      ),
+                      Text(
+                        score.toStringAsFixed(2),
+                        style: AppTextStyle.sectionTitleTextStyle(
+                            fontsize: 22.5),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: badgeBackground,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          height: 34,
+                          width: 34,
+                          child: _compactBadgeImage(badge.level),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Badge Earned",
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTextStyle.subSectionTextStyle(
+                                    fontsize: 11,
+                                    fontweight: FontWeight.normal,
+                                    color: Colors.blueGrey),
+                              ),
+                              Text(
+                                badge.name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTextStyle.subSectionTextStyle(
+                                  fontsize: 13,
+                                  fontweight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer3<ExperiencePointTableProvider, UserUidProvider,
@@ -130,8 +288,9 @@ class EfficienyScoreSelectedYearOrMonth extends StatelessWidget {
       String lastDayOfMonth = fal.lastDay;
 
       return getSelectedYearEfs
-          ? FutureBuilder(
-              future: xp.retrieveYearExperiencePointsEfficiencyScore(
+          ? _CachedFutureBuilder<double>(
+              cacheKey: 'selected-year-efs-$currentUserUid-$selectedYear',
+              futureFactory: () => xp.retrieveYearExperiencePointsEfficiencyScore(
                   currentUser: currentUserUid, currentYear: selectedYear),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -141,15 +300,13 @@ class EfficienyScoreSelectedYearOrMonth extends StatelessWidget {
                 } else {
                   final resultSnapShot = snapshot.data ?? 0.0;
 
-                  logger.i(
-                      "Total Efficiency Score for $selectedYear: $resultSnapShot");
-
-                  return specialSectionTitleSelectedYear(
-                      mainTitleName: resultSnapShot.toString());
+                  return _selectedYearEfsAndBadge(context, resultSnapShot);
                 }
               })
-          : FutureBuilder(
-              future: xp.retrieveMonthlyEfficiencyScore(
+          : _CachedFutureBuilder<double>(
+              cacheKey:
+                  'selected-month-efs-$currentUserUid-$firstDayOfMonth-$lastDayOfMonth',
+              futureFactory: () => xp.retrieveMonthlyEfficiencyScore(
                   currentUser: currentUserUid,
                   firstDayOfMonth: firstDayOfMonth,
                   lastDayOfMonth: lastDayOfMonth),
@@ -160,9 +317,6 @@ class EfficienyScoreSelectedYearOrMonth extends StatelessWidget {
                   return const Text("N/A");
                 } else {
                   final resultSnapShot = snapshot.data ?? 0.0;
-
-                  logger.i(
-                      "Total Efficiency Score for $selectedYear: $resultSnapShot");
 
                   return specialSectionTitleSelectedYear(
                       mainTitleName: resultSnapShot.toString());
@@ -190,8 +344,9 @@ class EfficienyScoreWindow extends StatelessWidget {
       final String currentYear = year.currentYear;
 
       return getEntireScore
-          ? FutureBuilder(
-              future: xp.retrieveExperiencePointsEfficiencyScore(
+          ? _CachedFutureBuilder<double>(
+              cacheKey: 'entire-efs-$currentUser',
+              futureFactory: () => xp.retrieveExperiencePointsEfficiencyScore(
                   currentUser: currentUser),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -201,14 +356,13 @@ class EfficienyScoreWindow extends StatelessWidget {
                 } else {
                   final resultSnapShot = snapshot.data ?? 0.0;
 
-                  logger.i("Total Efficiency Score: $resultSnapShot");
-
                   return efficiencySection(
                       score: "$resultSnapShot", getEntire: true);
                 }
               })
-          : FutureBuilder(
-              future: xp.retrieveYearExperiencePointsEfficiencyScore(
+          : _CachedFutureBuilder<double>(
+              cacheKey: 'year-efs-$currentUser-$currentYear',
+              futureFactory: () => xp.retrieveYearExperiencePointsEfficiencyScore(
                   currentUser: currentUser, currentYear: currentYear),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -217,8 +371,6 @@ class EfficienyScoreWindow extends StatelessWidget {
                   return const Text("N/A");
                 } else {
                   final resultSnapShot = snapshot.data ?? 0.0;
-
-                  logger.i("Total Efficiency Score: $resultSnapShot");
 
                   return CurrentYearEFSDisplay(
                       score: resultSnapShot, isEntire: false);
@@ -236,6 +388,28 @@ class CurrentYearEFSDisplay extends StatelessWidget {
 
   const CurrentYearEFSDisplay(
       {super.key, required this.score, required this.isEntire});
+
+  Future<NextBadgeProgress> _loadNextBadgeProgress({
+    required ExperiencePointTableProvider xpProvider,
+    required String currentUser,
+    required String currentYear,
+  }) async {
+    final totalXp = await xpProvider.retrieveTotalXP(
+      currentUser: currentUser,
+      isEntire: false,
+      year: currentYear,
+    );
+    final trackedDays = await xpProvider.retrieveYearExperiencePointDays(
+      currentUser: currentUser,
+      year: currentYear,
+    );
+
+    return EfsBadgePolicy.nextBadgeProgress(
+      currentScore: score,
+      currentYearXp: totalXp,
+      trackedDays: trackedDays,
+    );
+  }
 
   // efs and total XP strcuture
   Widget _efsAndTotalXp(context) {
@@ -258,8 +432,9 @@ class CurrentYearEFSDisplay extends StatelessWidget {
 
           final String currentYear = year.currentYear;
 
-          return FutureBuilder(
-              future: xps.retrieveTotalXP(
+          return _CachedFutureBuilder<int>(
+              cacheKey: 'total-xp-$currentUser-$isEntire-$currentYear',
+              futureFactory: () => xps.retrieveTotalXP(
                   currentUser: currentUser,
                   isEntire: isEntire,
                   year: currentYear),
@@ -271,8 +446,6 @@ class CurrentYearEFSDisplay extends StatelessWidget {
                   return const Text("N/A");
                 } else {
                   final snapResults = snapshot.data ?? 0;
-
-                  logger.i("Total XP for Current Year: $snapResults");
 
                   return Text(
                     "$snapResults XP",
@@ -337,46 +510,144 @@ class CurrentYearEFSDisplay extends StatelessWidget {
     );
   }
 
+  Widget _nextBadgeProgressRow(BuildContext context) {
+    return Consumer3<ExperiencePointTableProvider, UserUidProvider,
+        CurrentYearProvider>(builder: (context, xp, user, year, child) {
+      final String? currentUser = user.userUid;
+      if (currentUser == null) {
+        return const ShimmerWidget.rectangular(width: 160, height: 24);
+      }
+
+      final currentYear = year.currentYear;
+
+      return _CachedFutureBuilder<NextBadgeProgress>(
+          cacheKey: 'next-badge-progress-$currentUser-$currentYear-$score',
+          futureFactory: () => _loadNextBadgeProgress(
+                xpProvider: xp,
+                currentUser: currentUser,
+                currentYear: currentYear,
+              ),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const ShimmerWidget.rectangular(width: 160, height: 24);
+            } else if (snapshot.hasError) {
+              return const SizedBox.shrink();
+            }
+
+            final progress = snapshot.data;
+            if (progress == null) return const SizedBox.shrink();
+
+            final nextBadgeName = progress.nextBadge?.name ?? 'Top Badge';
+            final progressPercent = (progress.progress * 100).round();
+            final paceText = progress.isTopBadge
+                ? 'Top Badge Earned'
+                : '${progress.averageDailyXp.ceil()} XP/day';
+
+            return Padding(
+              padding: const EdgeInsets.only(top: 14.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          progress.isTopBadge
+                              ? 'Top Badge Earned'
+                              : 'Next: $nextBadgeName',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyle.subSectionTextStyle(
+                            fontsize: 11,
+                            fontweight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        progress.isTopBadge
+                            ? '100%'
+                            : '$progressPercent% | $paceText',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyle.subSectionTextStyle(
+                          fontsize: 10,
+                          fontweight: FontWeight.normal,
+                          color: Colors.blueGrey,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(99),
+                    child: LinearProgressIndicator(
+                      value: progress.progress,
+                      minHeight: 7.92,
+                      color: Colors.orange,
+                      backgroundColor: Colors.orange.withValues(alpha: 0.18),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
     return SizedBox(
-      height: screenHeight * 0.20,
+      height: screenHeight * 0.24,
       width: screenWidth * 0.64,
       child: Card(
         elevation: 0,
         child: Center(
           child: SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.only(left: 14.0, right: 8.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+              padding:
+                  const EdgeInsets.only(left: 14.0, right: 12.0, bottom: 8.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  // efs and total XP for current year
-                  Expanded(
-                    flex: 4,
-                    child: _efsAndTotalXp(context),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      // efs and total XP for current year
+                      Expanded(
+                        flex: 4,
+                        child: _efsAndTotalXp(context),
+                      ),
+
+                      const SizedBox(width: 8),
+
+                      // BADGE depending on score
+                      // When the badge is double tapped, it navigates to a page that displays
+                      // the badge assignment criteria
+                      Expanded(
+                        flex: 3,
+                        child: GestureDetector(
+                          onDoubleTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const BadgeAssignment()));
+                          },
+                          child: _getBadge(score),
+                        ),
+                      ),
+                    ],
                   ),
-
-                  const SizedBox(width: 8),
-
-                  // BADGE depending on score
-                  // When the badge is double tapped, it navigates to a page that displays
-                  // the badge assignment criteria
-                  Expanded(
-                    flex: 3,
-                    child: GestureDetector(
-                      onDoubleTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const BadgeAssignment()));
-                      },
-                      child: _getBadge(score),
-                    ),
+                  FractionallySizedBox(
+                    widthFactor: 1.0,
+                    child: _nextBadgeProgressRow(context),
                   ),
                 ],
               ),
@@ -457,8 +728,6 @@ class ProductiveDayBuilder extends StatelessWidget {
             return const Text("N/A");
           } else {
             final resultSnapShot = snapshot.data ?? [];
-
-            logger.i(resultSnapShot);
 
             // (most/least) productive date
             final String date = resultSnapShot[0][varableName];

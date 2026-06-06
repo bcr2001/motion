@@ -176,37 +176,67 @@ class AnnualGallaryBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // the year of the gallary summary
-            Align(
-              alignment: Alignment.bottomRight,
-              child: Text(
-                gallaryYear,
-                style: const TextStyle(
-                  color: AppColor.blueMainColor,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final borderColor =
+        isDarkMode ? Colors.white.withValues(alpha: 0.10) : Colors.black12;
+    final tileColor = isDarkMode
+        ? AppColor.darkModeContentWidget
+        : AppColor.lightModeContentWidget;
 
-            // DIVIDER
-            // divider
-            const SizedBox(
-              width: 100,
-              child: Divider(
-                thickness: 1.5,
-                color: AppColor.blueMainColor,
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: onTap,
+          child: Ink(
+            decoration: BoxDecoration(
+              color: tileColor,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: borderColor),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(9.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    height: 28,
+                    width: 28,
+                    decoration: BoxDecoration(
+                      color: AppColor.blueMainColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(9),
+                    ),
+                    child: const Icon(
+                      Icons.calendar_month_outlined,
+                      color: AppColor.blueMainColor,
+                      size: 16,
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        gallaryYear,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyle.sectionTitleTextStyle(
+                          fontsize: 16,
+                        ).copyWith(color: AppColor.blueMainColor),
+                      ),
+                      Icon(
+                        Icons.chevron_right,
+                        size: 18,
+                        color: isDarkMode ? Colors.white54 : Colors.black45,
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );

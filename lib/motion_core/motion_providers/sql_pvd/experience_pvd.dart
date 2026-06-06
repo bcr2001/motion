@@ -105,4 +105,14 @@ class ExperiencePointTableProvider extends ChangeNotifier {
         isEntire: isEntire,
         year: year);
   }
+
+  Future<int> retrieveYearExperiencePointDays({
+    required String currentUser,
+    required String year,
+  }) async {
+    return await trackDbInstance.getYearExperiencePointDays(
+      currentUser: requireCurrentUser(currentUser),
+      year: year,
+    );
+  }
 }

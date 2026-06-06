@@ -134,7 +134,7 @@ class AppString {
       "Please select a value from the drop-down.";
 
   // MANUAL RECORDING ROUTE
-  static const String manualAddBlock = "Add time block";
+  static const String manualAddBlock = "Add Time Block";
   static const String manualSave = "Save";
   static const String blockTitle = "Today’s Blocks";
   static const String manualInvalidValueError = "Please enter valid values";

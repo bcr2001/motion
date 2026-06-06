@@ -249,6 +249,14 @@ class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
         currentDate, requireCurrentUser(currentUser));
   }
 
+  Future<Map<String, double>> retrieveSubcategoryTotalsForDate(
+      String currentDate, String currentUser) async {
+    return await trackDbInstance.getSubcategoryTotalsForDate(
+      currentDate: currentDate,
+      currentUser: requireCurrentUser(currentUser),
+    );
+  }
+
   // get the total time spent for a specific subcategory
   Future<double> retrieveTotalTimeSpentSubSpecific(
       String currentDate, String currentUser, String subcategoryName) async {

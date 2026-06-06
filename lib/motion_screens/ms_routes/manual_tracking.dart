@@ -8,9 +8,7 @@ import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/experience_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_reusable/db_re/sub_logic.dart';
-import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
-import 'package:motion/motion_reusable/mu_reusable/user_reusable.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:provider/provider.dart';
@@ -55,26 +53,58 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
   Widget _titleAndTextFieldBuilder(
       {required String title,
       required TextEditingController textEditingController}) {
-    return Flexible(
-      child: Column(
-        children: [
-          // time component titles
-          Text(
-            title,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final borderColor =
+        isDarkMode ? Colors.white.withValues(alpha: 0.10) : Colors.black12;
+    final inputColor = isDarkMode
+        ? Colors.white.withValues(alpha: 0.04)
+        : Colors.black.withValues(alpha: 0.035);
 
-          // text field for each time component
-          SizedBox(
-            width: 60,
-            child: TextFormFieldBuilder(
-              maxCharacterLen: 2,
-              border: InputBorder.none,
-              fieldTextEditingController: textEditingController,
-              fieldHintText: "00",
-              fieldKeyboardType: TextInputType.number,
-              hintTextStyle: AppTextStyle.manualHintTextStyle(fontsize: 23),
-              fieldValidator: (value) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        decoration: BoxDecoration(
+          color: inputColor,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: borderColor),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // time component titles
+            Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyle.subSectionTextStyle(
+                fontsize: 11,
+                fontweight: FontWeight.normal,
+                color: Colors.blueGrey,
+              ),
+            ),
+
+            const SizedBox(height: 4),
+
+            // text field for each time component
+            TextFormField(
+              controller: textEditingController,
+              keyboardType: TextInputType.number,
+              maxLength: 2,
+              buildCounter: (BuildContext context,
+                      {int? currentLength,
+                      int? maxLength,
+                      bool? isFocused}) =>
+                  null,
+              textAlign: TextAlign.center,
+              cursorColor: AppColor.blueMainColor,
+              style: AppTextStyle.sectionTitleTextStyle(fontsize: 24),
+              decoration: InputDecoration(
+                isDense: true,
+                border: InputBorder.none,
+                hintText: "00",
+                hintStyle: AppTextStyle.manualHintTextStyle(fontsize: 24),
+              ),
+              validator: (value) {
                 // check whether the field is empty
                 if (value == null || value.isEmpty) {
                   return "??";
@@ -82,20 +112,144 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                 return null;
               },
             ),
-          )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _timeEntryBlock() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final borderColor =
+        isDarkMode ? Colors.white.withValues(alpha: 0.10) : Colors.black12;
+    final panelColor = isDarkMode
+        ? AppColor.darkModeContentWidget
+        : AppColor.lightModeContentWidget;
+
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: panelColor,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: borderColor),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Container(
+                height: 34,
+                width: 34,
+                decoration: BoxDecoration(
+                  color: AppColor.blueMainColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.timer_outlined,
+                  color: AppColor.blueMainColor,
+                  size: 19,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  widget.subcategoryName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyle.subSectionTextStyle(
+                    fontsize: 14,
+                    fontweight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          // time component text fields displayed
+          Row(
+            children: [
+              // hour time component
+              _titleAndTextFieldBuilder(
+                  title: "Hours", textEditingController: hourController),
+
+              const SizedBox(width: 8),
+
+              // minute time component
+              _titleAndTextFieldBuilder(
+                  title: "Minutes", textEditingController: minuteController),
+
+              const SizedBox(width: 8),
+
+              // seconds time component
+              _titleAndTextFieldBuilder(
+                  title: "Seconds", textEditingController: secondController)
+            ],
+          ),
         ],
       ),
     );
   }
 
-  // seperator
-  Widget _seperate() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 20.0),
-      child: Text(
-        ":",
-        style: AppTextStyle.manualHintTextStyle(fontsize: 23),
-      ),
+  Widget _timeDialogActions({
+    required VoidCallback onCancel,
+    required VoidCallback onAdd,
+  }) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final borderColor =
+        isDarkMode ? Colors.white.withValues(alpha: 0.16) : Colors.black12;
+    final cancelTextColor = isDarkMode ? Colors.white70 : Colors.blueGrey;
+
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton(
+            onPressed: onCancel,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: cancelTextColor,
+              minimumSize: const Size(0, 42),
+              side: BorderSide(color: borderColor),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              AppString.trackCancelTextButton,
+              style: AppTextStyle.subSectionTextStyle(
+                fontsize: 12,
+                fontweight: FontWeight.w700,
+                color: cancelTextColor,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: ElevatedButton(
+            onPressed: onAdd,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColor.blueMainColor,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              minimumSize: const Size(0, 42),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              AppString.trackAddTextButton,
+              style: AppTextStyle.subSectionTextStyle(
+                fontsize: 12,
+                fontweight: FontWeight.w800,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -113,36 +267,16 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
           return AlertDialogConst(
             screenHeight: screenHeight,
             screenWidth: screenWidth,
+            heightFactor: 0.28,
             alertDialogTitle: AppString.manualAddBlock,
             alertDialogContent: Form(
               key: _timeFormKey,
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  // time component text fields displayed
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      // hour time component
-                      _titleAndTextFieldBuilder(
-                          title: "Hours",
-                          textEditingController: hourController),
+                  _timeEntryBlock(),
 
-                      _seperate(),
-
-                      // minute time component
-                      _titleAndTextFieldBuilder(
-                          title: "Minutes",
-                          textEditingController: minuteController),
-
-                      _seperate(),
-
-                      // seconds time component
-                      _titleAndTextFieldBuilder(
-                          title: "Seconds",
-                          textEditingController: secondController)
-                    ],
-                  ),
+                  const SizedBox(height: 16),
 
                   // cancel and add button
                   Consumer4<
@@ -151,10 +285,8 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                       MainCategoryTrackerProvider,
                       ExperiencePointTableProvider>(
                     builder: (context, date, uid, mainCat, xp, child) {
-                      return CancelAddTextButtons(
-                        firstButtonName: AppString.trackCancelTextButton,
-                        secondButtonName: AppString.trackAddTextButton,
-                        onPressedFirst: () {
+                      return _timeDialogActions(
+                        onCancel: () {
                           // exits the alart dialog and resets the text
                           // contoller content
                           navigationKey.currentState!.pop();
@@ -163,7 +295,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                           minuteController.text = "";
                           secondController.text = "";
                         },
-                        onPressedSecond: () async {
+                        onAdd: () async {
                           final currentUser = uid.userUid;
                           if (currentUser == null) {
                             snackBarMessage(context,

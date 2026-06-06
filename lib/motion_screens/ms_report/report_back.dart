@@ -226,11 +226,12 @@ class MostAndLeastTrackedBuilder extends StatelessWidget {
   // totalHours and averageHours
   Widget totalHoursAverageHours() {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         // totalHours
         Text(
           totalHours,
-          style: AppTextStyle.sectionTitleTextStyle(fontsize: 24),
+          style: AppTextStyle.sectionTitleTextStyle(fontsize: 21),
         ),
 
         // averageHours
@@ -246,12 +247,13 @@ class MostAndLeastTrackedBuilder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // title
         Padding(
-          padding: const EdgeInsets.all(10.0),
+          padding: const EdgeInsets.only(left: 12, right: 12, bottom: 6),
           child: Text(
             title,
             style: AppTextStyle.subSectionTextStyle(
@@ -267,10 +269,11 @@ class MostAndLeastTrackedBuilder extends StatelessWidget {
             Icon(
               iconDirection,
               color: iconColor,
-              size: 45,
+              size: 36,
             ),
 
             // totalHours and averageHours
+            const SizedBox(width: 4),
             totalHoursAverageHours()
           ],
         ),
@@ -279,12 +282,14 @@ class MostAndLeastTrackedBuilder extends StatelessWidget {
         Align(
           alignment: Alignment.center,
           child: Container(
-              margin: const EdgeInsets.all(8.0),
+              margin: const EdgeInsets.only(top: 8, left: 10, right: 10),
               child: Padding(
-                padding: const EdgeInsets.only(top: 3.0),
+                padding: EdgeInsets.zero,
                 child: Text(
                   subcategoryName,
                   textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: AppTextStyle.subSectionTextStyle(
                       fontsize: 12, fontweight: FontWeight.normal),
                 ),
@@ -294,8 +299,8 @@ class MostAndLeastTrackedBuilder extends StatelessWidget {
         // bottom divider
         Center(
           child: Container(
-            margin: const EdgeInsets.only(left: 5),
-            width: 150,
+            margin: const EdgeInsets.only(top: 6, left: 5),
+            width: 130,
             child: const Divider(
               thickness: 1.5,
             ),
@@ -390,8 +395,6 @@ class MLTitleAndCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-
     return Padding(
       padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
       child: Column(
@@ -407,7 +410,7 @@ class MLTitleAndCard extends StatelessWidget {
           ),
 
           // card content
-          SizedBox(height: screenHeight * 0.28, child: cardContent)
+          SizedBox(height: 206, child: cardContent)
         ],
       ),
     );

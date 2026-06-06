@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
-import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // A class responsible for managing the user's UID and saving it to SharedPreferences.
@@ -26,8 +24,6 @@ class UserUidProvider extends ChangeNotifier {
     _userUid = uid;
 
     _pref?.setString(uidKey, uid);
-
-    logger.i("Saved UID: $uid");
 
     notifyListeners();
   }

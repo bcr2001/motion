@@ -164,10 +164,6 @@ class AnalysisGallery extends StatelessWidget {
     
                 return Column(
                   children: [
-                    // info to the user'
-                    const InfoToTheUser(
-                        sectionInformation: AppString.infoAboutGalleys),
-    
                     // yearly gallary
                     GridView.builder(
                         shrinkWrap: true,

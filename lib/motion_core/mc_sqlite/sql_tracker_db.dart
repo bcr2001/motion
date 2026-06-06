@@ -4,6 +4,7 @@ import 'package:motion/motion_core/mc_sql_table/main_table.dart';
 import 'package:motion/motion_core/mc_sql_table/sub_table.dart';
 import 'package:motion/motion_core/mc_sqlite/database_constants.dart';
 import 'package:motion/motion_core/mc_sqlite/database_error.dart';
+import 'package:motion/motion_core/mc_sqlite/sql_date_range.dart';
 import 'package:motion/motion_core/mc_sqlite/tracker_database_schema.dart';
 import 'package:motion/motion_core/mc_sqlite/xp_policy.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
@@ -266,13 +267,14 @@ class TrackerDatabaseHelper {
       }
 
       final db = await database;
+      final yearRange = SqlDateRange.year(currentYear);
 
       // number of days
       final resultGNOD = await db.rawQuery('''
         SELECT COUNT(DISTINCT date) AS NumberOfDays
         FROM main_category
-        WHERE currentLoggedInUser = ? AND strftime('%Y', date) = ?
-      ''', [currentUser, currentYear]);
+        WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
+      ''', [currentUser, ...yearRange.args]);
 
       // check if the result is empty
       if (resultGNOD.isNotEmpty) {
@@ -294,13 +296,14 @@ class TrackerDatabaseHelper {
       {required String currentUser, required String currentYear}) async {
     try {
       final db = await database;
+      final yearRange = SqlDateRange.year(currentYear);
 
       // number of days
       final resultGNODY = await db.rawQuery('''
-      SELECT COUNT(date) AS NumberOfDays
+      SELECT COUNT(DISTINCT date) AS NumberOfDays
       FROM main_category
-      WHERE currentLoggedInUser = ? AND str("YYYY", date) = ?
-    ''', [currentUser, currentYear]);
+      WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
+    ''', [currentUser, ...yearRange.args]);
 
       // check if the result is empty
       if (resultGNODY.isNotEmpty) {
@@ -381,6 +384,7 @@ class TrackerDatabaseHelper {
       String currentUser, bool isUnaccounted, String currentYear) async {
     try {
       final db = await database;
+      final yearRange = SqlDateRange.year(currentYear);
 
       final query = isUnaccounted
           ? '''
@@ -388,17 +392,17 @@ class TrackerDatabaseHelper {
         COALESCE(SUM(selfDevelopment), 0) + COALESCE(SUM(sleep), 0))
         AS EntireTotalResult
         FROM main_category
-        WHERE currentLoggedInUser = ? AND strftime('%Y', date) = ?
+        WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
         '''
           : '''
         SELECT COALESCE(SUM(education), 0) + COALESCE(SUM(work), 0) + COALESCE(SUM(skills), 0)
         + COALESCE(SUM(entertainment), 0) + COALESCE(SUM(selfDevelopment), 0)
         + COALESCE(SUM(sleep), 0) AS EntireTotalResult
         FROM main_category
-        WHERE currentLoggedInUser = ? AND strftime('%Y', date) = ?
+        WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
         ''';
 
-      final resultETMCT = await db.rawQuery(query, [currentUser, currentYear]);
+      final resultETMCT = await db.rawQuery(query, [currentUser, ...yearRange.args]);
 
       if (resultETMCT.isNotEmpty) {
         final totalETMCT = resultETMCT.first["EntireTotalResult"];
@@ -450,6 +454,7 @@ class TrackerDatabaseHelper {
       {required String currentUser, required String year}) async {
     try {
       final db = await database;
+      final yearRange = SqlDateRange.year(year);
 
       final resultMDAUA = await db.rawQuery('''
           SELECT  strftime('%m', date) AS Month,
@@ -462,9 +467,9 @@ class TrackerDatabaseHelper {
           + COALESCE(SUM(selfDevelopment), 0) +
           COALESCE(SUM(sleep), 0)))/60 AS Unaccounted
       FROM main_category
-      WHERE currentLoggedInUser = ? AND strftime('%Y', date) = ?
+      WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
       GROUP BY Month
-        ''', [currentUser, year]);
+        ''', [currentUser, ...yearRange.args]);
 
       return resultMDAUA;
     } catch (e, stackTrace) {
@@ -655,6 +660,7 @@ class TrackerDatabaseHelper {
       {required String currentUser, required String year}) async {
     try {
       final db = await database;
+      final yearRange = SqlDateRange.year(year);
 
       final resultYTFAMC = await db.rawQuery('''
         SELECT
@@ -666,9 +672,9 @@ class TrackerDatabaseHelper {
           ROUND(COALESCE(SUM(selfDevelopment) / 60.0, 0), 2) AS selfDevelopment,
           ROUND(COALESCE(SUM(sleep) / 60.0, 0), 2) AS sleep
         FROM main_category
-        WHERE currentLoggedInUser = ? AND strftime('%Y', date) = ?
+        WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
         GROUP BY Month;
-        ''', [currentUser, year]);
+        ''', [currentUser, ...yearRange.args]);
 
       return resultYTFAMC;
     } catch (e, stackTrace) {
@@ -683,6 +689,7 @@ class TrackerDatabaseHelper {
       bool getEntireIntensity = true}) async {
     try {
       final db = await database;
+      final yearRange = year.isEmpty ? null : SqlDateRange.year(year);
 
       final resultDAAI = getEntireIntensity ? await db.rawQuery('''
             SELECT date,
@@ -712,10 +719,10 @@ class TrackerDatabaseHelper {
                   END AS intensity
             FROM subcategory
             WHERE currentLoggedInUser = ?
-              AND (strftime("%Y", date) = ? OR date LIKE ?)
+              AND date BETWEEN ? AND ?
             GROUP BY date
 
-        ''', [currentUser, year, '%/$year']);
+        ''', [currentUser, ...yearRange!.args]);
 
       return resultDAAI;
     } catch (e, stackTrace) {
@@ -857,6 +864,35 @@ class TrackerDatabaseHelper {
     } catch (e, stackTrace) {
       logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
+  }
+
+  Future<Map<String, double>> getSubcategoryTotalsForDate({
+    required String currentDate,
+    required String currentUser,
+  }) async {
+    try {
+      final db = await database;
+
+      final result = await db.rawQuery('''
+        SELECT ${MotionDbColumns.subcategoryName},
+               COALESCE(SUM(${MotionDbColumns.timeSpent}), 0) AS total
+        FROM ${MotionDbTables.subcategory}
+        WHERE ${MotionDbColumns.date} = ?
+          AND ${MotionDbColumns.currentLoggedInUser} = ?
+        GROUP BY ${MotionDbColumns.subcategoryName}
+      ''', [currentDate, currentUser]);
+
+      return {
+        for (final row in result)
+          row[MotionDbColumns.subcategoryName].toString():
+              _readDouble(row['total']),
+      };
+    } catch (e, stackTrace) {
+      logDatabaseError(
+          "TrackerDatabaseHelper.getSubcategoryTotalsForDate", e, stackTrace);
+    }
+
+    return {};
   }
 
   // gets the total time spent on all subcategories for an entire month
@@ -1022,6 +1058,13 @@ class TrackerDatabaseHelper {
     return end.difference(start).inDays + 1;
   }
 
+  static double _readDouble(Object? value) {
+    final parsed = value;
+    if (parsed is int) return parsed.toDouble();
+    if (parsed is double) return parsed;
+    return double.tryParse(parsed?.toString() ?? '') ?? 0.0;
+  }
+
   // calculates and returns the total time spent on a particular subcategory
   Future<double> getTotalTimeSpentPerSubcategory(
       String currentDate, String currentUser, String subcategoryName) async {
@@ -1156,11 +1199,12 @@ class TrackerDatabaseHelper {
   Future<List<ExperiencePoints>> getAllExperiencePoints(
       {required String date}) async {
     final db = await database;
+    final yearRange = SqlDateRange.year(date);
     final result = await db.rawQuery('''
       SELECT *
       FROM experience_points
-      WHERE strftime('%Y', date) = ?;
-      ''', [date]);
+      WHERE date BETWEEN ? AND ?;
+      ''', yearRange.args);
 
     return result.map((map) => ExperiencePoints.fromMap(map)).toList();
   }
@@ -1209,6 +1253,7 @@ class TrackerDatabaseHelper {
       {required String currentUser, required String currentYear}) async {
     try {
       final db = await database;
+      final yearRange = SqlDateRange.year(currentYear);
 
       final resultEPES = await db.rawQuery('''
           SELECT ROUND(
@@ -1219,8 +1264,8 @@ class TrackerDatabaseHelper {
             ) / COUNT(DISTINCT date)) * 100.0 / ${MotionXpPolicy.maxDailyXp}, 2
           ) AS efficiencyScore
           FROM experience_points
-          WHERE currentLoggedInUser = ? AND strftime('%Y', date) = ?
-      ''', [currentUser, currentYear]);
+          WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
+      ''', [currentUser, ...yearRange.args]);
 
       if (resultEPES.isNotEmpty) {
         // first row and column
@@ -1293,6 +1338,7 @@ class TrackerDatabaseHelper {
       String? year}) async {
     try {
       final db = await database;
+      final yearRange = year == null ? null : SqlDateRange.year(year);
 
       final resultGTXP = isEntire ? await db.rawQuery("""
         SELECT (COALESCE(SUM(educationXP), 0) + COALESCE(SUM(workXP), 0) + COALESCE(SUM(skillsXP), 0) +
@@ -1305,8 +1351,8 @@ class TrackerDatabaseHelper {
                 COALESCE(SUM(sdXP), 0) +
                 COALESCE(SUM(sleepXP), 0)) AS entireTotalXP
         FROM experience_points
-        WHERE currentLoggedInUser = ? AND strftime('%Y', date) = ?
-          """, [currentUser, year]);
+        WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
+          """, [currentUser, ...yearRange!.args]);
 
       if (resultGTXP.isNotEmpty) {
         // first row and column
@@ -1322,6 +1368,33 @@ class TrackerDatabaseHelper {
     } catch (e, stackTrace) {
       logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
+  }
+
+  Future<int> getYearExperiencePointDays({
+    required String currentUser,
+    required String year,
+  }) async {
+    try {
+      final db = await database;
+      final yearRange = SqlDateRange.year(year);
+
+      final result = await db.rawQuery('''
+        SELECT COUNT(DISTINCT date) AS trackedDays
+        FROM experience_points
+        WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
+      ''', [currentUser, ...yearRange.args]);
+
+      if (result.isEmpty) return 0;
+
+      final trackedDays = result.first['trackedDays'];
+      if (trackedDays is int) return trackedDays;
+      return int.tryParse(trackedDays?.toString() ?? '') ?? 0;
+    } catch (e, stackTrace) {
+      logDatabaseError(
+          "TrackerDatabaseHelper.getYearExperiencePointDays", e, stackTrace);
+    }
+
+    return 0;
   }
 
   // Gets the efficiency score for the selected date
@@ -1362,6 +1435,7 @@ class TrackerDatabaseHelper {
       required String year}) async {
     try {
       final db = await database;
+      final yearRange = SqlDateRange.year(year);
 
       final resultMALPM = getMostProductiveMonth ? await db.rawQuery("""
           SELECT CASE
@@ -1385,10 +1459,10 @@ class TrackerDatabaseHelper {
                     COALESCE(SUM(educationXP), 0) + COALESCE(SUM(workXP), 0) + COALESCE(SUM(skillsXP), 0) +
                     COALESCE(SUM(sdXP), 0) + COALESCE(SUM(sleepXP), 0) AS totalMostXP
               FROM experience_points
-              WHERE currentLoggedInUser = ? AND strftime('%Y', date) = ?
+              WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
               GROUP BY month_num
           ) AS totalMostXP
-        """, [currentUser, year]) : await db.rawQuery("""
+        """, [currentUser, ...yearRange.args]) : await db.rawQuery("""
         SELECT CASE
                   WHEN month_num = 1 THEN 'January'
                   WHEN month_num = 2 THEN 'February'
@@ -1410,10 +1484,10 @@ class TrackerDatabaseHelper {
                   COALESCE(SUM(educationXP), 0) + COALESCE(SUM(workXP), 0) + COALESCE(SUM(skillsXP), 0) +
                   COALESCE(SUM(sdXP), 0) + COALESCE(SUM(sleepXP), 0) AS totalLeastXP
             FROM experience_points
-            WHERE currentLoggedInUser = ? AND strftime('%Y', date) = ?
+            WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
             GROUP BY month_num
         ) AS totalLeastXP
-          """, [currentUser, year]);
+          """, [currentUser, ...yearRange.args]);
       return resultMALPM;
     } catch (e, stackTrace) {
       logDatabaseError("TrackerDatabaseHelper", e, stackTrace);

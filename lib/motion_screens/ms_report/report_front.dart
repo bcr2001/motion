@@ -22,31 +22,31 @@ class MostAndLeastTrackedMaincategorySection extends StatelessWidget {
     return MLTitleAndCard(
         mlTitle: AppString.mainCategoryTitle,
         cardContent: Card(
-          child: SingleChildScrollView(
-            child: Padding(
-                padding: const EdgeInsets.only(top: 10, bottom: 14),
-                child: Consumer3<FirstAndLastDay, UserUidProvider,
-                    MainCategoryTrackerProvider>(
-                  builder: (context, day, user, main, child) {
-                    // first and last day of the month
-                    String firstDayOfMonth = day.firstDay;
-                    String lastDayOfMonth = day.lastDay;
+          child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+              child: Consumer3<FirstAndLastDay, UserUidProvider,
+                  MainCategoryTrackerProvider>(
+                builder: (context, day, user, main, child) {
+                  // first and last day of the month
+                  String firstDayOfMonth = day.firstDay;
+                  String lastDayOfMonth = day.lastDay;
 
-                    // currently logged in user
-                    final currentLoggedInUser = user.userUid;
-                    if (currentLoggedInUser == null) {
-                      return userLoadingIndicator();
-                    }
+                  // currently logged in user
+                  final currentLoggedInUser = user.userUid;
+                  if (currentLoggedInUser == null) {
+                    return userLoadingIndicator();
+                  }
 
-                    // the number of days in the current month
-                    // used to get the average hours per day
-                    int numberOfDaysInCurrentMonth = day.days;
+                  // the number of days in the current month
+                  // used to get the average hours per day
+                  int numberOfDaysInCurrentMonth = day.days;
 
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        // most tracked main category
-                        MostAndLeastTrackedResult(
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // most tracked main category
+                      Expanded(
+                        child: MostAndLeastTrackedResult(
                             resultIcon: Icons.line_axis,
                             resultIconColor: Colors.green,
                             sectionTitle: AppString.mostTrackedTitle,
@@ -57,9 +57,13 @@ class MostAndLeastTrackedMaincategorySection extends StatelessWidget {
                                     lastDay: lastDayOfMonth,
                                     currentUser: currentLoggedInUser,
                                     isMost: true)),
+                      ),
 
-                        // least tracked main category
-                        MostAndLeastTrackedResult(
+                      const SizedBox(width: 22),
+
+                      // least tracked main category
+                      Expanded(
+                        child: MostAndLeastTrackedResult(
                             resultIcon: Icons.line_axis,
                             resultIconColor: Colors.red,
                             sectionTitle: AppString.leastTrackedTitle,
@@ -70,11 +74,11 @@ class MostAndLeastTrackedMaincategorySection extends StatelessWidget {
                                     lastDay: lastDayOfMonth,
                                     currentUser: currentLoggedInUser,
                                     isMost: false)),
-                      ],
-                    );
-                  },
-                )),
-          ),
+                      ),
+                    ],
+                  );
+                },
+              )),
         ));
   }
 }
@@ -89,30 +93,30 @@ class MostAndLeastTrackedSubcategorySection extends StatelessWidget {
     return MLTitleAndCard(
         mlTitle: AppString.subcategoryTitle,
         cardContent: Card(
-          child: SingleChildScrollView(
-            child: Padding(
-                padding: const EdgeInsets.only(top: 10, bottom: 14),
-                child: Consumer3<FirstAndLastDay, UserUidProvider,
-                    SubcategoryTrackerDatabaseProvider>(
-                  builder: (context, day, user, sub, child) {
-                    // first and last day of the month
-                    String firstDayOfMonth = day.firstDay;
-                    String lastDayOfMonth = day.lastDay;
+          child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+              child: Consumer3<FirstAndLastDay, UserUidProvider,
+                  SubcategoryTrackerDatabaseProvider>(
+                builder: (context, day, user, sub, child) {
+                  // first and last day of the month
+                  String firstDayOfMonth = day.firstDay;
+                  String lastDayOfMonth = day.lastDay;
 
-                    // currently logged in user
-                    final currentLoggedInUser = user.userUid;
-                    if (currentLoggedInUser == null) {
-                      return userLoadingIndicator();
-                    }
+                  // currently logged in user
+                  final currentLoggedInUser = user.userUid;
+                  if (currentLoggedInUser == null) {
+                    return userLoadingIndicator();
+                  }
 
-                    // number of days in the current month
-                    int numberOfDaysInCurrentMonth = day.days;
+                  // number of days in the current month
+                  int numberOfDaysInCurrentMonth = day.days;
 
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        // most tracked subcategory
-                        MostAndLeastTrackedResult(
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // most tracked subcategory
+                      Expanded(
+                        child: MostAndLeastTrackedResult(
                             resultIcon: Icons.line_axis,
                             resultIconColor: Colors.green,
                             sectionTitle: AppString.mostTrackedTitle,
@@ -122,9 +126,13 @@ class MostAndLeastTrackedSubcategorySection extends StatelessWidget {
                                 lastDay: lastDayOfMonth,
                                 currentUser: currentLoggedInUser,
                                 isMost: true)),
+                      ),
 
-                        // least tracked subcategory
-                        MostAndLeastTrackedResult(
+                      const SizedBox(width: 22),
+
+                      // least tracked subcategory
+                      Expanded(
+                        child: MostAndLeastTrackedResult(
                             resultIcon: Icons.line_axis,
                             resultIconColor: Colors.red,
                             sectionTitle: AppString.leastTrackedTitle,
@@ -134,11 +142,11 @@ class MostAndLeastTrackedSubcategorySection extends StatelessWidget {
                                 lastDay: lastDayOfMonth,
                                 currentUser: currentLoggedInUser,
                                 isMost: false)),
-                      ],
-                    );
-                  },
-                )),
-          ),
+                      ),
+                    ],
+                  );
+                },
+              )),
         ));
   }
 }

@@ -1,3 +1,5 @@
+import 'package:motion/motion_core/mc_sqlite/xp_policy.dart';
+
 enum EfsBadgeLevel {
   timeNovice,
   focusedBeginner,
@@ -78,6 +80,117 @@ class EfsBadgePolicy {
     return badges.firstWhere(
       (badge) => badge.includes(normalizedScore),
       orElse: () => badges.first,
+    );
+  }
+
+  static EfsBadge? nextBadgeForScore(double score) {
+    final normalizedScore = score.clamp(0, 100).toDouble();
+
+    for (final badge in badges) {
+      if (badge.minimumScore > normalizedScore) {
+        return badge;
+      }
+    }
+
+    return null;
+  }
+
+  static NextBadgeProgress nextBadgeProgress({
+    required double currentScore,
+    required int currentYearXp,
+    required int trackedDays,
+    DateTime? today,
+  }) {
+    final normalizedScore = currentScore.clamp(0, 100).toDouble();
+    final currentBadge = badgeForScore(normalizedScore);
+    final nextBadge = nextBadgeForScore(normalizedScore);
+
+    if (nextBadge == null) {
+      return NextBadgeProgress.topBadge(
+        currentBadge: currentBadge,
+        currentScore: normalizedScore,
+      );
+    }
+
+    final bandSize = nextBadge.minimumScore - currentBadge.minimumScore;
+    final progress = bandSize <= 0
+        ? 1.0
+        : ((normalizedScore - currentBadge.minimumScore) / bandSize)
+            .clamp(0.0, 1.0)
+            .toDouble();
+
+    final currentDate = today ?? DateTime.now();
+    final daysRemaining = _daysRemainingInYear(currentDate);
+    final totalScoredDays = trackedDays + daysRemaining;
+    final targetYearXp = ((nextBadge.minimumScore / 100) *
+            MotionXpPolicy.maxDailyXp *
+            totalScoredDays)
+        .ceil();
+    final xpGap = (targetYearXp - currentYearXp).clamp(0, 1 << 31).toInt();
+    final averageDailyXp = daysRemaining == 0 ? 0.0 : xpGap / daysRemaining;
+
+    return NextBadgeProgress(
+      currentBadge: currentBadge,
+      nextBadge: nextBadge,
+      currentScore: normalizedScore,
+      targetScore: nextBadge.minimumScore,
+      progress: progress,
+      xpGap: xpGap,
+      daysRemaining: daysRemaining,
+      averageDailyXp: averageDailyXp,
+      isTopBadge: false,
+      isAttainableThisYear: averageDailyXp <= MotionXpPolicy.maxDailyXp,
+    );
+  }
+
+  static int _daysRemainingInYear(DateTime date) {
+    final today = DateTime(date.year, date.month, date.day);
+    final endOfYear = DateTime(date.year, 12, 31);
+    if (today.isAfter(endOfYear)) return 0;
+    return endOfYear.difference(today).inDays + 1;
+  }
+}
+
+class NextBadgeProgress {
+  final EfsBadge currentBadge;
+  final EfsBadge? nextBadge;
+  final double currentScore;
+  final double targetScore;
+  final double progress;
+  final int xpGap;
+  final int daysRemaining;
+  final double averageDailyXp;
+  final bool isTopBadge;
+  final bool isAttainableThisYear;
+
+  const NextBadgeProgress({
+    required this.currentBadge,
+    required this.nextBadge,
+    required this.currentScore,
+    required this.targetScore,
+    required this.progress,
+    required this.xpGap,
+    required this.daysRemaining,
+    required this.averageDailyXp,
+    required this.isTopBadge,
+    required this.isAttainableThisYear,
+  });
+
+  factory NextBadgeProgress.topBadge({
+    required EfsBadge currentBadge,
+    required double currentScore,
+  }) {
+    return NextBadgeProgress(
+      currentBadge: currentBadge,
+      nextBadge: null,
+      currentScore: currentScore,
+      targetScore: currentBadge.maximumScore,
+      progress: 1.0,
+      xpGap: 0,
+      daysRemaining: 0,
+      averageDailyXp: 0,
+      isTopBadge: true,
+      isAttainableThisYear: true,
     );
   }
 }
