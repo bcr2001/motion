@@ -31,7 +31,7 @@ class AppString {
   // App bar titles
   static const String statsRouteTitle = "Analytics Summary";
   static const String motionRouteTitle = "Track";
-  static const String logOutTitle = "Log out";
+  static const String logOutTitle = "Log Out";
   static const String cancelTitle = "Cancel";
   static const String settingsTitle = "Settings";
   static const String tipsTitle = "FAQ";

@@ -5,6 +5,7 @@ import 'package:motion/motion_core/motion_providers/date_pvd/current_year_pvd.da
 import 'package:motion/motion_core/motion_providers/date_pvd/first_and_last_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/assigner_pvd.dart';
+import 'package:motion/motion_core/motion_providers/sql_pvd/experience_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_reusable/date_re/year_progress.dart';
 import 'package:motion/motion_reusable/db_re/sub_logic.dart';
@@ -553,8 +554,8 @@ class _SubcategoryAndCurrentDayTotalsState
                         style: AppTextStyle.tileElementTextStyle(),
                       )),
                     ),
-                    onTap: () {
-                      Navigator.push(
+                    onTap: () async {
+                      await Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => ManualTimeRecordingRoute(
@@ -563,6 +564,11 @@ class _SubcategoryAndCurrentDayTotalsState
                           ),
                         ),
                       );
+                      if (context.mounted) {
+                        context
+                            .read<ExperiencePointTableProvider>()
+                            .refreshExperiencePointViews();
+                      }
                     },
                   );
                 },

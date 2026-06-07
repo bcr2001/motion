@@ -253,6 +253,184 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
     );
   }
 
+  Widget _todaysBlocksHeader({
+    required int blockCount,
+    required double totalMinutes,
+  }) {
+    final convertedTotal = convertMinutesToTime(totalMinutes);
+
+    return Row(
+      children: [
+        Container(
+          height: 36,
+          width: 36,
+          decoration: BoxDecoration(
+            color: AppColor.blueMainColor.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(11),
+          ),
+          child: const Icon(
+            Icons.event_note_outlined,
+            color: AppColor.blueMainColor,
+            size: 19,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                AppString.blockTitle,
+                style: AppTextStyle.subSectionTextStyle(
+                  fontsize: 15,
+                  fontweight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                "$blockCount ${blockCount == 1 ? "block" : "blocks"} | $convertedTotal",
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyle.subSectionTextStyle(
+                  fontsize: 12,
+                  fontweight: FontWeight.normal,
+                  color: Colors.blueGrey,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _trackedBlockTile({
+    required int index,
+    required String convertedTimeRecorded,
+    required VoidCallback onDelete,
+  }) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final borderColor =
+        isDarkMode ? Colors.white.withValues(alpha: 0.08) : Colors.black12;
+    final tileColor = isDarkMode
+        ? Colors.white.withValues(alpha: 0.03)
+        : Colors.black.withValues(alpha: 0.025);
+
+    return Container(
+      margin: const EdgeInsets.only(top: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: tileColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor),
+      ),
+      child: Row(
+        children: [
+          Container(
+            height: 28,
+            width: 28,
+            decoration: BoxDecoration(
+              color: AppColor.blueMainColor.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(9),
+            ),
+            child: Center(
+              child: Text(
+                "${index + 1}",
+                style: AppTextStyle.subSectionTextStyle(
+                  fontsize: 11,
+                  fontweight: FontWeight.w800,
+                  color: AppColor.blueMainColor,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              convertedTimeRecorded,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyle.subSectionTextStyle(
+                fontsize: 15,
+                fontweight: FontWeight.w700,
+              ),
+            ),
+          ),
+          IconButton(
+            onPressed: onDelete,
+            visualDensity: VisualDensity.compact,
+            icon: const Icon(
+              Icons.delete_outline,
+              size: 18,
+              color: Colors.redAccent,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _todaysBlocksPanel({
+    required List<Subcategories> blocks,
+    required SubcategoryTrackerDatabaseProvider subs,
+  }) {
+    final xpProvider = context.read<ExperiencePointTableProvider>();
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final borderColor =
+        isDarkMode ? Colors.white.withValues(alpha: 0.10) : Colors.black12;
+    final panelColor = isDarkMode
+        ? AppColor.darkModeContentWidget
+        : AppColor.lightModeContentWidget;
+    final totalMinutes = blocks.fold<double>(
+        0.0, (previousValue, item) => previousValue + item.timeSpent);
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: panelColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: borderColor),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _todaysBlocksHeader(
+            blockCount: blocks.length,
+            totalMinutes: totalMinutes,
+          ),
+          if (blocks.isEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 14),
+              child: Text(
+                "No time blocks added yet",
+                style: AppTextStyle.subSectionTextStyle(
+                  fontsize: 12,
+                  fontweight: FontWeight.normal,
+                  color: Colors.blueGrey,
+                ),
+              ),
+            )
+          else
+            ...blocks.asMap().entries.map((entry) {
+              final block = entry.value;
+              final convertedTimeRecorded =
+                  convertMinutesToTime(block.timeSpent);
+
+              return _trackedBlockTile(
+                index: entry.key,
+                convertedTimeRecorded: convertedTimeRecorded,
+                onDelete: () async {
+                  await subs.deleteSubcategoryEntry(block.id!);
+                  xpProvider.refreshExperiencePointViews();
+                },
+              );
+            }),
+        ],
+      ),
+    );
+  }
+
   // alert dialog that is displayed when the add icon is clicked
   void _showTimeAlertDialog(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
@@ -396,8 +574,9 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                                       m: minuteController.text,
                                       s: secondController.text));
 
-                              subTrackerProvider
+                              await subTrackerProvider
                                   .insertIntoSubcategoryTable(subcategory);
+                              xp.refreshExperiencePointViews();
                               navigationKey.currentState!.pop();
 
                               hourController.text = "";
@@ -451,50 +630,10 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
 
             return Container(
               margin: const EdgeInsets.only(top: 10),
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // todays blocks title
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16),
-                      child: Text(
-                        AppString.blockTitle,
-                        style: AppTextStyle.subSectionTextStyle(
-                            color: AppColor.accountedColor),
-                      ),
-                    ),
-
-                    // this list view generates all the time tracked
-                    // for a subcategory for a particular day
-                    ListView.builder(
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        itemCount: subsTrackedOnCurrentDay.length,
-                        itemBuilder: (BuildContext context, index) {
-                          final convertedTimeRecorded = convertMinutesToTime(
-                              subsTrackedOnCurrentDay[index].timeSpent);
-
-                          return ListTile(
-                            title: Text(
-                              convertedTimeRecorded,
-                              style: AppTextStyle.subSectionTextStyle(
-                                  fontsize: 16, color: Colors.blueGrey),
-                            ),
-                            trailing:
-                                // deletes entry in the subcategory table
-                                IconButton(
-                              onPressed: () {
-                                subs.deleteSubcategoryEntry(
-                                    subsTrackedOnCurrentDay[index].id!);
-                              },
-                              icon: const Icon(
-                                Icons.delete_outlined,
-                                size: 18,
-                              ),
-                            ),
-                          );
-                        })
-                  ]),
+              child: _todaysBlocksPanel(
+                blocks: subsTrackedOnCurrentDay,
+                subs: subs,
+              ),
             );
           }),
         ));

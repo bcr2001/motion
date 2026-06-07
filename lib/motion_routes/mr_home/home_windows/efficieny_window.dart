@@ -81,7 +81,7 @@ class EfficienyScoreSelectedDay extends StatelessWidget {
       }
 
       return _CachedFutureBuilder<int>(
-          cacheKey: 'daily-xp-$userUID-$selectedDay',
+          cacheKey: 'daily-xp-$userUID-$selectedDay-${xp.refreshKey}',
           futureFactory: () => xp.retrieveDailyExperiencePoints(
               currentUser: userUID, selectedDate: selectedDay),
           builder: (context, snapshot) {
@@ -122,7 +122,7 @@ class XPForTheCurrentDay extends StatelessWidget {
       }
 
       return _CachedFutureBuilder<int>(
-          cacheKey: 'today-xp-$currentUserUid-$today',
+          cacheKey: 'today-xp-$currentUserUid-$today-${xp.refreshKey}',
           futureFactory: () => xp.retrieveDailyExperiencePoints(
               currentUser: currentUserUid, selectedDate: today),
           builder: (context, snapshot) {
@@ -289,7 +289,8 @@ class EfficienyScoreSelectedYearOrMonth extends StatelessWidget {
 
       return getSelectedYearEfs
           ? _CachedFutureBuilder<double>(
-              cacheKey: 'selected-year-efs-$currentUserUid-$selectedYear',
+              cacheKey:
+                  'selected-year-efs-$currentUserUid-$selectedYear-${xp.refreshKey}',
               futureFactory: () => xp.retrieveYearExperiencePointsEfficiencyScore(
                   currentUser: currentUserUid, currentYear: selectedYear),
               builder: (context, snapshot) {
@@ -305,7 +306,7 @@ class EfficienyScoreSelectedYearOrMonth extends StatelessWidget {
               })
           : _CachedFutureBuilder<double>(
               cacheKey:
-                  'selected-month-efs-$currentUserUid-$firstDayOfMonth-$lastDayOfMonth',
+                  'selected-month-efs-$currentUserUid-$firstDayOfMonth-$lastDayOfMonth-${xp.refreshKey}',
               futureFactory: () => xp.retrieveMonthlyEfficiencyScore(
                   currentUser: currentUserUid,
                   firstDayOfMonth: firstDayOfMonth,
@@ -345,7 +346,7 @@ class EfficienyScoreWindow extends StatelessWidget {
 
       return getEntireScore
           ? _CachedFutureBuilder<double>(
-              cacheKey: 'entire-efs-$currentUser',
+              cacheKey: 'entire-efs-$currentUser-${xp.refreshKey}',
               futureFactory: () => xp.retrieveExperiencePointsEfficiencyScore(
                   currentUser: currentUser),
               builder: (context, snapshot) {
@@ -361,7 +362,7 @@ class EfficienyScoreWindow extends StatelessWidget {
                 }
               })
           : _CachedFutureBuilder<double>(
-              cacheKey: 'year-efs-$currentUser-$currentYear',
+              cacheKey: 'year-efs-$currentUser-$currentYear-${xp.refreshKey}',
               futureFactory: () => xp.retrieveYearExperiencePointsEfficiencyScore(
                   currentUser: currentUser, currentYear: currentYear),
               builder: (context, snapshot) {
@@ -433,7 +434,8 @@ class CurrentYearEFSDisplay extends StatelessWidget {
           final String currentYear = year.currentYear;
 
           return _CachedFutureBuilder<int>(
-              cacheKey: 'total-xp-$currentUser-$isEntire-$currentYear',
+              cacheKey:
+                  'total-xp-$currentUser-$isEntire-$currentYear-${xps.refreshKey}',
               futureFactory: () => xps.retrieveTotalXP(
                   currentUser: currentUser,
                   isEntire: isEntire,
@@ -521,7 +523,8 @@ class CurrentYearEFSDisplay extends StatelessWidget {
       final currentYear = year.currentYear;
 
       return _CachedFutureBuilder<NextBadgeProgress>(
-          cacheKey: 'next-badge-progress-$currentUser-$currentYear-$score',
+          cacheKey:
+              'next-badge-progress-$currentUser-$currentYear-$score-${xp.refreshKey}',
           futureFactory: () => _loadNextBadgeProgress(
                 xpProvider: xp,
                 currentUser: currentUser,

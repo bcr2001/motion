@@ -5,12 +5,10 @@ import 'package:motion/motion_core/motion_providers/date_pvd/current_date_pvd.da
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/assigner_pvd.dart';
 import 'package:motion/motion_core/motion_providers/dropDown_pvd/drop_down_pvd.dart';
-import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_reusable/mu_reusable/user_validator.dart';
 import 'package:motion/motion_routes/mr_track/track_reusable/front_track.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
-import 'package:motion/motion_reusable/mu_reusable/user_reusable.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:provider/provider.dart';
@@ -32,6 +30,15 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
 
   // subcategory text editting controller
   TextEditingController subcategoryController = TextEditingController();
+
+  final List<String> _mainCategories = const [
+    AppString.educationMainCategory,
+    AppString.workMainCategory,
+    AppString.skillMainCategory,
+    AppString.entertainmentMainCategory,
+    AppString.selfDevelopmentMainCategory,
+    AppString.sleepMainCategory,
+  ];
 
   @override
   void dispose() {
@@ -58,37 +65,374 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
     );
   }
 
-  // list tile
-  ListTile _listTileBuilder({
-    required String tileTitle, // The title text for the ListTile
-    required int activeStatus, // The active status, typically 0 or 1
-    required Assigner item, // The Assigner item associated with the ListTile
-  }) {
-    // Determine the icon based on the activeStatus
-    Icon iconSelected = activeStatus == 0
-        ? const Icon(
-            Icons.check_box_outline_blank_rounded,
-            size: 20,
-          ) // Inactive icon
-        : const Icon(
-            Icons.check_box_outlined,
-            color: AppColor.blueMainColor,
-            size: 20, // Active icon with custom color
-          );
+  Color _categoryColor(String categoryName) {
+    if (categoryName == AppString.educationMainCategory) {
+      return AppColor.educationPieChartColor;
+    }
+    if (categoryName == AppString.workMainCategory) {
+      return AppColor.workPieChartColor;
+    }
+    if (categoryName == AppString.skillMainCategory) {
+      return AppColor.skillsPieChartColor;
+    }
+    if (categoryName == AppString.entertainmentMainCategory) {
+      return AppColor.entertainmentPieChartColor;
+    }
+    if (categoryName == AppString.selfDevelopmentMainCategory) {
+      return AppColor.selfDevelopmentPieChartColor;
+    }
+    return AppColor.sleepPieChartColor;
+  }
 
-    // Create a ListTile with the specified title, and active status icon
-    return ListTile(
-      title: Text(
-        tileTitle,
-        style: AppTextStyle.subSectionTextStyle(),
-      ), // Display the provided title text
-      trailing: IconButton(
-        onPressed: () async {
-          // Handle item press, potentially passing the associated item
-          await _handleItemPressed(context, item);
-        },
-        icon: iconSelected, // Display the determined icon
+  IconData _categoryIcon(String categoryName) {
+    if (categoryName == AppString.educationMainCategory) {
+      return Icons.school_outlined;
+    }
+    if (categoryName == AppString.workMainCategory) {
+      return Icons.work_outline;
+    }
+    if (categoryName == AppString.skillMainCategory) {
+      return Icons.psychology_outlined;
+    }
+    if (categoryName == AppString.entertainmentMainCategory) {
+      return Icons.movie_filter_outlined;
+    }
+    if (categoryName == AppString.selfDevelopmentMainCategory) {
+      return Icons.self_improvement_outlined;
+    }
+    return Icons.bedtime_outlined;
+  }
+
+  List<Assigner> _itemsForCategory({
+    required List<Assigner> items,
+    required String? user,
+    required String categoryName,
+  }) {
+    return items
+        .where((item) =>
+            item.currentLoggedInUser == user &&
+            item.mainCategoryName == categoryName &&
+            item.isArchive == 0)
+        .toList();
+  }
+
+  Widget _subcategoryTile(Assigner item) {
+    final isActive = item.isActive == 1;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final borderColor =
+        isDarkMode ? Colors.white.withValues(alpha: 0.08) : Colors.black12;
+    final tileColor = isActive
+        ? AppColor.blueMainColor.withValues(alpha: isDarkMode ? 0.12 : 0.08)
+        : Colors.transparent;
+    final statusColor = isActive ? AppColor.blueMainColor : Colors.blueGrey;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: tileColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor),
       ),
+      child: Row(
+        children: [
+          Icon(
+            isActive
+                ? Icons.radio_button_checked
+                : Icons.radio_button_unchecked,
+            color: statusColor,
+            size: 18,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              item.subcategoryName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyle.subSectionTextStyle(
+                fontsize: 14,
+                fontweight: isActive ? FontWeight.w700 : FontWeight.normal,
+              ),
+            ),
+          ),
+          Container(
+            height: 28,
+            constraints: const BoxConstraints(minWidth: 62),
+            decoration: BoxDecoration(
+              color: statusColor.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(9),
+            ),
+            child: TextButton(
+              onPressed: () async => _handleItemPressed(context, item),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                foregroundColor: statusColor,
+              ),
+              child: Text(
+                isActive ? "Active" : "Off",
+                style: AppTextStyle.subSectionTextStyle(
+                  fontsize: 11,
+                  fontweight: FontWeight.w700,
+                  color: statusColor,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _categorySection({
+    required String categoryName,
+    required List<Assigner> categoryItems,
+  }) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final categoryColor = _categoryColor(categoryName);
+    final activeCount =
+        categoryItems.where((item) => item.isActive == 1).length;
+    final borderColor =
+        isDarkMode ? Colors.white.withValues(alpha: 0.10) : Colors.black12;
+    final panelColor = isDarkMode
+        ? AppColor.darkModeContentWidget
+        : AppColor.lightModeContentWidget;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 22),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: panelColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: borderColor),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Container(
+                height: 36,
+                width: 36,
+                decoration: BoxDecoration(
+                  color: categoryColor.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(11),
+                ),
+                child: Icon(
+                  _categoryIcon(categoryName),
+                  color: categoryColor,
+                  size: 19,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  categoryName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyle.subSectionTextStyle(
+                    fontsize: 15,
+                    fontweight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: categoryColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  "$activeCount/${categoryItems.length}",
+                  style: AppTextStyle.subSectionTextStyle(
+                    fontsize: 11,
+                    fontweight: FontWeight.w700,
+                    color: categoryColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          if (categoryItems.isEmpty)
+            Text(
+              "No subcategories yet",
+              style: AppTextStyle.subSectionTextStyle(
+                fontsize: 12,
+                fontweight: FontWeight.normal,
+                color: Colors.blueGrey,
+              ),
+            )
+          else
+            ...categoryItems.map(_subcategoryTile),
+        ],
+      ),
+    );
+  }
+
+  Widget _newSubcategoryHeader() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final helperTextColor = isDarkMode ? Colors.white60 : Colors.blueGrey;
+
+    return Row(
+      children: [
+        Container(
+          height: 38,
+          width: 38,
+          decoration: BoxDecoration(
+            color: AppColor.blueMainColor.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: const Icon(
+            Icons.add_task_outlined,
+            color: AppColor.blueMainColor,
+            size: 21,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            "Assign a subcategory to the main category it belongs to.",
+            style: AppTextStyle.subSectionTextStyle(
+              fontsize: 12,
+              fontweight: FontWeight.normal,
+              color: helperTextColor,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _dialogFieldPanel({
+    required Widget child,
+  }) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final borderColor =
+        isDarkMode ? Colors.white.withValues(alpha: 0.10) : Colors.black12;
+    final panelColor = isDarkMode
+        ? AppColor.darkModeContentWidget
+        : AppColor.lightModeContentWidget;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: panelColor,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: borderColor),
+      ),
+      child: child,
+    );
+  }
+
+  Widget _subcategoryNameField() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final fieldColor = isDarkMode
+        ? Colors.white.withValues(alpha: 0.04)
+        : Colors.black.withValues(alpha: 0.035);
+    final borderColor =
+        isDarkMode ? Colors.white.withValues(alpha: 0.10) : Colors.black12;
+
+    return TextFormField(
+      controller: subcategoryController,
+      cursorColor: AppColor.blueMainColor,
+      style: Theme.of(context).textTheme.bodyMedium,
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: fieldColor,
+        prefixIcon: const Icon(
+          Icons.label_outline,
+          color: AppColor.blueMainColor,
+          size: 20,
+        ),
+        hintText: AppString.trackTextFormFieldHintText,
+        hintStyle: AppTextStyle.subSectionTextStyle(
+          fontsize: 13,
+          fontweight: FontWeight.normal,
+          color: Colors.blueGrey,
+        ),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: borderColor),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide:
+              const BorderSide(color: AppColor.blueMainColor, width: 1.5),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.redAccent),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
+        ),
+      ),
+      validator: FormValidator.subcategoryValidator,
+    );
+  }
+
+  Widget _trackDialogActions({
+    required VoidCallback onCancel,
+    required VoidCallback onAdd,
+  }) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final borderColor =
+        isDarkMode ? Colors.white.withValues(alpha: 0.16) : Colors.black12;
+    final cancelTextColor = isDarkMode ? Colors.white70 : Colors.blueGrey;
+
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton(
+            onPressed: onCancel,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: cancelTextColor,
+              minimumSize: const Size(0, 44),
+              side: BorderSide(color: borderColor),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              AppString.trackCancelTextButton,
+              style: AppTextStyle.subSectionTextStyle(
+                fontsize: 12,
+                fontweight: FontWeight.w700,
+                color: cancelTextColor,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: ElevatedButton(
+            onPressed: onAdd,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColor.blueMainColor,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              minimumSize: const Size(0, 44),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              AppString.trackAddTextButton,
+              style: AppTextStyle.subSectionTextStyle(
+                fontsize: 12,
+                fontweight: FontWeight.w800,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -108,41 +452,42 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
           final mainCategoryProvider = mainCategory;
 
           return AlertDialogConst(
-            heightFactor: 0.30,
+            heightFactor: 0.324,
             screenHeight: screenHeight,
             screenWidth: screenWidth,
             alertDialogTitle: AppString.newAlertDialogTitle,
             alertDialogContent: Form(
               key: _formKey,
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // divider
-                  const Divider(),
+                  _newSubcategoryHeader(),
+
+                  const SizedBox(height: 16),
 
                   // main category drop down button
-                  const MyDropdownButton(
-                    isUpdate: false,
+                  _dialogFieldPanel(
+                    child: const MyDropdownButton(
+                      isUpdate: false,
+                      usePanelStyle: true,
+                    ),
                   ),
+
+                  const SizedBox(height: 12),
 
                   // subcategory name text field
-                  Padding(
-                    padding: const EdgeInsets.only(left: 5.0, right: 5.0),
-                    child: TextFormFieldBuilder(
-                        fieldTextEditingController: subcategoryController,
-                        fieldHintText: AppString.trackTextFormFieldHintText,
-                        fieldValidator: FormValidator.subcategoryValidator),
-                  ),
+                  _subcategoryNameField(),
+
+                  const SizedBox(height: 18),
 
                   // Cancel and Add Text Buttons
-                  CancelAddTextButtons(
-                    firstButtonName: AppString.trackCancelTextButton,
-                    secondButtonName: AppString.trackAddTextButton,
-                    onPressedFirst: () {
+                  _trackDialogActions(
+                    onCancel: () {
                       navigationKey.currentState!.pop();
                       mainCategoryProvider.changeSelectedValue(null);
                     },
-                    onPressedSecond: () {
+                    onAdd: () {
                       if (_formKey.currentState!.validate()) {
                         if (mainCategoryProvider.selectedValue == null) {
                           snackBarMessage(context,
@@ -198,125 +543,49 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
       ),
 
       // displays the alert dialog to add ne subcategories
-      floatingActionButton: floatingActionButton(context,
-          onPressed: () => _showTrackAlertDialog(context),
-          label: AppString.addItem,
-          icon: Icons.add),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _showTrackAlertDialog(context),
+        backgroundColor: AppColor.blueMainColor,
+        foregroundColor: Colors.white,
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        label: Text(
+          AppString.addItem,
+          style: AppTextStyle.subSectionTextStyle(
+            fontsize: 13,
+            fontweight: FontWeight.w800,
+            color: Colors.white,
+          ),
+        ),
+        icon: const Icon(Icons.add, color: Colors.white),
+      ),
 
-      body: Padding(
-          padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 85),
-          child: Consumer2<AssignerMainProvider, UserUidProvider>(
-            builder: (context, assignedList, userUiD, child) {
-              var items = assignedList.assignerItems;
-              var user = userUiD.userUid;
+      body: Consumer2<AssignerMainProvider, UserUidProvider>(
+        builder: (context, assignedList, userUiD, child) {
+          final items = assignedList.assignerItems;
+          final user = userUiD.userUid;
 
-              return ListView(
-                children: [
-                  // education category
-                  CardConstructor(
-                      cardTitle: AppString.educationMainCategory,
-                      cardListView: TrackListViewBuiler(
-                          itemCount: items.length,
-                          itemBuilder: (BuildContext context, index) {
-                            return items[index].currentLoggedInUser == user &&
-                                    items[index].mainCategoryName ==
-                                        AppString.educationMainCategory &&
-                                    items[index].isArchive == 0
-                                ? _listTileBuilder(
-                                    activeStatus: items[index].isActive,
-                                    tileTitle: items[index].subcategoryName,
-                                    item: items[index])
-                                : const SizedBox.shrink();
-                          })),
+          if (user == null) {
+            return userLoadingIndicator();
+          }
 
-                  // // skills category
-                  CardConstructor(
-                      cardTitle: AppString.workMainCategory,
-                      cardListView: TrackListViewBuiler(
-                          itemCount: items.length,
-                          itemBuilder: (BuildContext context, index) {
-                            return items[index].currentLoggedInUser == user &&
-                                    items[index].mainCategoryName ==
-                                        AppString.workMainCategory &&
-                                    items[index].isArchive == 0
-                                ? _listTileBuilder(
-                                    activeStatus: items[index].isActive,
-                                    tileTitle: items[index].subcategoryName,
-                                    item: items[index])
-                                : const SizedBox.shrink();
-                          })),
-
-                  // skills category
-                  CardConstructor(
-                      cardTitle: AppString.skillMainCategory,
-                      cardListView: TrackListViewBuiler(
-                          itemCount: items.length,
-                          itemBuilder: (BuildContext context, index) {
-                            return items[index].currentLoggedInUser == user &&
-                                    items[index].mainCategoryName ==
-                                        AppString.skillMainCategory &&
-                                    items[index].isArchive == 0
-                                ? _listTileBuilder(
-                                    activeStatus: items[index].isActive,
-                                    tileTitle: items[index].subcategoryName,
-                                    item: items[index])
-                                : const SizedBox.shrink();
-                          })),
-
-                  // entertainment category
-                  CardConstructor(
-                      cardTitle: AppString.entertainmentMainCategory,
-                      cardListView: TrackListViewBuiler(
-                          itemCount: items.length,
-                          itemBuilder: (BuildContext context, index) {
-                            return items[index].currentLoggedInUser == user &&
-                                    items[index].mainCategoryName ==
-                                        AppString.entertainmentMainCategory &&
-                                    items[index].isArchive == 0
-                                ? _listTileBuilder(
-                                    activeStatus: items[index].isActive,
-                                    tileTitle: items[index].subcategoryName,
-                                    item: items[index])
-                                : const SizedBox.shrink();
-                          })),
-
-                  // Self Development category
-                  CardConstructor(
-                      cardTitle: AppString.selfDevelopmentMainCategory,
-                      cardListView: TrackListViewBuiler(
-                          itemCount: items.length,
-                          itemBuilder: (BuildContext context, index) {
-                            return items[index].currentLoggedInUser == user &&
-                                    items[index].mainCategoryName ==
-                                        AppString.selfDevelopmentMainCategory &&
-                                    items[index].isArchive == 0
-                                ? _listTileBuilder(
-                                    activeStatus: items[index].isActive,
-                                    tileTitle: items[index].subcategoryName,
-                                    item: items[index])
-                                : const SizedBox.shrink();
-                          })),
-
-                  //sleep category
-                  CardConstructor(
-                      cardTitle: AppString.sleepMainCategory,
-                      cardListView: TrackListViewBuiler(
-                          itemCount: items.length,
-                          itemBuilder: (BuildContext context, index) {
-                            return items[index].currentLoggedInUser == user &&
-                                    items[index].mainCategoryName ==
-                                        AppString.sleepMainCategory &&
-                                    items[index].isArchive == 0
-                                ? _listTileBuilder(
-                                    activeStatus: items[index].isActive,
-                                    tileTitle: items[index].subcategoryName,
-                                    item: items[index])
-                                : const SizedBox.shrink();
-                          }))
-                ],
+          return ListView(
+            padding: const EdgeInsets.fromLTRB(10, 12, 10, 92),
+            children: _mainCategories.map((categoryName) {
+              return _categorySection(
+                categoryName: categoryName,
+                categoryItems: _itemsForCategory(
+                  items: items,
+                  user: user,
+                  categoryName: categoryName,
+                ),
               );
-            },
-          )),
+            }).toList(),
+          );
+        },
+      ),
     );
   }
 }

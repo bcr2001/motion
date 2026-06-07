@@ -6,6 +6,15 @@ import 'current_user_guard.dart';
 // EXPERIENCE POINT TABLE
 // handles database operations for the experience_points table
 class ExperiencePointTableProvider extends ChangeNotifier {
+  int _refreshKey = 0;
+
+  int get refreshKey => _refreshKey;
+
+  void refreshExperiencePointViews() {
+    _refreshKey++;
+    notifyListeners();
+  }
+
   /// Inserts an ExperiencePoints object into the database.
   ///
   /// This function delegates the insertion operation to the `insertExperiencePoint` method
@@ -18,6 +27,8 @@ class ExperiencePointTableProvider extends ChangeNotifier {
     await trackDbInstance.insertExperiencePoint(
       requireExperienceUser(experience),
     );
+
+    refreshExperiencePointViews();
   }
 
   /// Retrieves the average daily efficiency score for a specified user.

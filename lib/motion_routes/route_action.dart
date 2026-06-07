@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:motion/motion_core/mc_firebase/firebase_services.dart';
 import 'package:motion/motion_core/mc_firebase/google_services.dart';
-import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_screens/ms_settings/settings_page.dart';
 import 'package:motion/motion_screens/ms_tips/tips_page.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
+import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 
 import '../motion_screens/ms_report/report.dart';
@@ -42,6 +42,10 @@ class MotionActionButtons extends StatelessWidget {
 showAlertDialog(BuildContext context) {
   final screenHeight = MediaQuery.of(context).size.height;
   final screenWidth = MediaQuery.of(context).size.width;
+  final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+  final borderColor =
+      isDarkMode ? Colors.white.withValues(alpha: 0.16) : Colors.black12;
+  final cancelTextColor = isDarkMode ? Colors.white70 : Colors.blueGrey;
 
   showDialog(
       context: context,
@@ -50,44 +54,94 @@ showAlertDialog(BuildContext context) {
           screenHeight: screenHeight,
           screenWidth: screenWidth,
           widthFactor: 0.78,
-          heightFactor: 0.15,
+          heightFactor: 0.16,
           alertDialogTitle: AppString.logOutTitle,
-          alertDialogContent: Padding(
-            padding: const EdgeInsets.only(right: 18, left: 18),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // divider
-                const Divider(),
-
-                // log out query
-                Text(
-                  AppString.logOutQuestion,
-                  style: AppTextStyle.subSectionTextStyle(fontsize: 15, fontweight: FontWeight.normal),
-                ),
-
-                // Custom widget for displaying two buttons: cancel and log out
-                CancelAddTextButtons(
-                  // Callback function when the "Cancel" button is pressed
-                  onPressedFirst: () => Navigator.of(context).pop(),
-
-                  // Callback function when the "Log Out" button is pressed
-                  onPressedSecond: () {
-                    Navigator.pop(context); // Close the dialog or screen
-                    AuthServices.signOutUser(context); // Sign out the user
-                    GoogleAuthService
-                        .signOutGoogle(); // Sign out from Google (assuming it's a Google sign-in)
-                  },
-
-                  // Text displayed on the "Cancel" button
-                  firstButtonName: AppString.cancelTitle,
-
-                  // Text displayed on the "Log Out" button
-                  secondButtonName: AppString.logOutTitle,
-                )
-              ],
-            ),
+          alertDialogContent: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    height: 38,
+                    width: 38,
+                    decoration: BoxDecoration(
+                      color: Colors.redAccent.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.logout_rounded,
+                      color: Colors.redAccent,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      AppString.logOutQuestion,
+                      style: AppTextStyle.subSectionTextStyle(
+                        fontsize: 14,
+                        fontweight: FontWeight.normal,
+                        color: cancelTextColor,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 22),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: cancelTextColor,
+                        minimumSize: const Size(0, 44),
+                        side: BorderSide(color: borderColor),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        AppString.cancelTitle,
+                        style: AppTextStyle.subSectionTextStyle(
+                          fontsize: 12,
+                          fontweight: FontWeight.w700,
+                          color: cancelTextColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        AuthServices.signOutUser(context);
+                        GoogleAuthService.signOutGoogle();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.redAccent,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        minimumSize: const Size(0, 44),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        AppString.logOutTitle,
+                        style: AppTextStyle.subSectionTextStyle(
+                          fontsize: 12,
+                          fontweight: FontWeight.w800,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         );
       });
@@ -98,23 +152,67 @@ class MainRoutePopUpMenu extends StatelessWidget {
   const MainRoutePopUpMenu({super.key});
 
   // popup menu item builder
-  PopupMenuItem _popUpItemBuilder(
-      {required String itemName, required String value}) {
-    return PopupMenuItem(
-        value: value,
-        child: Container(
-          width: 100,
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
-          child: Text(itemName),
-        ));
+  PopupMenuItem<String> _popUpItemBuilder({
+    required BuildContext context,
+    required String itemName,
+    required String value,
+    required IconData icon,
+    required Color itemColor,
+  }) {
+    return PopupMenuItem<String>(
+      value: value,
+      height: 48,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: SizedBox(
+        width: 158,
+        child: Row(
+          children: [
+            Container(
+              height: 30,
+              width: 30,
+              decoration: BoxDecoration(
+                color: itemColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(9),
+              ),
+              child: Icon(
+                icon,
+                size: 17,
+                color: itemColor,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                itemName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyle.subSectionTextStyle(
+                  fontsize: 13,
+                  fontweight: FontWeight.w700,
+                  color: Theme.of(context).textTheme.bodyMedium?.color ??
+                      Colors.blueGrey,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return PopupMenuButton(
+    return PopupMenuButton<String>(
         padding: EdgeInsets.zero,
         color: Theme.of(context).popupMenuTheme.color,
-        onSelected: (dynamic value) {
+        elevation: 8,
+        offset: const Offset(0, 10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+        ),
+        icon: const Icon(Icons.more_vert_rounded),
+        tooltip: "Menu",
+        onSelected: (value) {
           // Change the parameter type to dynamic
           if (value == AppString.logOutValue) {
             showAlertDialog(context);
@@ -134,16 +232,30 @@ class MainRoutePopUpMenu extends StatelessWidget {
           return [
             // Tips
             _popUpItemBuilder(
-                value: AppString.tipsValue, itemName: AppString.tipsTitle),
+              context: context,
+              value: AppString.tipsValue,
+              itemName: AppString.tipsTitle,
+              icon: Icons.help_outline_rounded,
+              itemColor: Colors.blueGrey,
+            ),
 
             // settings
             _popUpItemBuilder(
-                itemName: AppString.settingsTitle,
-                value: AppString.settingsValue),
+              context: context,
+              itemName: AppString.settingsTitle,
+              value: AppString.settingsValue,
+              icon: Icons.settings_outlined,
+              itemColor: AppColor.blueMainColor,
+            ),
 
             // logout
             _popUpItemBuilder(
-                itemName: AppString.logOutTitle, value: AppString.logOutValue)
+              context: context,
+              itemName: AppString.logOutTitle,
+              value: AppString.logOutValue,
+              icon: Icons.logout_rounded,
+              itemColor: Colors.redAccent,
+            )
           ];
         });
   }

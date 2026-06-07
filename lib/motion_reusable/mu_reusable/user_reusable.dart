@@ -18,6 +18,7 @@ class TextFormFieldBuilder extends StatelessWidget {
   final InputBorder? border;
   final TextStyle? hintTextStyle;
   final int? maxCharacterLen;
+  final IconData? prefixIcon;
 
   const TextFormFieldBuilder(
       {super.key,
@@ -29,12 +30,20 @@ class TextFormFieldBuilder extends StatelessWidget {
       this.border,
       this.hintTextStyle,
       this.maxCharacterLen,
-      this.initialValue});
+      this.initialValue,
+      this.prefixIcon});
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final fieldColor = isDarkMode
+        ? Colors.white.withValues(alpha: 0.04)
+        : Colors.black.withValues(alpha: 0.035);
+    final borderColor =
+        isDarkMode ? Colors.white.withValues(alpha: 0.10) : Colors.black12;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 10),
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextFormField(
         initialValue: initialValue,
         cursorColor: AppColor.blueMainColor,
@@ -47,13 +56,43 @@ class TextFormFieldBuilder extends StatelessWidget {
         keyboardType: fieldKeyboardType,
         obscureText: fieldObscureText,
         decoration: InputDecoration(
-            border: border,
-            contentPadding: const EdgeInsets.only(left: 5.0),
-            focusedBorder: const UnderlineInputBorder(
-                borderSide:
-                    BorderSide(color: AppColor.blueMainColor, width: 2.0)),
-            hintText: fieldHintText,
-            hintStyle: hintTextStyle),
+          filled: true,
+          fillColor: fieldColor,
+          border: border,
+          prefixIcon: prefixIcon == null
+              ? null
+              : Icon(
+                  prefixIcon,
+                  color: AppColor.blueMainColor,
+                  size: 20,
+                ),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 14, vertical: 15),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide(color: borderColor),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide:
+                const BorderSide(color: AppColor.blueMainColor, width: 1.5),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(color: Colors.redAccent),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
+          ),
+          hintText: fieldHintText,
+          hintStyle: hintTextStyle ??
+              AppTextStyle.subSectionTextStyle(
+                fontsize: 13,
+                fontweight: FontWeight.normal,
+                color: Colors.blueGrey,
+              ),
+        ),
         validator: fieldValidator,
       ),
     );
@@ -71,23 +110,27 @@ class AuthPageButtons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 25),
-      child: OutlinedButton(
-          style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: AppColor.blueMainColor, width: 2)),
-          onPressed: onPressed,
-          child: SizedBox(
-            height: 50,
-            width: double.infinity,
-            child: Center(
-                child: Text(
-              buttonName,
-              style: contentStyle(
-                  color: AppColor.blueMainColor,
-                  fontWeight: FontWeight.w500,
-                  fontSize: 18),
-            )),
-          )),
+      padding: const EdgeInsets.only(top: 18, bottom: 8),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColor.blueMainColor,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          minimumSize: const Size(double.infinity, 50),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+        ),
+        onPressed: onPressed,
+        child: Text(
+          buttonName,
+          style: AppTextStyle.subSectionTextStyle(
+            fontsize: 15,
+            fontweight: FontWeight.w800,
+            color: Colors.white,
+          ),
+        ),
+      ),
     );
   }
 }
@@ -107,16 +150,24 @@ class RegSignOption2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 30),
+      padding: const EdgeInsets.symmetric(vertical: 18),
       child: RichText(
+        textAlign: TextAlign.center,
         text: TextSpan(
             text: regMessage,
-            style: DefaultTextStyle.of(context).style,
+            style: AppTextStyle.subSectionTextStyle(
+              fontsize: 13,
+              fontweight: FontWeight.normal,
+              color: Colors.blueGrey,
+            ),
             children: [
               // clickable text
               TextSpan(
                   text: regTextSpan,
-                  style: const TextStyle(color: AppColor.blueMainColor),
+                  style: const TextStyle(
+                    color: AppColor.blueMainColor,
+                    fontWeight: FontWeight.w800,
+                  ),
                   recognizer: TapGestureRecognizer()
                     ..onTap = () {
                       regAction();
@@ -137,9 +188,12 @@ class SvgImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 60, top: 20),
-      child: Align(alignment: imageAlignment, child: svgImage),
+    return Align(
+      alignment: imageAlignment,
+      child: SizedBox(
+        height: 170,
+        child: svgImage,
+      ),
     );
   }
 }

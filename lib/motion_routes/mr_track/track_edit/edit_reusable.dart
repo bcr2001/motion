@@ -7,8 +7,6 @@ import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:provider/provider.dart';
 import '../../../motion_core/mc_sql_table/assign_table.dart';
 import '../../../motion_core/motion_providers/dropDown_pvd/drop_down_pvd.dart';
-import '../../../motion_reusable/db_re/sub_ui.dart';
-import '../../../motion_reusable/mu_reusable/user_reusable.dart';
 import '../../../motion_reusable/mu_reusable/user_validator.dart';
 import '../../../motion_themes/mth_app/app_strings.dart';
 import '../../../motion_themes/mth_styling/motion_text_styling.dart';
@@ -45,27 +43,180 @@ class _TrailingEditButtonsState extends State<TrailingEditButtons> {
 
   @override
   void dispose() {
-    super.dispose();
     _editTextController.dispose();
+    super.dispose();
   }
 
-  // icon button builder
-  IconButton _buildIcon(
-      {required VoidCallback onPressed,
-      required Icon iconImage,
-      bool isArchive = false,
-      int archiveStatus = 0}) {
-    Icon iconSelectedArchive = archiveStatus == 0
-        ? const Icon(Icons.archive_outlined)
-        : const Icon(
-            Icons.archive_outlined,
-            color: AppColor.blueMainColor,
-          );
+  Widget _dialogFieldPanel({
+    required Widget child,
+  }) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final borderColor =
+        isDarkMode ? Colors.white.withValues(alpha: 0.10) : Colors.black12;
+    final panelColor = isDarkMode
+        ? AppColor.darkModeContentWidget
+        : AppColor.lightModeContentWidget;
 
-    return isArchive
-        ? IconButton(
-            iconSize: 18, onPressed: onPressed, icon: iconSelectedArchive)
-        : IconButton(iconSize: 18, onPressed: onPressed, icon: iconImage);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: panelColor,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: borderColor),
+      ),
+      child: child,
+    );
+  }
+
+  PopupMenuItem<String> _menuItem({
+    required String value,
+    required IconData icon,
+    required String label,
+    Color? color,
+  }) {
+    final itemColor = color ?? Theme.of(context).iconTheme.color;
+
+    return PopupMenuItem<String>(
+      value: value,
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: itemColor),
+          const SizedBox(width: 10),
+          Text(
+            label,
+            style: AppTextStyle.subSectionTextStyle(
+              fontsize: 13,
+              fontweight: FontWeight.normal,
+              color: itemColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _toggleArchive() {
+    final archiveItem = context.read<AssignerMainProvider>();
+
+    archiveItem.updateAssignedItems(Assigner(
+        id: widget.itemIndexId,
+        currentLoggedInUser: widget.itemIndexCurrentUser,
+        subcategoryName: widget.itemIndexSubcategoryName,
+        mainCategoryName: widget.itemIndexMainCategoryName,
+        dateCreated: widget.itemIndexDateCreated,
+        isActive: widget.itemIndexIsActive,
+        isArchive: widget.itemIndexIsArchive == 0 ? 1 : 0));
+  }
+
+  Widget _editNameField() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final fieldColor = isDarkMode
+        ? Colors.white.withValues(alpha: 0.04)
+        : Colors.black.withValues(alpha: 0.035);
+    final borderColor =
+        isDarkMode ? Colors.white.withValues(alpha: 0.10) : Colors.black12;
+
+    return TextFormField(
+      controller: _editTextController,
+      cursorColor: AppColor.blueMainColor,
+      style: Theme.of(context).textTheme.bodyMedium,
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: fieldColor,
+        prefixIcon: const Icon(
+          Icons.label_outline,
+          color: AppColor.blueMainColor,
+          size: 20,
+        ),
+        hintText: widget.itemIndexSubcategoryName,
+        hintStyle: AppTextStyle.subSectionTextStyle(
+          fontsize: 13,
+          fontweight: FontWeight.normal,
+          color: Colors.blueGrey,
+        ),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: borderColor),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide:
+              const BorderSide(color: AppColor.blueMainColor, width: 1.5),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.redAccent),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
+        ),
+      ),
+      validator: FormValidator.subcategoryValidator,
+    );
+  }
+
+  Widget _dialogActions({
+    required String confirmLabel,
+    required VoidCallback onCancel,
+    required VoidCallback onConfirm,
+    Color confirmColor = AppColor.blueMainColor,
+  }) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final borderColor =
+        isDarkMode ? Colors.white.withValues(alpha: 0.16) : Colors.black12;
+    final cancelTextColor = isDarkMode ? Colors.white70 : Colors.blueGrey;
+
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton(
+            onPressed: onCancel,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: cancelTextColor,
+              minimumSize: const Size(0, 44),
+              side: BorderSide(color: borderColor),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              AppString.trackCancelTextButton,
+              style: AppTextStyle.subSectionTextStyle(
+                fontsize: 12,
+                fontweight: FontWeight.w700,
+                color: cancelTextColor,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: ElevatedButton(
+            onPressed: onConfirm,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: confirmColor,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              minimumSize: const Size(0, 44),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              confirmLabel,
+              style: AppTextStyle.subSectionTextStyle(
+                fontsize: 12,
+                fontweight: FontWeight.w800,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   // this alert dialog is rendered when the user
@@ -81,7 +232,7 @@ class _TrailingEditButtonsState extends State<TrailingEditButtons> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialogConst(
-          heightFactor: 0.28,
+          heightFactor: 0.33,
           screenHeight: screenHeight,
           screenWidth: screenWidth,
           alertDialogTitle:
@@ -91,37 +242,45 @@ class _TrailingEditButtonsState extends State<TrailingEditButtons> {
             child: Consumer<DropDownTrackProvider>(
               builder: (context, maincat, child) {
                 return Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Divider
-                    const Divider(),
-
-                    // Update drop-down
-                    MyDropdownButton(
-                      isUpdate: true,
-                      mainCategoryName: widget.itemIndexMainCategoryName,
-                    ),
-
-                    // Subcategory name text field
-                    Padding(
-                      padding: const EdgeInsets.only(left: 5.0, right: 5.0),
-                      child: TextFormFieldBuilder(
-                        fieldTextEditingController: _editTextController,
-                        fieldHintText: widget.itemIndexSubcategoryName,
-                        fieldValidator: FormValidator.subcategoryValidator,
+                    Text(
+                      "Move it to a category and rename it if needed.",
+                      style: AppTextStyle.subSectionTextStyle(
+                        fontsize: 12,
+                        fontweight: FontWeight.normal,
+                        color: Colors.blueGrey,
                       ),
                     ),
 
+                    const SizedBox(height: 16),
+
+                    // Update drop-down
+                    _dialogFieldPanel(
+                      child: MyDropdownButton(
+                        isUpdate: true,
+                        mainCategoryName: widget.itemIndexMainCategoryName,
+                        usePanelStyle: true,
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // Subcategory name text field
+                    _editNameField(),
+
+                    const SizedBox(height: 18),
+
                     // Cancel and update buttons
-                    CancelAddTextButtons(
-                      firstButtonName: AppString.trackCancelTextButton,
-                      secondButtonName: AppString.editPageUpdateButtonName,
-                      onPressedFirst: () {
+                    _dialogActions(
+                      confirmLabel: AppString.editPageUpdateButtonName,
+                      onCancel: () {
                         // Close the dialog and reset selected value
                         navigationKey.currentState!.pop();
                         maincat.changeSelectedValue(null);
                       },
-                      onPressedSecond: () {
+                      onConfirm: () {
                         var updateItem = context.read<AssignerMainProvider>();
 
                         if (_editFormKey.currentState!.validate()) {
@@ -131,9 +290,7 @@ class _TrailingEditButtonsState extends State<TrailingEditButtons> {
                                 requiresColor: true,
                                 errorMessage: AppString.editPageUpdateError);
                           } else {
-
-
-                              // Trim white spaces from the subcategory name
+                            // Trim white spaces from the subcategory name
                             String trimmedSubcategoryName =
                                 _editTextController.text.trim();
 
@@ -177,41 +334,44 @@ class _TrailingEditButtonsState extends State<TrailingEditButtons> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialogConst(
-          heightFactor: 0.15,
+          heightFactor: 0.18,
           screenHeight: screenHeight,
           screenWidth: screenWidth * 0.75,
           alertDialogTitle:
               "${AppString.deleteTitle} ${widget.itemIndexSubcategoryName}", // Set the title of the dialog
           alertDialogContent: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Divider
-              const Divider(),
-
               // Alert dialog message
               Text(
-                  "Are you sure you want to delete ${widget.itemIndexSubcategoryName}?",
-                  style: AppTextStyle.subSectionTextStyle(fontsize: 15, fontweight: FontWeight.normal),),
+                "Are you sure you want to delete ${widget.itemIndexSubcategoryName}?",
+                style: AppTextStyle.subSectionTextStyle(
+                  fontsize: 14,
+                  fontweight: FontWeight.normal,
+                ),
+              ),
+
+              const SizedBox(height: 18),
 
               // Buttons
-              CancelAddTextButtons(
-                onPressedFirst: () {
+              _dialogActions(
+                confirmLabel: AppString.deleteTitle,
+                confirmColor: Colors.redAccent,
+                onCancel: () {
                   // Close the dialog
                   navigationKey.currentState!.pop();
                 },
-                onPressedSecond: () {
+                onConfirm: () {
                   // Delete the assigned item and close the dialog
                   final deleteItem = context.read<AssignerMainProvider>();
                   deleteItem.deleteAssignedItems(id);
 
-                  snackBarMessage(
-                    context, 
-                    errorMessage: "$subcategoryName has been deleted");
+                  snackBarMessage(context,
+                      errorMessage: "$subcategoryName has been deleted");
 
                   navigationKey.currentState!.pop();
                 },
-                firstButtonName: AppString.cancelTitle,
-                secondButtonName: AppString.deleteTitle,
               )
             ],
           ),
@@ -222,43 +382,45 @@ class _TrailingEditButtonsState extends State<TrailingEditButtons> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // edit icon
-        _buildIcon(
-            onPressed: () => _showUpdateAlertDialog(context),
-            iconImage: const Icon(Icons.edit)),
-
-        // archive icon
-
-        _buildIcon(
-            isArchive: true,
-            archiveStatus: widget.itemIndexIsArchive,
-            onPressed: () {
-
-              final archiveItem = context.read<AssignerMainProvider>();
-
-              archiveItem.updateAssignedItems(Assigner(
-                  id: widget.itemIndexId,
-                  currentLoggedInUser: widget.itemIndexCurrentUser,
-                  subcategoryName: widget.itemIndexSubcategoryName,
-                  mainCategoryName: widget.itemIndexMainCategoryName,
-                  dateCreated: widget.itemIndexDateCreated,
-                  isActive: widget.itemIndexIsActive,
-                  isArchive: widget.itemIndexIsArchive == 0 ? 1 : 0));
-            },
-            iconImage: const Icon(Icons.archive_outlined)),
-
-        // delete icon
-        _buildIcon(
-            onPressed: () {
-              _showDeleteAlertDialog(context,
-                  id: widget.itemIndexId,
-                  subcategoryName: widget.itemIndexSubcategoryName);
-            },
-            iconImage: const Icon(Icons.delete_outline))
-      ],
+    return PopupMenuButton<String>(
+      icon: const Icon(Icons.more_horiz),
+      tooltip: "More",
+      color: Theme.of(context).popupMenuTheme.color,
+      onSelected: (value) {
+        if (value == "edit") {
+          _showUpdateAlertDialog(context);
+        } else if (value == "archive") {
+          _toggleArchive();
+        } else if (value == "delete") {
+          _showDeleteAlertDialog(context,
+              id: widget.itemIndexId,
+              subcategoryName: widget.itemIndexSubcategoryName);
+        }
+      },
+      itemBuilder: (context) {
+        return [
+          _menuItem(
+            value: "edit",
+            icon: Icons.edit_outlined,
+            label: AppString.editPageAppBarTitle,
+            color: AppColor.blueMainColor,
+          ),
+          _menuItem(
+            value: "archive",
+            icon: widget.itemIndexIsArchive == 0
+                ? Icons.archive_outlined
+                : Icons.unarchive_outlined,
+            label: widget.itemIndexIsArchive == 0 ? "Archive" : "Unarchive",
+            color: Colors.blueGrey,
+          ),
+          _menuItem(
+            value: "delete",
+            icon: Icons.delete_outline,
+            label: AppString.deleteTitle,
+            color: Colors.redAccent,
+          ),
+        ];
+      },
     );
   }
 }
