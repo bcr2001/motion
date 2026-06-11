@@ -8,15 +8,15 @@ void main() {
       expect(MotionXpPolicy.maxDailyXp, 115);
     });
 
-    test('awards Work XP at one point per 15 minutes up to 25 XP', () {
-      expect(MotionXpPolicy.categoryXp(MotionCategories.work, 120), 8);
-      expect(MotionXpPolicy.categoryXp(MotionCategories.work, 375), 25);
+    test('awards Work XP at one point per 12 minutes up to 25 XP', () {
+      expect(MotionXpPolicy.categoryXp(MotionCategories.work, 120), 10);
+      expect(MotionXpPolicy.categoryXp(MotionCategories.work, 300), 25);
       expect(MotionXpPolicy.categoryXp(MotionCategories.work, 600), 25);
     });
 
     test('caps learning and growth categories at 20 XP', () {
-      expect(MotionXpPolicy.categoryXp(MotionCategories.education, 120), 8);
-      expect(MotionXpPolicy.categoryXp(MotionCategories.skills, 375), 20);
+      expect(MotionXpPolicy.categoryXp(MotionCategories.education, 120), 10);
+      expect(MotionXpPolicy.categoryXp(MotionCategories.skills, 240), 20);
       expect(
         MotionXpPolicy.categoryXp(MotionCategories.selfDevelopment, 600),
         20,

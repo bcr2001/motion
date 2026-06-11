@@ -138,7 +138,7 @@ class AnalysisGallery extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom:50.0),
+      padding: const EdgeInsets.only(bottom: 96.0),
       child: Consumer2<UserUidProvider, MainCategoryTrackerProvider>(
           builder: (context, user, main, child) {
         // current user uid

@@ -2,7 +2,7 @@ import 'package:motion/motion_core/mc_sqlite/database_constants.dart';
 import 'package:sqflite/sqflite.dart';
 
 class TrackerDatabaseSchema {
-  static const int version = 13;
+  static const int version = 14;
   static const String _legacyTimeRecordedColumn = 'timeRecorded';
 
   static const String mainCategoryTable = MotionDbTables.mainCategory;
@@ -37,6 +37,9 @@ class TrackerDatabaseSchema {
   static Future<void> migrate(
       Database db, int oldVersion, int newVersion) async {
     await ensureSchema(db);
+    if (oldVersion < 14) {
+      await _backfillExperiencePoints(db);
+    }
   }
 
   static Future<void> ensureSchema(Database db) async {
@@ -347,8 +350,8 @@ class TrackerDatabaseSchema {
   static String _standardXpFor(String category, String rowAlias) {
     return '''
       SELECT CASE
-        WHEN CAST(total / 15 AS INTEGER) > 20 THEN 20
-        ELSE CAST(total / 15 AS INTEGER)
+        WHEN CAST(total / 12 AS INTEGER) > 20 THEN 20
+        ELSE CAST(total / 12 AS INTEGER)
       END
       FROM (${_trackedTotal(category, rowAlias)})
     ''';
@@ -357,8 +360,8 @@ class TrackerDatabaseSchema {
   static String _workXpFor(String rowAlias) {
     return '''
       SELECT CASE
-        WHEN CAST(total / 15 AS INTEGER) > 25 THEN 25
-        ELSE CAST(total / 15 AS INTEGER)
+        WHEN CAST(total / 12 AS INTEGER) > 25 THEN 25
+        ELSE CAST(total / 12 AS INTEGER)
       END
       FROM (${_trackedTotal(MotionCategories.work, rowAlias)})
     ''';
@@ -367,8 +370,8 @@ class TrackerDatabaseSchema {
   static String _selfDevelopmentXpFor(String rowAlias) {
     return '''
       SELECT CASE
-        WHEN CAST(total / 15 AS INTEGER) > 20 THEN 20
-        ELSE CAST(total / 15 AS INTEGER)
+        WHEN CAST(total / 12 AS INTEGER) > 20 THEN 20
+        ELSE CAST(total / 12 AS INTEGER)
       END
       FROM (${_trackedTotal(MotionCategories.selfDevelopment, rowAlias)})
     ''';

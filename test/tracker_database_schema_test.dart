@@ -3,8 +3,8 @@ import 'package:motion/motion_core/mc_sqlite/tracker_database_schema.dart';
 
 void main() {
   group('TrackerDatabaseSchema', () {
-    test('uses version 13 after adding accountability bonus XP', () {
-      expect(TrackerDatabaseSchema.version, 13);
+    test('uses version 14 after changing productive XP pace', () {
+      expect(TrackerDatabaseSchema.version, 14);
     });
 
     test(

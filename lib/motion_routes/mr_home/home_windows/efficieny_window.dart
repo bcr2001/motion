@@ -361,10 +361,12 @@ class EfficienyScoreWindow extends StatelessWidget {
 class _XpTargetDialogData {
   final NextBadgeProgress progress;
   final Map<String, int> earnedXpByCategory;
+  final Map<String, double> trackedTimeByCategory;
 
   const _XpTargetDialogData({
     required this.progress,
     required this.earnedXpByCategory,
+    required this.trackedTimeByCategory,
   });
 }
 
@@ -415,16 +417,23 @@ class CurrentYearEFSDisplay extends StatelessWidget {
       currentUser: currentUser,
       selectedDate: currentDate,
     );
+    final trackedTimeByCategory =
+        await xpProvider.retrieveDailyMainCategoryTimeBreakdown(
+      currentUser: currentUser,
+      selectedDate: currentDate,
+    );
 
     return _XpTargetDialogData(
       progress: progress,
       earnedXpByCategory: earnedXpByCategory,
+      trackedTimeByCategory: trackedTimeByCategory,
     );
   }
 
   Widget _xpTargetRow({
     required BadgeXpTarget target,
     required int earnedXp,
+    required double trackedMinutes,
     required bool isDarkMode,
   }) {
     final rowColor = isDarkMode
@@ -493,6 +502,17 @@ class CurrentYearEFSDisplay extends StatelessWidget {
                     color: Colors.blueGrey,
                   ),
                 ),
+                const SizedBox(height: 1),
+                Text(
+                  'Tracked: ${_timeLabel(trackedMinutes.round())}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyle.subSectionTextStyle(
+                    fontsize: 11,
+                    fontweight: FontWeight.normal,
+                    color: Colors.blueGrey,
+                  ),
+                ),
               ],
             ),
           ),
@@ -519,6 +539,10 @@ class CurrentYearEFSDisplay extends StatelessWidget {
 
   String _targetTimeLabel(BadgeXpTarget target) {
     final minutes = _targetMinutes(target);
+    return _timeLabel(minutes);
+  }
+
+  String _timeLabel(int minutes) {
     if (minutes <= 0) return '0 min';
 
     final hours = minutes ~/ 60;
@@ -535,7 +559,7 @@ class CurrentYearEFSDisplay extends StatelessWidget {
       case 'Work':
       case 'Skills':
       case 'Self Development':
-        return target.xp * 15;
+        return target.xp * 12;
       case 'Sleep':
         if (target.xp <= 8) return 300;
         if (target.xp <= 15) return 360;
@@ -570,7 +594,7 @@ class CurrentYearEFSDisplay extends StatelessWidget {
         side: BorderSide(color: borderColor),
       ),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 450, maxHeight: 520),
+        constraints: const BoxConstraints(maxWidth: 450, maxHeight: 580),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 14, 10, 14),
           child: Column(
@@ -783,6 +807,9 @@ class CurrentYearEFSDisplay extends StatelessWidget {
                           target: target,
                           earnedXp:
                               dialogData.earnedXpByCategory[target.label] ?? 0,
+                          trackedMinutes:
+                              dialogData.trackedTimeByCategory[target.label] ??
+                                  0,
                           isDarkMode: isDarkMode,
                         ),
                       ),

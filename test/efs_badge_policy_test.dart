@@ -10,35 +10,35 @@ void main() {
         EfsBadgeLevel.timeNovice,
       );
       expect(
-        EfsBadgePolicy.badgeForScore(24.99).level,
+        EfsBadgePolicy.badgeForScore(19.99).level,
         EfsBadgeLevel.timeNovice,
       );
       expect(
-        EfsBadgePolicy.badgeForScore(25).level,
+        EfsBadgePolicy.badgeForScore(20).level,
         EfsBadgeLevel.focusedBeginner,
       );
       expect(
-        EfsBadgePolicy.badgeForScore(49.99).level,
+        EfsBadgePolicy.badgeForScore(39.99).level,
         EfsBadgeLevel.focusedBeginner,
       );
       expect(
-        EfsBadgePolicy.badgeForScore(50).level,
+        EfsBadgePolicy.badgeForScore(40).level,
         EfsBadgeLevel.timePro,
       );
       expect(
-        EfsBadgePolicy.badgeForScore(74.99).level,
+        EfsBadgePolicy.badgeForScore(59.99).level,
         EfsBadgeLevel.timePro,
       );
       expect(
-        EfsBadgePolicy.badgeForScore(75).level,
+        EfsBadgePolicy.badgeForScore(60).level,
         EfsBadgeLevel.timeMaster,
       );
       expect(
-        EfsBadgePolicy.badgeForScore(99.99).level,
+        EfsBadgePolicy.badgeForScore(79.99).level,
         EfsBadgeLevel.timeMaster,
       );
       expect(
-        EfsBadgePolicy.badgeForScore(100).level,
+        EfsBadgePolicy.badgeForScore(80).level,
         EfsBadgeLevel.timeWizard,
       );
     });

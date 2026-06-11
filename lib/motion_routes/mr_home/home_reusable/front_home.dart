@@ -70,9 +70,8 @@ class LifeCompleted extends StatelessWidget {
               final Color borderColor = isDarkMode
                   ? Colors.white.withValues(alpha: 0.10)
                   : Colors.black12;
-              final Color trackColor = isDarkMode
-                  ? Colors.white.withValues(alpha: 0.08)
-                  : Colors.black.withValues(alpha: 0.07);
+              final Color trackColor = AppColor.accountedColor
+                  .withValues(alpha: isDarkMode ? 0.22 : 0.18);
 
               return Padding(
                 padding: const EdgeInsets.only(top: 10, bottom: 12),

@@ -180,13 +180,13 @@ class TrackerDatabaseHelper {
             CASE
                 WHEN mainCategoryName = 'Work' THEN
                     CAST(CASE
-                        WHEN CAST(totalTimeSpent / 15 AS INTEGER) > 25 THEN 25
-                        ELSE CAST(totalTimeSpent / 15 AS INTEGER)
+                        WHEN CAST(totalTimeSpent / 12 AS INTEGER) > 25 THEN 25
+                        ELSE CAST(totalTimeSpent / 12 AS INTEGER)
                     END AS TEXT)
                 WHEN mainCategoryName IN ('Education', 'Skills', 'Self Development') THEN
                     CAST(CASE
-                        WHEN CAST(totalTimeSpent / 15 AS INTEGER) > 20 THEN 20
-                        ELSE CAST(totalTimeSpent / 15 AS INTEGER)
+                        WHEN CAST(totalTimeSpent / 12 AS INTEGER) > 20 THEN 20
+                        ELSE CAST(totalTimeSpent / 12 AS INTEGER)
                     END AS TEXT)
                 WHEN mainCategoryName = 'Sleep' THEN
                     CASE
@@ -1482,6 +1482,65 @@ class TrackerDatabaseHelper {
     };
   }
 
+  Future<Map<String, double>> dailyMainCategoryTimeBreakdown({
+    required String currentUser,
+    required String selectedDate,
+  }) async {
+    try {
+      final db = await database;
+
+      final result = await db.rawQuery('''
+        SELECT
+          ${MotionDbColumns.mainCategoryName},
+          COALESCE(SUM(${MotionDbColumns.timeSpent}), 0) AS total
+        FROM ${MotionDbTables.subcategory}
+        WHERE ${MotionDbColumns.currentLoggedInUser} = ?
+          AND ${MotionDbColumns.date} = ?
+        GROUP BY ${MotionDbColumns.mainCategoryName}
+      ''', [currentUser, selectedDate]);
+
+      final breakdown = <String, double>{
+        'Education': 0,
+        'Work': 0,
+        'Skills': 0,
+        'Self Development': 0,
+        'Sleep': 0,
+        'Tracking Bonus': 0,
+      };
+
+      var totalTracked = 0.0;
+      for (final row in result) {
+        final category = row[MotionDbColumns.mainCategoryName]?.toString();
+        final totalValue = row['total'];
+        final total = totalValue is num
+            ? totalValue.toDouble()
+            : double.tryParse('$totalValue') ?? 0.0;
+
+        totalTracked += total;
+        if (category != null && breakdown.containsKey(category)) {
+          breakdown[category] = total;
+        }
+      }
+
+      breakdown['Tracking Bonus'] = totalTracked;
+      return breakdown;
+    } catch (e, stackTrace) {
+      logDatabaseError(
+          "TrackerDatabaseHelper.dailyMainCategoryTimeBreakdown",
+          e,
+          stackTrace);
+    }
+
+    return const {
+      'Education': 0,
+      'Work': 0,
+      'Skills': 0,
+      'Self Development': 0,
+      'Sleep': 0,
+      'Tracking Bonus': 0,
+    };
+  }
+
   // this function get the most and least productive months
   Future<List<Map<String, dynamic>>> getMostAndLeastProductiveMonths(
       {required bool getMostProductiveMonth,
@@ -1619,8 +1678,8 @@ class TrackerDatabaseHelper {
         SET
           educationXP = (
             SELECT CASE
-              WHEN CAST(COALESCE(SUM(timeSpent), 0) / 15 AS INTEGER) > 20 THEN 20
-              ELSE CAST(COALESCE(SUM(timeSpent), 0) / 15 AS INTEGER)
+              WHEN CAST(COALESCE(SUM(timeSpent), 0) / 12 AS INTEGER) > 20 THEN 20
+              ELSE CAST(COALESCE(SUM(timeSpent), 0) / 12 AS INTEGER)
             END
             FROM subcategory
             WHERE mainCategoryName   = 'Education'
@@ -1629,8 +1688,8 @@ class TrackerDatabaseHelper {
           ),
           workXP = (
             SELECT CASE
-              WHEN CAST(COALESCE(SUM(timeSpent), 0) / 15 AS INTEGER) > 25 THEN 25
-              ELSE CAST(COALESCE(SUM(timeSpent), 0) / 15 AS INTEGER)
+              WHEN CAST(COALESCE(SUM(timeSpent), 0) / 12 AS INTEGER) > 25 THEN 25
+              ELSE CAST(COALESCE(SUM(timeSpent), 0) / 12 AS INTEGER)
             END
             FROM subcategory
             WHERE mainCategoryName   = 'Work'
@@ -1639,8 +1698,8 @@ class TrackerDatabaseHelper {
           ),
           skillsXP = (
             SELECT CASE
-              WHEN CAST(COALESCE(SUM(timeSpent), 0) / 15 AS INTEGER) > 20 THEN 20
-              ELSE CAST(COALESCE(SUM(timeSpent), 0) / 15 AS INTEGER)
+              WHEN CAST(COALESCE(SUM(timeSpent), 0) / 12 AS INTEGER) > 20 THEN 20
+              ELSE CAST(COALESCE(SUM(timeSpent), 0) / 12 AS INTEGER)
             END
             FROM subcategory
             WHERE mainCategoryName   = 'Skills'
@@ -1649,8 +1708,8 @@ class TrackerDatabaseHelper {
           ),
           sdXP = (
             SELECT CASE
-              WHEN CAST(COALESCE(SUM(timeSpent), 0) / 15 AS INTEGER) > 20 THEN 20
-              ELSE CAST(COALESCE(SUM(timeSpent), 0) / 15 AS INTEGER)
+              WHEN CAST(COALESCE(SUM(timeSpent), 0) / 12 AS INTEGER) > 20 THEN 20
+              ELSE CAST(COALESCE(SUM(timeSpent), 0) / 12 AS INTEGER)
             END
             FROM subcategory
             WHERE mainCategoryName   = 'Self Development'

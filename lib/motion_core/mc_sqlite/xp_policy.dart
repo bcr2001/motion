@@ -8,7 +8,7 @@ class MotionXpPolicy {
       return 0;
     }
 
-    final earned = totalMinutes ~/ 15;
+    final earned = totalMinutes ~/ 12;
     return earned > dailyCap ? dailyCap : earned;
   }
 

@@ -25,15 +25,55 @@ class SubTotalsPage extends StatelessWidget {
   }
 }
 
-class SubTotalsList extends StatelessWidget {
+class SubTotalsList extends StatefulWidget {
   const SubTotalsList({super.key});
+
+  @override
+  State<SubTotalsList> createState() => _SubTotalsListState();
+}
+
+class _SubTotalsListState extends State<SubTotalsList> {
+  final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
+  Future<List<Map<String, dynamic>>>? _subcategoryTotalsFuture;
+  String? _loadedUserUid;
+  int? _loadedRefreshKey;
+  String _searchQuery = "";
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _searchFocusNode.dispose();
+    super.dispose();
+  }
+
+  Future<List<Map<String, dynamic>>> _getSubcategoryTotalsFuture({
+    required SubcategoryTrackerDatabaseProvider sub,
+    required String userUid,
+  }) {
+    if (_subcategoryTotalsFuture == null ||
+        _loadedUserUid != userUid ||
+        _loadedRefreshKey != sub.refreshKey) {
+      _loadedUserUid = userUid;
+      _loadedRefreshKey = sub.refreshKey;
+      _subcategoryTotalsFuture = sub.retrieveAllSubcategoryTotals(
+        currentUser: userUid,
+      );
+    }
+
+    return _subcategoryTotalsFuture!;
+  }
 
   Widget _summaryHeader({
     required BuildContext context,
     required int subcategoryCount,
     required double totalMinutes,
+    required int visibleSubcategoryCount,
   }) {
     final totalTime = convertMinutesToTime(totalMinutes);
+    final subtitle = _searchQuery.isEmpty
+        ? "$subcategoryCount subcategories tracked"
+        : "$visibleSubcategoryCount of $subcategoryCount subcategories shown";
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(2, 4, 2, 18),
@@ -63,7 +103,7 @@ class SubTotalsList extends StatelessWidget {
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  "$subcategoryCount subcategories tracked",
+                  subtitle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: AppTextStyle.subSectionTextStyle(
@@ -90,6 +130,106 @@ class SubTotalsList extends StatelessWidget {
                 fontweight: FontWeight.w800,
                 color: AppColor.blueMainColor,
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _searchField(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final borderColor =
+        isDarkMode ? Colors.white.withValues(alpha: 0.10) : Colors.black12;
+    final fillColor = isDarkMode
+        ? AppColor.darkModeContentWidget
+        : AppColor.lightModeContentWidget;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: TextField(
+        controller: _searchController,
+        focusNode: _searchFocusNode,
+        onChanged: (value) {
+          setState(() {
+            _searchQuery = value.trim().toLowerCase();
+          });
+        },
+        textInputAction: TextInputAction.search,
+        style: AppTextStyle.subSectionTextStyle(
+          fontsize: 13,
+          fontweight: FontWeight.w600,
+        ),
+        decoration: InputDecoration(
+          hintText: "Search subcategories",
+          hintStyle: AppTextStyle.subSectionTextStyle(
+            fontsize: 13,
+            fontweight: FontWeight.normal,
+            color: Colors.blueGrey,
+          ),
+          prefixIcon: const Icon(
+            Icons.search_rounded,
+            color: AppColor.blueMainColor,
+          ),
+          suffixIcon: _searchController.text.isEmpty
+              ? null
+              : IconButton(
+                  tooltip: "Clear search",
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() {
+                      _searchQuery = "";
+                    });
+                  },
+                  icon: const Icon(Icons.close_rounded),
+                ),
+          filled: true,
+          fillColor: fillColor,
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide(color: borderColor),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(
+              color: AppColor.blueMainColor,
+              width: 1.2,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _emptySearchResult() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 32),
+      child: Column(
+        children: [
+          Icon(
+            Icons.search_off_rounded,
+            size: 36,
+            color: Colors.blueGrey.withValues(alpha: 0.75),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            "No matching subcategories",
+            textAlign: TextAlign.center,
+            style: AppTextStyle.subSectionTextStyle(
+              fontsize: 13,
+              fontweight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            "Try a different search term.",
+            textAlign: TextAlign.center,
+            style: AppTextStyle.subSectionTextStyle(
+              fontsize: 12,
+              fontweight: FontWeight.normal,
+              color: Colors.blueGrey,
             ),
           ),
         ],
@@ -238,8 +378,8 @@ class SubTotalsList extends StatelessWidget {
         return userLoadingIndicator();
       }
 
-      return FutureBuilder(
-          future: sub.retrieveAllSubcategoryTotals(currentUser: userUid),
+      return FutureBuilder<List<Map<String, dynamic>>>(
+          future: _getSubcategoryTotalsFuture(sub: sub, userUid: userUid),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
@@ -252,6 +392,14 @@ class SubTotalsList extends StatelessWidget {
             } else {
               // returned subcategory totals
               final allSubcategoryTotals = snapshot.data ?? [];
+              final filteredSubcategoryTotals = _searchQuery.isEmpty
+                  ? allSubcategoryTotals
+                  : allSubcategoryTotals.where((item) {
+                      final subcategoryName =
+                          item["subcategoryName"]?.toString().toLowerCase() ??
+                              "";
+                      return subcategoryName.contains(_searchQuery);
+                    }).toList();
               final totalMinutes = allSubcategoryTotals.fold<double>(
                   0.0,
                   (previousValue, item) =>
@@ -271,23 +419,40 @@ class SubTotalsList extends StatelessWidget {
                 );
               }
 
+              final showEmptySearchResult =
+                  _searchQuery.isNotEmpty && filteredSubcategoryTotals.isEmpty;
+
               return ListView.builder(
                 padding: const EdgeInsets.fromLTRB(12, 12, 12, 28),
-                itemCount: allSubcategoryTotals.length + 1,
+                itemCount: showEmptySearchResult
+                    ? 3
+                    : filteredSubcategoryTotals.length + 2,
                 itemBuilder: (context, index) {
                   if (index == 0) {
                     return _summaryHeader(
                       context: context,
                       subcategoryCount: allSubcategoryTotals.length,
                       totalMinutes: totalMinutes,
+                      visibleSubcategoryCount:
+                          filteredSubcategoryTotals.length,
                     );
                   }
 
-                  final subTotalItem = allSubcategoryTotals[index - 1];
+                  if (index == 1) {
+                    return _searchField(context);
+                  }
+
+                  if (showEmptySearchResult) {
+                    return _emptySearchResult();
+                  }
+
+                  final subTotalItem = filteredSubcategoryTotals[index - 2];
+                  final originalIndex =
+                      allSubcategoryTotals.indexOf(subTotalItem);
 
                   return _subcategoryTotalCard(
                     context: context,
-                    index: index - 1,
+                    index: originalIndex,
                     subTotalItem: subTotalItem,
                   );
                 },

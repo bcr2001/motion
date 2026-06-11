@@ -1,9 +1,8 @@
-import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
+import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 import 'package:motion/motion_routes/mr_home/home_reusable/back_home.dart';
-import 'package:motion/motion_routes/mr_stats/stats_back.dart';
 import 'package:motion/motion_screens/ms_report/report_back.dart';
 import 'package:motion/motion_screens/ms_subcategory/sub_totals.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
@@ -19,82 +18,332 @@ import '../../motion_themes/mth_app/app_strings.dart';
 class CategorySummaryReport extends StatelessWidget {
   const CategorySummaryReport({super.key});
 
-  // button that takes users to the subcategory totals page
-  // page that contains the all time totals for the subcategory
-  Widget _subcategoryViewTotals(context) {
+  Widget _summaryHeader(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          height: 42,
+          width: 42,
+          decoration: BoxDecoration(
+            color: AppColor.blueMainColor.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(13),
+          ),
+          child: const Icon(
+            Icons.donut_large_rounded,
+            color: AppColor.blueMainColor,
+            size: 22,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                AppString.mainCategoryTotalTitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyle.subSectionTextStyle(
+                  fontsize: 15,
+                  fontweight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                "All-time category distribution",
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyle.subSectionTextStyle(
+                  fontsize: 11,
+                  fontweight: FontWeight.normal,
+                  color: Colors.blueGrey,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+          decoration: BoxDecoration(
+            color: AppColor.accountedColor.withValues(alpha: 0.10),
+            borderRadius: BorderRadius.circular(99),
+            border: Border.all(
+              color: AppColor.accountedColor.withValues(alpha: 0.22),
+            ),
+          ),
+          child: Text(
+            "Lifetime",
+            style: AppTextStyle.subSectionTextStyle(
+              fontsize: 10.5,
+              fontweight: FontWeight.w800,
+              color: AppColor.accountedColor,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _subcategoryViewTotals(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final borderColor =
+        isDarkMode ? Colors.white.withValues(alpha: 0.08) : Colors.black12;
+
     return Padding(
-      padding: const EdgeInsets.only(top: 12.0, left: 12, bottom: 15),
-      child: GestureDetector(
-        onTap: (() {
-          Navigator.push(
+      padding: const EdgeInsets.only(top: 16),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: () {
+            Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (BuildContext context) => const SubTotalsPage()));
-        }),
-        child: Row(
-          children: [
-            // view subcategory totals
-            Text(
-              AppString.viewSubcategoryTotalsTitle,
-              style: AppTextStyle.mainCategoryTotalTitle(),
-            ),
-
-            // click icon
-            AvatarGlow(
-              glowColor: AppColor.accountedColor,
-              child: const Padding(
-                padding: EdgeInsets.only(left: 8.0),
-                child: Icon(Icons.ads_click_rounded),
+                builder: (BuildContext context) => const SubTotalsPage(),
               ),
+            );
+          },
+          child: Ink(
+            padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 12),
+            decoration: BoxDecoration(
+              color: AppColor.blueMainColor.withValues(alpha: 0.07),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: borderColor),
             ),
-          ],
+            child: Row(
+              children: [
+                Container(
+                  height: 34,
+                  width: 34,
+                  decoration: BoxDecoration(
+                    color: AppColor.blueMainColor.withValues(alpha: 0.13),
+                    borderRadius: BorderRadius.circular(11),
+                  ),
+                  child: const Icon(
+                    Icons.view_list_rounded,
+                    color: AppColor.blueMainColor,
+                    size: 19,
+                  ),
+                ),
+                const SizedBox(width: 11),
+                Expanded(
+                  child: Text(
+                    AppString.viewSubcategoryTotalsTitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyle.subSectionTextStyle(
+                      fontsize: 12.5,
+                      fontweight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: isDarkMode ? Colors.white60 : Colors.black45,
+                ),
+              ],
+            ),
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _pieChartHeader(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 18, bottom: 6),
+      child: Row(
+        children: [
+          Container(
+            height: 32,
+            width: 32,
+            decoration: BoxDecoration(
+              color: AppColor.selfDevelopmentPieChartColor
+                  .withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(
+              Icons.pie_chart_outline_rounded,
+              color: AppColor.selfDevelopmentPieChartColor,
+              size: 18,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: specialSectionTitle(
+              mainTitleName: AppString.entireLifeTitle,
+              elevatedTitleName: AppString.entireLifeInSlicesTitle,
+            ),
+          ),
+        ],
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-        child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Main Category Totals Title
-        Padding(
-          padding: const EdgeInsets.only(top: 12.0, left: 12),
-          child: Text(
-            AppString.mainCategoryTotalTitle,
-            style: AppTextStyle.mainCategoryTotalTitle(),
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final panelColor = isDarkMode
+        ? AppColor.darkModeContentWidget
+        : AppColor.lightModeContentWidget;
+    final borderColor =
+        isDarkMode ? Colors.white.withValues(alpha: 0.10) : Colors.black12;
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(10, 0, 10, 22),
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 18),
+      decoration: BoxDecoration(
+        color: panelColor,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: borderColor),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDarkMode ? 0.18 : 0.045),
+            blurRadius: 18,
+            offset: const Offset(0, 9),
           ),
-        ),
-        // entire data
-        const EntireDataStatistic(),
-
-        // view subcategory totals route
-        _subcategoryViewTotals(context),
-
-        // Pie Chart Title
-        Padding(
-          padding: const EdgeInsets.only(left: 10.0, top: 10),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              makeTransactionsIcon(),
-              const SizedBox(
-                width: 10,
-              ),
-              specialSectionTitle(
-                  mainTitleName: AppString.entireLifeTitle,
-                  elevatedTitleName: AppString.entireLifeInSlicesTitle),
-            ],
-          ),
-        ),
-
-        // pie chart
-        const AnalyticsMainCategoryDistributionPieChart()
-      ],
-    ));
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _summaryHeader(context),
+          const SizedBox(height: 14),
+          const EntireDataStatistic(),
+          _subcategoryViewTotals(context),
+          _pieChartHeader(context),
+          const AnalyticsMainCategoryDistributionPieChart(),
+        ],
+      ),
+    );
   }
+}
+
+class _CategorySummaryItem {
+  final String name;
+  final String initials;
+  final String totalHours;
+  final String totalDays;
+  final String average;
+  final Color accentColor;
+  final IconData icon;
+
+  const _CategorySummaryItem({
+    required this.name,
+    required this.initials,
+    required this.totalHours,
+    required this.totalDays,
+    required this.average,
+    required this.accentColor,
+    required this.icon,
+  });
+}
+
+List<_CategorySummaryItem> _categorySummaryItems(
+  Map<String, dynamic> totals,
+) {
+  String value(String key, String suffix) {
+    return "${totals[key] ?? 0} $suffix";
+  }
+
+  return [
+    _CategorySummaryItem(
+      name: AppString.sleepMainCategory,
+      initials: "SP",
+      totalHours: value("sleepHours", "HRS"),
+      totalDays: value("sleepDays", "days"),
+      average: value("sleepAverage", "hrs/day"),
+      accentColor: AppColor.sleepPieChartColor,
+      icon: Icons.bedtime_rounded,
+    ),
+    _CategorySummaryItem(
+      name: AppString.educationMainCategory,
+      initials: "ED",
+      totalHours: value("educationHours", "HRS"),
+      totalDays: value("educationDays", "days"),
+      average: value("educationAverage", "hrs/day"),
+      accentColor: AppColor.educationPieChartColor,
+      icon: Icons.school_rounded,
+    ),
+    _CategorySummaryItem(
+      name: AppString.workMainCategory,
+      initials: "WK",
+      totalHours: value("workHours", "HRS"),
+      totalDays: value("workDays", "days"),
+      average: value("workAverage", "hrs/day"),
+      accentColor: AppColor.workPieChartColor,
+      icon: Icons.work_rounded,
+    ),
+    _CategorySummaryItem(
+      name: AppString.skillMainCategory,
+      initials: "SK",
+      totalHours: value("skillHours", "HRS"),
+      totalDays: value("skillDays", "days"),
+      average: value("skillAverage", "hrs/day"),
+      accentColor: AppColor.skillsPieChartColor,
+      icon: Icons.psychology_rounded,
+    ),
+    _CategorySummaryItem(
+      name: AppString.entertainmentMainCategory,
+      initials: "ET",
+      totalHours: value("entertainmentHours", "HRS"),
+      totalDays: value("entertainmentDays", "days"),
+      average: value("entertainmentAverage", "hrs/day"),
+      accentColor: AppColor.entertainmentPieChartColor,
+      icon: Icons.movie_filter_rounded,
+    ),
+    _CategorySummaryItem(
+      name: AppString.selfDevelopmentMainCategory,
+      initials: "PG",
+      totalHours: value("pgHours", "HRS"),
+      totalDays: value("pgDays", "days"),
+      average: value("pgAverage", "hrs/day"),
+      accentColor: AppColor.selfDevelopmentPieChartColor,
+      icon: Icons.self_improvement_rounded,
+    ),
+  ];
+}
+
+Widget _categoryLoadingState() {
+  return const Padding(
+    padding: EdgeInsets.symmetric(vertical: 24),
+    child: Center(
+      child: CircularProgressIndicator(
+        color: AppColor.blueMainColor,
+      ),
+    ),
+  );
+}
+
+Widget _categoryErrorState(Object? error) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 18),
+    child: Text(
+      'Error: $error',
+      style: AppTextStyle.subSectionTextStyle(
+        fontsize: 12,
+        fontweight: FontWeight.normal,
+        color: Colors.redAccent,
+      ),
+    ),
+  );
+}
+
+Widget _categoryEmptyState() {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 18),
+    child: Center(
+      child: Text(
+        AppString.informationAboutNoData,
+        textAlign: TextAlign.center,
+        style: AppTextStyle.subSectionTextStyle(
+          fontsize: 12,
+          fontweight: FontWeight.normal,
+          color: Colors.blueGrey,
+        ),
+      ),
+    ),
+  );
 }
 
 // This section displays a summary of the main categories, including their
@@ -114,103 +363,45 @@ class EntireDataStatistic extends StatelessWidget {
         return userLoadingIndicator();
       }
 
-      return FutureBuilder(
-          future: main.retrieveAllMainCategoryTotals(currentUser: userUid),
+      return CachedFutureBuilder<List<Map<String, dynamic>>>(
+          cacheKey: 'category-summary-report-$userUid-${main.refreshKey}',
+          futureFactory: () =>
+              main.retrieveAllMainCategoryTotals(currentUser: userUid),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(
-                  color: AppColor.blueMainColor,
-                ),
-              );
+              return _categoryLoadingState();
             } else if (snapshot.hasError) {
-              return Text('Error: ${snapshot.error}');
+              return _categoryErrorState(snapshot.error);
             } else {
-              final allMainCategoryTotals = snapshot.data;
+              final allMainCategoryTotals = snapshot.data ?? [];
 
-              logger.i(allMainCategoryTotals);
+              if (allMainCategoryTotals.isEmpty) {
+                return _categoryEmptyState();
+              }
 
-              return Container(
-                  margin: const EdgeInsets.all(10.0),
-                  child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          // sleep
-                          CategoryBuilder(
-                            mainCategoryName: AppString.sleepMainCategory,
-                            galleryInitials: "SP",
-                            totalHours:
-                                "${allMainCategoryTotals![0]["sleepHours"]} HRS",
-                            totalDays:
-                                "${allMainCategoryTotals[0]["sleepDays"]} days",
-                            average:
-                                "${allMainCategoryTotals[0]["sleepAverage"]} hrs/day",
-                          ),
+              final categoryItems =
+                  _categorySummaryItems(allMainCategoryTotals.first);
 
-                          // Education Information
-                          CategoryBuilder(
-                            mainCategoryName: AppString.educationMainCategory,
-                            galleryInitials: "ED",
-                            totalHours:
-                                "${allMainCategoryTotals[0]["educationHours"]} HRS",
-                            totalDays:
-                                "${allMainCategoryTotals[0]["educationDays"]} days",
-                            average:
-                                "${allMainCategoryTotals[0]["educationAverage"]} hrs/day",
-                          ),
+              return LayoutBuilder(
+                builder: (context, constraints) {
+                  final useTwoColumns = constraints.maxWidth >= 360;
+                  final cardWidth = useTwoColumns
+                      ? (constraints.maxWidth - 10) / 2
+                      : constraints.maxWidth;
 
-                          // Work Information
-                          CategoryBuilder(
-                            mainCategoryName: AppString.workMainCategory,
-                            galleryInitials: "WK",
-                            totalHours:
-                                "${allMainCategoryTotals[0]["workHours"]} HRS",
-                            totalDays:
-                                "${allMainCategoryTotals[0]["workDays"]} days",
-                            average:
-                                "${allMainCategoryTotals[0]["workAverage"]} hrs/day",
-                          ),
-
-                          // Skills Information
-                          CategoryBuilder(
-                            mainCategoryName: AppString.skillMainCategory,
-                            galleryInitials: "SK",
-                            totalHours:
-                                "${allMainCategoryTotals[0]["skillHours"]} HRS",
-                            totalDays:
-                                "${allMainCategoryTotals[0]["skillDays"]} days",
-                            average:
-                                "${allMainCategoryTotals[0]["skillAverage"]} hrs/day",
-                          ),
-
-                          // Entertainment Information
-                          CategoryBuilder(
-                            mainCategoryName:
-                                AppString.entertainmentMainCategory,
-                            galleryInitials: "ET",
-                            totalHours:
-                                "${allMainCategoryTotals[0]["entertainmentHours"]} HRS",
-                            totalDays:
-                                "${allMainCategoryTotals[0]["entertainmentDays"]} days",
-                            average:
-                                "${allMainCategoryTotals[0]["entertainmentAverage"]} hrs/day",
-                          ),
-
-                          // Self Development Information
-                          CategoryBuilder(
-                            mainCategoryName:
-                                AppString.selfDevelopmentMainCategory,
-                            galleryInitials: "PG",
-                            totalHours:
-                                "${allMainCategoryTotals[0]["pgHours"]} HRS",
-                            totalDays:
-                                "${allMainCategoryTotals[0]["pgDays"]} days",
-                            average:
-                                "${allMainCategoryTotals[0]["pgAverage"]} hrs/day",
-                          ),
-                        ],
-                      )));
+                  return Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: [
+                      for (final item in categoryItems)
+                        _CategoryBuilder(
+                          item: item,
+                          width: cardWidth,
+                        ),
+                    ],
+                  );
+                },
+              );
             }
           });
     });
@@ -222,95 +413,114 @@ class EntireDataStatistic extends StatelessWidget {
 // information for each main category.
 // It handles the construction and layout of the gallery, ensuring that each
 // main category is presented effectively.
-class CategoryBuilder extends StatelessWidget {
-  final String mainCategoryName;
-  final String galleryInitials;
-  final String totalHours;
-  final String totalDays;
-  final String average;
-  final double? dividerWidth;
+class _CategoryBuilder extends StatelessWidget {
+  final _CategorySummaryItem item;
+  final double width;
 
-  const CategoryBuilder({
+  const _CategoryBuilder({
     super.key,
-    required this.mainCategoryName,
-    required this.galleryInitials,
-    required this.totalHours,
-    required this.totalDays,
-    required this.average,
-    this.dividerWidth = 120, // Default value
+    required this.item,
+    required this.width,
   });
 
-  // days and average text layout
-  Widget _daysAndAverageTextLayout(bool isDays) {
-    return Padding(
-      padding: isDays
-          ? const EdgeInsets.only(left: 50)
-          : const EdgeInsets.only(right: 50),
+  Widget _smallMetric({
+    required String label,
+    required String value,
+  }) {
+    return Expanded(
       child: Text(
-        isDays ? totalDays : average,
+        "$label\n$value",
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        textAlign: TextAlign.left,
         style: AppTextStyle.subSectionTextStyle(
-            fontsize: 12, color: AppColor.tileBackgroundColor),
+          fontsize: 10.5,
+          fontweight: FontWeight.w700,
+          color: Colors.blueGrey,
+        ),
       ),
-    );
-  }
-
-  // hours text layout
-  Widget _hoursTextLayout() {
-    return Text(
-      totalHours,
-      style: AppTextStyle.sectionTitleTextStyle(fontsize: 20),
-    );
-  }
-
-  // hours, days, and average
-  Widget _hoursDaysAverage() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        // days
-        _daysAndAverageTextLayout(true),
-
-        // hours
-        _hoursTextLayout(),
-
-        // average
-        _daysAndAverageTextLayout(false),
-      ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(10.0),
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final borderColor =
+        isDarkMode ? Colors.white.withValues(alpha: 0.08) : Colors.black12;
+    final tileColor = isDarkMode
+        ? Colors.white.withValues(alpha: 0.035)
+        : Colors.white.withValues(alpha: 0.72);
+
+    return SizedBox(
+      width: width,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // main category name and image
-          Text(
-            mainCategoryName,
-            style:
-                AppTextStyle.subSectionTextStyle(fontweight: FontWeight.normal),
-          ),
-
-          // hours, days, and average
-          Center(child: _hoursDaysAverage()),
-
-          // main category image representation
-          Align(
-            alignment: Alignment.bottomLeft,
-            child: Text(
-              galleryInitials,
-              style: AppTextStyle.subSectionTextStyle(fontsize: 11.5),
+          Container(
+            padding: const EdgeInsets.all(11),
+            decoration: BoxDecoration(
+              color: tileColor,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: borderColor),
             ),
-          ),
-
-          // gallery divider
-          SizedBox(
-            width: dividerWidth,
-            child: const Divider(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      height: 34,
+                      width: 34,
+                      decoration: BoxDecoration(
+                        color: item.accentColor.withValues(alpha: 0.13),
+                        borderRadius: BorderRadius.circular(11),
+                      ),
+                      child: Icon(
+                        item.icon,
+                        color: item.accentColor,
+                        size: 18,
+                      ),
+                    ),
+                    const SizedBox(width: 9),
+                    Expanded(
+                      child: Text(
+                        item.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyle.subSectionTextStyle(
+                          fontsize: 12.5,
+                          fontweight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      item.initials,
+                      style: AppTextStyle.subSectionTextStyle(
+                        fontsize: 10,
+                        fontweight: FontWeight.w800,
+                        color: item.accentColor,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  item.totalHours,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyle.sectionTitleTextStyle(
+                    fontsize: 16,
+                  ).copyWith(color: item.accentColor),
+                ),
+                const SizedBox(height: 9),
+                Row(
+                  children: [
+                    _smallMetric(label: "Days", value: item.totalDays),
+                    const SizedBox(width: 6),
+                    _smallMetric(label: "Avg", value: item.average),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
       ),
