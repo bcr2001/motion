@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:motion/motion_core/mc_sqlite/xp_policy.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_date_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_year_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/first_and_last_pvd.dart';
@@ -357,6 +358,16 @@ class EfficienyScoreWindow extends StatelessWidget {
   }
 }
 
+class _XpTargetDialogData {
+  final NextBadgeProgress progress;
+  final Map<String, int> earnedXpByCategory;
+
+  const _XpTargetDialogData({
+    required this.progress,
+    required this.earnedXpByCategory,
+  });
+}
+
 // EFS Current Year Display
 // Displays the current year EFS, and correnponding badge
 class CurrentYearEFSDisplay extends StatelessWidget {
@@ -385,6 +396,404 @@ class CurrentYearEFSDisplay extends StatelessWidget {
       currentScore: score,
       currentYearXp: totalXp,
       trackedDays: trackedDays,
+    );
+  }
+
+  Future<_XpTargetDialogData> _loadXpTargetDialogData({
+    required ExperiencePointTableProvider xpProvider,
+    required String currentUser,
+    required String currentYear,
+    required String currentDate,
+  }) async {
+    final progress = await _loadNextBadgeProgress(
+      xpProvider: xpProvider,
+      currentUser: currentUser,
+      currentYear: currentYear,
+    );
+    final earnedXpByCategory =
+        await xpProvider.retrieveDailyExperiencePointBreakdown(
+      currentUser: currentUser,
+      selectedDate: currentDate,
+    );
+
+    return _XpTargetDialogData(
+      progress: progress,
+      earnedXpByCategory: earnedXpByCategory,
+    );
+  }
+
+  Widget _xpTargetRow({
+    required BadgeXpTarget target,
+    required int earnedXp,
+    required bool isDarkMode,
+  }) {
+    final rowColor = isDarkMode
+        ? Colors.white.withValues(alpha: 0.055)
+        : AppColor.tileBackgroundColor.withValues(alpha: 0.045);
+    final accentColor = isDarkMode
+        ? AppColor.accountedColor.withValues(alpha: 0.85)
+        : AppColor.accountedColor;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
+      decoration: BoxDecoration(
+        color: rowColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDarkMode
+              ? Colors.white.withValues(alpha: 0.06)
+              : Colors.black.withValues(alpha: 0.045),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 4,
+            height: 28,
+            decoration: BoxDecoration(
+              color: accentColor,
+              borderRadius: BorderRadius.circular(99),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  target.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyle.subSectionTextStyle(
+                    fontsize: 13,
+                    fontweight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Earned: $earnedXp XP',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyle.subSectionTextStyle(
+                    fontsize: 11,
+                    fontweight: FontWeight.normal,
+                    color: Colors.blueGrey,
+                  ),
+                ),
+                const SizedBox(height: 1),
+                Text(
+                  'Target Time: ${_targetTimeLabel(target)}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyle.subSectionTextStyle(
+                    fontsize: 11,
+                    fontweight: FontWeight.normal,
+                    color: Colors.blueGrey,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: BoxDecoration(
+              color: accentColor.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(99),
+            ),
+            child: Text(
+              '${target.xp} XP',
+              style: AppTextStyle.subSectionTextStyle(
+                fontsize: 12,
+                fontweight: FontWeight.w800,
+                color: accentColor,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _targetTimeLabel(BadgeXpTarget target) {
+    final minutes = _targetMinutes(target);
+    if (minutes <= 0) return '0 min';
+
+    final hours = minutes ~/ 60;
+    final mins = minutes % 60;
+
+    if (hours == 0) return '$mins min';
+    if (mins == 0) return '${hours}h';
+    return '${hours}h ${mins}m';
+  }
+
+  int _targetMinutes(BadgeXpTarget target) {
+    switch (target.label) {
+      case 'Education':
+      case 'Work':
+      case 'Skills':
+      case 'Self Development':
+        return target.xp * 15;
+      case 'Sleep':
+        if (target.xp <= 8) return 300;
+        if (target.xp <= 15) return 360;
+        return 420;
+      case 'Tracking Bonus':
+        if (target.xp <= 1) return 480;
+        if (target.xp == 2) return 600;
+        if (target.xp == 3) return 720;
+        if (target.xp == 4) return 840;
+        return 960;
+      default:
+        return 0;
+    }
+  }
+
+  Widget _xpTargetDialogShell({
+    required BuildContext context,
+    required Widget child,
+  }) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final panelColor = isDarkMode
+        ? AppColor.darkModeContentWidget
+        : AppColor.lightModeContentWidget;
+    final borderColor =
+        isDarkMode ? Colors.white.withValues(alpha: 0.10) : Colors.black12;
+
+    return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      backgroundColor: panelColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: BorderSide(color: borderColor),
+      ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 450, maxHeight: 520),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 14, 10, 14),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    height: 38,
+                    width: 38,
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withValues(alpha: 0.14),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.bolt_rounded,
+                      color: Colors.orange,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 11),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          "Today's XP Target",
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyle.subSectionTextStyle(
+                            fontsize: 16,
+                            fontweight: FontWeight.w800,
+                          ),
+                        ),
+                        Text(
+                          'Next badge pace',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyle.subSectionTextStyle(
+                            fontsize: 11,
+                            fontweight: FontWeight.normal,
+                            color: Colors.blueGrey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Tooltip(
+                    message: 'Close',
+                    child: IconButton(
+                      visualDensity: VisualDensity.compact,
+                      icon: const Icon(Icons.close_rounded),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.only(right: 6),
+                  child: child,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showXpTargetsDialog(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        final isDarkMode = Theme.of(dialogContext).brightness == Brightness.dark;
+
+        return Consumer4<ExperiencePointTableProvider, UserUidProvider,
+            CurrentYearProvider, CurrentDateProvider>(
+          builder: (context, xp, user, year, date, child) {
+            final currentUser = user.userUid;
+            if (currentUser == null) {
+              return _xpTargetDialogShell(
+                context: dialogContext,
+                child: const SizedBox(
+                  height: 48,
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+              );
+            }
+
+            final currentYear = year.currentYear;
+            final currentDate = date.currentDate;
+
+            return FutureBuilder<_XpTargetDialogData>(
+              future: _loadXpTargetDialogData(
+                xpProvider: xp,
+                currentUser: currentUser,
+                currentYear: currentYear,
+                currentDate: currentDate,
+              ),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return _xpTargetDialogShell(
+                    context: dialogContext,
+                    child: const SizedBox(
+                      height: 48,
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                  );
+                }
+
+                if (snapshot.hasError || snapshot.data == null) {
+                  return _xpTargetDialogShell(
+                    context: dialogContext,
+                    child: const Text("N/A"),
+                  );
+                }
+
+                final dialogData = snapshot.data!;
+                final progress = dialogData.progress;
+                final nextBadge = progress.nextBadge;
+
+                if (progress.isTopBadge || nextBadge == null) {
+                  return _xpTargetDialogShell(
+                    context: dialogContext,
+                    child: Text(
+                      'Top Badge Earned',
+                      style: AppTextStyle.subSectionTextStyle(
+                        fontsize: 14,
+                        fontweight: FontWeight.w700,
+                      ),
+                    ),
+                  );
+                }
+
+                final dailyTarget = progress.averageDailyXp.ceil();
+                final targetRows = EfsBadgePolicy.dailyXpTargets(dailyTarget);
+
+                return _xpTargetDialogShell(
+                  context: dialogContext,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.withValues(alpha: 0.10),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    'Next Badge',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: AppTextStyle.subSectionTextStyle(
+                                      fontsize: 11,
+                                      fontweight: FontWeight.normal,
+                                      color: Colors.blueGrey,
+                                    ),
+                                  ),
+                                  Text(
+                                    nextBadge.name,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: AppTextStyle.subSectionTextStyle(
+                                      fontsize: 15,
+                                      fontweight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              '$dailyTarget XP',
+                              style: AppTextStyle.subSectionTextStyle(
+                                fontsize: 18,
+                                fontweight: FontWeight.w900,
+                                color: Colors.orange,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (!progress.isAttainableThisYear) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          'Daily Max: ${MotionXpPolicy.maxDailyXp} XP',
+                          textAlign: TextAlign.right,
+                          style: AppTextStyle.subSectionTextStyle(
+                            fontsize: 12,
+                            fontweight: FontWeight.normal,
+                            color: Colors.orange,
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 14),
+                      ...targetRows.map(
+                        (target) => _xpTargetRow(
+                          target: target,
+                          earnedXp:
+                              dialogData.earnedXpByCategory[target.label] ?? 0,
+                          isDarkMode: isDarkMode,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
     );
   }
 
@@ -425,10 +834,57 @@ class CurrentYearEFSDisplay extends StatelessWidget {
                 } else {
                   final snapResults = snapshot.data ?? 0;
 
-                  return Text(
-                    "$snapResults XP",
-                    style: AppTextStyle.accountedAndUnaccountedGallaryStyle(
-                        fontsize: 22, fontweight: FontWeight.w900),
+                  final isDarkMode =
+                      Theme.of(context).brightness == Brightness.dark;
+
+                  return Tooltip(
+                    message: "Today's XP Target",
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(14),
+                        onTap: () => _showXpTargetsDialog(context),
+                        child: Ink(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: isDarkMode
+                                ? AppColor.accountedColor
+                                    .withValues(alpha: 0.12)
+                                : AppColor.accountedColor
+                                    .withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: AppColor.accountedColor
+                                  .withValues(alpha: isDarkMode ? 0.28 : 0.18),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  "$snapResults XP",
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTextStyle
+                                      .accountedAndUnaccountedGallaryStyle(
+                                    fontsize: 17,
+                                    fontweight: FontWeight.w900,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              const Icon(
+                                Icons.info_outline_rounded,
+                                size: 14,
+                                color: AppColor.accountedColor,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                   );
                 }
               });

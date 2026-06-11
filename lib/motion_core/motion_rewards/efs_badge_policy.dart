@@ -143,12 +143,88 @@ class EfsBadgePolicy {
     );
   }
 
+  static List<BadgeXpTarget> dailyXpTargets(int targetXp) {
+    final cappedTarget = targetXp.clamp(0, MotionXpPolicy.maxDailyXp).toInt();
+    if (cappedTarget == 0) return const [];
+
+    const targetCaps = [
+      BadgeXpTarget(label: 'Education', xp: 20),
+      BadgeXpTarget(label: 'Work', xp: 25),
+      BadgeXpTarget(label: 'Skills', xp: 20),
+      BadgeXpTarget(label: 'Self Development', xp: 20),
+      BadgeXpTarget(label: 'Sleep', xp: 25),
+      BadgeXpTarget(label: 'Tracking Bonus', xp: 5),
+    ];
+
+    var order = 0;
+    final rawTargets = targetCaps.map((target) {
+      final rawXp = cappedTarget * target.xp / MotionXpPolicy.maxDailyXp;
+      return _RawBadgeXpTarget(
+        label: target.label,
+        cap: target.xp,
+        floorXp: rawXp.floor(),
+        remainder: rawXp - rawXp.floor(),
+        order: order++,
+      );
+    }).toList();
+
+    var allocatedXp = rawTargets.fold<int>(
+      0,
+      (total, target) => total + target.floorXp,
+    );
+    var remainingXp = cappedTarget - allocatedXp;
+
+    rawTargets.sort((a, b) => b.remainder.compareTo(a.remainder));
+    for (final target in rawTargets) {
+      if (remainingXp <= 0) break;
+      if (target.floorXp >= target.cap) continue;
+      target.floorXp++;
+      remainingXp--;
+    }
+
+    rawTargets.sort((a, b) => a.order.compareTo(b.order));
+
+    return rawTargets
+        .where((target) => target.floorXp > 0)
+        .map((target) => BadgeXpTarget(
+              label: target.label,
+              xp: target.floorXp,
+            ))
+        .toList();
+  }
+
   static int _daysRemainingInYear(DateTime date) {
     final today = DateTime(date.year, date.month, date.day);
     final endOfYear = DateTime(date.year, 12, 31);
     if (today.isAfter(endOfYear)) return 0;
     return endOfYear.difference(today).inDays + 1;
   }
+}
+
+class BadgeXpTarget {
+  final String label;
+  final int xp;
+
+  const BadgeXpTarget({
+    required this.label,
+    required this.xp,
+  });
+}
+
+class _RawBadgeXpTarget {
+  final String label;
+  final int cap;
+  int floorXp;
+  final double remainder;
+  final int order;
+
+  _RawBadgeXpTarget({
+    required this.label,
+    required this.cap,
+    required this.floorXp,
+    required this.remainder,
+    required this.order,
+  });
 }
 
 class NextBadgeProgress {

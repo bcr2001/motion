@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:motion/motion_core/mc_sqlite/xp_policy.dart';
 import 'package:motion/motion_core/motion_rewards/efs_badge_policy.dart';
 
 void main() {
@@ -50,6 +51,36 @@ void main() {
       expect(
         EfsBadgePolicy.badgeForScore(105).level,
         EfsBadgeLevel.timeWizard,
+      );
+    });
+
+    test('splits daily XP targets across XP-earning categories', () {
+      final targets = EfsBadgePolicy.dailyXpTargets(72);
+
+      expect(
+        targets.map((target) => target.label),
+        [
+          'Education',
+          'Work',
+          'Skills',
+          'Self Development',
+          'Sleep',
+          'Tracking Bonus',
+        ],
+      );
+      expect(
+        targets.fold<int>(0, (total, target) => total + target.xp),
+        72,
+      );
+    });
+
+    test('caps daily XP targets at the maximum possible daily XP', () {
+      final targets =
+          EfsBadgePolicy.dailyXpTargets(MotionXpPolicy.maxDailyXp + 50);
+
+      expect(
+        targets.fold<int>(0, (total, target) => total + target.xp),
+        MotionXpPolicy.maxDailyXp,
       );
     });
   });

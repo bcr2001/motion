@@ -1419,6 +1419,69 @@ class TrackerDatabaseHelper {
     }
   }
 
+  Future<Map<String, int>> dailyExperiencePointBreakdown({
+    required String currentUser,
+    required String selectedDate,
+  }) async {
+    try {
+      final db = await database;
+
+      final result = await db.query(
+        MotionDbTables.experiencePoints,
+        columns: const [
+          MotionDbColumns.educationXp,
+          MotionDbColumns.workXp,
+          MotionDbColumns.skillsXp,
+          MotionDbColumns.selfDevelopmentXp,
+          MotionDbColumns.sleepXp,
+          MotionDbColumns.accountabilityBonusXp,
+        ],
+        where:
+            '${MotionDbColumns.currentLoggedInUser} = ? AND ${MotionDbColumns.date} = ?',
+        whereArgs: [currentUser, selectedDate],
+        limit: 1,
+      );
+
+      if (result.isEmpty) {
+        return const {
+          'Education': 0,
+          'Work': 0,
+          'Skills': 0,
+          'Self Development': 0,
+          'Sleep': 0,
+          'Tracking Bonus': 0,
+        };
+      }
+
+      final row = result.first;
+      int readXp(String column) {
+        final value = row[column];
+        return value is int ? value : int.tryParse('$value') ?? 0;
+      }
+
+      return {
+        'Education': readXp(MotionDbColumns.educationXp),
+        'Work': readXp(MotionDbColumns.workXp),
+        'Skills': readXp(MotionDbColumns.skillsXp),
+        'Self Development': readXp(MotionDbColumns.selfDevelopmentXp),
+        'Sleep': readXp(MotionDbColumns.sleepXp),
+        'Tracking Bonus': readXp(MotionDbColumns.accountabilityBonusXp),
+      };
+    } catch (e, stackTrace) {
+      logDatabaseError(
+          "TrackerDatabaseHelper.dailyExperiencePointBreakdown", e, stackTrace);
+    }
+
+    return const {
+      'Education': 0,
+      'Work': 0,
+      'Skills': 0,
+      'Self Development': 0,
+      'Sleep': 0,
+      'Tracking Bonus': 0,
+    };
+  }
+
   // this function get the most and least productive months
   Future<List<Map<String, dynamic>>> getMostAndLeastProductiveMonths(
       {required bool getMostProductiveMonth,

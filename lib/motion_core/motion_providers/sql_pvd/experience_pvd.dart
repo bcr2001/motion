@@ -79,6 +79,16 @@ class ExperiencePointTableProvider extends ChangeNotifier {
         selectedDate: selectedDate);
   }
 
+  Future<Map<String, int>> retrieveDailyExperiencePointBreakdown({
+    required String currentUser,
+    required String selectedDate,
+  }) async {
+    return await trackDbInstance.dailyExperiencePointBreakdown(
+      currentUser: requireCurrentUser(currentUser),
+      selectedDate: selectedDate,
+    );
+  }
+
   // retrieves the most and least productive months
   // based on the experience points earned for a particular year
   Future<List<Map<String, dynamic>>> retrieveMostAndLeastProductiveMonths(
