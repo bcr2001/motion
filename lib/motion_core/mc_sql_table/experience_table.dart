@@ -8,6 +8,7 @@ class ExperiencePoints {
   int skillsXP;
   int sdXP;
   int sleepXP;
+  int accountabilityBonusXP;
   String currentLoggedInUser;
 
   ExperiencePoints(
@@ -17,6 +18,7 @@ class ExperiencePoints {
       this.skillsXP = 0,
       this.sdXP = 0,
       this.sleepXP = 0,
+      this.accountabilityBonusXP = 0,
       required this.currentLoggedInUser});
 
   // Factory constructor to convert a map to MainCategory object
@@ -28,6 +30,8 @@ class ExperiencePoints {
         skillsXP: map[MotionDbColumns.skillsXp] ?? 0,
         sdXP: map[MotionDbColumns.selfDevelopmentXp] ?? 0,
         sleepXP: map[MotionDbColumns.sleepXp] ?? 0,
+        accountabilityBonusXP:
+            map[MotionDbColumns.accountabilityBonusXp] ?? 0,
         currentLoggedInUser: map[MotionDbColumns.currentLoggedInUser]);
   }
 
@@ -40,12 +44,13 @@ class ExperiencePoints {
       MotionDbColumns.skillsXp: skillsXP,
       MotionDbColumns.selfDevelopmentXp: sdXP,
       MotionDbColumns.sleepXp: sleepXP,
+      MotionDbColumns.accountabilityBonusXp: accountabilityBonusXP,
       MotionDbColumns.currentLoggedInUser: currentLoggedInUser
     };
   }
 
   @override
   String toString() {
-    return 'Experience Points{date: $date, educationXP": $educationXP, workXP: $workXP, skillsXP: $skillsXP, sdXP: $sdXP, sleepXP: $sleepXP, currentLoggedInUser: $currentLoggedInUser}';
+    return 'Experience Points{date: $date, educationXP": $educationXP, workXP: $workXP, skillsXP: $skillsXP, sdXP: $sdXP, sleepXP: $sleepXP, accountabilityBonusXP: $accountabilityBonusXP, currentLoggedInUser: $currentLoggedInUser}';
   }
 }

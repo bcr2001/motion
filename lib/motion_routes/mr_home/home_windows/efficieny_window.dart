@@ -20,48 +20,6 @@ import '../../../motion_themes/mth_styling/motion_text_styling.dart';
 /// and error states.
 /// On successful data retrieval, it shows the calculated efficiency score.
 
-class _CachedFutureBuilder<T> extends StatefulWidget {
-  final Object cacheKey;
-  final Future<T> Function() futureFactory;
-  final Widget Function(BuildContext context, AsyncSnapshot<T> snapshot) builder;
-
-  const _CachedFutureBuilder({
-    required this.cacheKey,
-    required this.futureFactory,
-    required this.builder,
-  });
-
-  @override
-  State<_CachedFutureBuilder<T>> createState() =>
-      _CachedFutureBuilderState<T>();
-}
-
-class _CachedFutureBuilderState<T> extends State<_CachedFutureBuilder<T>> {
-  late Future<T> _future;
-
-  @override
-  void initState() {
-    super.initState();
-    _future = widget.futureFactory();
-  }
-
-  @override
-  void didUpdateWidget(covariant _CachedFutureBuilder<T> oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.cacheKey != widget.cacheKey) {
-      _future = widget.futureFactory();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<T>(
-      future: _future,
-      builder: widget.builder,
-    );
-  }
-}
-
 /// Get's the efficiency score for the selected date on the report
 /// page heat map section
 class EfficienyScoreSelectedDay extends StatelessWidget {
@@ -80,7 +38,7 @@ class EfficienyScoreSelectedDay extends StatelessWidget {
         return const ShimmerWidget.rectangular(width: 50, height: 30);
       }
 
-      return _CachedFutureBuilder<int>(
+      return CachedFutureBuilder<int>(
           cacheKey: 'daily-xp-$userUID-$selectedDay-${xp.refreshKey}',
           futureFactory: () => xp.retrieveDailyExperiencePoints(
               currentUser: userUID, selectedDate: selectedDay),
@@ -121,7 +79,7 @@ class XPForTheCurrentDay extends StatelessWidget {
         return const ShimmerWidget.rectangular(width: 120, height: 40);
       }
 
-      return _CachedFutureBuilder<int>(
+      return CachedFutureBuilder<int>(
           cacheKey: 'today-xp-$currentUserUid-$today-${xp.refreshKey}',
           futureFactory: () => xp.retrieveDailyExperiencePoints(
               currentUser: currentUserUid, selectedDate: today),
@@ -159,15 +117,15 @@ class EfficienyScoreSelectedYearOrMonth extends StatelessWidget {
   Widget _compactBadgeImage(EfsBadgeLevel level) {
     switch (level) {
       case EfsBadgeLevel.timeNovice:
-        return getImageAsset("sloth.png", 30, 30);
+        return getImageAsset("sloth.png", 42, 42);
       case EfsBadgeLevel.focusedBeginner:
-        return getImageAsset("dolphin.png", 30, 30);
+        return getImageAsset("dolphin.png", 42, 42);
       case EfsBadgeLevel.timePro:
-        return getImageAsset("eagle.png", 30, 30);
+        return getImageAsset("eagle.png", 42, 42);
       case EfsBadgeLevel.timeMaster:
-        return getImageAsset("dragon.png", 30, 30);
+        return getImageAsset("dragon.png", 42, 42);
       case EfsBadgeLevel.timeWizard:
-        return getImageAsset("wizard.png", 30, 30);
+        return getImageAsset("wizard.png", 42, 42);
     }
   }
 
@@ -175,103 +133,121 @@ class EfficienyScoreSelectedYearOrMonth extends StatelessWidget {
     final badge = EfsBadgePolicy.badgeForScore(score);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final borderColor =
-        isDarkMode ? Colors.white.withValues(alpha: 0.10) : Colors.black12;
+        isDarkMode ? Colors.white.withValues(alpha: 0.12) : Colors.black12;
     final panelColor = isDarkMode
         ? AppColor.darkModeContentWidget
         : AppColor.lightModeContentWidget;
-    final badgeBackground = isDarkMode
-        ? Colors.white.withValues(alpha: 0.06)
-        : AppColor.tileBackgroundColor.withValues(alpha: 0.08);
-
-    return Align(
-      alignment: Alignment.centerRight,
-      child: Padding(
-        padding: const EdgeInsets.only(left: 10, right: 12, top: 8, bottom: 10),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 280),
-          child: Card(
-            elevation: 0,
-            margin: EdgeInsets.zero,
-            color: panelColor,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: borderColor),
+    final badgeShellColor = isDarkMode
+        ? Colors.white.withValues(alpha: 0.07)
+        : AppColor.blueMainColor.withValues(alpha: 0.08);
+    final scoreShellColor = isDarkMode
+        ? AppColor.blueMainColor.withValues(alpha: 0.18)
+        : AppColor.blueMainColor.withValues(alpha: 0.10);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 14),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: panelColor,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: borderColor),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDarkMode ? 0.18 : 0.05),
+              blurRadius: 18,
+              offset: const Offset(0, 8),
             ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Container(
+                  height: 58,
+                  width: 58,
+                  decoration: BoxDecoration(
+                    color: badgeShellColor,
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(color: borderColor),
+                  ),
+                  child: Center(
+                    child: SizedBox(
+                      height: 42,
+                      width: 42,
+                      child: _compactBadgeImage(badge.level),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 13),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        "Badge Earned",
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyle.subSectionTextStyle(
+                          fontsize: 11,
+                          fontweight: FontWeight.w700,
+                          color: Colors.blueGrey,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        badge.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyle.subSectionTextStyle(
+                          fontsize: 16,
+                          fontweight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                  decoration: BoxDecoration(
+                    color: scoreShellColor,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
                         AppString.efficiencyScoreTitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: AppTextStyle.subSectionTextStyle(
-                            fontsize: 12, color: Colors.blueGrey),
+                          fontsize: 10,
+                          fontweight: FontWeight.w700,
+                          color: Colors.blueGrey,
+                        ),
                       ),
                       Text(
                         score.toStringAsFixed(2),
                         style: AppTextStyle.sectionTitleTextStyle(
-                            fontsize: 22.5),
+                          fontsize: 22,
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: badgeBackground,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          height: 34,
-                          width: 34,
-                          child: _compactBadgeImage(badge.level),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Badge Earned",
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: AppTextStyle.subSectionTextStyle(
-                                    fontsize: 11,
-                                    fontweight: FontWeight.normal,
-                                    color: Colors.blueGrey),
-                              ),
-                              Text(
-                                badge.name,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: AppTextStyle.subSectionTextStyle(
-                                  fontsize: 13,
-                                  fontweight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ),
+          ],
         ),
       ),
     );
   }
-
   @override
   Widget build(BuildContext context) {
     return Consumer3<ExperiencePointTableProvider, UserUidProvider,
@@ -288,7 +264,7 @@ class EfficienyScoreSelectedYearOrMonth extends StatelessWidget {
       String lastDayOfMonth = fal.lastDay;
 
       return getSelectedYearEfs
-          ? _CachedFutureBuilder<double>(
+          ? CachedFutureBuilder<double>(
               cacheKey:
                   'selected-year-efs-$currentUserUid-$selectedYear-${xp.refreshKey}',
               futureFactory: () => xp.retrieveYearExperiencePointsEfficiencyScore(
@@ -304,7 +280,7 @@ class EfficienyScoreSelectedYearOrMonth extends StatelessWidget {
                   return _selectedYearEfsAndBadge(context, resultSnapShot);
                 }
               })
-          : _CachedFutureBuilder<double>(
+          : CachedFutureBuilder<double>(
               cacheKey:
                   'selected-month-efs-$currentUserUid-$firstDayOfMonth-$lastDayOfMonth-${xp.refreshKey}',
               futureFactory: () => xp.retrieveMonthlyEfficiencyScore(
@@ -345,7 +321,7 @@ class EfficienyScoreWindow extends StatelessWidget {
       final String currentYear = year.currentYear;
 
       return getEntireScore
-          ? _CachedFutureBuilder<double>(
+          ? CachedFutureBuilder<double>(
               cacheKey: 'entire-efs-$currentUser-${xp.refreshKey}',
               futureFactory: () => xp.retrieveExperiencePointsEfficiencyScore(
                   currentUser: currentUser),
@@ -361,7 +337,7 @@ class EfficienyScoreWindow extends StatelessWidget {
                       score: "$resultSnapShot", getEntire: true);
                 }
               })
-          : _CachedFutureBuilder<double>(
+          : CachedFutureBuilder<double>(
               cacheKey: 'year-efs-$currentUser-$currentYear-${xp.refreshKey}',
               futureFactory: () => xp.retrieveYearExperiencePointsEfficiencyScore(
                   currentUser: currentUser, currentYear: currentYear),
@@ -433,7 +409,7 @@ class CurrentYearEFSDisplay extends StatelessWidget {
 
           final String currentYear = year.currentYear;
 
-          return _CachedFutureBuilder<int>(
+          return CachedFutureBuilder<int>(
               cacheKey:
                   'total-xp-$currentUser-$isEntire-$currentYear-${xps.refreshKey}',
               futureFactory: () => xps.retrieveTotalXP(
@@ -522,7 +498,7 @@ class CurrentYearEFSDisplay extends StatelessWidget {
 
       final currentYear = year.currentYear;
 
-      return _CachedFutureBuilder<NextBadgeProgress>(
+      return CachedFutureBuilder<NextBadgeProgress>(
           cacheKey:
               'next-badge-progress-$currentUser-$currentYear-$score-${xp.refreshKey}',
           futureFactory: () => _loadNextBadgeProgress(
@@ -682,12 +658,14 @@ Widget efficiencySection({required String score, required bool getEntire}) {
 class ProductiveDayBuilder extends StatelessWidget {
   final String productiveMessage;
   final Future<dynamic>? future;
+  final Object? cacheKey;
   final String varableName;
 
   const ProductiveDayBuilder(
       {super.key,
       required this.productiveMessage,
       this.future,
+      this.cacheKey,
       required this.varableName});
 
   Widget _productiveDisplay(
@@ -722,8 +700,9 @@ class ProductiveDayBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-        future: future,
+    return CachedFutureBuilder<dynamic>(
+        cacheKey: cacheKey ?? future ?? productiveMessage,
+        futureFactory: () => future ?? Future.value([]),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const ShimmerWidget.rectangular(width: 100, height: 30);
@@ -731,6 +710,9 @@ class ProductiveDayBuilder extends StatelessWidget {
             return const Text("N/A");
           } else {
             final resultSnapShot = snapshot.data ?? [];
+            if (resultSnapShot.isEmpty) {
+              return const Text("N/A");
+            }
 
             // (most/least) productive date
             final String date = resultSnapShot[0][varableName];
@@ -781,6 +763,8 @@ class MostAndLeastProductiveDayBuilder extends StatelessWidget {
 
             return ProductiveDayBuilder(
               productiveMessage: AppString.mostProductiveDay,
+              cacheKey:
+                  'most-productive-day-$currentUserUid-$firstDayOfMonth-$lastDayOfMonth-${xp.refreshKey}',
               future: xp.retrieveMostAndLeastProductiveDays(
                   currentUser: currentUserUid,
                   firstDay: firstDayOfMonth,
@@ -803,6 +787,8 @@ class MostAndLeastProductiveDayBuilder extends StatelessWidget {
 
             return ProductiveDayBuilder(
               productiveMessage: AppString.leastProductiveDay,
+              cacheKey:
+                  'least-productive-day-$currentUserUid-$firstDayOfMonth-$lastDayOfMonth-${xp.refreshKey}',
               future: xp.retrieveMostAndLeastProductiveDays(
                   currentUser: currentUserUid,
                   firstDay: firstDayOfMonth,
@@ -835,6 +821,8 @@ class MostAndLeastProductiveMonthBuilder extends StatelessWidget {
 
             return ProductiveDayBuilder(
               productiveMessage: AppString.mostProductiveMonth,
+              cacheKey:
+                  'most-productive-month-$currentUserUid-$year-${xp.refreshKey}',
               future: xp.retrieveMostAndLeastProductiveMonths(
                   getMostProductiveMonth: getMostProductiveMonth,
                   currentUser: currentUserUid,
@@ -852,6 +840,8 @@ class MostAndLeastProductiveMonthBuilder extends StatelessWidget {
 
             return ProductiveDayBuilder(
               productiveMessage: AppString.leastProductiveMonth,
+              cacheKey:
+                  'least-productive-month-$currentUserUid-$year-${xp.refreshKey}',
               future: xp.retrieveMostAndLeastProductiveMonths(
                   getMostProductiveMonth: getMostProductiveMonth,
                   currentUser: currentUserUid,

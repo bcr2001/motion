@@ -56,8 +56,15 @@ class MotionHomeRoute extends StatelessWidget {
                   builder: (context, user, streak, child) {
                     final String? currentUser = user.userUid;
 
-                    return FutureBuilder<int>(
-                      future: streak.retrievedUserStreak(currentUser: currentUser ?? ""),
+                    if (currentUser == null) {
+                      return const ShimmerWidget.rectangular(
+                          width: 5, height: 5);
+                    }
+
+                    return CachedFutureBuilder<int>(
+                      cacheKey: 'streak-$currentUser-${streak.refreshKey}',
+                      futureFactory: () =>
+                          streak.retrievedUserStreak(currentUser: currentUser),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState == ConnectionState.waiting) {
                           return const ShimmerWidget.rectangular(

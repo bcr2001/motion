@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/first_and_last_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
+import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_routes/mr_home/home_reusable/back_home.dart';
 import 'package:motion/motion_routes/mr_home/home_reusable/front_home.dart';
@@ -37,8 +38,10 @@ class SummaryWindow extends StatelessWidget {
         // if the total amount of time for the current
         // month is 0, then the summary page info
         // is displayed
-        return FutureBuilder(
-            future: main.retrieveEntireMonthlyTotalMainCategoryTable(
+        return CachedFutureBuilder<double>(
+            cacheKey:
+                'summary-month-$currentUser-$firstDayOfMonth-$lastDayOfMonth-${main.refreshKey}',
+            futureFactory: () => main.retrieveEntireMonthlyTotalMainCategoryTable(
                 currentUser, firstDayOfMonth, lastDayOfMonth, false),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {

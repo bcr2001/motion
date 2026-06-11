@@ -2,7 +2,7 @@ import 'package:motion/motion_core/mc_sqlite/database_constants.dart';
 import 'package:sqflite/sqflite.dart';
 
 class TrackerDatabaseSchema {
-  static const int version = 12;
+  static const int version = 13;
   static const String _legacyTimeRecordedColumn = 'timeRecorded';
 
   static const String mainCategoryTable = MotionDbTables.mainCategory;
@@ -69,6 +69,7 @@ class TrackerDatabaseSchema {
         ${MotionDbColumns.skillsXp} INTEGER DEFAULT 0,
         ${MotionDbColumns.selfDevelopmentXp} INTEGER DEFAULT 0,
         ${MotionDbColumns.sleepXp} INTEGER DEFAULT 0,
+        ${MotionDbColumns.accountabilityBonusXp} INTEGER DEFAULT 0,
         ${MotionDbColumns.currentLoggedInUser} TEXT,
         PRIMARY KEY (${MotionDbColumns.date}, ${MotionDbColumns.currentLoggedInUser}),
         FOREIGN KEY (${MotionDbColumns.date}, ${MotionDbColumns.currentLoggedInUser})
@@ -134,9 +135,18 @@ class TrackerDatabaseSchema {
         MotionDbColumns.sleepXp, 'INTEGER DEFAULT 0');
     await _addColumnIfMissing(
         db, experiencePointsTable, MotionDbColumns.currentLoggedInUser, 'TEXT');
+    final addedAccountabilityBonusColumn = await _addColumnIfMissing(
+        db,
+        experiencePointsTable,
+        MotionDbColumns.accountabilityBonusXp,
+        'INTEGER DEFAULT 0');
+
+    if (addedAccountabilityBonusColumn) {
+      await _backfillExperiencePoints(db);
+    }
   }
 
-  static Future<void> _addColumnIfMissing(
+  static Future<bool> _addColumnIfMissing(
     Database db,
     String tableName,
     String columnName,
@@ -148,7 +158,10 @@ class TrackerDatabaseSchema {
     if (!columnExists) {
       await db.execute(
           'ALTER TABLE $tableName ADD COLUMN $columnName $columnDefinition');
+      return true;
     }
+
+    return false;
   }
 
   static Future<void> _createIndexes(Database db) async {
@@ -326,7 +339,8 @@ class TrackerDatabaseSchema {
           ${MotionDbColumns.workXp} = (${_workXpFor(rowAlias)}),
           ${MotionDbColumns.skillsXp} = (${_standardXpFor(MotionCategories.skills, rowAlias)}),
           ${MotionDbColumns.selfDevelopmentXp} = (${_selfDevelopmentXpFor(rowAlias)}),
-          ${MotionDbColumns.sleepXp} = (${_sleepXpFor(rowAlias)})
+          ${MotionDbColumns.sleepXp} = (${_sleepXpFor(rowAlias)}),
+          ${MotionDbColumns.accountabilityBonusXp} = (${_accountabilityBonusXpFor(rowAlias)})
     ''';
   }
 
@@ -374,6 +388,20 @@ class TrackerDatabaseSchema {
     ''';
   }
 
+  static String _accountabilityBonusXpFor(String rowAlias) {
+    return '''
+      SELECT CASE
+        WHEN total < 480 THEN 0
+        WHEN total < 600 THEN 1
+        WHEN total < 720 THEN 2
+        WHEN total < 840 THEN 3
+        WHEN total < 960 THEN 4
+        ELSE 5
+      END
+      FROM (${_trackedTotalForAllCategories(rowAlias)})
+    ''';
+  }
+
   static String _mainCategoryAssignments(String rowAlias) {
     return '''
           ${MotionDbColumns.education} = (${_categoryTotal(MotionCategories.education, rowAlias)}),
@@ -403,11 +431,46 @@ class TrackerDatabaseSchema {
     ''';
   }
 
+  static String _trackedTotalForAllCategories(String rowAlias) {
+    return '''
+      SELECT COALESCE(SUM(${MotionDbColumns.timeSpent}), 0) AS total
+      FROM $subcategoryTable
+      WHERE ${MotionDbColumns.date} = $rowAlias.${MotionDbColumns.date}
+        AND ${MotionDbColumns.currentLoggedInUser} =
+            $rowAlias.${MotionDbColumns.currentLoggedInUser}
+    ''';
+  }
+
   static String _rowMatch(String rowAlias) {
     return '''
       ${MotionDbColumns.date} = $rowAlias.${MotionDbColumns.date}
       AND ${MotionDbColumns.currentLoggedInUser} =
           $rowAlias.${MotionDbColumns.currentLoggedInUser}
     ''';
+  }
+
+  static Future<void> _backfillExperiencePoints(Database db) async {
+    await db.execute('''
+      INSERT OR IGNORE INTO $experiencePointsTable(
+        ${MotionDbColumns.date},
+        ${MotionDbColumns.currentLoggedInUser},
+        ${MotionDbColumns.educationXp},
+        ${MotionDbColumns.workXp},
+        ${MotionDbColumns.skillsXp},
+        ${MotionDbColumns.selfDevelopmentXp},
+        ${MotionDbColumns.sleepXp},
+        ${MotionDbColumns.accountabilityBonusXp}
+      )
+      SELECT
+        ${MotionDbColumns.date},
+        ${MotionDbColumns.currentLoggedInUser},
+        0, 0, 0, 0, 0, 0
+      FROM $mainCategoryTable
+    ''');
+
+    await db.execute('''
+      UPDATE $experiencePointsTable
+      SET ${_experiencePointAssignments(experiencePointsTable)}
+    ''');
   }
 }

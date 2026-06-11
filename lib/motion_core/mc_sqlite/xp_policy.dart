@@ -1,7 +1,7 @@
 import 'package:motion/motion_core/mc_sqlite/database_constants.dart';
 
 class MotionXpPolicy {
-  static const int maxDailyXp = 110;
+  static const int maxDailyXp = 115;
 
   static int productiveXp(int totalMinutes, {required int dailyCap}) {
     if (totalMinutes <= 0) {
@@ -27,6 +27,26 @@ class MotionXpPolicy {
     }
     if (totalMinutes <= 600) {
       return 15;
+    }
+
+    return 5;
+  }
+
+  static int accountabilityBonusXp(int totalMinutes) {
+    if (totalMinutes < 480) {
+      return 0;
+    }
+    if (totalMinutes < 600) {
+      return 1;
+    }
+    if (totalMinutes < 720) {
+      return 2;
+    }
+    if (totalMinutes < 840) {
+      return 3;
+    }
+    if (totalMinutes < 960) {
+      return 4;
     }
 
     return 5;

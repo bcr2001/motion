@@ -28,6 +28,12 @@ class UserUidProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> clearUserUid() async {
+    _userUid = null;
+    await _pref?.remove(uidKey);
+    notifyListeners();
+  }
+
   // Load the saved UID from SharedPreferences.
   Future<void> _loadSavedUid() async {
     final savedUid = _pref?.getString(uidKey);

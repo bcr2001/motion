@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
+import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_routes/mr_home/home_reusable/back_home.dart';
 import 'package:motion/motion_routes/mr_home/home_reusable/front_home.dart';
@@ -45,8 +46,9 @@ class MotionStatesRoute extends StatelessWidget {
               // indicate to the user that there is no data
               //  available and if data is available, then
               // the gallary windows for the years will be shown
-              return FutureBuilder(
-                  future: main.retrieveEntireTotalMainCategoryTable(
+              return CachedFutureBuilder<double>(
+                  cacheKey: 'stats-entire-total-$currentUser-${main.refreshKey}',
+                  futureFactory: () => main.retrieveEntireTotalMainCategoryTable(
                       currentUser, false),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
@@ -147,8 +149,9 @@ class AnalysisGallery extends StatelessWidget {
         }
     
         // returns a grid view of yearly break down gallaries
-        return FutureBuilder(
-            future: main.retrieveAccountedAndUnaccountedBrokenByYears(
+        return CachedFutureBuilder<List<Map<String, dynamic>>>(
+            cacheKey: 'annual-gallery-$currentUser-${main.refreshKey}',
+            futureFactory: () => main.retrieveAccountedAndUnaccountedBrokenByYears(
                 currentUser: currentUser),
             builder: ((context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {

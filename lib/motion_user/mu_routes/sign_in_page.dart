@@ -77,8 +77,8 @@ class _SignInPageState extends State<SignInPage> {
                       ),
                       const SizedBox(height: 26),
                       ContinueWithGoogleOr(
-                        onPressed: () {
-                          GoogleAuthService.signInWithGoogle(context);
+                        onPressed: () async {
+                          await GoogleAuthService.signInWithGoogle(context);
                         },
                       ),
                       TextFormFieldBuilder(

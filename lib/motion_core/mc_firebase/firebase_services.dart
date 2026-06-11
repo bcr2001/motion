@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:motion/main.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
@@ -12,7 +13,7 @@ class AuthServices {
   static final FirebaseAuth _auth = FirebaseAuth.instance;
 
   // sign in users using email and password
-  static Future<void> signInUser(context,
+  static Future<void> signInUser(BuildContext context,
       {required String userEmail, required userPassword}) async {
     // Display a circular loading indicator during sign-in.
     circularIndicator(context);
@@ -71,7 +72,7 @@ class AuthServices {
   }
 
   // sign up users using email and password
-  static signUpUser(context,
+  static Future<void> signUpUser(BuildContext context,
       {required String userEmailSignup,
       required String userPasswordSignUp}) async {
     // Display a circular loading indicator during sign-up.
@@ -97,13 +98,17 @@ class AuthServices {
   }
 
   // sign out user
-  static void signOutUser(context) async {
+  static Future<void> signOutUser(BuildContext context) async {
     // Dispose of the circular loading indicator upon sign-up completion.
     circularIndicator(context);
 
     try {
+      final userUidProvider =
+          Provider.of<UserUidProvider>(context, listen: false);
+
       // Sign the user out.
       await _auth.signOut();
+      await userUidProvider.clearUserUid();
     } on FirebaseAuthException catch (e) {
       // Handle errors during sign-out.
 

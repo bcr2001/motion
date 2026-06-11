@@ -156,10 +156,14 @@ Widget specialSectionTitleEFS(
 // main or subcategory with a scollbar
 class ScrollingListBuilder extends StatefulWidget {
   final Future<List<Map<String, dynamic>>> future;
+  final Object? cacheKey;
   final String columnName;
 
   const ScrollingListBuilder(
-      {super.key, required this.future, required this.columnName});
+      {super.key,
+      required this.future,
+      this.cacheKey,
+      required this.columnName});
 
   @override
   State<ScrollingListBuilder> createState() => _ScrollingListBuilderState();
@@ -170,8 +174,9 @@ class _ScrollingListBuilderState extends State<ScrollingListBuilder> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Map<String, dynamic>>>(
-        future: widget.future,
+    return CachedFutureBuilder<List<Map<String, dynamic>>>(
+        cacheKey: widget.cacheKey ?? widget.future,
+        futureFactory: () => widget.future,
         builder: (BuildContext context,
             AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {

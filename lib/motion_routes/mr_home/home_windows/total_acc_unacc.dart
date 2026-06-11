@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_year_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
+import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:provider/provider.dart';
 import '../../../motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
@@ -34,13 +35,18 @@ class TotalAccountedAndUnaccounted extends StatelessWidget {
         CurrentYearProvider>(
       builder: (context, user, main, year, child) {
         final currentUser = user.userUid;
+        if (currentUser == null) {
+          return const ShimmerWidget.rectangular(width: 120, height: 40);
+        }
 
         return getEntireTotal
             ? _totalsDisplay(displayContent: [
                   // Accounted total
                   entireTimeAccountedAndUnaccounted(
+                      cacheKey:
+                          'entire-accounted-$currentUser-${main.refreshKey}',
                       future: main.retrieveEntireTotalMainCategoryTable(
-                          currentUser!, false),
+                          currentUser, false),
                       resultName: AppString.accountedTitle,
                       dayStyle: AppTextStyle.resultTitleStyleHome(false),
                       hoursStyle:
@@ -48,6 +54,8 @@ class TotalAccountedAndUnaccounted extends StatelessWidget {
 
                   // Unaccounted total
                   entireTimeAccountedAndUnaccounted(
+                      cacheKey:
+                          'entire-unaccounted-$currentUser-${main.refreshKey}',
                       future: main.retrieveEntireTotalMainCategoryTable(
                           currentUser, true),
                       resultName: AppString.unAccountedTitle,
@@ -59,8 +67,10 @@ class TotalAccountedAndUnaccounted extends StatelessWidget {
             : _totalsDisplay(displayContent: [
                 // Accounted total
                 entireTimeAccountedAndUnaccounted(
+                    cacheKey:
+                        'year-accounted-$currentUser-${year.currentYear}-${main.refreshKey}',
                     future: main.retrieveGetEntireYearTotalMainCategoryTable(
-                        currentUser!, false, year.currentYear),
+                        currentUser, false, year.currentYear),
                     resultName: AppString.accountedTitle,
                     dayStyle: AppTextStyle.resultTitleStyleHome(false),
                     hoursStyle:
@@ -68,6 +78,8 @@ class TotalAccountedAndUnaccounted extends StatelessWidget {
 
                 // Unaccounted total
                 entireTimeAccountedAndUnaccounted(
+                    cacheKey:
+                        'year-unaccounted-$currentUser-${year.currentYear}-${main.refreshKey}',
                     future: main.retrieveGetEntireYearTotalMainCategoryTable(
                         currentUser, true, year.currentYear),
                     resultName: AppString.unAccountedTitle,

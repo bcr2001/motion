@@ -62,6 +62,7 @@ void main() {
         skillsXP: 15,
         sdXP: 20,
         sleepXP: 25,
+        accountabilityBonusXP: 5,
         currentLoggedInUser: 'user-1',
       );
 
@@ -72,6 +73,7 @@ void main() {
       expect(map[MotionDbColumns.skillsXp], 15);
       expect(map[MotionDbColumns.selfDevelopmentXp], 20);
       expect(map[MotionDbColumns.sleepXp], 25);
+      expect(map[MotionDbColumns.accountabilityBonusXp], 5);
       expect(ExperiencePoints.fromMap(map).toMap(), map);
     });
 

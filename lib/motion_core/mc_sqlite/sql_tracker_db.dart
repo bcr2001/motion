@@ -17,6 +17,14 @@ import 'package:path/path.dart';
 // main category table tracks the aggregated subcategories
 class TrackerDatabaseHelper {
   static final DateTime _firstTrackingDate = DateTime(2021, 7, 1);
+  static const String _totalXpExpression = '''
+    COALESCE(SUM(${MotionDbColumns.educationXp}), 0) +
+    COALESCE(SUM(${MotionDbColumns.workXp}), 0) +
+    COALESCE(SUM(${MotionDbColumns.skillsXp}), 0) +
+    COALESCE(SUM(${MotionDbColumns.selfDevelopmentXp}), 0) +
+    COALESCE(SUM(${MotionDbColumns.sleepXp}), 0) +
+    COALESCE(SUM(${MotionDbColumns.accountabilityBonusXp}), 0)
+  ''';
 
   // Singleton instance
   static final TrackerDatabaseHelper _instance =
@@ -955,7 +963,7 @@ class TrackerDatabaseHelper {
       SELECT subcategoryName, COALESCE(SUM(timeSpent), 0) AS total,
       COALESCE(AVG(timeSpent), 0) AS average
       FROM subcategory
-      WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
+      WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ? AND timeSpent > 0
       GROUP BY subcategoryName
       ORDER BY total DESC;
     ''', [currentUser, startingDate, endingDate]) : await db.rawQuery('''
@@ -964,7 +972,7 @@ class TrackerDatabaseHelper {
       FROM (
         SELECT date, mainCategoryName, COALESCE(SUM(timeSpent), 0) AS dailyTotal
         FROM subcategory
-        WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
+        WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ? AND timeSpent > 0
         GROUP BY date, mainCategoryName
       )
       GROUP BY mainCategoryName
@@ -1223,11 +1231,7 @@ class TrackerDatabaseHelper {
       final db = await database;
 
       final resultEPES = await db.rawQuery('''
-          SELECT ROUND(((
-            COALESCE(SUM(educationXP), 0) + COALESCE(SUM(workXP), 0) + COALESCE(SUM(skillsXP), 0) +
-            COALESCE(SUM(sdXP), 0) +
-            COALESCE(SUM(sleepXP), 0)
-          ) / COUNT(DISTINCT date)) * 100.0 / ${MotionXpPolicy.maxDailyXp}, 2) AS efficiencyScore
+          SELECT ROUND((($_totalXpExpression) / COUNT(DISTINCT date)) * 100.0 / ${MotionXpPolicy.maxDailyXp}, 2) AS efficiencyScore
           FROM experience_points
           WHERE currentLoggedInUser = ?
         ''', [currentUser]);
@@ -1257,11 +1261,7 @@ class TrackerDatabaseHelper {
 
       final resultEPES = await db.rawQuery('''
           SELECT ROUND(
-            ((
-              COALESCE(SUM(educationXP), 0) + COALESCE(SUM(workXP), 0) + COALESCE(SUM(skillsXP), 0) +
-              COALESCE(SUM(sdXP), 0) +
-              COALESCE(SUM(sleepXP), 0)
-            ) / COUNT(DISTINCT date)) * 100.0 / ${MotionXpPolicy.maxDailyXp}, 2
+            (($_totalXpExpression) / COUNT(DISTINCT date)) * 100.0 / ${MotionXpPolicy.maxDailyXp}, 2
           ) AS efficiencyScore
           FROM experience_points
           WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
@@ -1286,7 +1286,7 @@ class TrackerDatabaseHelper {
   /// Calculates the average monthly efficiency score for a user over a
   /// specified date range.
   /// The score is computed as the sum of experience points across categories
-  /// (educationXP, skillsXP, sdXP, sleepXP),
+  /// (educationXP, workXP, skillsXP, sdXP, sleepXP, accountabilityBonusXP),
   /// divided by the count of distinct days with data within the month.
   /// This ensures an accurate average, considering only days where data is
   /// present.
@@ -1305,11 +1305,7 @@ class TrackerDatabaseHelper {
       final db = await database;
 
       final resultMES = await db.rawQuery('''
-      SELECT ROUND(((
-        COALESCE(SUM(educationXP), 0) + COALESCE(SUM(workXP), 0) + COALESCE(SUM(skillsXP), 0) +
-        COALESCE(SUM(sdXP), 0) +
-        COALESCE(SUM(sleepXP), 0)
-      ) / COUNT(DISTINCT date)) * 100.0 / ${MotionXpPolicy.maxDailyXp}, 2) AS efficiencyScore
+      SELECT ROUND((($_totalXpExpression) / COUNT(DISTINCT date)) * 100.0 / ${MotionXpPolicy.maxDailyXp}, 2) AS efficiencyScore
       FROM experience_points
       WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
     ''', [currentUser, firstDayOfMonth, lastDayOfMonth]);
@@ -1341,15 +1337,11 @@ class TrackerDatabaseHelper {
       final yearRange = year == null ? null : SqlDateRange.year(year);
 
       final resultGTXP = isEntire ? await db.rawQuery("""
-        SELECT (COALESCE(SUM(educationXP), 0) + COALESCE(SUM(workXP), 0) + COALESCE(SUM(skillsXP), 0) +
-                COALESCE(SUM(sdXP), 0) +
-                COALESCE(SUM(sleepXP), 0)) AS entireTotalXP
+        SELECT ($_totalXpExpression) AS entireTotalXP
         FROM experience_points
         WHERE currentLoggedInUser = ?
         """, [currentUser]) : await db.rawQuery("""
-        SELECT (COALESCE(SUM(educationXP), 0) + COALESCE(SUM(workXP), 0) + COALESCE(SUM(skillsXP), 0) +
-                COALESCE(SUM(sdXP), 0) +
-                COALESCE(SUM(sleepXP), 0)) AS entireTotalXP
+        SELECT ($_totalXpExpression) AS entireTotalXP
         FROM experience_points
         WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
           """, [currentUser, ...yearRange!.args]);
@@ -1405,8 +1397,7 @@ class TrackerDatabaseHelper {
       final db = await database;
 
       final resultDES = await db.rawQuery('''
-      SELECT COALESCE(SUM(educationXP), 0) + COALESCE(SUM(workXP), 0) + COALESCE(SUM(skillsXP), 0) +
-             COALESCE(SUM(sdXP), 0) + COALESCE(SUM(sleepXP), 0) AS totalXP
+      SELECT ($_totalXpExpression) AS totalXP
       FROM experience_points
       WHERE currentLoggedInUser = ? AND date = ?
     ''', [currentUser, selectedDate]);
@@ -1456,8 +1447,7 @@ class TrackerDatabaseHelper {
                 COALESCE(MAX(totalMostXP), 0) AS most_productive
           FROM (
               SELECT CAST(strftime('%m', date) AS INTEGER) AS month_num,
-                    COALESCE(SUM(educationXP), 0) + COALESCE(SUM(workXP), 0) + COALESCE(SUM(skillsXP), 0) +
-                    COALESCE(SUM(sdXP), 0) + COALESCE(SUM(sleepXP), 0) AS totalMostXP
+                    ($_totalXpExpression) AS totalMostXP
               FROM experience_points
               WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
               GROUP BY month_num
@@ -1481,8 +1471,7 @@ class TrackerDatabaseHelper {
               COALESCE(MIN(totalLeastXP), 0) AS totalLeastXP
         FROM (
             SELECT CAST(strftime('%m', date) AS INTEGER) AS month_num,
-                  COALESCE(SUM(educationXP), 0) + COALESCE(SUM(workXP), 0) + COALESCE(SUM(skillsXP), 0) +
-                  COALESCE(SUM(sdXP), 0) + COALESCE(SUM(sleepXP), 0) AS totalLeastXP
+                  ($_totalXpExpression) AS totalLeastXP
             FROM experience_points
             WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
             GROUP BY month_num
@@ -1507,8 +1496,7 @@ class TrackerDatabaseHelper {
       final resultMALPD = getMostProductiveDay ? await db.rawQuery("""
       SELECT COALESCE(date, 'TBD') AS date, COALESCE(MAX(totalMostXP),0) AS most_productive
       FROM (
-        SELECT date, COALESCE(SUM(educationXP), 0) + COALESCE(SUM(workXP), 0) + COALESCE(SUM(skillsXP), 0) +
-             COALESCE(SUM(sdXP), 0) + COALESCE(SUM(sleepXP), 0) AS totalMostXP
+        SELECT date, ($_totalXpExpression) AS totalMostXP
         FROM experience_points
         WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
         GROUP BY date
@@ -1516,8 +1504,7 @@ class TrackerDatabaseHelper {
         """, [currentUser, firstDay, lastDay]) : await db.rawQuery("""
       SELECT COALESCE(date, 'TBD') AS date, COALESCE(MIN(totalLeastXP),0) AS least_productive
       FROM (
-        SELECT date, COALESCE(SUM(educationXP), 0) + COALESCE(SUM(workXP), 0) + COALESCE(SUM(skillsXP), 0) +
-             COALESCE(SUM(sdXP), 0) + COALESCE(SUM(sleepXP), 0) AS totalLeastXP
+        SELECT date, ($_totalXpExpression) AS totalLeastXP
         FROM experience_points
         WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
         GROUP BY date
@@ -1557,8 +1544,8 @@ class TrackerDatabaseHelper {
     // 1) Insert any missing (date,user) rows with zero XP
     await db.execute('''
       INSERT OR IGNORE INTO experience_points
-        (date, currentLoggedInUser, educationXP, workXP, skillsXP, sdXP, sleepXP)
-      SELECT date, currentLoggedInUser, 0, 0, 0, 0, 0
+        (date, currentLoggedInUser, educationXP, workXP, skillsXP, sdXP, sleepXP, accountabilityBonusXP)
+      SELECT date, currentLoggedInUser, 0, 0, 0, 0, 0, 0
         FROM main_category
       WHERE currentLoggedInUser = ?;
     ''', [currentUser]);
@@ -1619,6 +1606,19 @@ class TrackerDatabaseHelper {
             FROM subcategory
             WHERE mainCategoryName   = 'Sleep'
               AND date               = experience_points.date
+              AND currentLoggedInUser= experience_points.currentLoggedInUser
+          ),
+          accountabilityBonusXP = (
+            SELECT CASE
+              WHEN COALESCE(SUM(timeSpent),0) < 480 THEN 0
+              WHEN COALESCE(SUM(timeSpent),0) < 600 THEN 1
+              WHEN COALESCE(SUM(timeSpent),0) < 720 THEN 2
+              WHEN COALESCE(SUM(timeSpent),0) < 840 THEN 3
+              WHEN COALESCE(SUM(timeSpent),0) < 960 THEN 4
+              ELSE 5
+            END
+            FROM subcategory
+            WHERE date               = experience_points.date
               AND currentLoggedInUser= experience_points.currentLoggedInUser
           )
       WHERE currentLoggedInUser = ?;

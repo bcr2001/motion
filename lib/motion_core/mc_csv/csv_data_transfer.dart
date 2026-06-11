@@ -455,6 +455,7 @@ class MotionCsvDataTransfer {
         MotionDbColumns.skillsXp: 0,
         MotionDbColumns.selfDevelopmentXp: 0,
         MotionDbColumns.sleepXp: 0,
+        MotionDbColumns.accountabilityBonusXp: 0,
         MotionDbColumns.currentLoggedInUser: currentUser,
       },
       conflictAlgorithm: ConflictAlgorithm.ignore,
@@ -468,9 +469,9 @@ class MotionCsvDataTransfer {
         (${MotionDbColumns.date}, ${MotionDbColumns.currentLoggedInUser},
         ${MotionDbColumns.educationXp}, ${MotionDbColumns.workXp},
         ${MotionDbColumns.skillsXp}, ${MotionDbColumns.selfDevelopmentXp},
-        ${MotionDbColumns.sleepXp})
+        ${MotionDbColumns.sleepXp}, ${MotionDbColumns.accountabilityBonusXp})
       SELECT ${MotionDbColumns.date}, ${MotionDbColumns.currentLoggedInUser},
-        0, 0, 0, 0, 0
+        0, 0, 0, 0, 0, 0
       FROM ${MotionDbTables.mainCategory}
       WHERE ${MotionDbColumns.currentLoggedInUser} = ?;
     ''', [currentUser]);

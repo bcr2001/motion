@@ -5,7 +5,7 @@ import 'package:motion/motion_core/mc_sqlite/xp_policy.dart';
 void main() {
   group('MotionXpPolicy', () {
     test('defines the maximum daily XP used to normalize EFS', () {
-      expect(MotionXpPolicy.maxDailyXp, 110);
+      expect(MotionXpPolicy.maxDailyXp, 115);
     });
 
     test('awards Work XP at one point per 15 minutes up to 25 XP', () {
@@ -34,6 +34,15 @@ void main() {
       expect(MotionXpPolicy.categoryXp(MotionCategories.sleep, 480), 25);
       expect(MotionXpPolicy.categoryXp(MotionCategories.sleep, 570), 15);
       expect(MotionXpPolicy.categoryXp(MotionCategories.sleep, 660), 5);
+    });
+
+    test('awards accountability bonus XP for well-accounted days', () {
+      expect(MotionXpPolicy.accountabilityBonusXp(479), 0);
+      expect(MotionXpPolicy.accountabilityBonusXp(480), 1);
+      expect(MotionXpPolicy.accountabilityBonusXp(600), 2);
+      expect(MotionXpPolicy.accountabilityBonusXp(720), 3);
+      expect(MotionXpPolicy.accountabilityBonusXp(840), 4);
+      expect(MotionXpPolicy.accountabilityBonusXp(960), 5);
     });
   });
 }

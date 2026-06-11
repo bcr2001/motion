@@ -35,8 +35,9 @@ class LifeCompleted extends StatelessWidget {
 
       final dateOfBirthStorage = DateOfBirthStorage();
 
-      return FutureBuilder<DateTime?>(
-        future: currentUser != null
+      return CachedFutureBuilder<DateTime?>(
+        cacheKey: 'birthdate-$currentUser',
+        futureFactory: () => currentUser != null
             ? dateOfBirthStorage.getDateOfBirth(currentUser)
             : Future.value(null),
         builder: (context, snapshot) {
@@ -153,6 +154,7 @@ class LifeCompleted extends StatelessWidget {
 // total all time accounted for and unaccounted for
 Widget entireTimeAccountedAndUnaccounted(
     {required Future<dynamic> future,
+    Object? cacheKey,
     required String resultName,
     required TextStyle dayStyle,
     required TextStyle hoursStyle}) {
@@ -162,8 +164,9 @@ Widget entireTimeAccountedAndUnaccounted(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         // table result (accounted/ unaccounted)
-        FutureBuilder(
-            future: future,
+        CachedFutureBuilder<dynamic>(
+            cacheKey: cacheKey ?? future,
+            futureFactory: () => future,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const ShimmerWidget.rectangular(width: 100, height: 25);
@@ -258,9 +261,13 @@ class NumberOfDaysMainCategory extends StatelessWidget {
   // It shows a loading indicator while waiting, an error message in case of
   // an error, and the total number of days when data is available.
   Widget _futureData(
-      {Future<dynamic>? future, required bool percent, int? displayYear}) {
-    return FutureBuilder(
-      future: future,
+      {Future<dynamic>? future,
+      Object? cacheKey,
+      required bool percent,
+      int? displayYear}) {
+    return CachedFutureBuilder<dynamic>(
+      cacheKey: cacheKey ?? future ?? Object(),
+      futureFactory: () => future ?? Future.value(0),
       builder: (BuildContext context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           // Display shimmer effect while the data is being loaded
@@ -319,9 +326,11 @@ class NumberOfDaysMainCategory extends StatelessWidget {
         // and call _futureData to build the UI accordingly
         return getAllDays
             ? _futureData(
+                cacheKey: 'days-all-$userUid-${main.refreshKey}',
                 future: main.retrievedNumberOfDays(currentUser: userUid),
                 percent: false)
             : _futureData(
+                cacheKey: 'days-year-$userUid-$currentYear-${main.refreshKey}',
                 future: main.retrievedNumberOfDays(
                     currentUser: userUid,
                     currentYear: currentYear,
@@ -358,9 +367,55 @@ class EfficiencyAndNumberOfDays extends StatelessWidget {
 // returns the total time accounted for the current date
 // and the current date text to the right
 Widget timeAccountedCurrentDateXP() {
-  return Consumer3<SubcategoryTrackerDatabaseProvider, CurrentDateProvider,
-      UserUidProvider>(
-    builder: (context, sub, date, user, child) {
+  return const TimeAccountedCurrentDateXP();
+}
+
+class TimeAccountedCurrentDateXP extends StatefulWidget {
+  const TimeAccountedCurrentDateXP({super.key});
+
+  @override
+  State<TimeAccountedCurrentDateXP> createState() =>
+      _TimeAccountedCurrentDateXPState();
+}
+
+class _TimeAccountedCurrentDateXPState
+    extends State<TimeAccountedCurrentDateXP> {
+  Future<double>? _totalFuture;
+  String? _totalKey;
+  String? _latestTotalKey;
+  double? _latestTotal;
+
+  Future<double> _totalFor({
+    required SubcategoryTrackerDatabaseProvider sub,
+    required String currentDate,
+    required String currentUser,
+  }) {
+    final displayKey = '$currentUser-$currentDate';
+    final key = '$displayKey-${sub.refreshKey}';
+
+    if (_totalKey != key || _totalFuture == null) {
+      _totalKey = key;
+      _totalFuture = sub.retrieveTotalTimeSpentAllSubs(
+        currentDate,
+        currentUser,
+      );
+      _totalFuture!.then((total) {
+        if (!mounted || _totalKey != key) return;
+        setState(() {
+          _latestTotalKey = displayKey;
+          _latestTotal = total;
+        });
+      });
+    }
+
+    return _totalFuture!;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer3<SubcategoryTrackerDatabaseProvider, CurrentDateProvider,
+        UserUidProvider>(
+      builder: (context, sub, date, user, child) {
       String formattedDate = date.getFormattedDate();
 
       final String? currentUser = user.userUid;
@@ -390,18 +445,25 @@ Widget timeAccountedCurrentDateXP() {
               children: [
                 // Accounted
                 FutureBuilder<double>(
-                  future: sub.retrieveTotalTimeSpentAllSubs(
-                    date.currentDate,
-                    currentUser,
+                  future: _totalFor(
+                    sub: sub,
+                    currentDate: date.currentDate,
+                    currentUser: currentUser,
                   ),
                   builder: (BuildContext context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
+                    final currentKey = '$currentUser-${date.currentDate}';
+                    final canUseCachedTotal = _latestTotalKey == currentKey &&
+                        _latestTotal != null;
+
+                    if (snapshot.connectionState == ConnectionState.waiting &&
+                        !canUseCachedTotal) {
                       return const ShimmerWidget.rectangular(
                           width: 120, height: 40);
                     } else if (snapshot.hasError) {
                       return Text('Error: ${snapshot.error}');
                     } else {
-                      final totalTimeSpentAllSub = snapshot.data ?? 0.0;
+                      final totalTimeSpentAllSub =
+                          snapshot.data ?? _latestTotal ?? 0.0;
 
                       final convertedAllTotalTimeSpent =
                           convertMinutesToTime(totalTimeSpentAllSub);
@@ -425,8 +487,9 @@ Widget timeAccountedCurrentDateXP() {
           ],
         ),
       );
-    },
-  );
+      },
+    );
+  }
 }
 
 // total time spent for the month in all subcategories
@@ -441,8 +504,10 @@ Widget totalMonthTimeSpent() {
 
     return Padding(
       padding: const EdgeInsets.only(top: 15, left: 10, right: 10),
-      child: FutureBuilder<double>(
-          future: sub.retrieveMonthTotalTimeSpent(
+      child: CachedFutureBuilder<double>(
+          cacheKey:
+              'month-total-$currentUser-${dayPvd.firstDay}-${dayPvd.lastDay}-${sub.refreshKey}',
+          futureFactory: () => sub.retrieveMonthTotalTimeSpent(
               currentUser, dayPvd.firstDay, dayPvd.lastDay),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -478,6 +543,35 @@ class SubcategoryAndCurrentDayTotals extends StatefulWidget {
 class _SubcategoryAndCurrentDayTotalsState
     extends State<SubcategoryAndCurrentDayTotals> {
   final ScrollController _scrollController = ScrollController();
+  Future<Map<String, double>>? _dailyTotalsFuture;
+  String? _dailyTotalsKey;
+  String? _latestDailyTotalsKey;
+  Map<String, double> _latestDailyTotals = {};
+
+  Future<Map<String, double>> _dailyTotalsFor({
+    required SubcategoryTrackerDatabaseProvider sub,
+    required String currentDate,
+    required String currentUser,
+    bool forceRefresh = false,
+  }) {
+    final displayKey = '$currentUser-$currentDate';
+    final key = '$displayKey-${sub.refreshKey}';
+
+    if (forceRefresh || _dailyTotalsKey != key || _dailyTotalsFuture == null) {
+      _dailyTotalsKey = key;
+      _dailyTotalsFuture =
+          sub.retrieveSubcategoryTotalsForDate(currentDate, currentUser);
+      _dailyTotalsFuture!.then((totals) {
+        if (!mounted || _dailyTotalsKey != key) return;
+        setState(() {
+          _latestDailyTotalsKey = displayKey;
+          _latestDailyTotals = totals;
+        });
+      });
+    }
+
+    return _dailyTotalsFuture!;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -502,17 +596,27 @@ class _SubcategoryAndCurrentDayTotalsState
               item.isArchive == 0;
         }).toList();
 
+        final dailyTotalsKey = '$currentUser-${date.currentDate}';
+
         return FutureBuilder<Map<String, double>>(
-          future: sub.retrieveSubcategoryTotalsForDate(
-              date.currentDate, currentUser),
+          future: _dailyTotalsFor(
+            sub: sub,
+            currentDate: date.currentDate,
+            currentUser: currentUser,
+          ),
           builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
+            if (snapshot.connectionState == ConnectionState.waiting &&
+                (_latestDailyTotalsKey != dailyTotalsKey ||
+                    _latestDailyTotals.isEmpty)) {
               return buildShimmerProgress();
             } else if (snapshot.hasError) {
               return Text('Error: ${snapshot.error}');
             }
 
-            final dailyTotals = snapshot.data ?? {};
+            final dailyTotals = snapshot.data ??
+                (_latestDailyTotalsKey == dailyTotalsKey
+                    ? _latestDailyTotals
+                    : <String, double>{});
 
             return Scrollbar(
               radius: const Radius.circular(10.0),
@@ -565,6 +669,14 @@ class _SubcategoryAndCurrentDayTotalsState
                         ),
                       );
                       if (context.mounted) {
+                        setState(() {
+                          _dailyTotalsFuture = _dailyTotalsFor(
+                            sub: sub,
+                            currentDate: date.currentDate,
+                            currentUser: currentUser,
+                            forceRefresh: true,
+                          );
+                        });
                         context
                             .read<ExperiencePointTableProvider>()
                             .refreshExperiencePointViews();
@@ -609,10 +721,14 @@ class _SubcategoryMonthTotalsAndAveragesState
 
       return widget.isSubcategory
           ? ScrollingListBuilder(
+              cacheKey:
+                  'month-subcategory-list-$currentUser-${day.firstDay}-${day.lastDay}-${sub.refreshKey}',
               future: sub.retrieveMonthTotalAndAverage(
                   currentUser, day.firstDay, day.lastDay, true),
               columnName: "subcategoryName")
           : ScrollingListBuilder(
+              cacheKey:
+                  'month-main-list-$currentUser-${day.firstDay}-${day.lastDay}-${sub.refreshKey}',
               future: sub.retrieveMonthTotalAndAverage(
                   currentUser, day.firstDay, day.lastDay, false),
               columnName: "mainCategoryName");

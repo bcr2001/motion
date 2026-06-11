@@ -49,7 +49,7 @@ showAlertDialog(BuildContext context) {
 
   showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) {
         return AlertDialogConst(
           screenHeight: screenHeight,
           screenWidth: screenWidth,
@@ -93,7 +93,7 @@ showAlertDialog(BuildContext context) {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () => Navigator.of(context).pop(),
+                      onPressed: () => Navigator.of(dialogContext).pop(),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: cancelTextColor,
                         minimumSize: const Size(0, 44),
@@ -115,10 +115,10 @@ showAlertDialog(BuildContext context) {
                   const SizedBox(width: 10),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        AuthServices.signOutUser(context);
-                        GoogleAuthService.signOutGoogle();
+                      onPressed: () async {
+                        Navigator.pop(dialogContext);
+                        await AuthServices.signOutUser(context);
+                        await GoogleAuthService.signOutGoogle(context);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.redAccent,

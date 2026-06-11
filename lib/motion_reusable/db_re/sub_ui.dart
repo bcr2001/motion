@@ -158,3 +158,71 @@ class ShimmerWidget extends StatelessWidget {
     );
   }
 }
+
+class CachedFutureBuilder<T> extends StatefulWidget {
+  final Object cacheKey;
+  final Future<T> Function() futureFactory;
+  final Widget Function(BuildContext context, AsyncSnapshot<T> snapshot) builder;
+
+  const CachedFutureBuilder({
+    super.key,
+    required this.cacheKey,
+    required this.futureFactory,
+    required this.builder,
+  });
+
+  @override
+  State<CachedFutureBuilder<T>> createState() => _CachedFutureBuilderState<T>();
+}
+
+class _CachedFutureBuilderState<T> extends State<CachedFutureBuilder<T>> {
+  late Future<T> _future;
+  T? _latestData;
+  bool _hasLatestData = false;
+  int _requestId = 0;
+
+  Future<T> _loadFuture() {
+    final requestId = ++_requestId;
+    final future = widget.futureFactory();
+    future.then((value) {
+      if (!mounted || requestId != _requestId) return;
+      setState(() {
+        _latestData = value;
+        _hasLatestData = true;
+      });
+    }).catchError((_) {});
+    return future;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _future = _loadFuture();
+  }
+
+  @override
+  void didUpdateWidget(covariant CachedFutureBuilder<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.cacheKey != widget.cacheKey) {
+      _future = _loadFuture();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<T>(
+      future: _future,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting &&
+            _hasLatestData) {
+          return widget.builder(
+            context,
+            AsyncSnapshot<T>.withData(ConnectionState.done, _latestData as T),
+          );
+        }
+
+        return widget.builder(context, snapshot);
+      },
+    );
+  }
+}

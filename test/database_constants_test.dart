@@ -18,5 +18,9 @@ void main() {
       expect(MotionCategories.selfDevelopment, 'Self Development');
       expect(MotionCategories.sleep, 'Sleep');
     });
+
+    test('XP column names match the persisted SQLite columns', () {
+      expect(MotionDbColumns.accountabilityBonusXp, 'accountabilityBonusXP');
+    });
   });
 }

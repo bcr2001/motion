@@ -8,13 +8,22 @@ import 'current_user_guard.dart';
 // MAIN CATEGORY TABLE
 //handles database operations for the main_category table
 class MainCategoryTrackerProvider extends ChangeNotifier {
+  int _refreshKey = 0;
+
+  int get refreshKey => _refreshKey;
+
+  void _notifyDataChanged() {
+    _refreshKey++;
+    notifyListeners();
+  }
+
   // insert data into the main_category table
   Future<void> insertIntoMainCategoryTable(MainCategory mainCategory) async {
     await trackDbInstance.insertMainCategory(
       requireMainCategoryUser(mainCategory),
     );
 
-    notifyListeners();
+    _notifyDataChanged();
   }
 
   // update existing data in the main category table
@@ -23,7 +32,7 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
       requireMainCategoryUser(mainCategory),
     );
 
-    notifyListeners();
+    _notifyDataChanged();
   }
 
   // retrieve the main category name, total for a specific day,
@@ -199,6 +208,15 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
 // SUBCATEGORY TABLE
 // handles database operation for the subcategory table
 class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
+  int _refreshKey = 0;
+
+  int get refreshKey => _refreshKey;
+
+  void _notifyDataChanged() {
+    _refreshKey++;
+    notifyListeners();
+  }
+
   // a list of subcategories tracked for a specific date
   List<Subcategories> _currentDateSubcategories = [];
   List<Subcategories> get currentDateSubcategories => _currentDateSubcategories;
@@ -212,7 +230,7 @@ class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
       subcategoryName,
     );
 
-    notifyListeners();
+    _notifyDataChanged();
   }
 
   // retrieve the entire totals of subcategories
@@ -291,7 +309,7 @@ class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
       requireSubcategoryUser(subcategories),
     );
 
-    notifyListeners();
+    _notifyDataChanged();
   }
 
   // update data in the subcategory table
@@ -300,13 +318,13 @@ class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
       requireSubcategoryUser(subcategories),
     );
 
-    notifyListeners();
+    _notifyDataChanged();
   }
 
   // delete an already added subcategory
   Future<void> deleteSubcategoryEntry(int id) async {
     await trackDbInstance.deleteSubcategory(id);
 
-    notifyListeners();
+    _notifyDataChanged();
   }
 }

@@ -23,6 +23,7 @@ class MotionDbColumns {
   static const String skillsXp = 'skillsXP';
   static const String selfDevelopmentXp = 'sdXP';
   static const String sleepXp = 'sleepXP';
+  static const String accountabilityBonusXp = 'accountabilityBonusXP';
   static const String isActive = 'isActive';
   static const String isArchive = 'isArchive';
   static const String dateCreated = 'dateCreated';

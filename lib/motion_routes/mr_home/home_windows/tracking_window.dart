@@ -24,8 +24,9 @@ class TrackedSubcategories extends StatelessWidget {
       // if the result from the isTableEmptyOrNotBeingTracked()
       // function is True then the an instruction screen will be shown
       // otherwise the normal tracking window will be displayed once the user addes a subcategory to be tracked
-      return FutureBuilder(
-          future: assign.retrieveIsTableEmptyOrNotBeingTracked(
+      return CachedFutureBuilder<List<Map<String, dynamic>>>(
+          cacheKey: 'tracking-empty-state-$currentUser-${assign.refreshKey}',
+          futureFactory: () => assign.retrieveIsTableEmptyOrNotBeingTracked(
               currentUser: currentUser),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {

@@ -9,6 +9,15 @@ final AssignerDatabaseHelper dbInstance = AssignerDatabaseHelper();
 
 // handles the database operations for the to_assign table
 class AssignerMainProvider extends ChangeNotifier {
+  int _refreshKey = 0;
+
+  int get refreshKey => _refreshKey;
+
+  void _notifyDataChanged() {
+    _refreshKey++;
+    notifyListeners();
+  }
+
   // a list of subcategories and all it's relevant information
   List<Assigner> _assignerItems = [];
   List<Assigner> get assignerItems => _assignerItems;
@@ -17,7 +26,7 @@ class AssignerMainProvider extends ChangeNotifier {
   Future<void> getAllUserItems() async {
     _assignerItems = await dbInstance.getAllItems();
 
-    notifyListeners();
+    _notifyDataChanged();
   }
 
   // check whether the table is empty or whether
