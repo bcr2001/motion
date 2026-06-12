@@ -436,12 +436,19 @@ class CurrentYearEFSDisplay extends StatelessWidget {
     required double trackedMinutes,
     required bool isDarkMode,
   }) {
+    final hasMetTarget = earnedXp >= target.xp;
+    final remainingXp = hasMetTarget ? 0 : target.xp - earnedXp;
+    final targetProgress = target.xp <= 0
+        ? 1.0
+        : (earnedXp / target.xp).clamp(0.0, 1.0).toDouble();
     final rowColor = isDarkMode
         ? Colors.white.withValues(alpha: 0.055)
         : AppColor.tileBackgroundColor.withValues(alpha: 0.045);
-    final accentColor = isDarkMode
-        ? AppColor.accountedColor.withValues(alpha: 0.85)
-        : AppColor.accountedColor;
+    final accentColor = hasMetTarget
+        ? (isDarkMode
+            ? AppColor.accountedColor.withValues(alpha: 0.85)
+            : AppColor.accountedColor)
+        : Colors.orange;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -450,9 +457,7 @@ class CurrentYearEFSDisplay extends StatelessWidget {
         color: rowColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isDarkMode
-              ? Colors.white.withValues(alpha: 0.06)
-              : Colors.black.withValues(alpha: 0.045),
+          color: accentColor.withValues(alpha: hasMetTarget ? 0.22 : 0.18),
         ),
       ),
       child: Row(
@@ -513,27 +518,152 @@ class CurrentYearEFSDisplay extends StatelessWidget {
                     color: Colors.blueGrey,
                   ),
                 ),
+                const SizedBox(height: 7),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(99),
+                  child: LinearProgressIndicator(
+                    value: targetProgress,
+                    minHeight: 5,
+                    color: accentColor,
+                    backgroundColor: accentColor.withValues(alpha: 0.13),
+                  ),
+                ),
               ],
             ),
           ),
           const SizedBox(width: 12),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              color: accentColor.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(99),
-            ),
-            child: Text(
-              '${target.xp} XP',
-              style: AppTextStyle.subSectionTextStyle(
-                fontsize: 12,
-                fontweight: FontWeight.w800,
-                color: accentColor,
-              ),
+          SizedBox(
+            width: 86,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: accentColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(99),
+                  ),
+                  child: Text(
+                    '${target.xp} XP',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyle.subSectionTextStyle(
+                      fontsize: 12,
+                      fontweight: FontWeight.w800,
+                      color: accentColor,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: accentColor.withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(99),
+                    border: Border.all(
+                      color: accentColor.withValues(alpha: 0.18),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        hasMetTarget
+                            ? Icons.check_circle_rounded
+                            : Icons.timelapse_rounded,
+                        size: 12,
+                        color: accentColor,
+                      ),
+                      const SizedBox(width: 3),
+                      Text(
+                        hasMetTarget ? 'Met' : '$remainingXp left',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyle.subSectionTextStyle(
+                          fontsize: 10,
+                          fontweight: FontWeight.w800,
+                          color: accentColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _dailyXpSummaryTile({
+    required String label,
+    required String value,
+    required Color color,
+  }) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.10),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: color.withValues(alpha: 0.18)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyle.subSectionTextStyle(
+                fontsize: 10.5,
+                fontweight: FontWeight.normal,
+                color: Colors.blueGrey,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              value,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyle.subSectionTextStyle(
+                fontsize: 13,
+                fontweight: FontWeight.w900,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _dailyXpSummaryRow({
+    required int earnedToday,
+    required int dailyTarget,
+  }) {
+    final remainingXp = dailyTarget > earnedToday ? dailyTarget - earnedToday : 0;
+    final hasMetDailyTarget = earnedToday >= dailyTarget;
+
+    return Row(
+      children: [
+        _dailyXpSummaryTile(
+          label: 'Earned Today',
+          value: '$earnedToday XP',
+          color: hasMetDailyTarget ? AppColor.accountedColor : Colors.orange,
+        ),
+        const SizedBox(width: 8),
+        _dailyXpSummaryTile(
+          label: hasMetDailyTarget ? 'Daily Target' : 'Remaining',
+          value: hasMetDailyTarget ? '$dailyTarget XP met' : '$remainingXp XP',
+          color: hasMetDailyTarget ? AppColor.accountedColor : Colors.orange,
+        ),
+      ],
     );
   }
 
@@ -594,7 +724,7 @@ class CurrentYearEFSDisplay extends StatelessWidget {
         side: BorderSide(color: borderColor),
       ),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 450, maxHeight: 580),
+        constraints: const BoxConstraints(maxWidth: 450, maxHeight: 620),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 14, 10, 14),
           child: Column(
@@ -735,6 +865,10 @@ class CurrentYearEFSDisplay extends StatelessWidget {
 
                 final dailyTarget = progress.averageDailyXp.ceil();
                 final targetRows = EfsBadgePolicy.dailyXpTargets(dailyTarget);
+                final earnedToday = dialogData.earnedXpByCategory.values.fold(
+                  0,
+                  (previousValue, earnedXp) => previousValue + earnedXp,
+                );
 
                 return _xpTargetDialogShell(
                   context: dialogContext,
@@ -788,6 +922,11 @@ class CurrentYearEFSDisplay extends StatelessWidget {
                             ),
                           ],
                         ),
+                      ),
+                      const SizedBox(height: 10),
+                      _dailyXpSummaryRow(
+                        earnedToday: earnedToday,
+                        dailyTarget: dailyTarget,
                       ),
                       if (!progress.isAttainableThisYear) ...[
                         const SizedBox(height: 8),
