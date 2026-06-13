@@ -20,6 +20,10 @@ class TrailingEditButtons extends StatefulWidget {
   final String itemIndexDateCreated;
   final int itemIndexIsArchive;
   final int itemIndexIsActive;
+  final int itemIndexIsStreakActive;
+  final String itemIndexStreakType;
+  final double itemIndexStreakTargetMinutes;
+  final String itemIndexStreakStartDate;
 
   const TrailingEditButtons(
       {super.key,
@@ -29,7 +33,11 @@ class TrailingEditButtons extends StatefulWidget {
       required this.itemIndexCurrentUser,
       required this.itemIndexDateCreated,
       required this.itemIndexIsActive,
-      required this.itemIndexIsArchive});
+      required this.itemIndexIsArchive,
+      required this.itemIndexIsStreakActive,
+      required this.itemIndexStreakType,
+      required this.itemIndexStreakTargetMinutes,
+      required this.itemIndexStreakStartDate});
 
   @override
   State<TrailingEditButtons> createState() => _TrailingEditButtonsState();
@@ -105,7 +113,11 @@ class _TrailingEditButtonsState extends State<TrailingEditButtons> {
         mainCategoryName: widget.itemIndexMainCategoryName,
         dateCreated: widget.itemIndexDateCreated,
         isActive: widget.itemIndexIsActive,
-        isArchive: widget.itemIndexIsArchive == 0 ? 1 : 0));
+        isArchive: widget.itemIndexIsArchive == 0 ? 1 : 0,
+        isStreakActive: widget.itemIndexIsStreakActive,
+        streakType: widget.itemIndexStreakType,
+        streakTargetMinutes: widget.itemIndexStreakTargetMinutes,
+        streakStartDate: widget.itemIndexStreakStartDate));
   }
 
   Widget _editNameField() {
@@ -302,6 +314,12 @@ class _TrailingEditButtonsState extends State<TrailingEditButtons> {
                               mainCategoryName: maincat.selectedValue!,
                               dateCreated: widget.itemIndexDateCreated,
                               isActive: widget.itemIndexIsActive,
+                              isArchive: widget.itemIndexIsArchive,
+                              isStreakActive: widget.itemIndexIsStreakActive,
+                              streakType: widget.itemIndexStreakType,
+                              streakTargetMinutes:
+                                  widget.itemIndexStreakTargetMinutes,
+                              streakStartDate: widget.itemIndexStreakStartDate,
                             ));
 
                             navigationKey.currentState!.pop();

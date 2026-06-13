@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:motion/motion_core/mc_sql_table/experience_table.dart';
 import 'package:motion/motion_core/mc_sql_table/main_table.dart';
+import 'package:motion/motion_core/mc_sql_table/streak_status.dart';
 import 'package:motion/motion_core/mc_sql_table/sub_table.dart';
 import 'package:motion/motion_core/mc_sqlite/database_constants.dart';
 import 'package:motion/motion_core/mc_sqlite/database_error.dart';
@@ -1033,6 +1034,351 @@ class TrackerDatabaseHelper {
     return streak;
   }
 
+  Future<SubcategoryStreakStatus> getSubcategoryStreakStatus({
+    required String currentUser,
+    required String subcategoryName,
+    required String mainCategoryName,
+    required SubcategoryStreakType streakType,
+    required double targetMinutes,
+    required String startDate,
+    required String currentDate,
+  }) async {
+    final db = await database;
+
+    final firstTrackedDate = await _getFirstTrackedDateForSubcategory(
+      db,
+      currentUser: currentUser,
+      subcategoryName: subcategoryName,
+      mainCategoryName: mainCategoryName,
+    );
+    final savedStartDate = _parseStoredDate(startDate);
+    final currentDay =
+        _dateOnly(_parseStoredDate(currentDate) ?? DateTime.now());
+    final effectiveStartDay = _earliestDate(
+      firstTrackedDate,
+      savedStartDate,
+    ) ?? currentDay;
+    final effectiveStartDate = _formatIsoDate(effectiveStartDay);
+
+    final records = await db.rawQuery('''
+      SELECT ${MotionDbColumns.date},
+             COALESCE(SUM(${MotionDbColumns.timeSpent}), 0) AS total
+      FROM ${MotionDbTables.subcategory}
+      WHERE ${MotionDbColumns.currentLoggedInUser} = ?
+        AND ${MotionDbColumns.subcategoryName} = ?
+        AND ${MotionDbColumns.mainCategoryName} = ?
+        AND ${MotionDbColumns.date} BETWEEN ? AND ?
+      GROUP BY ${MotionDbColumns.date}
+      ORDER BY ${MotionDbColumns.date} ASC
+    ''', [
+      currentUser,
+      subcategoryName,
+      mainCategoryName,
+      effectiveStartDate,
+      currentDate,
+    ]);
+
+    final dailyTotals = <DateTime, double>{};
+    for (final record in records) {
+      final date = _parseStoredDate(record[MotionDbColumns.date]);
+      if (date == null) continue;
+      dailyTotals[_dateOnly(date)] = (record["total"] as num?)?.toDouble() ?? 0;
+    }
+
+    final today = currentDay;
+    final firstDay = effectiveStartDay;
+
+    bool metTarget(DateTime date) {
+      final total = dailyTotals[date] ?? 0.0;
+      if (streakType == SubcategoryStreakType.targetTime) {
+        return total >= targetMinutes;
+      }
+      return total > 0;
+    }
+
+    var bestStreak = 0;
+    var runningStreak = 0;
+    for (var date = firstDay;
+        !date.isAfter(today);
+        date = date.add(const Duration(days: 1))) {
+      if (metTarget(date)) {
+        runningStreak++;
+        if (runningStreak > bestStreak) bestStreak = runningStreak;
+      } else {
+        runningStreak = 0;
+      }
+    }
+
+    final todayMinutes = dailyTotals[today] ?? 0.0;
+    final hasMetToday = metTarget(today);
+
+    var currentStreak = 0;
+    if (hasMetToday) {
+      currentStreak = 1;
+      var expectedDate = today.subtract(const Duration(days: 1));
+      while (!expectedDate.isBefore(firstDay) && metTarget(expectedDate)) {
+        currentStreak++;
+        expectedDate = expectedDate.subtract(const Duration(days: 1));
+      }
+    } else {
+      var expectedDate = today.subtract(const Duration(days: 1));
+      while (!expectedDate.isBefore(firstDay) && metTarget(expectedDate)) {
+        currentStreak++;
+        expectedDate = expectedDate.subtract(const Duration(days: 1));
+      }
+    }
+
+    final todayStatus = hasMetToday
+        ? SubcategoryStreakTodayStatus.metToday
+        : currentStreak > 0 || firstDay == today
+            ? SubcategoryStreakTodayStatus.atRisk
+            : SubcategoryStreakTodayStatus.missed;
+
+    return SubcategoryStreakStatus(
+      subcategoryName: subcategoryName,
+      mainCategoryName: mainCategoryName,
+      streakType: streakType,
+      targetMinutes: targetMinutes,
+      startDate: effectiveStartDate,
+      currentStreak: currentStreak,
+      bestStreak: bestStreak,
+      todayMinutes: todayMinutes,
+      todayStatus: todayStatus,
+    );
+  }
+
+  Future<String?> getFirstTrackedDateForSubcategory({
+    required String currentUser,
+    required String subcategoryName,
+    required String mainCategoryName,
+  }) async {
+    final db = await database;
+    final firstTrackedDate = await _getFirstTrackedDateForSubcategory(
+      db,
+      currentUser: currentUser,
+      subcategoryName: subcategoryName,
+      mainCategoryName: mainCategoryName,
+    );
+
+    return firstTrackedDate == null ? null : _formatIsoDate(firstTrackedDate);
+  }
+
+  Future<List<SubcategoryStreakHistoryPoint>> getSubcategoryStreakHistory({
+    required String currentUser,
+    required String subcategoryName,
+    required String mainCategoryName,
+    required SubcategoryStreakType streakType,
+    required double targetMinutes,
+    required String startDate,
+    required String currentDate,
+    required SubcategoryStreakHistoryRange range,
+  }) async {
+    final db = await database;
+    final firstTrackedDate = await _getFirstTrackedDateForSubcategory(
+      db,
+      currentUser: currentUser,
+      subcategoryName: subcategoryName,
+      mainCategoryName: mainCategoryName,
+    );
+    final savedStartDate = _parseStoredDate(startDate);
+    final currentDay =
+        _dateOnly(_parseStoredDate(currentDate) ?? DateTime.now());
+    final effectiveStartDay = _earliestDate(
+      firstTrackedDate,
+      savedStartDate,
+    ) ?? currentDay;
+    final effectiveStartDate = _formatIsoDate(effectiveStartDay);
+
+    final records = await db.rawQuery('''
+      SELECT ${MotionDbColumns.date},
+             COALESCE(SUM(${MotionDbColumns.timeSpent}), 0) AS total
+      FROM ${MotionDbTables.subcategory}
+      WHERE ${MotionDbColumns.currentLoggedInUser} = ?
+        AND ${MotionDbColumns.subcategoryName} = ?
+        AND ${MotionDbColumns.mainCategoryName} = ?
+        AND ${MotionDbColumns.date} BETWEEN ? AND ?
+      GROUP BY ${MotionDbColumns.date}
+      ORDER BY ${MotionDbColumns.date} ASC
+    ''', [
+      currentUser,
+      subcategoryName,
+      mainCategoryName,
+      effectiveStartDate,
+      currentDate,
+    ]);
+
+    final dailyTotals = <DateTime, double>{};
+    for (final record in records) {
+      final date = _parseStoredDate(record[MotionDbColumns.date]);
+      if (date == null) continue;
+      dailyTotals[_dateOnly(date)] = (record["total"] as num?)?.toDouble() ?? 0;
+    }
+
+    bool metTarget(DateTime date) {
+      final total = dailyTotals[date] ?? 0.0;
+      if (streakType == SubcategoryStreakType.targetTime) {
+        return total >= targetMinutes;
+      }
+      return total > 0;
+    }
+
+    return _streakHistoryBuckets(
+      range: range,
+      firstDay: effectiveStartDay,
+      today: currentDay,
+    ).map((bucket) {
+      var runningStreak = 0;
+      var bestStreak = 0;
+      final bucketStart = bucket.start.isBefore(effectiveStartDay)
+          ? effectiveStartDay
+          : bucket.start;
+      final bucketEnd =
+          bucket.end.isAfter(currentDay) ? currentDay : bucket.end;
+
+      if (!bucketEnd.isBefore(bucketStart)) {
+        for (var date = bucketStart;
+            !date.isAfter(bucketEnd);
+            date = date.add(const Duration(days: 1))) {
+          if (metTarget(date)) {
+            runningStreak++;
+            if (runningStreak > bestStreak) bestStreak = runningStreak;
+          } else {
+            runningStreak = 0;
+          }
+        }
+      }
+
+      return SubcategoryStreakHistoryPoint(
+        label: bucket.label,
+        bestStreak: bestStreak,
+      );
+    }).toList();
+  }
+
+  Future<DateTime?> _getFirstTrackedDateForSubcategory(
+    DatabaseExecutor db, {
+    required String currentUser,
+    required String subcategoryName,
+    required String mainCategoryName,
+  }) async {
+    final records = await db.rawQuery('''
+      SELECT ${MotionDbColumns.date}
+      FROM ${MotionDbTables.subcategory}
+      WHERE ${MotionDbColumns.currentLoggedInUser} = ?
+        AND ${MotionDbColumns.subcategoryName} = ?
+        AND ${MotionDbColumns.mainCategoryName} = ?
+        AND ${MotionDbColumns.timeSpent} > 0
+    ''', [
+      currentUser,
+      subcategoryName,
+      mainCategoryName,
+    ]);
+
+    final dates = records
+        .map((record) => _parseStoredDate(record[MotionDbColumns.date]))
+        .whereType<DateTime>()
+        .toList();
+
+    if (dates.isEmpty) return null;
+    dates.sort();
+    return dates.first;
+  }
+
+  List<_StreakHistoryBucket> _streakHistoryBuckets({
+    required SubcategoryStreakHistoryRange range,
+    required DateTime firstDay,
+    required DateTime today,
+  }) {
+    switch (range) {
+      case SubcategoryStreakHistoryRange.week:
+        return _weeklyStreakHistoryBuckets(today);
+      case SubcategoryStreakHistoryRange.month:
+        return _monthlyStreakHistoryBuckets(today);
+      case SubcategoryStreakHistoryRange.year:
+        return _yearlyStreakHistoryBuckets(firstDay, today);
+    }
+  }
+
+  List<_StreakHistoryBucket> _weeklyStreakHistoryBuckets(DateTime today) {
+    final yearStart = DateTime(today.year, 1, 1);
+    final weekCount = today.difference(yearStart).inDays ~/ 7 + 1;
+
+    return List.generate(weekCount, (index) {
+      final start = yearStart.add(Duration(days: index * 7));
+      final end = start.add(const Duration(days: 6));
+      return _StreakHistoryBucket(
+        label: 'W${index + 1}',
+        start: _dateOnly(start),
+        end: _dateOnly(end),
+      );
+    });
+  }
+
+  List<_StreakHistoryBucket> _monthlyStreakHistoryBuckets(DateTime today) {
+    return List.generate(today.month, (index) {
+      final month = index + 1;
+      final start = DateTime(today.year, month, 1);
+      final end = DateTime(today.year, month + 1, 0);
+      return _StreakHistoryBucket(
+        label: _shortMonthName(month),
+        start: start,
+        end: end,
+      );
+    });
+  }
+
+  List<_StreakHistoryBucket> _yearlyStreakHistoryBuckets(
+    DateTime firstDay,
+    DateTime today,
+  ) {
+    final startYear = firstDay.year;
+    final endYear = today.year;
+
+    return List.generate(endYear - startYear + 1, (index) {
+      final year = startYear + index;
+      return _StreakHistoryBucket(
+        label: year.toString(),
+        start: DateTime(year, 1, 1),
+        end: DateTime(year, 12, 31),
+      );
+    });
+  }
+
+  static String _shortMonthName(int month) {
+    const monthNames = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+
+    return monthNames[month - 1];
+  }
+
+  static DateTime? _earliestDate(DateTime? first, DateTime? second) {
+    if (first == null) return second == null ? null : _dateOnly(second);
+    if (second == null) return _dateOnly(first);
+
+    final firstDate = _dateOnly(first);
+    final secondDate = _dateOnly(second);
+    return firstDate.isBefore(secondDate) ? firstDate : secondDate;
+  }
+
+  static String _formatIsoDate(DateTime date) {
+    final normalized = _dateOnly(date);
+    final month = normalized.month.toString().padLeft(2, '0');
+    final day = normalized.day.toString().padLeft(2, '0');
+    return '${normalized.year}-$month-$day';
+  }
+
   static DateTime _dateOnly(DateTime date) {
     return DateTime(date.year, date.month, date.day);
   }
@@ -1779,4 +2125,16 @@ class TrackerDatabaseHelper {
   //     logger.e("Error: $e");
   //   }
   // }
+}
+
+class _StreakHistoryBucket {
+  final String label;
+  final DateTime start;
+  final DateTime end;
+
+  const _StreakHistoryBucket({
+    required this.label,
+    required this.start,
+    required this.end,
+  });
 }

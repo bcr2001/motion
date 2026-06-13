@@ -27,6 +27,10 @@ class MotionDbColumns {
   static const String isActive = 'isActive';
   static const String isArchive = 'isArchive';
   static const String dateCreated = 'dateCreated';
+  static const String isStreakActive = 'isStreakActive';
+  static const String streakType = 'streakType';
+  static const String streakTargetMinutes = 'streakTargetMinutes';
+  static const String streakStartDate = 'streakStartDate';
 }
 
 class MotionCategories {

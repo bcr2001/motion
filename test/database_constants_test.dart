@@ -22,5 +22,12 @@ void main() {
     test('XP column names match the persisted SQLite columns', () {
       expect(MotionDbColumns.accountabilityBonusXp, 'accountabilityBonusXP');
     });
+
+    test('streak assignment column names match persisted SQLite columns', () {
+      expect(MotionDbColumns.isStreakActive, 'isStreakActive');
+      expect(MotionDbColumns.streakType, 'streakType');
+      expect(MotionDbColumns.streakTargetMinutes, 'streakTargetMinutes');
+      expect(MotionDbColumns.streakStartDate, 'streakStartDate');
+    });
   });
 }

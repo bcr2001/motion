@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:motion/motion_core/mc_sql_table/main_table.dart';
+import 'package:motion/motion_core/mc_sql_table/streak_status.dart';
 import 'package:motion/motion_core/mc_sql_table/sub_table.dart';
 
 import '../../../main.dart';
@@ -111,6 +112,60 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
         currentUser: requireCurrentUser(currentUser));
 
     return streak;
+  }
+
+  Future<SubcategoryStreakStatus> retrieveSubcategoryStreakStatus({
+    required String currentUser,
+    required String subcategoryName,
+    required String mainCategoryName,
+    required SubcategoryStreakType streakType,
+    required double targetMinutes,
+    required String startDate,
+    required String currentDate,
+  }) async {
+    return await trackDbInstance.getSubcategoryStreakStatus(
+      currentUser: requireCurrentUser(currentUser),
+      subcategoryName: subcategoryName,
+      mainCategoryName: mainCategoryName,
+      streakType: streakType,
+      targetMinutes: targetMinutes,
+      startDate: startDate,
+      currentDate: currentDate,
+    );
+  }
+
+  Future<String?> retrieveFirstTrackedDateForSubcategory({
+    required String currentUser,
+    required String subcategoryName,
+    required String mainCategoryName,
+  }) async {
+    return await trackDbInstance.getFirstTrackedDateForSubcategory(
+      currentUser: requireCurrentUser(currentUser),
+      subcategoryName: subcategoryName,
+      mainCategoryName: mainCategoryName,
+    );
+  }
+
+  Future<List<SubcategoryStreakHistoryPoint>> retrieveSubcategoryStreakHistory({
+    required String currentUser,
+    required String subcategoryName,
+    required String mainCategoryName,
+    required SubcategoryStreakType streakType,
+    required double targetMinutes,
+    required String startDate,
+    required String currentDate,
+    required SubcategoryStreakHistoryRange range,
+  }) async {
+    return await trackDbInstance.getSubcategoryStreakHistory(
+      currentUser: requireCurrentUser(currentUser),
+      subcategoryName: subcategoryName,
+      mainCategoryName: mainCategoryName,
+      streakType: streakType,
+      targetMinutes: targetMinutes,
+      startDate: startDate,
+      currentDate: currentDate,
+      range: range,
+    );
   }
 
   // retrieve the most tracked and least tracked main category

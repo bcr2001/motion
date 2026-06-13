@@ -86,6 +86,10 @@ void main() {
         dateCreated: '2026-06-04',
         isActive: 1,
         isArchive: 0,
+        isStreakActive: 1,
+        streakType: 'target_time',
+        streakTargetMinutes: 45,
+        streakStartDate: '2026-06-12',
       );
 
       final map = assigner.toMap();
@@ -97,6 +101,10 @@ void main() {
       expect(map[MotionDbColumns.dateCreated], '2026-06-04');
       expect(map[MotionDbColumns.isActive], 1);
       expect(map[MotionDbColumns.isArchive], 0);
+      expect(map[MotionDbColumns.isStreakActive], 1);
+      expect(map[MotionDbColumns.streakType], 'target_time');
+      expect(map[MotionDbColumns.streakTargetMinutes], 45);
+      expect(map[MotionDbColumns.streakStartDate], '2026-06-12');
       expect(Assigner.fromAssignerMap(withId).toMap(), map);
     });
   });

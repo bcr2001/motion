@@ -11,6 +11,10 @@ class Assigner {
   late int
       isArchive; // Indicates whether the assignment is archived (0 == false, 1 == true)
   final String dateCreated; // Date when the assignment was created
+  final int isStreakActive;
+  final String streakType;
+  final double streakTargetMinutes;
+  final String streakStartDate;
 
   Assigner({
     this.id = 0, // Assignment ID (auto-generated in the database)
@@ -20,6 +24,10 @@ class Assigner {
     required this.dateCreated,
     this.isActive = 0,
     this.isArchive = 0,
+    this.isStreakActive = 0,
+    this.streakType = "",
+    this.streakTargetMinutes = 0.0,
+    this.streakStartDate = "",
   });
 
   // Factory constructor to create an 'Assigner' object
@@ -38,6 +46,12 @@ class Assigner {
           map[MotionDbColumns.isArchive] ?? 0, // Extract isArchive (0 or 1)
       dateCreated:
           map[MotionDbColumns.dateCreated] ?? "", // Extract creation date
+      isStreakActive: map[MotionDbColumns.isStreakActive] ?? 0,
+      streakType: map[MotionDbColumns.streakType] ?? "",
+      streakTargetMinutes:
+          (map[MotionDbColumns.streakTargetMinutes] as num?)?.toDouble() ??
+              0.0,
+      streakStartDate: map[MotionDbColumns.streakStartDate] ?? "",
     );
   }
 
@@ -50,11 +64,15 @@ class Assigner {
       MotionDbColumns.isActive: isActive,
       MotionDbColumns.isArchive: isArchive, // Include isArchive in the map
       MotionDbColumns.dateCreated: dateCreated,
+      MotionDbColumns.isStreakActive: isStreakActive,
+      MotionDbColumns.streakType: streakType,
+      MotionDbColumns.streakTargetMinutes: streakTargetMinutes,
+      MotionDbColumns.streakStartDate: streakStartDate,
     };
   }
 
   @override
   String toString() {
-    return 'Assigner{id: $id, currentLoggedInUser: $currentLoggedInUser, subcategoryName: $subcategoryName, mainCategoryName: $mainCategoryName, isActive: $isActive, isArchive: $isArchive, dateCreated: $dateCreated}';
+    return 'Assigner{id: $id, currentLoggedInUser: $currentLoggedInUser, subcategoryName: $subcategoryName, mainCategoryName: $mainCategoryName, isActive: $isActive, isArchive: $isArchive, dateCreated: $dateCreated, isStreakActive: $isStreakActive, streakType: $streakType, streakTargetMinutes: $streakTargetMinutes, streakStartDate: $streakStartDate}';
   }
 }

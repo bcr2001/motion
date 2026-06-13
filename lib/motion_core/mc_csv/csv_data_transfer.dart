@@ -231,6 +231,14 @@ class MotionCsvDataTransfer {
                 _parseInt(rowMap[MotionDbColumns.isArchive]),
             MotionDbColumns.dateCreated:
                 _normalizeDate(rowMap[MotionDbColumns.dateCreated]),
+            MotionDbColumns.isStreakActive:
+                _parseInt(rowMap[MotionDbColumns.isStreakActive]),
+            MotionDbColumns.streakType:
+                rowMap[MotionDbColumns.streakType] ?? '',
+            MotionDbColumns.streakTargetMinutes:
+                _parseDouble(rowMap[MotionDbColumns.streakTargetMinutes]),
+            MotionDbColumns.streakStartDate:
+                _normalizeDate(rowMap[MotionDbColumns.streakStartDate]),
           },
           conflictAlgorithm: ConflictAlgorithm.replace,
         );
@@ -321,6 +329,10 @@ class MotionCsvDataTransfer {
         MotionDbColumns.isActive,
         MotionDbColumns.isArchive,
         MotionDbColumns.dateCreated,
+        MotionDbColumns.isStreakActive,
+        MotionDbColumns.streakType,
+        MotionDbColumns.streakTargetMinutes,
+        MotionDbColumns.streakStartDate,
       ],
       ...rows.map((row) => [
             row[MotionDbColumns.currentLoggedInUser],
@@ -329,6 +341,10 @@ class MotionCsvDataTransfer {
             row[MotionDbColumns.isActive],
             row[MotionDbColumns.isArchive],
             row[MotionDbColumns.dateCreated],
+            row[MotionDbColumns.isStreakActive],
+            row[MotionDbColumns.streakType],
+            row[MotionDbColumns.streakTargetMinutes],
+            row[MotionDbColumns.streakStartDate],
           ]),
     ];
   }

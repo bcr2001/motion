@@ -52,7 +52,7 @@ class AssignerDatabaseHelper {
     // upgrading it if necessary.
     return await openDatabase(
       path,
-      version: 6,
+      version: 7,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
       onOpen: _ensureSchema,
@@ -72,7 +72,11 @@ class AssignerDatabaseHelper {
         ${MotionDbColumns.mainCategoryName} TEXT,
         ${MotionDbColumns.isActive} INTEGER,
         ${MotionDbColumns.isArchive} INTEGER DEFAULT 0,
-        ${MotionDbColumns.dateCreated} TEXT
+        ${MotionDbColumns.dateCreated} TEXT,
+        ${MotionDbColumns.isStreakActive} INTEGER DEFAULT 0,
+        ${MotionDbColumns.streakType} TEXT DEFAULT '',
+        ${MotionDbColumns.streakTargetMinutes} REAL DEFAULT 0,
+        ${MotionDbColumns.streakStartDate} TEXT DEFAULT ''
       )
     """);
     await _createIndexes(db);
@@ -91,7 +95,11 @@ class AssignerDatabaseHelper {
         ${MotionDbColumns.mainCategoryName} TEXT,
         ${MotionDbColumns.isActive} INTEGER,
         ${MotionDbColumns.isArchive} INTEGER DEFAULT 0,
-        ${MotionDbColumns.dateCreated} TEXT
+        ${MotionDbColumns.dateCreated} TEXT,
+        ${MotionDbColumns.isStreakActive} INTEGER DEFAULT 0,
+        ${MotionDbColumns.streakType} TEXT DEFAULT '',
+        ${MotionDbColumns.streakTargetMinutes} REAL DEFAULT 0,
+        ${MotionDbColumns.streakStartDate} TEXT DEFAULT ''
       )
     """);
 
@@ -107,6 +115,14 @@ class AssignerDatabaseHelper {
         MotionDbColumns.isArchive, "INTEGER DEFAULT 0");
     await _addColumnIfMissing(
         db, MotionDbTables.assigner, MotionDbColumns.dateCreated, "TEXT");
+    await _addColumnIfMissing(db, MotionDbTables.assigner,
+        MotionDbColumns.isStreakActive, "INTEGER DEFAULT 0");
+    await _addColumnIfMissing(db, MotionDbTables.assigner,
+        MotionDbColumns.streakType, "TEXT DEFAULT ''");
+    await _addColumnIfMissing(db, MotionDbTables.assigner,
+        MotionDbColumns.streakTargetMinutes, "REAL DEFAULT 0");
+    await _addColumnIfMissing(db, MotionDbTables.assigner,
+        MotionDbColumns.streakStartDate, "TEXT DEFAULT ''");
     await _createIndexes(db);
   }
 
@@ -126,6 +142,15 @@ class AssignerDatabaseHelper {
         ${MotionDbColumns.currentLoggedInUser},
         ${MotionDbColumns.mainCategoryName},
         ${MotionDbColumns.subcategoryName}
+      )
+    """);
+
+    await db.execute("""
+      CREATE INDEX IF NOT EXISTS idx_assigner_user_streak
+      ON ${MotionDbTables.assigner}(
+        ${MotionDbColumns.currentLoggedInUser},
+        ${MotionDbColumns.isStreakActive},
+        ${MotionDbColumns.isArchive}
       )
     """);
   }

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:motion/main.dart';
 import 'package:motion/motion_core/mc_sql_table/assign_table.dart';
+import 'package:motion/motion_core/mc_sql_table/streak_status.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_date_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/assigner_pvd.dart';
+import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_core/motion_providers/dropDown_pvd/drop_down_pvd.dart';
+import 'package:motion/motion_reusable/db_re/sub_logic.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_reusable/mu_reusable/user_validator.dart';
 import 'package:motion/motion_routes/mr_track/track_reusable/front_track.dart';
@@ -25,6 +28,8 @@ class MotionTrackRoute extends StatefulWidget {
 }
 
 class _MotionTrackRouteState extends State<MotionTrackRoute> {
+  static const Color _streakAccentColor = Color(0xFFD97706);
+
   // form key
   final _formKey = GlobalKey<FormState>();
 
@@ -61,8 +66,520 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
           mainCategoryName: item.mainCategoryName,
           dateCreated: item.dateCreated,
           isActive: item.isActive == 0 ? 1 : 0,
-          isArchive: item.isArchive),
+          isArchive: item.isArchive,
+          isStreakActive: item.isStreakActive,
+          streakType: item.streakType,
+          streakTargetMinutes: item.streakTargetMinutes,
+          streakStartDate: item.streakStartDate),
     );
+  }
+
+  Future<void> _disableStreak(BuildContext context, Assigner item) async {
+    await context.read<AssignerMainProvider>().updateStreakSettings(
+          assigner: item,
+          isStreakActive: false,
+          streakType: "",
+          streakTargetMinutes: 0.0,
+          streakStartDate: "",
+        );
+  }
+
+  String _timeInputPart(int value) {
+    if (value == 0) return "";
+    return value.toString().padLeft(2, '0');
+  }
+
+  TextEditingController _timeController(String value) {
+    return TextEditingController(text: value);
+  }
+
+  Widget _streakRuleCard({
+    required BuildContext context,
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final accentColor = isSelected ? _streakAccentColor : Colors.blueGrey;
+    final borderColor = isSelected
+        ? _streakAccentColor.withValues(alpha: 0.28)
+        : isDarkMode
+            ? Colors.white.withValues(alpha: 0.10)
+            : Colors.black12;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 9),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: onTap,
+          child: Ink(
+            padding: const EdgeInsets.all(11),
+            decoration: BoxDecoration(
+              color: accentColor.withValues(alpha: isSelected ? 0.08 : 0.045),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: borderColor),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  height: 34,
+                  width: 34,
+                  decoration: BoxDecoration(
+                    color: accentColor.withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(11),
+                  ),
+                  child: Icon(icon, color: accentColor, size: 18),
+                ),
+                const SizedBox(width: 11),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyle.subSectionTextStyle(
+                          fontsize: 13,
+                          fontweight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        subtitle,
+                        style: AppTextStyle.subSectionTextStyle(
+                          fontsize: 11,
+                          fontweight: FontWeight.normal,
+                          color: Colors.blueGrey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Icon(
+                  isSelected
+                      ? Icons.check_circle_rounded
+                      : Icons.radio_button_unchecked_rounded,
+                  color: accentColor,
+                  size: 18,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _streakTimeInput({
+    required String title,
+    required TextEditingController controller,
+  }) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final borderColor =
+        isDarkMode ? Colors.white.withValues(alpha: 0.10) : Colors.black12;
+    final inputColor = isDarkMode
+        ? Colors.white.withValues(alpha: 0.04)
+        : Colors.black.withValues(alpha: 0.035);
+
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        decoration: BoxDecoration(
+          color: inputColor,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: borderColor),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyle.subSectionTextStyle(
+                fontsize: 10.5,
+                fontweight: FontWeight.normal,
+                color: Colors.blueGrey,
+              ),
+            ),
+            const SizedBox(height: 4),
+            TextField(
+              controller: controller,
+              keyboardType: TextInputType.number,
+              maxLength: 2,
+              buildCounter: (BuildContext context,
+                      {int? currentLength,
+                      int? maxLength,
+                      bool? isFocused}) =>
+                  null,
+              textAlign: TextAlign.center,
+              cursorColor: AppColor.blueMainColor,
+              style: AppTextStyle.sectionTitleTextStyle(fontsize: 22),
+              decoration: InputDecoration(
+                isDense: true,
+                border: InputBorder.none,
+                hintText: "00",
+                hintStyle: AppTextStyle.manualHintTextStyle(fontsize: 22),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _streakTargetTimeBlock({
+    required TextEditingController hourController,
+    required TextEditingController minuteController,
+    required TextEditingController secondController,
+  }) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final borderColor =
+        isDarkMode ? Colors.white.withValues(alpha: 0.10) : Colors.black12;
+    final panelColor = isDarkMode
+        ? Colors.white.withValues(alpha: 0.04)
+        : _streakAccentColor.withValues(alpha: 0.04);
+
+    return Container(
+      margin: const EdgeInsets.only(top: 3),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: panelColor,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: borderColor),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Container(
+                height: 32,
+                width: 32,
+                decoration: BoxDecoration(
+                  color: _streakAccentColor.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.timer_outlined,
+                  color: _streakAccentColor,
+                  size: 18,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  "Daily Target",
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyle.subSectionTextStyle(
+                    fontsize: 13,
+                    fontweight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              _streakTimeInput(
+                title: "Hours",
+                controller: hourController,
+              ),
+              const SizedBox(width: 8),
+              _streakTimeInput(
+                title: "Minutes",
+                controller: minuteController,
+              ),
+              const SizedBox(width: 8),
+              _streakTimeInput(
+                title: "Seconds",
+                controller: secondController,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showStreakPrompt(BuildContext context, Assigner item) async {
+    final savedTarget = item.streakTargetMinutes;
+    final savedHours = savedTarget ~/ 60;
+    final savedMinutes = savedTarget.floor() % 60;
+    final savedSeconds = ((savedTarget - savedTarget.floor()) * 60).round();
+    final hourController = _timeController(_timeInputPart(savedHours));
+    final minuteController = _timeController(_timeInputPart(savedMinutes));
+    final secondController = _timeController(_timeInputPart(savedSeconds));
+    var selectedType = item.streakType.isEmpty
+        ? SubcategoryStreakType.anyTime
+        : SubcategoryStreakTypeValues.fromStoredValue(item.streakType);
+    final currentDate = context.read<CurrentDateProvider>().currentDate;
+    final trackerProvider = context.read<MainCategoryTrackerProvider>();
+    final assignerProvider = context.read<AssignerMainProvider>();
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        final isDarkMode = Theme.of(dialogContext).brightness == Brightness.dark;
+        final panelColor = isDarkMode
+            ? AppColor.darkModeContentWidget
+            : AppColor.lightModeContentWidget;
+        final borderColor =
+            isDarkMode ? Colors.white.withValues(alpha: 0.10) : Colors.black12;
+        final cancelColor = isDarkMode ? Colors.white70 : Colors.blueGrey;
+
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            final isTargetTime =
+                selectedType == SubcategoryStreakType.targetTime;
+
+            return Dialog(
+              backgroundColor: panelColor,
+              insetPadding:
+                  const EdgeInsets.symmetric(horizontal: 18, vertical: 24),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18),
+                side: BorderSide(color: borderColor),
+              ),
+              child: ConstrainedBox(
+                constraints:
+                    const BoxConstraints(maxWidth: 430, maxHeight: 620),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            height: 38,
+                            width: 38,
+                            decoration: BoxDecoration(
+                              color: _streakAccentColor.withValues(alpha: 0.10),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.local_fire_department_rounded,
+                              color: _streakAccentColor,
+                              size: 22,
+                            ),
+                          ),
+                          const SizedBox(width: 11),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Streak",
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTextStyle.subSectionTextStyle(
+                                    fontsize: 16,
+                                    fontweight: FontWeight.w900,
+                                  ),
+                                ),
+                                Text(
+                                  item.subcategoryName,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTextStyle.subSectionTextStyle(
+                                    fontsize: 11,
+                                    fontweight: FontWeight.normal,
+                                    color: Colors.blueGrey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            visualDensity: VisualDensity.compact,
+                            tooltip: "Close",
+                            onPressed: () => Navigator.of(dialogContext).pop(),
+                            icon: const Icon(Icons.close_rounded),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        "Choose how this streak should be maintained each day.",
+                        style: AppTextStyle.subSectionTextStyle(
+                          fontsize: 12,
+                          fontweight: FontWeight.normal,
+                          color: Colors.blueGrey,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Flexible(
+                        child: SingleChildScrollView(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _streakRuleCard(
+                                context: dialogContext,
+                                title: "Any Time",
+                                subtitle:
+                                    "Keep the streak when any time is tracked.",
+                                icon: Icons.check_circle_outline_rounded,
+                                isSelected: selectedType ==
+                                    SubcategoryStreakType.anyTime,
+                                onTap: () {
+                                  setDialogState(() {
+                                    selectedType =
+                                        SubcategoryStreakType.anyTime;
+                                  });
+                                },
+                              ),
+                              _streakRuleCard(
+                                context: dialogContext,
+                                title: "Target Time",
+                                subtitle:
+                                    "Keep the streak only when the target is met.",
+                                icon: Icons.timer_outlined,
+                                isSelected: isTargetTime,
+                                onTap: () {
+                                  setDialogState(() {
+                                    selectedType =
+                                        SubcategoryStreakType.targetTime;
+                                  });
+                                },
+                              ),
+                              if (isTargetTime)
+                                _streakTargetTimeBlock(
+                                  hourController: hourController,
+                                  minuteController: minuteController,
+                                  secondController: secondController,
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () =>
+                                  Navigator.of(dialogContext).pop(),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: cancelColor,
+                                backgroundColor:
+                                    cancelColor.withValues(alpha: 0.08),
+                                minimumSize: const Size(0, 42),
+                                side: BorderSide(
+                                  color: cancelColor.withValues(alpha: 0.30),
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: Text(
+                                "Cancel",
+                                style: AppTextStyle.subSectionTextStyle(
+                                  fontsize: 12,
+                                  fontweight: FontWeight.w800,
+                                  color: cancelColor,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                final targetMinutes = isTargetTime
+                                    ? timeAdder(
+                                        h: hourController.text.trim().isEmpty
+                                            ? "0"
+                                            : hourController.text.trim(),
+                                        m: minuteController.text.trim().isEmpty
+                                            ? "0"
+                                            : minuteController.text.trim(),
+                                        s: secondController.text.trim().isEmpty
+                                            ? "0"
+                                            : secondController.text.trim(),
+                                      )
+                                    : 0.0;
+
+                                if (isTargetTime && targetMinutes <= 0) {
+                                  snackBarMessage(
+                                    context,
+                                    requiresColor: true,
+                                    errorMessage:
+                                        "Enter a target greater than 0 minutes",
+                                  );
+                                  return;
+                                }
+
+                                final firstTrackedDate = await trackerProvider
+                                    .retrieveFirstTrackedDateForSubcategory(
+                                      currentUser: item.currentLoggedInUser,
+                                      subcategoryName: item.subcategoryName,
+                                      mainCategoryName: item.mainCategoryName,
+                                    );
+
+                                await assignerProvider.updateStreakSettings(
+                                  assigner: item,
+                                  isStreakActive: true,
+                                  streakType: SubcategoryStreakTypeValues
+                                      .toStoredValue(selectedType),
+                                  streakTargetMinutes: targetMinutes,
+                                  streakStartDate:
+                                      firstTrackedDate ?? currentDate,
+                                );
+
+                                if (dialogContext.mounted) {
+                                  Navigator.of(dialogContext).pop();
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: _streakAccentColor,
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                minimumSize: const Size(0, 42),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: const Text("Save"),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+
+    Future<void>.delayed(const Duration(milliseconds: 350), () {
+      hourController.dispose();
+      minuteController.dispose();
+      secondController.dispose();
+    });
+  }
+
+  Future<void> _handleStreakPressed(BuildContext context, Assigner item) async {
+    if (item.isStreakActive == 1) {
+      await _disableStreak(context, item);
+      return;
+    }
+
+    await _showStreakPrompt(context, item);
   }
 
   Color _categoryColor(String categoryName) {
@@ -116,8 +633,41 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
         .toList();
   }
 
+  Widget _tileActionButton({
+    required String label,
+    required Color color,
+    required VoidCallback onPressed,
+  }) {
+    return Container(
+      height: 28,
+      constraints: const BoxConstraints(minWidth: 58),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(9),
+      ),
+      child: TextButton(
+        onPressed: onPressed,
+        style: TextButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          minimumSize: Size.zero,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          foregroundColor: color,
+        ),
+        child: Text(
+          label,
+          style: AppTextStyle.subSectionTextStyle(
+            fontsize: 11,
+            fontweight: FontWeight.w700,
+            color: color,
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _subcategoryTile(Assigner item) {
     final isActive = item.isActive == 1;
+    final isStreakActive = item.isStreakActive == 1;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final borderColor =
         isDarkMode ? Colors.white.withValues(alpha: 0.08) : Colors.black12;
@@ -125,6 +675,7 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
         ? AppColor.blueMainColor.withValues(alpha: isDarkMode ? 0.12 : 0.08)
         : Colors.transparent;
     final statusColor = isActive ? AppColor.blueMainColor : Colors.blueGrey;
+    final streakColor = isStreakActive ? _streakAccentColor : Colors.blueGrey;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -155,30 +706,21 @@ class _MotionTrackRouteState extends State<MotionTrackRoute> {
               ),
             ),
           ),
-          Container(
-            height: 28,
-            constraints: const BoxConstraints(minWidth: 62),
-            decoration: BoxDecoration(
-              color: statusColor.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(9),
-            ),
-            child: TextButton(
-              onPressed: () async => _handleItemPressed(context, item),
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                foregroundColor: statusColor,
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _tileActionButton(
+                label: isActive ? "Active" : "Off",
+                color: statusColor,
+                onPressed: () async => _handleItemPressed(context, item),
               ),
-              child: Text(
-                isActive ? "Active" : "Off",
-                style: AppTextStyle.subSectionTextStyle(
-                  fontsize: 11,
-                  fontweight: FontWeight.w700,
-                  color: statusColor,
-                ),
+              const SizedBox(width: 6),
+              _tileActionButton(
+                label: "Streak",
+                color: streakColor,
+                onPressed: () async => _handleStreakPressed(context, item),
               ),
-            ),
+            ],
           ),
         ],
       ),

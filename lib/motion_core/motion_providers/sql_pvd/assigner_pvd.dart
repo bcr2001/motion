@@ -49,6 +49,30 @@ class AssignerMainProvider extends ChangeNotifier {
     await getAllUserItems();
   }
 
+  Future<void> updateStreakSettings({
+    required Assigner assigner,
+    required bool isStreakActive,
+    required String streakType,
+    required double streakTargetMinutes,
+    required String streakStartDate,
+  }) async {
+    await updateAssignedItems(
+      Assigner(
+        id: assigner.id,
+        currentLoggedInUser: assigner.currentLoggedInUser,
+        subcategoryName: assigner.subcategoryName,
+        mainCategoryName: assigner.mainCategoryName,
+        dateCreated: assigner.dateCreated,
+        isActive: assigner.isActive,
+        isArchive: assigner.isArchive,
+        isStreakActive: isStreakActive ? 1 : 0,
+        streakType: isStreakActive ? streakType : "",
+        streakTargetMinutes: isStreakActive ? streakTargetMinutes : 0.0,
+        streakStartDate: isStreakActive ? streakStartDate : "",
+      ),
+    );
+  }
+
   // delete existing items in the to_assign table
   Future<void> deleteAssignedItems(int id) async {
     await dbInstance.assignDelete(id);
