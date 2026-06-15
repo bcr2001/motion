@@ -454,6 +454,19 @@ class TrackerDatabaseSchema {
 
   static Future<void> _backfillExperiencePoints(Database db) async {
     await db.execute('''
+      INSERT OR IGNORE INTO $mainCategoryTable(
+        ${MotionDbColumns.date},
+        ${MotionDbColumns.currentLoggedInUser}
+      )
+      SELECT DISTINCT
+        ${MotionDbColumns.date},
+        ${MotionDbColumns.currentLoggedInUser}
+      FROM $subcategoryTable
+      WHERE ${MotionDbColumns.date} IS NOT NULL
+        AND ${MotionDbColumns.currentLoggedInUser} IS NOT NULL
+    ''');
+
+    await db.execute('''
       INSERT OR IGNORE INTO $experiencePointsTable(
         ${MotionDbColumns.date},
         ${MotionDbColumns.currentLoggedInUser},

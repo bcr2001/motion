@@ -199,6 +199,44 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
     return resultMT;
   }
 
+  Future<Map<String, dynamic>> retrieveMonthlyReportSnapshot({
+    required String currentUser,
+    required String firstDay,
+    required String lastDay,
+  }) async {
+    return await trackDbInstance.getMonthlyReportSnapshot(
+      currentUser: requireCurrentUser(currentUser),
+      firstDay: firstDay,
+      lastDay: lastDay,
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> retrieveMonthlyDailyXpTrend({
+    required String currentUser,
+    required String firstDay,
+    required String lastDay,
+  }) async {
+    return await trackDbInstance.getMonthlyDailyXpTrend(
+      currentUser: requireCurrentUser(currentUser),
+      firstDay: firstDay,
+      lastDay: lastDay,
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> retrieveTopSubcategoriesForPeriod({
+    required String currentUser,
+    required String firstDay,
+    required String lastDay,
+    int limit = 5,
+  }) async {
+    return await trackDbInstance.getTopSubcategoriesForPeriod(
+      currentUser: requireCurrentUser(currentUser),
+      firstDay: firstDay,
+      lastDay: lastDay,
+      limit: limit,
+    );
+  }
+
   // accounted time and unaccounted time for everyday
   // for a particular week
   Future<List<Map<String, dynamic>>> retrieveAWeekOfAccountedAndAccountedData(

@@ -339,10 +339,6 @@ class _SpecificDaySummaryHeatMapState extends State<SpecificDaySummaryHeatMap> {
             } else {
               final snapShotData = snapshot.data!;
 
-              logger.i(widget.dateValue);
-
-              // logger.i(snapShotData);
-
               // calculating total accounted time
               final double totalTimeAccounted =
                   calculateTotalTime(snapShotData);
@@ -356,8 +352,6 @@ class _SpecificDaySummaryHeatMapState extends State<SpecificDaySummaryHeatMap> {
 
               final String contributionScore =
                   calculateScoreFromMinutes(totalTimeAccounted);
-
-              logger.i(totalTimeAccounted);
 
               return Column(
                 children: [

@@ -573,12 +573,16 @@ class HomeStreaksSection extends StatelessWidget {
     required Assigner assigner,
     required String currentUser,
     required String currentDate,
+    required int refreshKey,
   }) {
     final tracker = context.read<MainCategoryTrackerProvider>();
     final streakType =
         SubcategoryStreakTypeValues.fromStoredValue(assigner.streakType);
 
     return FutureBuilder<SubcategoryStreakStatus>(
+      key: ValueKey(
+        'home-streak-${assigner.subcategoryName}-${assigner.mainCategoryName}-$currentDate-$refreshKey',
+      ),
       future: tracker.retrieveSubcategoryStreakStatus(
         currentUser: currentUser,
         subcategoryName: assigner.subcategoryName,
@@ -689,8 +693,9 @@ class HomeStreaksSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer3<AssignerMainProvider, UserUidProvider, CurrentDateProvider>(
-      builder: (context, assigner, user, date, child) {
+    return Consumer4<AssignerMainProvider, UserUidProvider, CurrentDateProvider,
+        SubcategoryTrackerDatabaseProvider>(
+      builder: (context, assigner, user, date, sub, child) {
         final currentUser = user.userUid;
         if (currentUser == null) {
           return const SizedBox.shrink();
@@ -717,6 +722,7 @@ class HomeStreaksSection extends StatelessWidget {
                 assigner: item,
                 currentUser: currentUser,
                 currentDate: date.currentDate,
+                refreshKey: sub.refreshKey,
               ),
             ),
           ],
