@@ -44,6 +44,11 @@ class SubcategoryStreakStatus {
   final String startDate;
   final int currentStreak;
   final int bestStreak;
+  final String currentStreakStartDate;
+  final String bestStreakStartDate;
+  final String bestStreakEndDate;
+  final int metDays;
+  final int totalDays;
   final double todayMinutes;
   final SubcategoryStreakTodayStatus todayStatus;
 
@@ -55,6 +60,11 @@ class SubcategoryStreakStatus {
     required this.startDate,
     required this.currentStreak,
     required this.bestStreak,
+    required this.currentStreakStartDate,
+    required this.bestStreakStartDate,
+    required this.bestStreakEndDate,
+    required this.metDays,
+    required this.totalDays,
     required this.todayMinutes,
     required this.todayStatus,
   });
@@ -67,5 +77,29 @@ class SubcategoryStreakHistoryPoint {
   const SubcategoryStreakHistoryPoint({
     required this.label,
     required this.bestStreak,
+  });
+}
+
+class SubcategoryStreakDay {
+  final String date;
+  final bool metTarget;
+  final double minutesTracked;
+
+  const SubcategoryStreakDay({
+    required this.date,
+    required this.metTarget,
+    required this.minutesTracked,
+  });
+}
+
+class SubcategoryBestStreakRun {
+  final String startDate;
+  final String endDate;
+  final int streakLength;
+
+  const SubcategoryBestStreakRun({
+    required this.startDate,
+    required this.endDate,
+    required this.streakLength,
   });
 }
