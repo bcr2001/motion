@@ -168,6 +168,48 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
     );
   }
 
+  Future<List<SubcategoryBestStreakRun>> retrieveSubcategoryBestStreakRuns({
+    required String currentUser,
+    required String subcategoryName,
+    required String mainCategoryName,
+    required SubcategoryStreakType streakType,
+    required double targetMinutes,
+    required String startDate,
+    required String currentDate,
+    int limit = 9,
+  }) async {
+    return await trackDbInstance.getSubcategoryBestStreakRuns(
+      currentUser: requireCurrentUser(currentUser),
+      subcategoryName: subcategoryName,
+      mainCategoryName: mainCategoryName,
+      streakType: streakType,
+      targetMinutes: targetMinutes,
+      startDate: startDate,
+      currentDate: currentDate,
+      limit: limit,
+    );
+  }
+
+  Future<List<SubcategoryStreakDay>> retrieveSubcategoryStreakDays({
+    required String currentUser,
+    required String subcategoryName,
+    required String mainCategoryName,
+    required SubcategoryStreakType streakType,
+    required double targetMinutes,
+    required String startDate,
+    required String currentDate,
+  }) async {
+    return await trackDbInstance.getSubcategoryStreakDays(
+      currentUser: requireCurrentUser(currentUser),
+      subcategoryName: subcategoryName,
+      mainCategoryName: mainCategoryName,
+      streakType: streakType,
+      targetMinutes: targetMinutes,
+      startDate: startDate,
+      currentDate: currentDate,
+    );
+  }
+
   // retrieve the most tracked and least tracked main category
   Future<List<Map<String, dynamic>>> retrieveMostAndLeastTrackedMainCategory(
       {required String firstDay,

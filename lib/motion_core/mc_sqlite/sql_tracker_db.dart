@@ -1082,7 +1082,7 @@ class TrackerDatabaseHelper {
     for (final record in records) {
       final date = _parseStoredDate(record[MotionDbColumns.date]);
       if (date == null) continue;
-      dailyTotals[_dateOnly(date)] = (record["total"] as num?)?.toDouble() ?? 0;
+      dailyTotals[_dateOnly(date)] = _readDouble(record["total"]);
     }
 
     final today = currentDay;
@@ -1098,14 +1098,25 @@ class TrackerDatabaseHelper {
 
     var bestStreak = 0;
     var runningStreak = 0;
+    var metDays = 0;
+    DateTime? runningStartDate;
+    DateTime? bestStartDate;
+    DateTime? bestEndDate;
     for (var date = firstDay;
         !date.isAfter(today);
         date = date.add(const Duration(days: 1))) {
       if (metTarget(date)) {
+        metDays++;
+        runningStartDate ??= date;
         runningStreak++;
-        if (runningStreak > bestStreak) bestStreak = runningStreak;
+        if (runningStreak > bestStreak) {
+          bestStreak = runningStreak;
+          bestStartDate = runningStartDate;
+          bestEndDate = date;
+        }
       } else {
         runningStreak = 0;
+        runningStartDate = null;
       }
     }
 
@@ -1113,17 +1124,21 @@ class TrackerDatabaseHelper {
     final hasMetToday = metTarget(today);
 
     var currentStreak = 0;
+    DateTime? currentStreakStartDate;
     if (hasMetToday) {
       currentStreak = 1;
+      currentStreakStartDate = today;
       var expectedDate = today.subtract(const Duration(days: 1));
       while (!expectedDate.isBefore(firstDay) && metTarget(expectedDate)) {
         currentStreak++;
+        currentStreakStartDate = expectedDate;
         expectedDate = expectedDate.subtract(const Duration(days: 1));
       }
     } else {
       var expectedDate = today.subtract(const Duration(days: 1));
       while (!expectedDate.isBefore(firstDay) && metTarget(expectedDate)) {
         currentStreak++;
+        currentStreakStartDate = expectedDate;
         expectedDate = expectedDate.subtract(const Duration(days: 1));
       }
     }
@@ -1142,6 +1157,15 @@ class TrackerDatabaseHelper {
       startDate: effectiveStartDate,
       currentStreak: currentStreak,
       bestStreak: bestStreak,
+      currentStreakStartDate: currentStreakStartDate == null
+          ? ''
+          : _formatIsoDate(currentStreakStartDate!),
+      bestStreakStartDate:
+          bestStartDate == null ? '' : _formatIsoDate(bestStartDate!),
+      bestStreakEndDate:
+          bestEndDate == null ? '' : _formatIsoDate(bestEndDate!),
+      metDays: metDays,
+      totalDays: _inclusiveDaysBetween(firstDay, today),
       todayMinutes: todayMinutes,
       todayStatus: todayStatus,
     );
@@ -1253,6 +1277,173 @@ class TrackerDatabaseHelper {
         bestStreak: bestStreak,
       );
     }).toList();
+  }
+
+  Future<List<SubcategoryBestStreakRun>> getSubcategoryBestStreakRuns({
+    required String currentUser,
+    required String subcategoryName,
+    required String mainCategoryName,
+    required SubcategoryStreakType streakType,
+    required double targetMinutes,
+    required String startDate,
+    required String currentDate,
+    int limit = 9,
+  }) async {
+    final db = await database;
+    final firstTrackedDate = await _getFirstTrackedDateForSubcategory(
+      db,
+      currentUser: currentUser,
+      subcategoryName: subcategoryName,
+      mainCategoryName: mainCategoryName,
+    );
+    final savedStartDate = _parseStoredDate(startDate);
+    final currentDay =
+        _dateOnly(_parseStoredDate(currentDate) ?? DateTime.now());
+    final effectiveStartDay = _earliestDate(
+      firstTrackedDate,
+      savedStartDate,
+    ) ?? currentDay;
+    final effectiveStartDate = _formatIsoDate(effectiveStartDay);
+
+    final records = await db.rawQuery('''
+      SELECT ${MotionDbColumns.date},
+             COALESCE(SUM(${MotionDbColumns.timeSpent}), 0) AS total
+      FROM ${MotionDbTables.subcategory}
+      WHERE ${MotionDbColumns.currentLoggedInUser} = ?
+        AND ${MotionDbColumns.subcategoryName} = ?
+        AND ${MotionDbColumns.mainCategoryName} = ?
+        AND ${MotionDbColumns.date} BETWEEN ? AND ?
+      GROUP BY ${MotionDbColumns.date}
+      ORDER BY ${MotionDbColumns.date} ASC
+    ''', [
+      currentUser,
+      subcategoryName,
+      mainCategoryName,
+      effectiveStartDate,
+      currentDate,
+    ]);
+
+    final dailyTotals = <DateTime, double>{};
+    for (final record in records) {
+      final date = _parseStoredDate(record[MotionDbColumns.date]);
+      if (date == null) continue;
+      dailyTotals[_dateOnly(date)] = _readDouble(record["total"]);
+    }
+
+    bool metTarget(DateTime date) {
+      final total = dailyTotals[date] ?? 0.0;
+      if (streakType == SubcategoryStreakType.targetTime) {
+        return total >= targetMinutes;
+      }
+      return total > 0;
+    }
+
+    final runs = <SubcategoryBestStreakRun>[];
+    DateTime? runStart;
+    DateTime? runEnd;
+    var runningLength = 0;
+
+    void closeRun() {
+      if (runStart == null || runEnd == null || runningLength <= 0) return;
+      runs.add(SubcategoryBestStreakRun(
+        startDate: _formatIsoDate(runStart!),
+        endDate: _formatIsoDate(runEnd!),
+        streakLength: runningLength,
+      ));
+      runStart = null;
+      runEnd = null;
+      runningLength = 0;
+    }
+
+    for (var date = effectiveStartDay;
+        !date.isAfter(currentDay);
+        date = date.add(const Duration(days: 1))) {
+      if (metTarget(date)) {
+        runStart ??= date;
+        runEnd = date;
+        runningLength++;
+      } else {
+        closeRun();
+      }
+    }
+    closeRun();
+
+    runs.sort((a, b) {
+      final streakComparison = b.streakLength.compareTo(a.streakLength);
+      if (streakComparison != 0) return streakComparison;
+      return b.endDate.compareTo(a.endDate);
+    });
+    return runs.take(limit).toList();
+  }
+
+  Future<List<SubcategoryStreakDay>> getSubcategoryStreakDays({
+    required String currentUser,
+    required String subcategoryName,
+    required String mainCategoryName,
+    required SubcategoryStreakType streakType,
+    required double targetMinutes,
+    required String startDate,
+    required String currentDate,
+  }) async {
+    final db = await database;
+    final firstTrackedDate = await _getFirstTrackedDateForSubcategory(
+      db,
+      currentUser: currentUser,
+      subcategoryName: subcategoryName,
+      mainCategoryName: mainCategoryName,
+    );
+    final savedStartDate = _parseStoredDate(startDate);
+    final currentDay =
+        _dateOnly(_parseStoredDate(currentDate) ?? DateTime.now());
+    final effectiveStartDay = _earliestDate(
+      firstTrackedDate,
+      savedStartDate,
+    ) ?? currentDay;
+    final effectiveStartDate = _formatIsoDate(effectiveStartDay);
+
+    final records = await db.rawQuery('''
+      SELECT ${MotionDbColumns.date},
+             COALESCE(SUM(${MotionDbColumns.timeSpent}), 0) AS total
+      FROM ${MotionDbTables.subcategory}
+      WHERE ${MotionDbColumns.currentLoggedInUser} = ?
+        AND ${MotionDbColumns.subcategoryName} = ?
+        AND ${MotionDbColumns.mainCategoryName} = ?
+        AND ${MotionDbColumns.date} BETWEEN ? AND ?
+      GROUP BY ${MotionDbColumns.date}
+      ORDER BY ${MotionDbColumns.date} ASC
+    ''', [
+      currentUser,
+      subcategoryName,
+      mainCategoryName,
+      effectiveStartDate,
+      currentDate,
+    ]);
+
+    final dailyTotals = <DateTime, double>{};
+    for (final record in records) {
+      final date = _parseStoredDate(record[MotionDbColumns.date]);
+      if (date == null) continue;
+      dailyTotals[_dateOnly(date)] = _readDouble(record["total"]);
+    }
+
+    bool metTarget(DateTime date) {
+      final total = dailyTotals[date] ?? 0.0;
+      if (streakType == SubcategoryStreakType.targetTime) {
+        return total >= targetMinutes;
+      }
+      return total > 0;
+    }
+
+    return [
+      for (var date = effectiveStartDay;
+          !date.isAfter(currentDay);
+          date = date.add(const Duration(days: 1)))
+        SubcategoryStreakDay(
+          date: _formatIsoDate(date),
+          metTarget: metTarget(date),
+          minutesTracked: dailyTotals[date] ?? 0.0,
+        ),
+    ];
   }
 
   Future<DateTime?> _getFirstTrackedDateForSubcategory(
