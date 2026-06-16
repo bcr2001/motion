@@ -579,19 +579,17 @@ class HomeStreaksSection extends StatelessWidget {
     final streakType =
         SubcategoryStreakTypeValues.fromStoredValue(assigner.streakType);
 
-    return FutureBuilder<SubcategoryStreakStatus>(
-      key: ValueKey(
-        'home-streak-${assigner.subcategoryName}-${assigner.mainCategoryName}-$currentDate-$refreshKey',
-      ),
-      future: tracker.retrieveSubcategoryStreakStatus(
-        currentUser: currentUser,
-        subcategoryName: assigner.subcategoryName,
-        mainCategoryName: assigner.mainCategoryName,
-        streakType: streakType,
-        targetMinutes: assigner.streakTargetMinutes,
-        startDate: assigner.streakStartDate,
-        currentDate: currentDate,
-      ),
+    return CachedFutureBuilder<SubcategoryStreakStatus>(
+      cacheKey:
+          'home-streak-${assigner.subcategoryName}-${assigner.mainCategoryName}-$currentDate-$refreshKey',
+      futureFactory: () => tracker.retrieveSubcategoryStreakStatus(
+          currentUser: currentUser,
+          subcategoryName: assigner.subcategoryName,
+          mainCategoryName: assigner.mainCategoryName,
+          streakType: streakType,
+          targetMinutes: assigner.streakTargetMinutes,
+          startDate: assigner.streakStartDate,
+          currentDate: currentDate),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Padding(
@@ -717,13 +715,21 @@ class HomeStreaksSection extends StatelessWidget {
           children: [
             subSectionTitle2(titleName: 'Streaks'),
             ...activeStreaks.map(
-              (item) => _streakCard(
-                context: context,
-                assigner: item,
-                currentUser: currentUser,
-                currentDate: date.currentDate,
-                refreshKey: sub.refreshKey,
-              ),
+              (item) {
+                final refreshKey = sub.refreshKeyForSubcategory(
+                  currentUser: currentUser,
+                  mainCategoryName: item.mainCategoryName,
+                  subcategoryName: item.subcategoryName,
+                );
+
+                return _streakCard(
+                  context: context,
+                  assigner: item,
+                  currentUser: currentUser,
+                  currentDate: date.currentDate,
+                  refreshKey: refreshKey,
+                );
+              },
             ),
           ],
         );

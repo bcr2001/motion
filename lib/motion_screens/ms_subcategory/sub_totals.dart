@@ -447,12 +447,15 @@ class _SubTotalsListState extends State<SubTotalsList> {
                   }
 
                   final subTotalItem = filteredSubcategoryTotals[index - 2];
-                  final originalIndex =
-                      allSubcategoryTotals.indexOf(subTotalItem);
+                  final originalIndex = allSubcategoryTotals.indexWhere(
+                    (item) =>
+                        item["subcategoryName"] ==
+                        subTotalItem["subcategoryName"],
+                  );
 
                   return _subcategoryTotalCard(
                     context: context,
-                    index: originalIndex,
+                    index: originalIndex < 0 ? index - 2 : originalIndex,
                     subTotalItem: subTotalItem,
                   );
                 },

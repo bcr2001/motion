@@ -33,6 +33,7 @@ class ManualTimeRecordingRoute extends StatefulWidget {
 
 class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
   final _timeFormKey = GlobalKey<FormState>();
+  final Set<int> _deletingBlockIds = {};
 
   // Text editing controllers for hours, minutes, and seconds input fields
   TextEditingController hourController = TextEditingController();
@@ -197,6 +198,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
   Widget _timeDialogActions({
     required VoidCallback onCancel,
     required VoidCallback onAdd,
+    required bool isBusy,
   }) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final borderColor =
@@ -207,7 +209,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
       children: [
         Expanded(
           child: OutlinedButton(
-            onPressed: onCancel,
+            onPressed: isBusy ? null : onCancel,
             style: OutlinedButton.styleFrom(
               foregroundColor: cancelTextColor,
               minimumSize: const Size(0, 42),
@@ -229,7 +231,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
         const SizedBox(width: 10),
         Expanded(
           child: ElevatedButton(
-            onPressed: onAdd,
+            onPressed: isBusy ? null : onAdd,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColor.blueMainColor,
               foregroundColor: Colors.white,
@@ -239,14 +241,23 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: Text(
-              AppString.trackAddTextButton,
-              style: AppTextStyle.subSectionTextStyle(
-                fontsize: 12,
-                fontweight: FontWeight.w800,
-                color: Colors.white,
-              ),
-            ),
+            child: isBusy
+                ? const SizedBox(
+                    height: 18,
+                    width: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : Text(
+                    AppString.trackAddTextButton,
+                    style: AppTextStyle.subSectionTextStyle(
+                      fontsize: 12,
+                      fontweight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
+                  ),
           ),
         ),
       ],
@@ -308,6 +319,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
     required int index,
     required String convertedTimeRecorded,
     required VoidCallback onDelete,
+    required bool isDeleting,
   }) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final borderColor =
@@ -357,13 +369,19 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
             ),
           ),
           IconButton(
-            onPressed: onDelete,
+            onPressed: isDeleting ? null : onDelete,
             visualDensity: VisualDensity.compact,
-            icon: const Icon(
-              Icons.delete_outline,
-              size: 18,
-              color: Colors.redAccent,
-            ),
+            icon: isDeleting
+                ? const SizedBox(
+                    height: 18,
+                    width: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(
+                    Icons.delete_outline,
+                    size: 18,
+                    color: Colors.redAccent,
+                  ),
           ),
         ],
       ),
@@ -420,9 +438,26 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
               return _trackedBlockTile(
                 index: entry.key,
                 convertedTimeRecorded: convertedTimeRecorded,
+                isDeleting:
+                    block.id != null && _deletingBlockIds.contains(block.id),
                 onDelete: () async {
-                  await subs.deleteSubcategoryEntry(block.id!);
-                  xpProvider.refreshExperiencePointViews();
+                  final blockId = block.id;
+                  if (blockId == null || _deletingBlockIds.contains(blockId)) {
+                    return;
+                  }
+
+                  setState(() => _deletingBlockIds.add(blockId));
+                  try {
+                    await subs.deleteSubcategoryEntry(
+                      blockId,
+                      deletedSubcategory: block,
+                    );
+                    xpProvider.refreshExperiencePointViews();
+                  } finally {
+                    if (mounted) {
+                      setState(() => _deletingBlockIds.remove(blockId));
+                    }
+                  }
                 },
               );
             }),
@@ -439,158 +474,187 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
     showDialog(
         context: context,
         builder: (BuildContext context) {
+          var isAddingBlock = false;
           var subTrackerProvider =
               context.read<SubcategoryTrackerDatabaseProvider>();
 
-          return AlertDialogConst(
-            screenHeight: screenHeight,
-            screenWidth: screenWidth,
-            heightFactor: 0.28,
-            alertDialogTitle: AppString.manualAddBlock,
-            alertDialogContent: Form(
-              key: _timeFormKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _timeEntryBlock(),
+          return StatefulBuilder(
+            builder: (dialogContext, setDialogState) {
+              return AlertDialogConst(
+                screenHeight: screenHeight,
+                screenWidth: screenWidth,
+                heightFactor: 0.28,
+                alertDialogTitle: AppString.manualAddBlock,
+                alertDialogContent: Form(
+                  key: _timeFormKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _timeEntryBlock(),
 
-                  const SizedBox(height: 16),
+                      const SizedBox(height: 16),
 
-                  // cancel and add button
-                  Consumer4<
-                      CurrentDateProvider,
-                      UserUidProvider,
-                      MainCategoryTrackerProvider,
-                      ExperiencePointTableProvider>(
-                    builder: (context, date, uid, mainCat, xp, child) {
-                      return _timeDialogActions(
-                        onCancel: () {
-                          // exits the alart dialog and resets the text
-                          // contoller content
-                          navigationKey.currentState!.pop();
-
-                          hourController.text = "";
-                          minuteController.text = "";
-                          secondController.text = "";
-                        },
-                        onAdd: () async {
-                          final currentUser = uid.userUid;
-                          if (currentUser == null) {
-                            snackBarMessage(context,
-                                errorMessage:
-                                    AppString.firebaseSomethingWentWrong,
-                                requiresColor: true);
-                            return;
-                          }
-
-                          // adds the necessary data to the subcategory
-                          // table if validation passes
-                          if (_timeFormKey.currentState!.validate()) {
-                            _timeFormKey.currentState!.save();
-
-                            // checks whether the text the user passes into the
-                            // text fields are indeed values and not strings
-                            if (hourController.text.contains('.') ||
-                                minuteController.text.contains('.') ||
-                                secondController.text.contains('.') ||
-                                hourController.text.contains('-') ||
-                                minuteController.text.contains('-') ||
-                                secondController.text.contains('-')) {
-                              // if either texts contains "." or "-" then
-                              // the error message below will pop up
-                              snackBarMessage(context,
-                                  errorMessage:
-                                      AppString.manualInvalidValueError,
-                                  requiresColor: true);
-
-                              logger.e("Invald use of a dot");
-                            }
-                            // checks whether the values entered fall within
-                            // a specific range, if not then an error message
-                            // will be displayed
-                            else if (int.parse(hourController.text) > 25 ||
-                                int.parse(minuteController.text) > 59 ||
-                                int.parse(secondController.text) > 59) {
-                              // snack bar that alerts the user when the
-                              // entries are out of range
-                              snackBarMessage(context,
-                                  errorMessage: AppString.manualRangeValueError,
-                                  requiresColor: true);
-                              logger.i("Failed Validation");
-                            } else {
-                              logger.i("Passed Validation");
-
-                              // Check if the date and currentLoggedInUser
-                              // exist in the main category table
-                              final mainCategoryExists1 =
-                                  await mainCategoryExists(
-                                      date.currentDate, currentUser);
-
-                              final experiencePointsExists2 =
-                                  await experiencePointsExists(
-                                      date.currentDate, currentUser);
-
-                              logger.i(mainCategoryExists1);
-
-                              if (!experiencePointsExists2) {
-                                logger.i(
-                                    "a new row is being added into the experience_point table");
-                                // Insert date and currentLoggedInUser into
-                                //the experience_point table
-                                final experiencePointInsert = ExperiencePoints(
-                                  date: date.currentDate,
-                                  currentLoggedInUser: currentUser,
-                                );
-
-                                await xp.insertIntoExperiencePoint(
-                                    experiencePointInsert);
-                                logger.i("a new row has been inserted");
-                              }
-
-                              if (!mainCategoryExists1) {
-                                logger.i("Main Category is being added");
-                                logger.i(date.currentDate);
-                                logger.i(currentUser);
-                                // Insert date and currentLoggedInUser into
-                                //the main category table
-                                final mainCategory = MainCategory(
-                                  date: date.currentDate,
-                                  currentLoggedInUser: currentUser,
-                                );
-
-                                await mainCat
-                                    .insertIntoMainCategoryTable(mainCategory);
-                                logger.i("a new row has been inserted");
-                              }
-
-                              final subcategory = Subcategories(
-                                  date: date.currentDate,
-                                  mainCategoryName: widget.mainCategoryName,
-                                  subcategoryName: widget.subcategoryName,
-                                  currentLoggedInUser: currentUser,
-                                  // timeAdder functions converts all the time components to minutes
-                                  timeSpent: timeAdder(
-                                      h: hourController.text,
-                                      m: minuteController.text,
-                                      s: secondController.text));
-
-                              await subTrackerProvider
-                                  .insertIntoSubcategoryTable(subcategory);
-                              xp.refreshExperiencePointViews();
+                      // cancel and add button
+                      Consumer4<
+                          CurrentDateProvider,
+                          UserUidProvider,
+                          MainCategoryTrackerProvider,
+                          ExperiencePointTableProvider>(
+                        builder: (context, date, uid, mainCat, xp, child) {
+                          return _timeDialogActions(
+                            onCancel: () {
+                              // exits the alart dialog and resets the text
+                              // contoller content
                               navigationKey.currentState!.pop();
 
                               hourController.text = "";
                               minuteController.text = "";
                               secondController.text = "";
-                            }
-                          }
+                            },
+                            onAdd: () async {
+                              if (isAddingBlock) {
+                                return;
+                              }
+
+                              final currentUser = uid.userUid;
+                              if (currentUser == null) {
+                                snackBarMessage(context,
+                                    errorMessage:
+                                        AppString.firebaseSomethingWentWrong,
+                                    requiresColor: true);
+                                return;
+                              }
+
+                              // adds the necessary data to the subcategory
+                              // table if validation passes
+                              if (_timeFormKey.currentState!.validate()) {
+                                _timeFormKey.currentState!.save();
+                                setDialogState(() => isAddingBlock = true);
+                                var shouldCloseDialog = false;
+
+                                // checks whether the text the user passes into the
+                                // text fields are indeed values and not strings
+                                try {
+                                  if (hourController.text.contains('.') ||
+                                      minuteController.text.contains('.') ||
+                                      secondController.text.contains('.') ||
+                                      hourController.text.contains('-') ||
+                                      minuteController.text.contains('-') ||
+                                      secondController.text.contains('-')) {
+                                    // if either texts contains "." or "-" then
+                                    // the error message below will pop up
+                                    snackBarMessage(context,
+                                        errorMessage:
+                                            AppString.manualInvalidValueError,
+                                        requiresColor: true);
+
+                                    logger.e("Invald use of a dot");
+                                  }
+                                  // checks whether the values entered fall within
+                                  // a specific range, if not then an error message
+                                  // will be displayed
+                                  else if (int.parse(hourController.text) >
+                                          25 ||
+                                      int.parse(minuteController.text) > 59 ||
+                                      int.parse(secondController.text) > 59) {
+                                    // snack bar that alerts the user when the
+                                    // entries are out of range
+                                    snackBarMessage(context,
+                                        errorMessage:
+                                            AppString.manualRangeValueError,
+                                        requiresColor: true);
+                                    logger.i("Failed Validation");
+                                  } else {
+                                    logger.i("Passed Validation");
+
+                                    // Check if the date and currentLoggedInUser
+                                    // exist in the main category table
+                                    final mainCategoryExists1 =
+                                        await mainCategoryExists(
+                                            date.currentDate, currentUser);
+
+                                    final experiencePointsExists2 =
+                                        await experiencePointsExists(
+                                            date.currentDate, currentUser);
+
+                                    logger.i(mainCategoryExists1);
+
+                                    if (!experiencePointsExists2) {
+                                      logger.i(
+                                          "a new row is being added into the experience_point table");
+                                      // Insert date and currentLoggedInUser into
+                                      //the experience_point table
+                                      final experiencePointInsert =
+                                          ExperiencePoints(
+                                        date: date.currentDate,
+                                        currentLoggedInUser: currentUser,
+                                      );
+
+                                      await xp.insertIntoExperiencePoint(
+                                          experiencePointInsert);
+                                      logger.i("a new row has been inserted");
+                                    }
+
+                                    if (!mainCategoryExists1) {
+                                      logger.i("Main Category is being added");
+                                      logger.i(date.currentDate);
+                                      logger.i(currentUser);
+                                      // Insert date and currentLoggedInUser into
+                                      //the main category table
+                                      final mainCategory = MainCategory(
+                                        date: date.currentDate,
+                                        currentLoggedInUser: currentUser,
+                                      );
+
+                                      await mainCat
+                                          .insertIntoMainCategoryTable(
+                                              mainCategory);
+                                      logger.i("a new row has been inserted");
+                                    }
+
+                                    final subcategory = Subcategories(
+                                        date: date.currentDate,
+                                        mainCategoryName:
+                                            widget.mainCategoryName,
+                                        subcategoryName: widget.subcategoryName,
+                                        currentLoggedInUser: currentUser,
+                                        // timeAdder functions converts all the time components to minutes
+                                        timeSpent: timeAdder(
+                                            h: hourController.text,
+                                            m: minuteController.text,
+                                            s: secondController.text));
+
+                                    await subTrackerProvider
+                                        .insertIntoSubcategoryTable(
+                                            subcategory);
+                                    xp.refreshExperiencePointViews();
+                                    shouldCloseDialog = true;
+
+                                    hourController.text = "";
+                                    minuteController.text = "";
+                                    secondController.text = "";
+                                  }
+                                } finally {
+                                  if (!shouldCloseDialog && context.mounted) {
+                                    setDialogState(
+                                        () => isAddingBlock = false);
+                                  }
+                                }
+
+                                if (shouldCloseDialog) {
+                                  navigationKey.currentState!.pop();
+                                }
+                              }
+                            },
+                            isBusy: isAddingBlock,
+                          );
                         },
-                      );
-                    },
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           );
         });
   }

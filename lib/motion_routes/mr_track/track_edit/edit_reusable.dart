@@ -44,18 +44,8 @@ class TrailingEditButtons extends StatefulWidget {
 }
 
 class _TrailingEditButtonsState extends State<TrailingEditButtons> {
-  // edit subcategory controller
-  final TextEditingController _editTextController = TextEditingController();
-
-  final _editFormKey = GlobalKey<FormState>();
-
-  @override
-  void dispose() {
-    _editTextController.dispose();
-    super.dispose();
-  }
-
   Widget _dialogFieldPanel({
+    required BuildContext context,
     required Widget child,
   }) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
@@ -120,7 +110,10 @@ class _TrailingEditButtonsState extends State<TrailingEditButtons> {
         streakStartDate: widget.itemIndexStreakStartDate));
   }
 
-  Widget _editNameField() {
+  Widget _editNameField({
+    required BuildContext context,
+    required ValueChanged<String> onChanged,
+  }) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final fieldColor = isDarkMode
         ? Colors.white.withValues(alpha: 0.04)
@@ -129,7 +122,8 @@ class _TrailingEditButtonsState extends State<TrailingEditButtons> {
         isDarkMode ? Colors.white.withValues(alpha: 0.10) : Colors.black12;
 
     return TextFormField(
-      controller: _editTextController,
+      initialValue: widget.itemIndexSubcategoryName,
+      onChanged: onChanged,
       cursorColor: AppColor.blueMainColor,
       style: Theme.of(context).textTheme.bodyMedium,
       decoration: InputDecoration(
@@ -171,6 +165,7 @@ class _TrailingEditButtonsState extends State<TrailingEditButtons> {
   }
 
   Widget _dialogActions({
+    required BuildContext context,
     required String confirmLabel,
     required VoidCallback onCancel,
     required VoidCallback onConfirm,
@@ -238,11 +233,13 @@ class _TrailingEditButtonsState extends State<TrailingEditButtons> {
     // Get screen dimensions
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
+    final editFormKey = GlobalKey<FormState>();
+    var editedSubcategoryName = widget.itemIndexSubcategoryName;
 
     // Show the update alert dialog
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) {
         return AlertDialogConst(
           heightFactor: 0.33,
           screenHeight: screenHeight,
@@ -250,7 +247,7 @@ class _TrailingEditButtonsState extends State<TrailingEditButtons> {
           alertDialogTitle:
               "Update ${widget.itemIndexSubcategoryName}", // Set the title of the dialog
           alertDialogContent: Form(
-            key: _editFormKey, // Form with a GlobalKey for validation
+            key: editFormKey, // Form with a GlobalKey for validation
             child: Consumer<DropDownTrackProvider>(
               builder: (context, maincat, child) {
                 return Column(
@@ -270,6 +267,7 @@ class _TrailingEditButtonsState extends State<TrailingEditButtons> {
 
                     // Update drop-down
                     _dialogFieldPanel(
+                      context: dialogContext,
                       child: MyDropdownButton(
                         isUpdate: true,
                         mainCategoryName: widget.itemIndexMainCategoryName,
@@ -280,22 +278,29 @@ class _TrailingEditButtonsState extends State<TrailingEditButtons> {
                     const SizedBox(height: 12),
 
                     // Subcategory name text field
-                    _editNameField(),
+                    _editNameField(
+                      context: dialogContext,
+                      onChanged: (value) {
+                        editedSubcategoryName = value;
+                      },
+                    ),
 
                     const SizedBox(height: 18),
 
                     // Cancel and update buttons
                     _dialogActions(
+                      context: dialogContext,
                       confirmLabel: AppString.editPageUpdateButtonName,
                       onCancel: () {
-                        // Close the dialog and reset selected value
-                        navigationKey.currentState!.pop();
-                        maincat.changeSelectedValue(null);
+                        // Close the dialog.
+                        FocusScope.of(dialogContext).unfocus();
+                        Navigator.of(dialogContext).pop();
                       },
                       onConfirm: () {
-                        var updateItem = context.read<AssignerMainProvider>();
+                        var updateItem =
+                            dialogContext.read<AssignerMainProvider>();
 
-                        if (_editFormKey.currentState!.validate()) {
+                        if (editFormKey.currentState!.validate()) {
                           if (maincat.selectedValue == null) {
                             // Show a snackbar if no value is selected
                             snackBarMessage(context,
@@ -304,7 +309,7 @@ class _TrailingEditButtonsState extends State<TrailingEditButtons> {
                           } else {
                             // Trim white spaces from the subcategory name
                             String trimmedSubcategoryName =
-                                _editTextController.text.trim();
+                                editedSubcategoryName.trim();
 
                             // Update the assigned item and close the dialog
                             updateItem.updateAssignedItems(Assigner(
@@ -322,8 +327,8 @@ class _TrailingEditButtonsState extends State<TrailingEditButtons> {
                               streakStartDate: widget.itemIndexStreakStartDate,
                             ));
 
-                            navigationKey.currentState!.pop();
-                            maincat.changeSelectedValue(null);
+                            FocusScope.of(dialogContext).unfocus();
+                            Navigator.of(dialogContext).pop();
                           }
                         }
                       },
@@ -335,7 +340,10 @@ class _TrailingEditButtonsState extends State<TrailingEditButtons> {
           ),
         );
       },
-    );
+    ).whenComplete(() {
+      if (!mounted) return;
+      context.read<DropDownTrackProvider>().changeSelectedValue(null);
+    });
   }
 
   // this alert dialog is a confirmation for whether the
@@ -374,6 +382,7 @@ class _TrailingEditButtonsState extends State<TrailingEditButtons> {
 
               // Buttons
               _dialogActions(
+                context: context,
                 confirmLabel: AppString.deleteTitle,
                 confirmColor: Colors.redAccent,
                 onCancel: () {

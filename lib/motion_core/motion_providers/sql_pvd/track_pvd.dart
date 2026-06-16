@@ -344,11 +344,34 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
 // handles database operation for the subcategory table
 class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
   int _refreshKey = 0;
+  final Map<String, int> _subcategoryRefreshKeys = {};
 
   int get refreshKey => _refreshKey;
 
-  void _notifyDataChanged() {
+  String _subcategoryRefreshKey(Subcategories subcategory) {
+    return [
+      subcategory.currentLoggedInUser,
+      subcategory.mainCategoryName,
+      subcategory.subcategoryName,
+    ].join('|');
+  }
+
+  int refreshKeyForSubcategory({
+    required String currentUser,
+    required String mainCategoryName,
+    required String subcategoryName,
+  }) {
+    return _subcategoryRefreshKeys[
+            [currentUser, mainCategoryName, subcategoryName].join('|')] ??
+        0;
+  }
+
+  void _notifyDataChanged({Subcategories? affectedSubcategory}) {
     _refreshKey++;
+    if (affectedSubcategory != null) {
+      final key = _subcategoryRefreshKey(affectedSubcategory);
+      _subcategoryRefreshKeys[key] = (_subcategoryRefreshKeys[key] ?? 0) + 1;
+    }
     notifyListeners();
   }
 
@@ -440,26 +463,27 @@ class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
 
   // inserting data into the subcategory table
   Future<void> insertIntoSubcategoryTable(Subcategories subcategories) async {
-    await trackDbInstance.insertSubcategory(
-      requireSubcategoryUser(subcategories),
-    );
+    final guardedSubcategory = requireSubcategoryUser(subcategories);
+    await trackDbInstance.insertSubcategory(guardedSubcategory);
 
-    _notifyDataChanged();
+    _notifyDataChanged(affectedSubcategory: guardedSubcategory);
   }
 
   // update data in the subcategory table
   Future<void> updateSubcategoryTable(Subcategories subcategories) async {
-    await trackDbInstance.updateSubcategory(
-      requireSubcategoryUser(subcategories),
-    );
+    final guardedSubcategory = requireSubcategoryUser(subcategories);
+    await trackDbInstance.updateSubcategory(guardedSubcategory);
 
-    _notifyDataChanged();
+    _notifyDataChanged(affectedSubcategory: guardedSubcategory);
   }
 
   // delete an already added subcategory
-  Future<void> deleteSubcategoryEntry(int id) async {
+  Future<void> deleteSubcategoryEntry(
+    int id, {
+    Subcategories? deletedSubcategory,
+  }) async {
     await trackDbInstance.deleteSubcategory(id);
 
-    _notifyDataChanged();
+    _notifyDataChanged(affectedSubcategory: deletedSubcategory);
   }
 }

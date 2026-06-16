@@ -3,17 +3,15 @@ import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
-import 'package:motion/motion_routes/mr_home/home_reusable/back_home.dart';
 import 'package:motion/motion_routes/mr_home/home_reusable/front_home.dart';
 import 'package:motion/motion_routes/mr_home/home_windows/total_acc_unacc.dart';
 import 'package:motion/motion_routes/mr_stats/stats_back.dart';
 import 'package:motion/motion_routes/mr_stats/stats_front.dart';
-// import 'package:motion/motion_routes/mr_stats/stats_sections.dart';
 import 'package:motion/motion_routes/route_action.dart';
-import 'package:motion/motion_screens/ms_report/report_back.dart';
 import 'package:motion/motion_themes/mth_app/app_images.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
+import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:provider/provider.dart';
 
 import '../mr_home/home_windows/efficieny_window.dart';
@@ -64,61 +62,31 @@ class MotionStatesRoute extends StatelessWidget {
                       final snapshotData = snapshot.data;
 
                       if (snapshotData! <= 0) {
-                        return SizedBox(
-                          height: MediaQuery.of(context).size.height,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              // default display image that is shown
-                              // when the page is empty
-                              AppImages.noAnalysisGallary,
-                          
-                              // information on why it is empty
-                              const InfoToTheUser(
-                                  sectionInformation:
-                                      AppString.infoAboutAnnualOverviewEmpty)
-                            ],
-                          ),
-                        );
+                        return const _AnalyticsEmptyState();
                       } else {
                         // if data is available,the analysis
                         // gallaries are displayed
-                        return Container(
-                          margin: const EdgeInsets.only(top: 20),
+                        return Padding(
+                          padding: const EdgeInsets.fromLTRB(12, 12, 12, 28),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // users all time efficiency score
-                              // total number of days
-                              const EfficiencyAndNumberOfDays(
-                                efficiencyScore: Padding(
-                                  padding: EdgeInsets.only(left: 20),
-                                  child: EfficienyScoreWindow(
-                                  getEntireScore: true,
-                                                                ),
-                                ), numberOfDays: Padding(
-                                    padding: EdgeInsets.only(bottom: 8.0),
-                                    child: NumberOfDaysMainCategory(
-                                        getAllDays: true),
-                                  )),
-
-                              // displays the total time accounted 
-                              // and unaccounted for the entire period
-                              const TotalAccountedAndUnaccounted(
-                                  getEntireTotal: true),
-
-                              // Main Category Summary
-                              sectionTitle(
-                                  titleName:
-                                      AppString.mainCategorySummaryTitle),
-
-
+                              const _AnalyticsHeroPanel(),
+                              const _AnalyticsSection(
+                                title: "Time Coverage",
+                                subtitle:
+                                    "All-time accounted and unaccounted time",
+                                icon: Icons.query_stats_rounded,
+                                child: TotalAccountedAndUnaccounted(
+                                    getEntireTotal: true),
+                              ),
                               const CategorySummaryReport(),
-
-                              // Yealry Report
-                              sectionTitle(
-                                  titleName: AppString.yearlyReportTitle),
-                              const AnalysisGallery(),
+                              const _AnalyticsSection(
+                                title: AppString.yearlyReportTitle,
+                                subtitle: "Open a year to review trends, XP, badges, and consistency",
+                                icon: Icons.calendar_month_rounded,
+                                child: AnalysisGallery(),
+                              ),
                             ],
                           ),
                         );
@@ -131,6 +99,225 @@ class MotionStatesRoute extends StatelessWidget {
   }
 }
 
+class _AnalyticsHeroPanel extends StatelessWidget {
+  const _AnalyticsHeroPanel();
+
+  @override
+  Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final panelColor = isDarkMode
+        ? AppColor.darkModeContentWidget
+        : AppColor.lightModeContentWidget;
+    final borderColor =
+        isDarkMode ? Colors.white.withValues(alpha: 0.10) : Colors.black12;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: panelColor,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: borderColor),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDarkMode ? 0.18 : 0.045),
+            blurRadius: 18,
+            offset: const Offset(0, 9),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Container(
+                height: 44,
+                width: 44,
+                decoration: BoxDecoration(
+                  color: AppColor.accountedColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: const Icon(
+                  Icons.analytics_rounded,
+                  color: AppColor.accountedColor,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Lifetime Analytics",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyle.subSectionTextStyle(
+                        fontsize: 18,
+                        fontweight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      "Your complete tracking history at a glance",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyle.subSectionTextStyle(
+                        fontsize: 11,
+                        fontweight: FontWeight.normal,
+                        color: Colors.blueGrey,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          const EfficiencyAndNumberOfDays(
+            efficiencyScore: EfficienyScoreWindow(getEntireScore: true),
+            numberOfDays: NumberOfDaysMainCategory(getAllDays: true),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AnalyticsSection extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Widget child;
+
+  const _AnalyticsSection({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final panelColor = isDarkMode
+        ? AppColor.darkModeContentWidget
+        : AppColor.lightModeContentWidget;
+    final borderColor =
+        isDarkMode ? Colors.white.withValues(alpha: 0.10) : Colors.black12;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 14),
+      decoration: BoxDecoration(
+        color: panelColor,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: borderColor),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Container(
+                height: 38,
+                width: 38,
+                decoration: BoxDecoration(
+                  color: AppColor.blueMainColor.withValues(alpha: 0.11),
+                  borderRadius: BorderRadius.circular(13),
+                ),
+                child: Icon(
+                  icon,
+                  color: AppColor.blueMainColor,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 11),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyle.subSectionTextStyle(
+                        fontsize: 15,
+                        fontweight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      subtitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyle.subSectionTextStyle(
+                        fontsize: 11,
+                        fontweight: FontWeight.normal,
+                        color: Colors.blueGrey,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+class _AnalyticsEmptyState extends StatelessWidget {
+  const _AnalyticsEmptyState();
+
+  @override
+  Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    return SizedBox(
+      height: screenHeight * 0.78,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              height: 180,
+              child: FittedBox(
+                fit: BoxFit.contain,
+                child: AppImages.noAnalysisGallary,
+              ),
+            ),
+            const SizedBox(height: 18),
+            Text(
+              "No Analytics Yet",
+              textAlign: TextAlign.center,
+              style: AppTextStyle.subSectionTextStyle(
+                fontsize: 18,
+                fontweight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              AppString.infoAboutAnnualOverviewEmpty,
+              textAlign: TextAlign.center,
+              style: AppTextStyle.subSectionTextStyle(
+                fontsize: 12,
+                fontweight: FontWeight.normal,
+                color: Colors.blueGrey,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 // a generated grid view for yearly gallery
 class AnalysisGallery extends StatelessWidget {
   const AnalysisGallery({super.key});
@@ -138,7 +325,7 @@ class AnalysisGallery extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 96.0),
+      padding: const EdgeInsets.only(bottom: 8.0),
       child: Consumer2<UserUidProvider, MainCategoryTrackerProvider>(
           builder: (context, user, main, child) {
         // current user uid
@@ -170,6 +357,7 @@ class AnalysisGallery extends StatelessWidget {
                     // yearly gallary
                     GridView.builder(
                         shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
                                 mainAxisExtent: 100,
