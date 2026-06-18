@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:motion/motion_core/mc_firebase/firebase_services.dart';
 import 'package:motion/motion_core/mc_firebase/google_services.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
+import 'package:motion/motion_screens/ms_awards/awards_page.dart';
 import 'package:motion/motion_screens/ms_settings/settings_page.dart';
 import 'package:motion/motion_screens/ms_tips/tips_page.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
@@ -216,6 +217,13 @@ class MainRoutePopUpMenu extends StatelessWidget {
           // Change the parameter type to dynamic
           if (value == AppString.logOutValue) {
             showAlertDialog(context);
+          } else if (value == AppString.awardsValue) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (BuildContext context) => const AwardsPage(),
+              ),
+            );
           } else if (value == AppString.tipsValue) {
             Navigator.push(
                 context,
@@ -230,6 +238,15 @@ class MainRoutePopUpMenu extends StatelessWidget {
         },
         itemBuilder: (BuildContext context) {
           return [
+            // Awards
+            _popUpItemBuilder(
+              context: context,
+              value: AppString.awardsValue,
+              itemName: AppString.awardsTitle,
+              icon: Icons.emoji_events_outlined,
+              itemColor: Colors.amber.shade700,
+            ),
+
             // Tips
             _popUpItemBuilder(
               context: context,
