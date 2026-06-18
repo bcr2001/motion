@@ -1,70 +1,328 @@
 import 'package:flutter/material.dart';
-import 'package:motion/motion_screens/ms_report/report_back.dart';
+import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
+import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 
-import '../../motion_themes/mth_app/app_strings.dart';
-import '../../motion_themes/mth_styling/motion_text_styling.dart';
-
-// MainCategoriesAndSubcategoryExamples is a stateless widget that displays
-// examples of subcategories under their respective main categories.
 class MainCategoriesAndSubcategoryExamples extends StatelessWidget {
   const MainCategoriesAndSubcategoryExamples({super.key});
 
-  // This method creates a widget for displaying a subcategory example.
-  // subcategoryName: The name of the subcategory.
-  // subcategoryDescription: A brief description of the subcategory.
-  Widget _subcategoryExample(
-      {required String subcategoryName,
-      required String subcategoryDescription}) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
-      child: RichText(
-        text: TextSpan(
-          children: <TextSpan>[
-            TextSpan(
-                text: subcategoryName,
-                style: const TextStyle(
-                    color: Colors.blueGrey,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600)),
-            TextSpan(
-                text: subcategoryDescription,
-                style: const TextStyle(color: AppColor.tileBackgroundColor)),
-          ],
+  static const List<_ExampleCategory> _categories = [
+    _ExampleCategory(
+      name: AppString.educationMainCategory,
+      icon: Icons.school_outlined,
+      color: AppColor.educationPieChartColor,
+      examples: [
+        _SubcategoryExample(
+          name: AppString.lectureClassSB1,
+          description: AppString.lectureClassDB1,
         ),
+        _SubcategoryExample(
+          name: AppString.examsSB2,
+          description: AppString.examsDB2,
+        ),
+        _SubcategoryExample(
+          name: AppString.assignmentHomeworkSB3,
+          description: AppString.assignmentHomeworkDB3,
+        ),
+        _SubcategoryExample(
+          name: AppString.studiesRevisionSB4,
+          description: AppString.studiesRevisionDB4,
+        ),
+      ],
+    ),
+    _ExampleCategory(
+      name: AppString.skillMainCategory,
+      icon: Icons.psychology_alt_outlined,
+      color: AppColor.skillsPieChartColor,
+      examples: [
+        _SubcategoryExample(
+          name: AppString.programmingCodingSB5,
+          description: AppString.programmingCodingDB5,
+        ),
+        _SubcategoryExample(
+          name: AppString.graphicsDesignSB6,
+          description: AppString.graphicsDesignDB6,
+        ),
+        _SubcategoryExample(
+          name: AppString.languagesSB7,
+          description: AppString.languagesDB7,
+        ),
+        _SubcategoryExample(
+          name: AppString.musicSB8,
+          description: AppString.musicDB8,
+        ),
+      ],
+    ),
+    _ExampleCategory(
+      name: AppString.entertainmentMainCategory,
+      icon: Icons.movie_filter_outlined,
+      color: AppColor.entertainmentPieChartColor,
+      information: AppString.entertainmentInfo,
+      examples: [
+        _SubcategoryExample(
+          name: AppString.videoGamesSB9,
+          description: AppString.videoGamesDB9,
+        ),
+        _SubcategoryExample(
+          name: AppString.moviesAndShowsSB10,
+          description: AppString.moviesAndShowsDB10,
+        ),
+        _SubcategoryExample(
+          name: AppString.socialMediaSB11,
+          description: AppString.socialMediaDB11,
+        ),
+      ],
+    ),
+    _ExampleCategory(
+      name: AppString.selfDevelopmentMainCategory,
+      icon: Icons.self_improvement_rounded,
+      color: AppColor.selfDevelopmentPieChartColor,
+      information: AppString.selfDevelopmentInfo,
+      examples: [
+        _SubcategoryExample(
+          name: AppString.journalingSB12,
+          description: AppString.journalingDB12,
+        ),
+        _SubcategoryExample(
+          name: AppString.meditationSB13,
+          description: AppString.meditationDB13,
+        ),
+        _SubcategoryExample(
+          name: AppString.exerciseSB14,
+          description: AppString.exerciseDB14,
+        ),
+        _SubcategoryExample(
+          name: AppString.sportsSB15,
+          description: AppString.sportsDB15,
+        ),
+      ],
+    ),
+    _ExampleCategory(
+      name: AppString.sleepMainCategory,
+      icon: Icons.bedtime_outlined,
+      color: AppColor.sleepPieChartColor,
+      information: AppString.sleepInfo,
+      examples: [
+        _SubcategoryExample(
+          name: AppString.sleepSB16,
+          description: AppString.sleepDB16,
+        ),
+        _SubcategoryExample(
+          name: AppString.napSB17,
+          description: AppString.nappingDB17,
+        ),
+      ],
+    ),
+  ];
+
+  Widget _guideHeader(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final borderColor =
+        isDarkMode ? Colors.white.withValues(alpha: 0.10) : Colors.black12;
+
+    return Container(
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: AppColor.selfDevelopmentPieChartColor.withValues(
+          alpha: isDarkMode ? 0.10 : 0.07,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: borderColor),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            height: 43,
+            width: 43,
+            decoration: BoxDecoration(
+              color:
+                  AppColor.selfDevelopmentPieChartColor.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(13),
+            ),
+            child: const Icon(
+              Icons.lightbulb_outline_rounded,
+              color: AppColor.selfDevelopmentPieChartColor,
+              size: 23,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Build a useful tracking list',
+                  style: AppTextStyle.subSectionTextStyle(
+                    fontsize: 15,
+                    fontweight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  AppString.note7BackSlashAlert,
+                  style: AppTextStyle.subSectionTextStyle(
+                    fontsize: 11.5,
+                    fontweight: FontWeight.normal,
+                    color: Colors.blueGrey,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  // This method constructs a widget for displaying a main category
-  // and its associated subcategory examples.
-  // mainCategoryName: The name of the main category.
-  // children: A list of widgets representing subcategory examples.
-  // includeAdditionalInfo: Flag to include additional information about the main category.
-  // mainCategoryInfo: Additional information about the main category, if any.
-  Widget _mainCategoryAndExamples(
-      {required String mainCategoryName,
-      required List<Widget> children,
-      required bool includeAdditionalInfo,
-      String mainCategoryInfo = ""}) {
-    return Padding(
-      padding: const EdgeInsets.all(10.0),
+  Widget _categorySection({
+    required BuildContext context,
+    required _ExampleCategory category,
+  }) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final panelColor = isDarkMode
+        ? AppColor.darkModeContentWidget
+        : AppColor.lightModeContentWidget;
+    final borderColor =
+        isDarkMode ? Colors.white.withValues(alpha: 0.09) : Colors.black12;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: panelColor,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: borderColor),
+      ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(13, 12, 13, 11),
+            child: Row(
+              children: [
+                Container(
+                  height: 38,
+                  width: 38,
+                  decoration: BoxDecoration(
+                    color: category.color.withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(11),
+                  ),
+                  child: Icon(
+                    category.icon,
+                    color: category.color,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 11),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        category.name,
+                        style: AppTextStyle.subSectionTextStyle(
+                          fontsize: 14,
+                          fontweight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${category.examples.length} examples',
+                        style: AppTextStyle.subSectionTextStyle(
+                          fontsize: 10.5,
+                          fontweight: FontWeight.normal,
+                          color: Colors.blueGrey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (category.information != null)
+            Container(
+              margin: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: category.color.withValues(alpha: 0.07),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                category.information!,
+                style: AppTextStyle.subSectionTextStyle(
+                  fontsize: 10.5,
+                  fontweight: FontWeight.normal,
+                  color: Colors.blueGrey,
+                ),
+              ),
+            ),
+          Divider(
+            height: 1,
+            thickness: 1,
+            color: borderColor,
+          ),
+          for (var index = 0; index < category.examples.length; index++) ...[
+            _exampleRow(
+              example: category.examples[index],
+              accentColor: category.color,
+            ),
+            if (index != category.examples.length - 1)
+              Padding(
+                padding: const EdgeInsets.only(left: 45),
+                child: Divider(
+                  height: 1,
+                  thickness: 1,
+                  color: borderColor,
+                ),
+              ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _exampleRow({
+    required _SubcategoryExample example,
+    required Color accentColor,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(13, 12, 13, 12),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Displaying the main category name.
-          Text(mainCategoryName, style: AppTextStyle.sectionTitleTextStyle()),
-
-          // Conditionally displaying additional information about the main category.
-          includeAdditionalInfo
-              ? const SizedBox.shrink()
-              : InfoToTheUser(sectionInformation: mainCategoryInfo),
-
-          // Divider to separate the main category name from its subcategories.
-          const Divider(thickness: 1.5),
-
-          // Column containing the list of subcategory example widgets.
-          Column(children: children),
+          Container(
+            margin: const EdgeInsets.only(top: 5),
+            height: 8,
+            width: 8,
+            decoration: BoxDecoration(
+              color: accentColor,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 11),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  example.name.replaceFirst(RegExp(r':\s*$'), ''),
+                  style: AppTextStyle.subSectionTextStyle(
+                    fontsize: 12.5,
+                    fontweight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  example.description.trim(),
+                  style: AppTextStyle.subSectionTextStyle(
+                    fontsize: 11.5,
+                    fontweight: FontWeight.normal,
+                    color: Colors.blueGrey,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -76,137 +334,65 @@ class MainCategoriesAndSubcategoryExamples extends StatelessWidget {
       appBar: AppBar(
         title: const Text(AppString.subcategoryExampleTitles),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(10.0),
-          child: Column(
-            children: [
-              // Info to the user regarding the user of "/"
-              const InfoToTheUser(sectionInformation: AppString.note7BackSlashAlert),
-
-              
-              // EDUCATION main category with it's examples
-              _mainCategoryAndExamples(
-                  mainCategoryName: AppString.educationMainCategory,
-                  children: [
-                    // Lecture/Classes
-                    _subcategoryExample(
-                        subcategoryName: AppString.lectureClassSB1,
-                        subcategoryDescription: AppString.lectureClassDB1),
-
-                    // Exams
-                    _subcategoryExample(
-                        subcategoryName: AppString.examsSB2,
-                        subcategoryDescription: AppString.examsDB2),
-
-                    // Assignment/ Homework
-                    _subcategoryExample(
-                        subcategoryName: AppString.assignmentHomeworkSB3,
-                        subcategoryDescription:
-                            AppString.assignmentHomeworkDB3),
-
-                    // Studies/ Revision
-                    _subcategoryExample(
-                        subcategoryName: AppString.studiesRevisionSB4,
-                        subcategoryDescription: AppString.studiesRevisionDB4),
-                  ],
-                  includeAdditionalInfo: true),
-
-              // SKILLS main categories and subcategory examples
-              _mainCategoryAndExamples(
-                  mainCategoryName: AppString.skillMainCategory,
-                  children: [
-                    // Programming/ Coding
-                    _subcategoryExample(
-                        subcategoryName: AppString.programmingCodingSB5,
-                        subcategoryDescription: AppString.programmingCodingDB5),
-
-                    // Graphics Design
-                    _subcategoryExample(
-                        subcategoryName: AppString.graphicsDesignSB6,
-                        subcategoryDescription: AppString.graphicsDesignDB6),
-
-                    // Languages
-                    _subcategoryExample(
-                        subcategoryName: AppString.languagesSB7,
-                        subcategoryDescription: AppString.languagesDB7),
-
-                    // Music
-                    _subcategoryExample(
-                        subcategoryName: AppString.musicSB8,
-                        subcategoryDescription: AppString.musicDB8)
-                  ],
-                  includeAdditionalInfo: true),
-
-              // ENTERTAINMENT main category and subcategory examples
-              _mainCategoryAndExamples(
-                  mainCategoryName: AppString.entertainmentMainCategory,
-                  children: [
-                    // Video Games
-                    _subcategoryExample(
-                        subcategoryName: AppString.videoGamesSB9,
-                        subcategoryDescription: AppString.videoGamesDB9),
-
-                    // Movies and TvShows
-                    _subcategoryExample(
-                        subcategoryName: AppString.moviesAndShowsSB10,
-                        subcategoryDescription: AppString.moviesAndShowsDB10),
-
-                    // Social Media
-                    _subcategoryExample(
-                        subcategoryName: AppString.socialMediaSB11,
-                        subcategoryDescription: AppString.socialMediaDB11),
-                  ],
-                  includeAdditionalInfo: false,
-                  mainCategoryInfo: AppString.entertainmentInfo),
-
-              // SELF DEVELOPMENT main category and subcategory examples
-              _mainCategoryAndExamples(
-                  mainCategoryName: AppString.selfDevelopmentMainCategory,
-                  children: [
-                    // Journaling
-                    _subcategoryExample(
-                        subcategoryName: AppString.journalingSB12,
-                        subcategoryDescription: AppString.journalingDB12),
-
-                    // Meditation
-                    _subcategoryExample(
-                        subcategoryName: AppString.meditationSB13,
-                        subcategoryDescription: AppString.meditationDB13),
-
-                    // Exercise
-                    _subcategoryExample(
-                        subcategoryName: AppString.exerciseSB14,
-                        subcategoryDescription: AppString.exerciseDB14),
-
-                    // Sports
-                    _subcategoryExample(
-                        subcategoryName: AppString.sportsSB15,
-                        subcategoryDescription: AppString.sportsDB15)
-                  ],
-                  includeAdditionalInfo: false,
-                  mainCategoryInfo: AppString.selfDevelopmentInfo),
-
-              // SLEEP main category and subcategory example
-              _mainCategoryAndExamples(
-                  mainCategoryName: AppString.sleepMainCategory,
-                  children: [
-                    // Sleep
-                    _subcategoryExample(
-                        subcategoryName: AppString.sleepSB16,
-                        subcategoryDescription: AppString.sleepDB16),
-
-                    // Napping
-                    _subcategoryExample(
-                        subcategoryName: AppString.napSB17,
-                        subcategoryDescription: AppString.nappingDB17)
-                  ],
-                  includeAdditionalInfo: false,
-                  mainCategoryInfo: AppString.sleepInfo)
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(14, 14, 14, 28),
+          children: [
+            _guideHeader(context),
+            const SizedBox(height: 20),
+            Text(
+              'Category Guide',
+              style: AppTextStyle.sectionTitleTextStyle(fontsize: 17).copyWith(
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Use these as a starting point and adapt them to your routine.',
+              style: AppTextStyle.subSectionTextStyle(
+                fontsize: 11.5,
+                fontweight: FontWeight.normal,
+                color: Colors.blueGrey,
+              ),
+            ),
+            const SizedBox(height: 12),
+            for (var index = 0; index < _categories.length; index++) ...[
+              _categorySection(
+                context: context,
+                category: _categories[index],
+              ),
+              if (index != _categories.length - 1)
+                const SizedBox(height: 11),
             ],
-          ),
+          ],
         ),
       ),
     );
   }
+}
+
+class _ExampleCategory {
+  final String name;
+  final IconData icon;
+  final Color color;
+  final String? information;
+  final List<_SubcategoryExample> examples;
+
+  const _ExampleCategory({
+    required this.name,
+    required this.icon,
+    required this.color,
+    required this.examples,
+    this.information,
+  });
+}
+
+class _SubcategoryExample {
+  final String name;
+  final String description;
+
+  const _SubcategoryExample({
+    required this.name,
+    required this.description,
+  });
 }

@@ -457,7 +457,7 @@ class _StreakDetailPageState extends State<StreakDetailPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Streak Summary'),
+        title: Text('${streak.subcategoryName} Streak'),
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(14, 14, 14, 28),

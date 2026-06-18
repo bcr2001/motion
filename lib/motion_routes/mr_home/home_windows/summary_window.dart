@@ -221,6 +221,7 @@ class SummaryWindow extends StatelessWidget {
     final name = item[columnName].toString();
     final total = convertMinutesToTime(item["total"]);
     final average = convertMinutesToHoursOnly(item["average"]);
+    final rankMovement = (item["rankMovement"] as num?)?.toInt() ?? 0;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final accentColor =
         isSubcategory ? AppColor.blueMainColor : _summaryAccentForName(name);
@@ -262,14 +263,24 @@ class SummaryWindow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyle.subSectionTextStyle(
-                    fontsize: 13,
-                    fontweight: FontWeight.w800,
-                  ),
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyle.subSectionTextStyle(
+                          fontsize: 13,
+                          fontweight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                    if (isSubcategory && rankMovement != 0) ...[
+                      const SizedBox(width: 5),
+                      _rankMovementIcon(rankMovement),
+                    ],
+                  ],
                 ),
                 const SizedBox(height: 5),
                 Container(
@@ -307,11 +318,112 @@ class SummaryWindow extends StatelessWidget {
     );
   }
 
+  Widget _rankMovementIcon(int rankMovement) {
+    final movedUp = rankMovement > 0;
+    final color = movedUp ? AppColor.accountedColor : Colors.redAccent;
+
+    return Tooltip(
+      message: movedUp ? 'Moved up this month' : 'Moved down this month',
+      child: Icon(
+        movedUp ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded,
+        color: color,
+        size: 16,
+      ),
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> _summaryItemsWithRankMovement({
+    required SubcategoryTrackerDatabaseProvider sub,
+    required String currentUser,
+    required String firstDay,
+    required String lastDay,
+    required String currentDate,
+    required bool isSubcategory,
+  }) async {
+    final items = await sub.retrieveMonthTotalAndAverage(
+      currentUser,
+      firstDay,
+      lastDay,
+      isSubcategory,
+    );
+
+    if (!isSubcategory || items.isEmpty) {
+      return items;
+    }
+
+    items.sort((a, b) {
+      final totalCompare = ((b["total"] as num?)?.toDouble() ?? 0)
+          .compareTo((a["total"] as num?)?.toDouble() ?? 0);
+      if (totalCompare != 0) return totalCompare;
+      return a["subcategoryName"]
+          .toString()
+          .compareTo(b["subcategoryName"].toString());
+    });
+
+    final todaysTotals =
+        await sub.retrieveSubcategoryTotalsForDate(currentDate, currentUser);
+    final currentRanks = <String, int>{};
+
+    for (var i = 0; i < items.length; i++) {
+      currentRanks[items[i]["subcategoryName"].toString()] = i + 1;
+    }
+
+    final previousTotals = <Map<String, dynamic>>[];
+    for (final item in items) {
+      final name = item["subcategoryName"].toString();
+      final currentTotal = ((item["total"] as num?)?.toDouble() ?? 0);
+      final todayTotal = todaysTotals[name] ?? 0;
+      final previousTotal = currentTotal - todayTotal;
+
+      if (previousTotal > 0.0001) {
+        previousTotals.add({
+          "subcategoryName": name,
+          "total": previousTotal,
+        });
+      }
+    }
+
+    previousTotals.sort((a, b) {
+      final totalCompare = ((b["total"] as num).toDouble())
+          .compareTo((a["total"] as num).toDouble());
+      if (totalCompare != 0) return totalCompare;
+      return a["subcategoryName"]
+          .toString()
+          .compareTo(b["subcategoryName"].toString());
+    });
+
+    final previousRanks = <String, int>{};
+    for (var i = 0; i < previousTotals.length; i++) {
+      previousRanks[previousTotals[i]["subcategoryName"].toString()] = i + 1;
+    }
+
+    return items.map((item) {
+      final name = item["subcategoryName"].toString();
+      final currentRank = currentRanks[name];
+      final previousRank = previousRanks[name];
+      int rankMovement = 0;
+
+      if (currentRank != null && previousRank != null) {
+        if (currentRank < previousRank) {
+          rankMovement = 1;
+        } else if (currentRank > previousRank) {
+          rankMovement = -1;
+        }
+      }
+
+      return {
+        ...item,
+        "rankMovement": rankMovement,
+      };
+    }).toList();
+  }
+
   Widget _dialogSummaryList({
     required bool isSubcategory,
   }) {
-    return Consumer3<SubcategoryTrackerDatabaseProvider, UserUidProvider,
-        FirstAndLastDay>(builder: (context, sub, user, day, child) {
+    return Consumer4<SubcategoryTrackerDatabaseProvider, UserUidProvider,
+            FirstAndLastDay, CurrentDateProvider>(
+        builder: (context, sub, user, day, currentDate, child) {
       final currentUser = user.userUid;
       if (currentUser == null) {
         return const ShimmerWidget.rectangular(width: 100, height: 30);
@@ -322,12 +434,14 @@ class SummaryWindow extends StatelessWidget {
 
       return CachedFutureBuilder<List<Map<String, dynamic>>>(
         cacheKey:
-            '$cachePrefix-$currentUser-${day.firstDay}-${day.lastDay}-${sub.refreshKey}',
-        futureFactory: () => sub.retrieveMonthTotalAndAverage(
-          currentUser,
-          day.firstDay,
-          day.lastDay,
-          isSubcategory,
+            '$cachePrefix-$currentUser-${day.firstDay}-${day.lastDay}-${currentDate.currentDate}-${sub.refreshKey}',
+        futureFactory: () => _summaryItemsWithRankMovement(
+          sub: sub,
+          currentUser: currentUser,
+          firstDay: day.firstDay,
+          lastDay: day.lastDay,
+          currentDate: currentDate.currentDate,
+          isSubcategory: isSubcategory,
         ),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
