@@ -340,12 +340,17 @@ class SummaryWindow extends StatelessWidget {
     required String currentDate,
     required bool isSubcategory,
   }) async {
-    final items = await sub.retrieveMonthTotalAndAverage(
+    final retrievedItems = await sub.retrieveMonthTotalAndAverage(
       currentUser,
       firstDay,
       lastDay,
       isSubcategory,
     );
+    final items = retrievedItems
+        .map<Map<String, dynamic>>(
+          (item) => Map<String, dynamic>.from(item),
+        )
+        .toList(growable: true);
 
     if (!isSubcategory || items.isEmpty) {
       return items;

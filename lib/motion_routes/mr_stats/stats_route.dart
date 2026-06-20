@@ -73,9 +73,9 @@ class MotionStatesRoute extends StatelessWidget {
                             children: [
                               const _AnalyticsHeroPanel(),
                               const _AnalyticsSection(
-                                title: "Time Coverage",
+                                title: "Tracked Time",
                                 subtitle:
-                                    "All-time accounted and unaccounted time",
+                                    "Accounted and unaccounted time across your history",
                                 icon: Icons.query_stats_rounded,
                                 child: TotalAccountedAndUnaccounted(
                                     getEntireTotal: true),
@@ -83,7 +83,8 @@ class MotionStatesRoute extends StatelessWidget {
                               const CategorySummaryReport(),
                               const _AnalyticsSection(
                                 title: AppString.yearlyReportTitle,
-                                subtitle: "Open a year to review trends, XP, badges, and consistency",
+                                subtitle:
+                                    "Explore yearly trends, XP, badges, and consistency",
                                 icon: Icons.calendar_month_rounded,
                                 child: AnalysisGallery(),
                               ),
@@ -150,7 +151,7 @@ class _AnalyticsHeroPanel extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Lifetime Analytics",
+                      "Lifetime Summary",
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppTextStyle.subSectionTextStyle(
@@ -160,7 +161,7 @@ class _AnalyticsHeroPanel extends StatelessWidget {
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      "Your complete tracking history at a glance",
+                      "Your all-time performance at a glance",
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppTextStyle.subSectionTextStyle(

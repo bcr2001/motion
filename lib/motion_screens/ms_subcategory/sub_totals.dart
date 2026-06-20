@@ -144,58 +144,73 @@ class _SubTotalsListState extends State<SubTotalsList> {
     final fillColor = isDarkMode
         ? AppColor.darkModeContentWidget
         : AppColor.lightModeContentWidget;
+    final textColor = isDarkMode ? Colors.white : Colors.black87;
+    final selectionColor = AppColor.blueMainColor.withValues(alpha: 0.28);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
-      child: TextField(
-        controller: _searchController,
-        focusNode: _searchFocusNode,
-        onChanged: (value) {
-          setState(() {
-            _searchQuery = value.trim().toLowerCase();
-          });
-        },
-        textInputAction: TextInputAction.search,
-        style: AppTextStyle.subSectionTextStyle(
-          fontsize: 13,
-          fontweight: FontWeight.w600,
+      child: TextSelectionTheme(
+        data: TextSelectionThemeData(
+          cursorColor: AppColor.blueMainColor,
+          selectionColor: selectionColor,
+          selectionHandleColor: AppColor.blueMainColor,
         ),
-        decoration: InputDecoration(
-          hintText: "Search subcategories",
-          hintStyle: AppTextStyle.subSectionTextStyle(
+        child: TextField(
+          controller: _searchController,
+          focusNode: _searchFocusNode,
+          cursorColor: AppColor.blueMainColor,
+          cursorWidth: 2,
+          onChanged: (value) {
+            setState(() {
+              _searchQuery = value.trim().toLowerCase();
+            });
+          },
+          textInputAction: TextInputAction.search,
+          style: AppTextStyle.subSectionTextStyle(
             fontsize: 13,
-            fontweight: FontWeight.normal,
-            color: Colors.blueGrey,
+            fontweight: FontWeight.w600,
+            color: textColor,
           ),
-          prefixIcon: const Icon(
-            Icons.search_rounded,
-            color: AppColor.blueMainColor,
-          ),
-          suffixIcon: _searchController.text.isEmpty
-              ? null
-              : IconButton(
-                  tooltip: "Clear search",
-                  onPressed: () {
-                    _searchController.clear();
-                    setState(() {
-                      _searchQuery = "";
-                    });
-                  },
-                  icon: const Icon(Icons.close_rounded),
-                ),
-          filled: true,
-          fillColor: fillColor,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide(color: borderColor),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: const BorderSide(
+          decoration: InputDecoration(
+            hintText: "Search subcategories",
+            hintStyle: AppTextStyle.subSectionTextStyle(
+              fontsize: 13,
+              fontweight: FontWeight.normal,
+              color: Colors.blueGrey,
+            ),
+            prefixIcon: const Icon(
+              Icons.search_rounded,
               color: AppColor.blueMainColor,
-              width: 1.2,
+            ),
+            suffixIcon: _searchController.text.isEmpty
+                ? null
+                : IconButton(
+                    tooltip: "Clear search",
+                    onPressed: () {
+                      _searchController.clear();
+                      setState(() {
+                        _searchQuery = "";
+                      });
+                    },
+                    icon: Icon(
+                      Icons.close_rounded,
+                      color: textColor,
+                    ),
+                  ),
+            filled: true,
+            fillColor: fillColor,
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide(color: borderColor),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(
+                color: AppColor.blueMainColor,
+                width: 1.2,
+              ),
             ),
           ),
         ),

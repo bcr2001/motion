@@ -50,7 +50,7 @@ class CategorySummaryReport extends StatelessWidget {
               ),
               const SizedBox(height: 3),
               Text(
-                "All-time category distribution",
+                "How your tracked time is distributed",
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: AppTextStyle.subSectionTextStyle(

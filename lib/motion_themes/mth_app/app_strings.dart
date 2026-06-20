@@ -29,7 +29,7 @@ class AppString {
   static const String statsNavigation = "Stats";
 
   // App bar titles
-  static const String statsRouteTitle = "Analytics Summary";
+  static const String statsRouteTitle = "Insights";
   static const String motionRouteTitle = "Track";
   static const String logOutTitle = "Log Out";
   static const String cancelTitle = "Cancel";
@@ -242,16 +242,17 @@ class AppString {
   static const String statusTitle = "Status";
   static const String statusUpTitle = "Up";
   static const String mainCategorySummaryTitle = "Category Summary Report";
-  static const String mainCategoryTotalTitle = "Main Category Totals";
-  static const String yearlyReportTitle = "Annual Overview";
-  static const String viewSubcategoryTotalsTitle = "View Subcategory Totals";
+  static const String mainCategoryTotalTitle = "Category Breakdown";
+  static const String yearlyReportTitle = "Yearly Reports";
+  static const String viewSubcategoryTotalsTitle =
+      "View Subcategory Breakdown";
   static const String subcategoryTotalsTitle = "Subcategory Totals";
 
   static const String chartingAYearInLinesTitle = "Graphing a Year in Lines";
   static const String stackingAYearInLinesTitle = "Stacking Up Your Year";
   static const String stackingATitle = "Stacking";
-  static const String entireLifeTitle = "Entire Life";
-  static const String entireLifeInSlicesTitle = "in slices";
+  static const String entireLifeTitle = "Lifetime";
+  static const String entireLifeInSlicesTitle = "Distribution";
 
   static const String infoAboutAnnualOverviewEmpty =
       "Initiate the tracking process to generate and display your summary report here.";
