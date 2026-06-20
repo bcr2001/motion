@@ -4,7 +4,9 @@ import 'package:motion/motion_core/motion_providers/date_pvd/current_date_pvd.da
 import 'package:motion/motion_core/motion_providers/date_pvd/current_year_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/first_and_last_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
+import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_core/motion_rewards/efs_badge_policy.dart';
+import 'package:motion/motion_core/motion_widgets/home_analytics_widget.dart';
 import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_routes/mr_home/home_reusable/back_home.dart';
@@ -381,36 +383,63 @@ class CurrentYearEFSDisplay extends StatelessWidget {
 
   Future<NextBadgeProgress> _loadNextBadgeProgress({
     required ExperiencePointTableProvider xpProvider,
+    required MainCategoryTrackerProvider trackerProvider,
     required String currentUser,
     required String currentYear,
+    required String currentDate,
   }) async {
-    final totalXp = await xpProvider.retrieveTotalXP(
-      currentUser: currentUser,
-      isEntire: false,
-      year: currentYear,
-    );
-    final trackedDays = await xpProvider.retrieveYearExperiencePointDays(
-      currentUser: currentUser,
-      year: currentYear,
-    );
+    final results = await Future.wait<int>([
+      xpProvider.retrieveTotalXP(
+        currentUser: currentUser,
+        isEntire: false,
+        year: currentYear,
+      ),
+      xpProvider.retrieveYearExperiencePointDays(
+        currentUser: currentUser,
+        year: currentYear,
+      ),
+      xpProvider.retrieveDailyExperiencePoints(
+        currentUser: currentUser,
+        selectedDate: currentDate,
+      ),
+      trackerProvider.retrievedUserStreak(currentUser: currentUser),
+    ]);
+    final totalXp = results[0];
+    final trackedDays = results[1];
+    final todayXp = results[2];
+    final currentStreak = results[3];
 
-    return EfsBadgePolicy.nextBadgeProgress(
+    final progress = EfsBadgePolicy.nextBadgeProgress(
       currentScore: score,
       currentYearXp: totalXp,
       trackedDays: trackedDays,
     );
+
+    await HomeAnalyticsWidget.update(
+      todayXp: todayXp,
+      targetXp: progress.isTopBadge
+          ? MotionXpPolicy.maxDailyXp
+          : progress.averageDailyXp.ceil(),
+      currentStreak: currentStreak,
+      badge: EfsBadgePolicy.badgeForScore(score),
+    );
+
+    return progress;
   }
 
   Future<_XpTargetDialogData> _loadXpTargetDialogData({
     required ExperiencePointTableProvider xpProvider,
+    required MainCategoryTrackerProvider trackerProvider,
     required String currentUser,
     required String currentYear,
     required String currentDate,
   }) async {
     final progress = await _loadNextBadgeProgress(
       xpProvider: xpProvider,
+      trackerProvider: trackerProvider,
       currentUser: currentUser,
       currentYear: currentYear,
+      currentDate: currentDate,
     );
     final earnedXpByCategory =
         await xpProvider.retrieveDailyExperiencePointBreakdown(
@@ -824,6 +853,7 @@ class CurrentYearEFSDisplay extends StatelessWidget {
             return FutureBuilder<_XpTargetDialogData>(
               future: _loadXpTargetDialogData(
                 xpProvider: xp,
+                trackerProvider: context.read<MainCategoryTrackerProvider>(),
                 currentUser: currentUser,
                 currentYear: currentYear,
                 currentDate: currentDate,
@@ -1111,8 +1141,9 @@ class CurrentYearEFSDisplay extends StatelessWidget {
   }
 
   Widget _nextBadgeProgressRow(BuildContext context) {
-    return Consumer3<ExperiencePointTableProvider, UserUidProvider,
-        CurrentYearProvider>(builder: (context, xp, user, year, child) {
+    return Consumer4<ExperiencePointTableProvider, UserUidProvider,
+        CurrentYearProvider, CurrentDateProvider>(
+        builder: (context, xp, user, year, date, child) {
       final String? currentUser = user.userUid;
       if (currentUser == null) {
         return const ShimmerWidget.rectangular(width: 160, height: 24);
@@ -1122,11 +1153,13 @@ class CurrentYearEFSDisplay extends StatelessWidget {
 
       return CachedFutureBuilder<NextBadgeProgress>(
           cacheKey:
-              'next-badge-progress-$currentUser-$currentYear-$score-${xp.refreshKey}',
+              'next-badge-progress-$currentUser-$currentYear-${date.currentDate}-$score-${xp.refreshKey}',
           futureFactory: () => _loadNextBadgeProgress(
                 xpProvider: xp,
+                trackerProvider: context.read<MainCategoryTrackerProvider>(),
                 currentUser: currentUser,
                 currentYear: currentYear,
+                currentDate: date.currentDate,
               ),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {

@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets
 
 class MainActivity : FlutterActivity() {
     private val downloadsChannel = "motion/downloads"
+    private val homeWidgetChannel = "motion/home_widget"
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -34,6 +35,29 @@ class MainActivity : FlutterActivity() {
                     result.success(saveCsvToDownloads(fileName, content))
                 } catch (error: Exception) {
                     result.error("download_save_failed", error.message, null)
+                }
+            }
+
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, homeWidgetChannel)
+            .setMethodCallHandler { call, result ->
+                if (call.method != "update") {
+                    result.notImplemented()
+                    return@setMethodCallHandler
+                }
+
+                try {
+                    MotionAnalyticsWidget.saveAndRefresh(
+                        context = applicationContext,
+                        todayXp = call.argument<Int>("todayXp") ?: 0,
+                        targetXp = call.argument<Int>("targetXp") ?: 0,
+                        currentStreak = call.argument<Int>("currentStreak") ?: 0,
+                        badgeLevel = call.argument<String>("badgeLevel").orEmpty(),
+                        badgeName = call.argument<String>("badgeName").orEmpty(),
+                        progress = call.argument<Double>("progress") ?: 0.0,
+                    )
+                    result.success(null)
+                } catch (error: Exception) {
+                    result.error("widget_update_failed", error.message, null)
                 }
             }
     }

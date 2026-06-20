@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="motion_widget_background">#FF1B202E</color>
+    <color name="motion_widget_border">#1FFFFFFF</color>
+    <color name="motion_widget_primary_text">#FFFFFFFF</color>
+    <color name="motion_widget_secondary_text">#FF90A4AE</color>
+</resources>
