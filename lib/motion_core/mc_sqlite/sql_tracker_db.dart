@@ -777,17 +777,20 @@ class TrackerDatabaseHelper {
 // CRUD OPERATION FOR SUBCATEGORY TABLE
 
   // insert new rows into the subcategory category table
-  Future<void> insertSubcategory(Subcategories subcategory) async {
+  Future<int> insertSubcategory(Subcategories subcategory) async {
     try {
       final db = await database;
-      await db.transaction((txn) async {
+      return await db.transaction((txn) async {
         await _ensureDailyRows(
           txn,
           date: subcategory.date,
           currentUser: subcategory.currentLoggedInUser,
         );
-        await txn.insert(MotionDbTables.subcategory, subcategory.toMap(),
-            conflictAlgorithm: ConflictAlgorithm.abort);
+        return txn.insert(
+          MotionDbTables.subcategory,
+          subcategory.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.abort,
+        );
       });
     } catch (e, stackTrace) {
       logDatabaseError("TrackerDatabaseHelper", e, stackTrace);

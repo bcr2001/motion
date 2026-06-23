@@ -115,7 +115,7 @@ class AwardsPage extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             currentAward == null
-                ? 'Keep tracking to unlock Deer'
+                ? 'Keep tracking to unlock First Day'
                 : nextAward == null
                     ? 'Every lifetime award has been unlocked'
                     : '${currentAward.name} Award earned',

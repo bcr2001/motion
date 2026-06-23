@@ -462,11 +462,14 @@ class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
   }
 
   // inserting data into the subcategory table
-  Future<void> insertIntoSubcategoryTable(Subcategories subcategories) async {
+  Future<int> insertIntoSubcategoryTable(Subcategories subcategories) async {
     final guardedSubcategory = requireSubcategoryUser(subcategories);
-    await trackDbInstance.insertSubcategory(guardedSubcategory);
+    final insertedId =
+        await trackDbInstance.insertSubcategory(guardedSubcategory);
+    guardedSubcategory.id = insertedId;
 
     _notifyDataChanged(affectedSubcategory: guardedSubcategory);
+    return insertedId;
   }
 
   // update data in the subcategory table
