@@ -17,6 +17,7 @@ class ContinueWithGoogleOr extends StatelessWidget {
     final buttonColor = isDarkMode
         ? Colors.white.withValues(alpha: 0.04)
         : Colors.black.withValues(alpha: 0.025);
+    final textColor = isDarkMode ? Colors.white : Colors.black87;
 
     return Column(
       children: [
@@ -45,6 +46,7 @@ class ContinueWithGoogleOr extends StatelessWidget {
                   style: AppTextStyle.subSectionTextStyle(
                     fontsize: 13,
                     fontweight: FontWeight.w800,
+                    color: textColor,
                   ),
                 ),
               ],

@@ -68,15 +68,7 @@ class _SignUpPageState extends State<SignUpPage> {
                         height: 112,
                         child: AppImages.signUpGraphics,
                       ),
-                      const SizedBox(height: 14),
-                      Text(
-                        AppString.registerTitle,
-                        textAlign: TextAlign.center,
-                        style: AppTextStyle.sectionTitleTextStyle(
-                          fontsize: 28,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 16),
                       Text(
                         AppString.signUpWelcomeMessage,
                         textAlign: TextAlign.center,

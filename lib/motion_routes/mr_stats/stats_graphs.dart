@@ -220,12 +220,16 @@ class GroupedPieChartAccountedUnaccounted extends StatelessWidget {
   const GroupedPieChartAccountedUnaccounted.groupedBarChartAccountedUnaccounted(
       {super.key, required this.year});
 
-  final double width = 10;
+  final double width = 8;
 
   BarChartGroupData makeGroupData(int x, double y1, double y2) {
     return BarChartGroupData(
-      barsSpace: 3,
+      barsSpace: 8,
       x: x,
+      showingTooltipIndicators: [
+        if (y1 > 0) 0,
+        if (y2 > 0) 1,
+      ],
       barRods: [
         BarChartRodData(
           toY: y1,
@@ -238,6 +242,24 @@ class GroupedPieChartAccountedUnaccounted extends StatelessWidget {
           width: width,
         ),
       ],
+    );
+  }
+
+  BarTooltipItem? distributionTooltipItem(
+    BarChartGroupData group,
+    int groupIndex,
+    BarChartRodData rod,
+    int rodIndex,
+  ) {
+    if (rod.toY <= 0) return null;
+
+    return BarTooltipItem(
+      rod.toY.toStringAsFixed(1),
+      AppTextStyle.subSectionTextStyle(
+        fontsize: 7,
+        fontweight: FontWeight.w800,
+        color: Colors.white,
+      ),
     );
   }
 
@@ -375,7 +397,19 @@ class GroupedPieChartAccountedUnaccounted extends StatelessWidget {
                     // grouped barchart
                     Expanded(
                         child: BarChart(BarChartData(
-                            maxY: 30,
+                            maxY: 34,
+                            barTouchData: BarTouchData(
+                              enabled: false,
+                              touchTooltipData: BarTouchTooltipData(
+                                tooltipPadding: EdgeInsets.zero,
+                                tooltipMargin: 2,
+                                tooltipRoundedRadius: 0,
+                                maxContentWidth: 24,
+                                getTooltipColor: (group) => Colors.transparent,
+                                getTooltipItem: distributionTooltipItem,
+                                fitInsideHorizontally: true,
+                              ),
+                            ),
                             titlesData: FlTitlesData(
                               show: true,
                               rightTitles: const AxisTitles(
