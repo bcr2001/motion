@@ -25,17 +25,7 @@ class AuthServices {
 
       // If sign-in is successful and a user is authenticated.
       if (_auth.currentUser != null) {
-        final userUidProvider =
-            Provider.of<UserUidProvider>(context, listen: false);
-
-        // Check if user UID is saved in SharedPreferences
-        while (!(await userUidProvider.isUserUidSaved())) {
-          // Keep displaying the circular progress indicator until user UID is saved
-          await Future.delayed(const Duration(milliseconds: 100));
-        }
-
-        // Set the user's UID in the UserUidProvider.
-        userUidProvider.setUserUid(_auth.currentUser!.uid);
+        logger.i("(signInUser): authenticated successfully");
       }
     } on FirebaseAuthException catch (e) {
       if (e.code == "user-not-found") {

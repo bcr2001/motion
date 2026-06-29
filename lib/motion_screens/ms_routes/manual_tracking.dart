@@ -1,18 +1,19 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:motion/main.dart';
-import 'package:motion/motion_core/mc_sql_table/experience_table.dart';
-import 'package:motion/motion_core/mc_sql_table/main_table.dart';
 import 'package:motion/motion_core/mc_sql_table/sub_table.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_date_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
-import 'package:motion/motion_core/motion_providers/sql_pvd/experience_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_reusable/db_re/sub_logic.dart';
+import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../motion_themes/mth_styling/app_color.dart';
 
@@ -33,14 +34,173 @@ class ManualTimeRecordingRoute extends StatefulWidget {
 }
 
 class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
+  static const String _pastEntriesStoragePrefix =
+      'manualTrackingPastEntriesAdded';
+
   final _timeFormKey = GlobalKey<FormState>();
   final Set<int> _deletingBlockIds = {};
   final List<Subcategories> _pastEntriesAdded = [];
+  String? _loadedPastEntriesKey;
 
   // Text editing controllers for hours, minutes, and seconds input fields
   TextEditingController hourController = TextEditingController();
   TextEditingController minuteController = TextEditingController();
   TextEditingController secondController = TextEditingController();
+
+  String _pastEntriesStorageKey({
+    required String currentUser,
+    required String currentDate,
+  }) {
+    return '$_pastEntriesStoragePrefix-$currentUser-$currentDate-${widget.subcategoryName}';
+  }
+
+  Map<String, dynamic> _pastEntryToJson(Subcategories entry) {
+    return {
+      'id': entry.id,
+      'date': entry.date,
+      'mainCategoryName': entry.mainCategoryName,
+      'subcategoryName': entry.subcategoryName,
+      'timeSpent': entry.timeSpent,
+      'currentLoggedInUser': entry.currentLoggedInUser,
+    };
+  }
+
+  Subcategories? _pastEntryFromJson(Map<String, dynamic> map) {
+    final id = map['id'];
+    if (id == null) return null;
+
+    return Subcategories(
+      id: id is int ? id : int.tryParse('$id'),
+      date: map['date']?.toString() ?? '',
+      mainCategoryName: map['mainCategoryName']?.toString() ?? '',
+      subcategoryName: map['subcategoryName']?.toString() ?? '',
+      timeSpent: map['timeSpent'] is num
+          ? (map['timeSpent'] as num).toDouble()
+          : double.tryParse('${map['timeSpent']}') ?? 0,
+      currentLoggedInUser: map['currentLoggedInUser']?.toString() ?? '',
+    );
+  }
+
+  Future<void> _restorePastEntriesAddedToday({
+    required String currentUser,
+    required String currentDate,
+  }) async {
+    final storageKey = _pastEntriesStorageKey(
+      currentUser: currentUser,
+      currentDate: currentDate,
+    );
+    if (_loadedPastEntriesKey == storageKey) return;
+    _loadedPastEntriesKey = storageKey;
+
+    final preferences = await SharedPreferences.getInstance();
+    final encodedEntries = preferences.getStringList(storageKey) ?? const [];
+    final restoredEntries = <Subcategories>[];
+
+    for (final encodedEntry in encodedEntries) {
+      try {
+        final decodedEntry = jsonDecode(encodedEntry);
+        if (decodedEntry is! Map<String, dynamic>) continue;
+
+        final restoredEntry = _pastEntryFromJson(decodedEntry);
+        if (restoredEntry == null ||
+            restoredEntry.currentLoggedInUser != currentUser ||
+            restoredEntry.subcategoryName != widget.subcategoryName ||
+            restoredEntry.date == currentDate) {
+          continue;
+        }
+
+        restoredEntries.add(restoredEntry);
+      } catch (_) {
+        continue;
+      }
+    }
+
+    if (!mounted) return;
+    setState(() {
+      final existingIds = _pastEntriesAdded
+          .map((entry) => entry.id)
+          .whereType<int>()
+          .toSet();
+      final entriesToAdd = restoredEntries
+          .where((entry) => entry.id != null && existingIds.add(entry.id!))
+          .toList();
+      _pastEntriesAdded.addAll(entriesToAdd);
+    });
+  }
+
+  Future<void> _rememberPastEntryAddedToday({
+    required Subcategories entry,
+    required String currentDate,
+  }) async {
+    if (entry.id == null) return;
+
+    final storageKey = _pastEntriesStorageKey(
+      currentUser: entry.currentLoggedInUser,
+      currentDate: currentDate,
+    );
+    final preferences = await SharedPreferences.getInstance();
+    final existingEntries = preferences.getStringList(storageKey) ?? const [];
+    final nextEntries = <String>[];
+    final seenIds = <int>{};
+
+    for (final encodedEntry in existingEntries) {
+      try {
+        final decodedEntry = jsonDecode(encodedEntry);
+        if (decodedEntry is! Map<String, dynamic>) continue;
+
+        final existingEntry = _pastEntryFromJson(decodedEntry);
+        final existingId = existingEntry?.id;
+        if (existingEntry == null ||
+            existingId == null ||
+            existingEntry.date == currentDate ||
+            !seenIds.add(existingId)) {
+          continue;
+        }
+
+        nextEntries.add(encodedEntry);
+      } catch (_) {
+        continue;
+      }
+    }
+
+    if (seenIds.add(entry.id!)) {
+      nextEntries.insert(0, jsonEncode(_pastEntryToJson(entry)));
+    }
+
+    await preferences.setStringList(storageKey, nextEntries);
+  }
+
+  Future<void> _forgetPastEntryAddedToday({
+    required Subcategories entry,
+    required String currentDate,
+  }) async {
+    final entryId = entry.id;
+    if (entryId == null) return;
+
+    final storageKey = _pastEntriesStorageKey(
+      currentUser: entry.currentLoggedInUser,
+      currentDate: currentDate,
+    );
+    final preferences = await SharedPreferences.getInstance();
+    final existingEntries = preferences.getStringList(storageKey) ?? const [];
+    final nextEntries = <String>[];
+
+    for (final encodedEntry in existingEntries) {
+      try {
+        final decodedEntry = jsonDecode(encodedEntry);
+        if (decodedEntry is! Map<String, dynamic>) continue;
+
+        final existingEntry = _pastEntryFromJson(decodedEntry);
+        if (existingEntry?.id == entryId) continue;
+
+        nextEntries.add(encodedEntry);
+      } catch (_) {
+        continue;
+      }
+    }
+
+    await preferences.setStringList(storageKey, nextEntries);
+  }
 
   @override
   void dispose() {
@@ -287,6 +447,13 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
 
         return StatefulBuilder(
           builder: (context, setDialogState) {
+            final mediaQuery = MediaQuery.of(dialogContext);
+            final maxDialogHeight = mediaQuery.size.height -
+                mediaQuery.viewInsets.bottom -
+                mediaQuery.padding.top -
+                mediaQuery.padding.bottom -
+                40;
+
             return Dialog(
               backgroundColor: surfaceColor,
               insetPadding:
@@ -296,13 +463,19 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                 side: BorderSide(color: borderColor),
               ),
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 430),
+                constraints: BoxConstraints(
+                  maxWidth: 430,
+                  maxHeight: maxDialogHeight.clamp(360.0, 620.0),
+                ),
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(14, 14, 14, 13),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
+                  child: SingleChildScrollView(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
                       Row(
                         children: [
                           Container(
@@ -519,7 +692,8 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                           ),
                         ],
                       ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -898,7 +1072,6 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
     required List<Subcategories> blocks,
     required SubcategoryTrackerDatabaseProvider subs,
   }) {
-    final xpProvider = context.read<ExperiencePointTableProvider>();
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final borderColor =
         isDarkMode ? Colors.white.withValues(alpha: 0.10) : Colors.black12;
@@ -961,7 +1134,6 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                       blockId,
                       deletedSubcategory: block,
                     );
-                    xpProvider.refreshExperiencePointViews();
                   } finally {
                     if (mounted) {
                       setState(() => _deletingBlockIds.remove(blockId));
@@ -977,10 +1149,10 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
 
   Widget _pastEntriesPanel({
     required SubcategoryTrackerDatabaseProvider subs,
+    required String currentDate,
   }) {
     if (_pastEntriesAdded.isEmpty) return const SizedBox.shrink();
 
-    final xpProvider = context.read<ExperiencePointTableProvider>();
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final borderColor =
         isDarkMode ? Colors.white.withValues(alpha: 0.10) : Colors.black12;
@@ -1036,7 +1208,10 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                     blockId,
                     deletedSubcategory: block,
                   );
-                  xpProvider.refreshExperiencePointViews();
+                  await _forgetPastEntryAddedToday(
+                    entry: block,
+                    currentDate: currentDate,
+                  );
                   if (mounted) {
                     setState(() => _pastEntriesAdded.remove(block));
                   }
@@ -1104,11 +1279,8 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                       const SizedBox(height: 16),
 
                       // cancel and add button
-                      Consumer3<
-                          UserUidProvider,
-                          MainCategoryTrackerProvider,
-                          ExperiencePointTableProvider>(
-                        builder: (context, uid, mainCat, xp, child) {
+                      Consumer<UserUidProvider>(
+                        builder: (context, uid, child) {
                           return _timeDialogActions(
                             onCancel: () {
                               // exits the alart dialog and resets the text
@@ -1211,51 +1383,6 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                                     setDialogState(
                                         () => isAddingBlock = true);
 
-                                    // Check if the date and currentLoggedInUser
-                                    // exist in the main category table
-                                    final mainCategoryExists1 =
-                                        await mainCategoryExists(
-                                            selectedDateIso, currentUser);
-
-                                    final experiencePointsExists2 =
-                                        await experiencePointsExists(
-                                            selectedDateIso, currentUser);
-
-                                    logger.i(mainCategoryExists1);
-
-                                    if (!experiencePointsExists2) {
-                                      logger.i(
-                                          "a new row is being added into the experience_point table");
-                                      // Insert date and currentLoggedInUser into
-                                      //the experience_point table
-                                      final experiencePointInsert =
-                                          ExperiencePoints(
-                                        date: selectedDateIso,
-                                        currentLoggedInUser: currentUser,
-                                      );
-
-                                      await xp.insertIntoExperiencePoint(
-                                          experiencePointInsert);
-                                      logger.i("a new row has been inserted");
-                                    }
-
-                                    if (!mainCategoryExists1) {
-                                      logger.i("Main Category is being added");
-                                      logger.i(selectedDateIso);
-                                      logger.i(currentUser);
-                                      // Insert date and currentLoggedInUser into
-                                      //the main category table
-                                      final mainCategory = MainCategory(
-                                        date: selectedDateIso,
-                                        currentLoggedInUser: currentUser,
-                                      );
-
-                                      await mainCat
-                                          .insertIntoMainCategoryTable(
-                                              mainCategory);
-                                      logger.i("a new row has been inserted");
-                                    }
-
                                     final subcategory = Subcategories(
                                         date: selectedDateIso,
                                         mainCategoryName:
@@ -1270,12 +1397,20 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                                                 subcategory);
                                     subcategory.id = insertedId;
                                     if (isHistorical && mounted) {
+                                      await _rememberPastEntryAddedToday(
+                                        entry: subcategory,
+                                        currentDate: DateFormat('yyyy-MM-dd')
+                                            .format(DateTime(
+                                          today.year,
+                                          today.month,
+                                          today.day,
+                                        )),
+                                      );
                                       setState(() {
                                         _pastEntriesAdded.insert(
                                             0, subcategory);
                                       });
                                     }
-                                    xp.refreshExperiencePointViews();
                                     shouldCloseDialog = true;
 
                                     hourController.text = "";
@@ -1330,27 +1465,53 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
             if (currentUser == null) {
               return userLoadingIndicator();
             }
+            _restorePastEntriesAddedToday(
+              currentUser: currentUser,
+              currentDate: date.currentDate,
+            );
 
-            // Call retrieveCurrentDateSubcategories
-            // to fetch subcategories for the current date
-            subs.retrieveCurrentDateSubcategories(
-                date.currentDate, currentUser, widget.subcategoryName);
+            return CachedFutureBuilder<List<Subcategories>>(
+              cacheKey:
+                  'manual-blocks-$currentUser-${date.currentDate}-${widget.subcategoryName}-'
+                  '${subs.refreshKeyForDate(currentUser: currentUser, date: date.currentDate)}',
+              futureFactory: () => subs.retrieveCurrentDateSubcategories(
+                date.currentDate,
+                currentUser,
+                widget.subcategoryName,
+              ),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting &&
+                    !snapshot.hasData) {
+                  return const Padding(
+                    padding: EdgeInsets.all(18),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: AppColor.blueMainColor,
+                      ),
+                    ),
+                  );
+                }
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                }
 
-            // Access the fetched subcategories from the provider
-            List<Subcategories> subsTrackedOnCurrentDay =
-                subs.currentDateSubcategories;
-
-            return Column(
-              children: [
-                Container(
-                  margin: const EdgeInsets.only(top: 10),
-                  child: _todaysBlocksPanel(
-                    blocks: subsTrackedOnCurrentDay,
-                    subs: subs,
-                  ),
-                ),
-                _pastEntriesPanel(subs: subs),
-              ],
+                final blocks = snapshot.data ?? const <Subcategories>[];
+                return Column(
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.only(top: 10),
+                      child: _todaysBlocksPanel(
+                        blocks: blocks,
+                        subs: subs,
+                      ),
+                    ),
+                    _pastEntriesPanel(
+                      subs: subs,
+                      currentDate: date.currentDate,
+                    ),
+                  ],
+                );
+              },
             );
           }),
         ));

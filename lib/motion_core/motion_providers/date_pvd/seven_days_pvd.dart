@@ -1,51 +1,43 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import 'calendar_clock.dart';
+
 class FirstAndLastWithSevenDaysDiff extends ChangeNotifier {
-  String _firstDay = '';
-  String _lastDay = '';
-
-  Timer? timer;
-
-  FirstAndLastWithSevenDaysDiff() {
-    _calculateFirstAndLastDay();
-    timer = Timer.periodic(const Duration(days: 1), (Timer t) {
-      if (_calculateFirstAndLastDay()) {
-        notifyListeners();
-      }
-    });
+  FirstAndLastWithSevenDaysDiff({CalendarClock? clock})
+      : _clock = clock ?? CalendarClock.instance {
+    _calculate();
+    _clock.addListener(_updateFromClock);
   }
+
+  final CalendarClock _clock;
+  late String _firstDay;
+  late String _lastDay;
 
   String get firstDay => _firstDay;
   String get lastDay => _lastDay;
 
-  bool _calculateFirstAndLastDay() {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
+  void _calculate() {
+    final today = _clock.today;
+    final firstDate = today.subtract(Duration(days: today.weekday - 1));
+    final lastDate = firstDate.add(const Duration(days: 6));
+    final formatter = DateFormat('yyyy-MM-dd');
+    _firstDay = formatter.format(firstDate);
+    _lastDay = formatter.format(lastDate);
+  }
 
-    // Finding the first date
-    DateTime firstDate = today.subtract(Duration(days: today.weekday - 1));
-
-    // Finding the last date, seven days after the first date
-    DateTime lastDate = firstDate.add(const Duration(days: 6));
-
-    final dateFormat = DateFormat('yyyy-MM-dd');
-    final firstDay = dateFormat.format(firstDate);
-    final lastDay = dateFormat.format(lastDate);
-
-    if (firstDay == _firstDay && lastDay == _lastDay) {
-      return false;
+  void _updateFromClock() {
+    final previousFirst = _firstDay;
+    final previousLast = _lastDay;
+    _calculate();
+    if (previousFirst != _firstDay || previousLast != _lastDay) {
+      notifyListeners();
     }
-
-    _firstDay = firstDay;
-    _lastDay = lastDay;
-    return true;
   }
 
   @override
   void dispose() {
-    timer?.cancel();
+    _clock.removeListener(_updateFromClock);
     super.dispose();
   }
 }

@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:motion/firebase_options.dart';
@@ -15,6 +14,7 @@ import 'package:motion/motion_user/mu_ops/auth_page.dart';
 import 'package:provider/provider.dart';
 import 'motion_core/motion_providers/date_pvd/current_date_pvd.dart';
 import 'motion_core/motion_providers/sql_pvd/assigner_pvd.dart';
+import 'motion_core/motion_providers/sql_pvd/tracking_data_revisions.dart';
 import 'motion_core/motion_providers/web_api_pvd/zen_quotes_pvd.dart';
 import 'motion_themes/mth_theme/dark_theme.dart';
 import 'motion_themes/mth_theme/light_theme.dart';
@@ -53,15 +53,22 @@ void main() async {
   await themeModeProviderN1.initSharedPreferences();
 
   // TrackDatabaseProvider
+  final trackingDataRevisions = TrackingDataRevisions();
 
-  final trackSubcategoryDatabaseProvider = SubcategoryTrackerDatabaseProvider();
+  final trackSubcategoryDatabaseProvider = SubcategoryTrackerDatabaseProvider(
+    revisions: trackingDataRevisions,
+  );
 
-  final trackMainCategoryDatabaseProvider = MainCategoryTrackerProvider();
+  final trackMainCategoryDatabaseProvider = MainCategoryTrackerProvider(
+    revisions: trackingDataRevisions,
+  );
+  final experiencePointTableProvider = ExperiencePointTableProvider(
+    revisions: trackingDataRevisions,
+  );
 
   runApp(MultiProvider(
     providers: [
-      ChangeNotifierProvider(
-          create: (context) => ExperiencePointTableProvider()),
+      ChangeNotifierProvider.value(value: experiencePointTableProvider),
       ChangeNotifierProvider(
           create: (context) => FirstAndLastWithSevenDaysDiff()),
       ChangeNotifierProvider.value(value: themeModeProviderN1),
@@ -71,10 +78,6 @@ void main() async {
       ChangeNotifierProvider.value(value: trackSubcategoryDatabaseProvider),
       ChangeNotifierProvider.value(value: assignerProvider),
       ChangeNotifierProvider.value(value: userUidProvider),
-      StreamProvider<User?>.value(
-        initialData: null,
-        value: FirebaseAuth.instance.authStateChanges(),
-      ),
       ChangeNotifierProvider(create: (context) => DropDownTrackProvider()),
       ChangeNotifierProvider(create: (context) => CurrentDateProvider()),
       ChangeNotifierProvider(create: (context) => zenQuoteProvider),

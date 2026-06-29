@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:motion/motion_core/mc_sql_table/assign_table.dart';
 import 'package:motion/motion_core/mc_sqlite/sql_assigner_db.dart';
@@ -20,7 +22,8 @@ class AssignerMainProvider extends ChangeNotifier {
 
   // a list of subcategories and all it's relevant information
   List<Assigner> _assignerItems = [];
-  List<Assigner> get assignerItems => _assignerItems;
+  UnmodifiableListView<Assigner> get assignerItems =>
+      UnmodifiableListView(_assignerItems);
 
   // get all items in the assigner.db database
   Future<void> getAllUserItems() async {

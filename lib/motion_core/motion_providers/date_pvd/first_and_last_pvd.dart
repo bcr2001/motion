@@ -1,56 +1,48 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-// gets the first and last day of any particular month
-//  also calculates how many day a particular month has
+import 'calendar_clock.dart';
+
 class FirstAndLastDay extends ChangeNotifier {
-  String _firstDay = '';
-  String _lastDay = '';
-  int _days = 0; // Add the _days variable here.
-
-  Timer? timer;
-
-  FirstAndLastDay() {
-    // Initialize the first and last day when the class is instantiated.
-    _calculateFirstAndLastDay();
-    // Update the dates at the start of each month using a timer.
-    timer = Timer.periodic(const Duration(days: 1), (Timer t) {
-      if (_calculateFirstAndLastDay()) {
-        notifyListeners();
-      }
-    });
+  FirstAndLastDay({CalendarClock? clock})
+      : _clock = clock ?? CalendarClock.instance {
+    _calculate();
+    _clock.addListener(_updateFromClock);
   }
+
+  final CalendarClock _clock;
+  late String _firstDay;
+  late String _lastDay;
+  late int _days;
 
   String get firstDay => _firstDay;
   String get lastDay => _lastDay;
-  int get days => _days; // Add the getter for _days.
+  int get days => _days;
 
-  bool _calculateFirstAndLastDay() {
-    final now = DateTime.now();
-    final firstDayOfMonth = DateTime(now.year, now.month, 1);
-    final lastDayOfMonth = DateTime(now.year, now.month + 1, 0);
+  void _calculate() {
+    final today = _clock.today;
+    final formatter = DateFormat('yyyy-MM-dd');
+    _firstDay = formatter.format(DateTime(today.year, today.month, 1));
+    final lastDate = DateTime(today.year, today.month + 1, 0);
+    _lastDay = formatter.format(lastDate);
+    _days = lastDate.day;
+  }
 
-    final dateFormat = DateFormat('yyyy-MM-dd');
-    final firstDay = dateFormat.format(firstDayOfMonth);
-    final lastDay = dateFormat.format(lastDayOfMonth);
-    final days = lastDayOfMonth.day;
-
-    if (firstDay == _firstDay && lastDay == _lastDay && days == _days) {
-      return false;
+  void _updateFromClock() {
+    final previousFirst = _firstDay;
+    final previousLast = _lastDay;
+    final previousDays = _days;
+    _calculate();
+    if (previousFirst != _firstDay ||
+        previousLast != _lastDay ||
+        previousDays != _days) {
+      notifyListeners();
     }
-
-    _firstDay = firstDay;
-    _lastDay = lastDay;
-
-    // Calculate the number of days in the current month.
-    _days = days;
-    return true;
   }
 
   @override
   void dispose() {
-    timer?.cancel();
+    _clock.removeListener(_updateFromClock);
     super.dispose();
   }
 }

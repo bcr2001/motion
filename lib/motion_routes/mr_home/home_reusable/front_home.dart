@@ -676,9 +676,6 @@ class _SubcategoryAndCurrentDayTotalsState
                             forceRefresh: true,
                           );
                         });
-                        context
-                            .read<ExperiencePointTableProvider>()
-                            .refreshExperiencePointViews();
                       }
                     },
                   );

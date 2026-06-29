@@ -5,16 +5,27 @@ import 'package:motion/motion_core/mc_sql_table/sub_table.dart';
 
 import '../../../main.dart';
 import 'current_user_guard.dart';
+import 'tracking_data_revisions.dart';
 
 // MAIN CATEGORY TABLE
 //handles database operations for the main_category table
 class MainCategoryTrackerProvider extends ChangeNotifier {
-  int _refreshKey = 0;
+  MainCategoryTrackerProvider({TrackingDataRevisions? revisions})
+      : _revisions = revisions ?? TrackingDataRevisions() {
+    _lastRevision = _revisions.mainCategoryRevision;
+    _revisions.addListener(_handleRevisionChange);
+  }
 
-  int get refreshKey => _refreshKey;
+  final TrackingDataRevisions _revisions;
+  late int _lastRevision;
 
-  void _notifyDataChanged() {
-    _refreshKey++;
+  int get refreshKey => _revisions.mainCategoryRevision;
+
+  void _handleRevisionChange() {
+    final revision = _revisions.mainCategoryRevision;
+    if (revision == _lastRevision) return;
+
+    _lastRevision = revision;
     notifyListeners();
   }
 
@@ -24,7 +35,7 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
       requireMainCategoryUser(mainCategory),
     );
 
-    _notifyDataChanged();
+    _revisions.markMainCategoryChanged();
   }
 
   // update existing data in the main category table
@@ -33,7 +44,7 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
       requireMainCategoryUser(mainCategory),
     );
 
-    _notifyDataChanged();
+    _revisions.markMainCategoryChanged();
   }
 
   // retrieve the main category name, total for a specific day,
@@ -338,22 +349,34 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
         year: year,
         getEntireIntensity: getEntireIntensity);
   }
+
+  @override
+  void dispose() {
+    _revisions.removeListener(_handleRevisionChange);
+    super.dispose();
+  }
 }
 
 // SUBCATEGORY TABLE
 // handles database operation for the subcategory table
 class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
-  int _refreshKey = 0;
-  final Map<String, int> _subcategoryRefreshKeys = {};
+  SubcategoryTrackerDatabaseProvider({TrackingDataRevisions? revisions})
+      : _revisions = revisions ?? TrackingDataRevisions() {
+    _lastRevision = _revisions.subcategoryRevision;
+    _revisions.addListener(_handleRevisionChange);
+  }
 
-  int get refreshKey => _refreshKey;
+  final TrackingDataRevisions _revisions;
+  late int _lastRevision;
 
-  String _subcategoryRefreshKey(Subcategories subcategory) {
-    return [
-      subcategory.currentLoggedInUser,
-      subcategory.mainCategoryName,
-      subcategory.subcategoryName,
-    ].join('|');
+  int get refreshKey => _revisions.subcategoryRevision;
+
+  void _handleRevisionChange() {
+    final revision = _revisions.subcategoryRevision;
+    if (revision == _lastRevision) return;
+
+    _lastRevision = revision;
+    notifyListeners();
   }
 
   int refreshKeyForSubcategory({
@@ -361,34 +384,31 @@ class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
     required String mainCategoryName,
     required String subcategoryName,
   }) {
-    return _subcategoryRefreshKeys[
-            [currentUser, mainCategoryName, subcategoryName].join('|')] ??
-        0;
+    return _revisions.revisionForSubcategory(
+      currentUser: currentUser,
+      mainCategoryName: mainCategoryName,
+      subcategoryName: subcategoryName,
+    );
   }
 
-  void _notifyDataChanged({Subcategories? affectedSubcategory}) {
-    _refreshKey++;
-    if (affectedSubcategory != null) {
-      final key = _subcategoryRefreshKey(affectedSubcategory);
-      _subcategoryRefreshKeys[key] = (_subcategoryRefreshKeys[key] ?? 0) + 1;
-    }
-    notifyListeners();
+  int refreshKeyForDate({
+    required String currentUser,
+    required String date,
+  }) {
+    return _revisions.revisionForDate(
+      currentUser: currentUser,
+      date: date,
+    );
   }
-
-  // a list of subcategories tracked for a specific date
-  List<Subcategories> _currentDateSubcategories = [];
-  List<Subcategories> get currentDateSubcategories => _currentDateSubcategories;
 
   // get subcategories tracked on the current date
-  Future<void> retrieveCurrentDateSubcategories(
+  Future<List<Subcategories>> retrieveCurrentDateSubcategories(
       String currentDate, String currentUser, String subcategoryName) async {
-    _currentDateSubcategories = await trackDbInstance.getCurrentDateSubcategory(
+    return trackDbInstance.getCurrentDateSubcategory(
       currentDate,
       requireCurrentUser(currentUser),
       subcategoryName,
     );
-
-    _notifyDataChanged();
   }
 
   // retrieve the entire totals of subcategories
@@ -468,7 +488,7 @@ class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
         await trackDbInstance.insertSubcategory(guardedSubcategory);
     guardedSubcategory.id = insertedId;
 
-    _notifyDataChanged(affectedSubcategory: guardedSubcategory);
+    _revisions.markSubcategoryChanged(guardedSubcategory);
     return insertedId;
   }
 
@@ -477,7 +497,7 @@ class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
     final guardedSubcategory = requireSubcategoryUser(subcategories);
     await trackDbInstance.updateSubcategory(guardedSubcategory);
 
-    _notifyDataChanged(affectedSubcategory: guardedSubcategory);
+    _revisions.markSubcategoryChanged(guardedSubcategory);
   }
 
   // delete an already added subcategory
@@ -487,6 +507,14 @@ class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
   }) async {
     await trackDbInstance.deleteSubcategory(id);
 
-    _notifyDataChanged(affectedSubcategory: deletedSubcategory);
+    if (deletedSubcategory != null) {
+      _revisions.markSubcategoryChanged(deletedSubcategory);
+    }
+  }
+
+  @override
+  void dispose() {
+    _revisions.removeListener(_handleRevisionChange);
+    super.dispose();
   }
 }

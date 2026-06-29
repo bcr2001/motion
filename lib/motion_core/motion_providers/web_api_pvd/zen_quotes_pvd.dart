@@ -32,7 +32,9 @@ class ZenQuoteProvider extends ChangeNotifier {
   // Check the date and fetch a new quote if it's a new day
   Future<void> _checkAndFetchNewQuote() async {
     final savedDate = _prefs?.getString(dateKey);
-    if (savedDate == null || !_isToday(DateTime.parse(savedDate))) {
+    final parsedDate =
+        savedDate == null ? null : DateTime.tryParse(savedDate);
+    if (parsedDate == null || !_isToday(parsedDate)) {
       await fetchTodaysQuote();
     }
   }
@@ -62,16 +64,15 @@ class ZenQuoteProvider extends ChangeNotifier {
     final savedQuote = _prefs?.getString(quoteKey);
     final savedDate = _prefs?.getString(dateKey);
 
-    if (savedQuote != null &&
-        savedDate != null &&
-        _isToday(DateTime.parse(savedDate))) {
+    if (savedQuote != null) {
       _todaysQuote = savedQuote;
-      // notify listeners
       notifyListeners();
-    } else {
-      // if it's the next day, a new quote
-      // of the day is fetched
-      await _checkAndFetchNewQuote();
+    }
+
+    final parsedDate =
+        savedDate == null ? null : DateTime.tryParse(savedDate);
+    if (parsedDate == null || !_isToday(parsedDate)) {
+      unawaited(_checkAndFetchNewQuote());
     }
   }
 

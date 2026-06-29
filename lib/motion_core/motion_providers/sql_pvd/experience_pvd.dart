@@ -2,17 +2,32 @@ import 'package:flutter/material.dart';
 import '../../../main.dart';
 import '../../mc_sql_table/experience_table.dart';
 import 'current_user_guard.dart';
+import 'tracking_data_revisions.dart';
 
 // EXPERIENCE POINT TABLE
 // handles database operations for the experience_points table
 class ExperiencePointTableProvider extends ChangeNotifier {
-  int _refreshKey = 0;
+  ExperiencePointTableProvider({TrackingDataRevisions? revisions})
+      : _revisions = revisions ?? TrackingDataRevisions() {
+    _lastRevision = _revisions.experiencePointRevision;
+    _revisions.addListener(_handleRevisionChange);
+  }
 
-  int get refreshKey => _refreshKey;
+  final TrackingDataRevisions _revisions;
+  late int _lastRevision;
+
+  int get refreshKey => _revisions.experiencePointRevision;
+
+  void _handleRevisionChange() {
+    final revision = _revisions.experiencePointRevision;
+    if (revision == _lastRevision) return;
+
+    _lastRevision = revision;
+    notifyListeners();
+  }
 
   void refreshExperiencePointViews() {
-    _refreshKey++;
-    notifyListeners();
+    _revisions.markExperiencePointsChanged();
   }
 
   /// Inserts an ExperiencePoints object into the database.
@@ -145,5 +160,11 @@ class ExperiencePointTableProvider extends ChangeNotifier {
       currentUser: requireCurrentUser(currentUser),
       year: year,
     );
+  }
+
+  @override
+  void dispose() {
+    _revisions.removeListener(_handleRevisionChange);
+    super.dispose();
   }
 }

@@ -1,73 +1,31 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-// contains functions that constantly updates
-// the current date in the desired format
+import 'calendar_clock.dart';
+
 class CurrentDateProvider extends ChangeNotifier {
-  String _currentDate = DateFormat("yyyy-MM-dd").format(DateTime.now());
+  CurrentDateProvider({CalendarClock? clock})
+      : _clock = clock ?? CalendarClock.instance {
+    _currentDate = _formatDate(_clock.today);
+    _clock.addListener(_updateFromClock);
+  }
+
+  final CalendarClock _clock;
+  late String _currentDate;
 
   String get currentDate => _currentDate;
 
-  Timer? _timer;
-
-  // Constructor that initializes the timer to update the current date daily.
-  CurrentDateProvider() {
-    _timer = Timer.periodic(const Duration(days: 1), (Timer t) {
-      getCurrentDate();
-    });
-
-    // Check if a new date should be fetched on app startup
-    _checkAndUpdateDate();
-  }
-
-  Future<void> _checkAndUpdateDate() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String lastUpdate = prefs.getString('lastUpdate') ?? '';
-
-    final String today = DateFormat("yyyy-MM-dd").format(DateTime.now());
-
-    if (lastUpdate != today) {
-      _currentDate = today;
-      prefs.setString('lastUpdate', today);
-      notifyListeners();
-    }
-  }
-
-  // Method to get the new date after a day and reset the
-  // date stored by the _currentDate variable.
   void getCurrentDate() {
-    final String thisMoment = DateFormat("yyyy-MM-dd").format(DateTime.now());
-
-    if (thisMoment != _currentDate) {
-      _currentDate = thisMoment;
-      notifyListeners();
-    }
+    _clock.refresh();
+    _updateFromClock();
   }
 
-  // Method to format the date with the day of the week and suffix.
   String getFormattedDate() {
-    final List<String> dateParts = _currentDate.split('-');
-    if (dateParts.length != 3) {
-      return "Invalid Date";
-    }
+    final dateTime = DateTime.tryParse(_currentDate);
+    if (dateTime == null) return "Invalid Date";
 
-    final int year = int.tryParse(dateParts[0]) ?? 0;
-    final int month = int.tryParse(dateParts[1]) ?? 0;
-    final int day = int.tryParse(dateParts[2]) ?? 0;
-
-    // Convert the date string to a DateTime object
-    final DateTime dateTime = DateTime(year, month, day);
-
-    // Get the day of the week name using the intl package
-    final String dayOfWeekName = DateFormat('EEEE').format(dateTime);
-
-    if (day < 1 || day > 31 || month < 1 || month > 12 || year < 1) {
-      return "Invalid Date";
-    }
-    // Add the appropriate suffix to the day (e.g., 1st, 2nd, 3rd, 4th, etc.)
-    final String daySuffix = (day >= 11 && day <= 13)
+    final day = dateTime.day;
+    final daySuffix = (day >= 11 && day <= 13)
         ? 'th'
         : (day % 10 == 1)
             ? 'st'
@@ -77,12 +35,24 @@ class CurrentDateProvider extends ChangeNotifier {
                     ? 'rd'
                     : 'th';
 
-    return '$dayOfWeekName $day$daySuffix ';
+    return '${DateFormat('EEEE').format(dateTime)} $day$daySuffix ';
+  }
+
+  void _updateFromClock() {
+    final currentDate = _formatDate(_clock.today);
+    if (currentDate == _currentDate) return;
+
+    _currentDate = currentDate;
+    notifyListeners();
+  }
+
+  static String _formatDate(DateTime date) {
+    return DateFormat('yyyy-MM-dd').format(date);
   }
 
   @override
   void dispose() {
-    _timer?.cancel();
+    _clock.removeListener(_updateFromClock);
     super.dispose();
   }
 }

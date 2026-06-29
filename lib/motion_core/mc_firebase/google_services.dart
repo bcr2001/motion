@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import "package:google_sign_in/google_sign_in.dart";
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:motion/main.dart';
-import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
-import 'package:provider/provider.dart';
 import '../../motion_reusable/general_reuseable.dart';
 import '../../motion_themes/mth_app/app_strings.dart';
 
@@ -38,12 +36,6 @@ class GoogleAuthService {
 
       // Get the user's UID from the authentication result
       final User? userUid = authResult.user;
-      if (userUid != null) {
-        // Set the user's UID in the UserUidProvider using Provider
-        final userUIdProviders =
-            Provider.of<UserUidProvider>(context, listen: false);
-        userUIdProviders.setUserUid(userUid.uid);
-      }
       logger.i("USER UID RETRIEVED:> ${userUid?.uid}");
       // Return the authentication result
       return authResult;
