@@ -401,6 +401,10 @@ class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
     );
   }
 
+  void refreshAllTrackingData() {
+    _revisions.markAllTrackingDataChanged();
+  }
+
   // get subcategories tracked on the current date
   Future<List<Subcategories>> retrieveCurrentDateSubcategories(
       String currentDate, String currentUser, String subcategoryName) async {

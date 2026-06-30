@@ -53,13 +53,13 @@ class AppString {
   static const String setDateOfBirthTitle = "Set Date of Birth";
   static const String setDateOfBirthDescription =
       "To see how much you have left";
-  static const String downloadDataTitle = "Download Personal Data";
+  static const String downloadDataTitle = "Data Management";
   static const String notificationTitle = "Notification";
   static const String importDataTitle = "Import Data";
   static const String aboutMotionTitle = "About Motion";
 
   static const String downloadDataDescription =
-      "Download all your personal data.";
+      "Export or import your Motion data.";
   static const String notificationDescription =
       "Personalize your notification settings.";
   static const String importDataDescription = "Bring your data into Motion.";

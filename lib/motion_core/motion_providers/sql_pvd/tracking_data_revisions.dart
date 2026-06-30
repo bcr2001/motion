@@ -64,6 +64,13 @@ class TrackingDataRevisions extends ChangeNotifier {
     notifyListeners();
   }
 
+  void markAllTrackingDataChanged() {
+    _subcategoryRevision++;
+    _mainCategoryRevision++;
+    _experiencePointRevision++;
+    notifyListeners();
+  }
+
   String _subcategoryKey({
     required String currentUser,
     required String mainCategoryName,

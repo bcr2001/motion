@@ -16,6 +16,98 @@ enum MotionCsvFileType {
   assigner,
 }
 
+typedef MotionCsvImportProgressChanged = void Function(
+  MotionCsvImportProgress progress,
+);
+
+class MotionCsvImportProgress {
+  const MotionCsvImportProgress({
+    required this.processedRows,
+    required this.totalRows,
+    required this.importedRows,
+    required this.fileLabel,
+  });
+
+  final int processedRows;
+  final int totalRows;
+  final int importedRows;
+  final String fileLabel;
+
+  double get value => totalRows == 0 ? 0 : processedRows / totalRows;
+}
+
+class MotionDeletedDataSummary {
+  const MotionDeletedDataSummary({
+    required this.subcategoryRows,
+    required this.mainCategoryRows,
+    required this.experiencePointRows,
+    required this.assignerRows,
+  });
+
+  final int subcategoryRows;
+  final int mainCategoryRows;
+  final int experiencePointRows;
+  final int assignerRows;
+
+  int get totalRows =>
+      subcategoryRows + mainCategoryRows + experiencePointRows + assignerRows;
+}
+
+class MotionDataSummary {
+  const MotionDataSummary({
+    required this.subcategoryRows,
+    required this.mainCategoryRows,
+    required this.experiencePointRows,
+    required this.assignerRows,
+    required this.firstTrackedDate,
+    required this.lastTrackedDate,
+  });
+
+  final int subcategoryRows;
+  final int mainCategoryRows;
+  final int experiencePointRows;
+  final int assignerRows;
+  final String? firstTrackedDate;
+  final String? lastTrackedDate;
+
+  int get totalRows =>
+      subcategoryRows + mainCategoryRows + experiencePointRows + assignerRows;
+
+  bool get hasExportableData => subcategoryRows > 0 || assignerRows > 0;
+}
+
+class MotionCsvPreview {
+  const MotionCsvPreview({
+    required this.fileName,
+    required this.fileType,
+    required this.totalRows,
+    required this.validRows,
+    required this.skippedRows,
+    required this.firstDate,
+    required this.lastDate,
+  });
+
+  final String fileName;
+  final MotionCsvFileType fileType;
+  final int totalRows;
+  final int validRows;
+  final int skippedRows;
+  final String? firstDate;
+  final String? lastDate;
+}
+
+class MotionCsvImportResult {
+  const MotionCsvImportResult({
+    required this.importedRows,
+    required this.skippedRows,
+    required this.rebuiltDailyRows,
+  });
+
+  final int importedRows;
+  final int skippedRows;
+  final int rebuiltDailyRows;
+}
+
 class MotionCsvDataTransfer {
   MotionCsvDataTransfer({
     TrackerDatabaseHelper? trackerDb,
@@ -29,8 +121,10 @@ class MotionCsvDataTransfer {
       MethodChannel('motion/downloads');
 
   Future<String> exportAllToDownloads({required String currentUser}) async {
+    await _ensureHasExportableData(currentUser);
+
     if (Platform.isAndroid) {
-      return _exportAllToAndroidDownloads(currentUser);
+      return _exportAllToAndroidDownloads(currentUser: currentUser);
     }
 
     final downloadsDirectory = await _downloadsDirectory();
@@ -40,17 +134,42 @@ class MotionCsvDataTransfer {
     );
   }
 
-  Future<String> _exportAllToAndroidDownloads(String currentUser) async {
+  Future<String> exportBackupToDownloads({required String currentUser}) async {
+    await _ensureHasExportableData(currentUser);
+    final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
+    final prefix = 'motion_backup_${timestamp}_';
+
+    if (Platform.isAndroid) {
+      return _exportAllToAndroidDownloads(
+        currentUser: currentUser,
+        fileNamePrefix: prefix,
+      );
+    }
+
+    final downloadsDirectory = await _downloadsDirectory();
+    final backupDirectory = Directory(
+      p.join(downloadsDirectory.path, 'motion_backup_$timestamp'),
+    );
+    return _exportAllToDirectory(
+      currentUser: currentUser,
+      directory: backupDirectory,
+    );
+  }
+
+  Future<String> _exportAllToAndroidDownloads({
+    required String currentUser,
+    String fileNamePrefix = '',
+  }) async {
     await _writeAndroidCsvFile(
-      fileName: 'main_category.csv',
+      fileName: '${fileNamePrefix}main_category.csv',
       rows: await _mainCategoryRows(currentUser),
     );
     await _writeAndroidCsvFile(
-      fileName: 'subcategory.csv',
+      fileName: '${fileNamePrefix}subcategory.csv',
       rows: await _subcategoryRows(currentUser),
     );
     await _writeAndroidCsvFile(
-      fileName: 'to_assign.csv',
+      fileName: '${fileNamePrefix}to_assign.csv',
       rows: await _assignerRows(currentUser),
     );
 
@@ -61,6 +180,8 @@ class MotionCsvDataTransfer {
     required String currentUser,
     required String directoryPath,
   }) async {
+    await _ensureHasExportableData(currentUser);
+
     return _exportAllToDirectory(
       currentUser: currentUser,
       directory: Directory(directoryPath),
@@ -92,81 +213,172 @@ class MotionCsvDataTransfer {
     return directory.path;
   }
 
-  Future<int> importCsv({
+  Future<MotionCsvPreview> previewCsv({
     required MotionCsvFileType fileType,
     required String filePath,
-    required String currentUser,
   }) async {
     final csvRows = await _readCsvRows(filePath);
-    if (csvRows.length <= 1) return 0;
+    if (csvRows.isEmpty) {
+      return MotionCsvPreview(
+        fileName: p.basename(filePath),
+        fileType: fileType,
+        totalRows: 0,
+        validRows: 0,
+        skippedRows: 0,
+        firstDate: null,
+        lastDate: null,
+      );
+    }
 
+    final headers = _headers(csvRows);
     switch (fileType) {
       case MotionCsvFileType.mainCategory:
-        return _importMainCategory(csvRows, currentUser);
+        throw UnsupportedError(
+          'main_category.csv is derived from subcategory.csv and is export-only.',
+        );
       case MotionCsvFileType.subcategory:
-        return _importSubcategory(csvRows, currentUser);
+        _requireHeaders(headers, [
+          MotionDbColumns.date,
+          MotionDbColumns.mainCategoryName,
+          MotionDbColumns.subcategoryName,
+          MotionDbColumns.timeSpent,
+        ]);
+        return _previewRows(
+          filePath: filePath,
+          fileType: fileType,
+          csvRows: csvRows,
+          headers: headers,
+          isValidRow: (rowMap) {
+            return _normalizeDate(rowMap[MotionDbColumns.date]).isNotEmpty &&
+                (rowMap[MotionDbColumns.mainCategoryName] ?? '').isNotEmpty &&
+                (rowMap[MotionDbColumns.subcategoryName] ?? '').isNotEmpty;
+          },
+          dateForRow: (rowMap) => _normalizeDate(rowMap[MotionDbColumns.date]),
+        );
       case MotionCsvFileType.assigner:
-        return _importAssigner(csvRows, currentUser);
+        _requireHeaders(headers, [
+          MotionDbColumns.subcategoryName,
+          MotionDbColumns.mainCategoryName,
+          MotionDbColumns.isActive,
+          MotionDbColumns.dateCreated,
+        ]);
+        return _previewRows(
+          filePath: filePath,
+          fileType: fileType,
+          csvRows: csvRows,
+          headers: headers,
+          isValidRow: (rowMap) {
+            return (rowMap[MotionDbColumns.subcategoryName] ?? '').isNotEmpty &&
+                (rowMap[MotionDbColumns.mainCategoryName] ?? '').isNotEmpty;
+          },
+          dateForRow: (rowMap) =>
+              _normalizeDate(rowMap[MotionDbColumns.dateCreated]),
+        );
     }
   }
 
-  Future<int> _importMainCategory(
-    List<List<dynamic>> csvRows,
-    String currentUser,
-  ) async {
-    final db = await _trackerDb.database;
-    final headers = _headers(csvRows);
-    var importedRows = 0;
+  Future<MotionCsvImportResult> importCsv({
+    required MotionCsvFileType fileType,
+    required String filePath,
+    required String currentUser,
+    MotionCsvImportProgressChanged? onProgress,
+  }) async {
+    final csvRows = await _readCsvRows(filePath);
+    if (csvRows.length <= 1) {
+      return const MotionCsvImportResult(
+        importedRows: 0,
+        skippedRows: 0,
+        rebuiltDailyRows: 0,
+      );
+    }
 
-    await db.transaction((txn) async {
-      for (final row in csvRows.skip(1)) {
-        final rowMap = _rowMap(headers, row);
-        final date = _normalizeDate(rowMap[MotionDbColumns.date]);
-        if (date.isEmpty) continue;
-
-        final values = {
-          MotionDbColumns.date: date,
-          MotionDbColumns.education:
-              _parseDouble(rowMap[MotionDbColumns.education]),
-          MotionDbColumns.work: _parseDouble(rowMap[MotionDbColumns.work]),
-          MotionDbColumns.skills: _parseDouble(
-              _firstValue(rowMap, [MotionDbColumns.skills, 'skill'])),
-          MotionDbColumns.entertainment:
-              _parseDouble(rowMap[MotionDbColumns.entertainment]),
-          MotionDbColumns.selfDevelopment:
-              _parseDouble(rowMap[MotionDbColumns.selfDevelopment]),
-          MotionDbColumns.sleep: _parseDouble(rowMap[MotionDbColumns.sleep]),
-          MotionDbColumns.currentLoggedInUser: currentUser,
-        };
-
-        await txn.insert(
-          MotionDbTables.mainCategory,
-          values,
-          conflictAlgorithm: ConflictAlgorithm.ignore,
+    switch (fileType) {
+      case MotionCsvFileType.mainCategory:
+        throw UnsupportedError(
+          'main_category.csv is derived from subcategory.csv and is export-only.',
         );
-        await txn.update(
-          MotionDbTables.mainCategory,
-          values,
-          where:
-              '${MotionDbColumns.date} = ? AND ${MotionDbColumns.currentLoggedInUser} = ?',
-          whereArgs: [date, currentUser],
+      case MotionCsvFileType.subcategory:
+        return _importSubcategory(
+          csvRows,
+          currentUser,
+          onProgress: onProgress,
         );
-
-        importedRows++;
-      }
-    });
-
-    await _backfillXp(currentUser);
-    return importedRows;
+      case MotionCsvFileType.assigner:
+        return _importAssigner(
+          csvRows,
+          currentUser,
+          onProgress: onProgress,
+        );
+    }
   }
 
-  Future<int> _importSubcategory(
+  Future<MotionDeletedDataSummary> deleteAllDataForUser({
+    required String currentUser,
+  }) async {
+    final trackerDb = await _trackerDb.database;
+    final assignerDb = await _assignerDb.database;
+    var subcategoryRows = 0;
+    var mainCategoryRows = 0;
+    var experiencePointRows = 0;
+
+    await trackerDb.transaction((txn) async {
+      subcategoryRows = await txn.delete(
+        MotionDbTables.subcategory,
+        where: '${MotionDbColumns.currentLoggedInUser} = ?',
+        whereArgs: [currentUser],
+      );
+      experiencePointRows = await txn.delete(
+        MotionDbTables.experiencePoints,
+        where: '${MotionDbColumns.currentLoggedInUser} = ?',
+        whereArgs: [currentUser],
+      );
+      mainCategoryRows = await txn.delete(
+        MotionDbTables.mainCategory,
+        where: '${MotionDbColumns.currentLoggedInUser} = ?',
+        whereArgs: [currentUser],
+      );
+    });
+
+    final assignerRows = await assignerDb.delete(
+      MotionDbTables.assigner,
+      where: '${MotionDbColumns.currentLoggedInUser} = ?',
+      whereArgs: [currentUser],
+    );
+
+    return MotionDeletedDataSummary(
+      subcategoryRows: subcategoryRows,
+      mainCategoryRows: mainCategoryRows,
+      experiencePointRows: experiencePointRows,
+      assignerRows: assignerRows,
+    );
+  }
+
+  Future<MotionCsvImportResult> _importSubcategory(
     List<List<dynamic>> csvRows,
-    String currentUser,
-  ) async {
+    String currentUser, {
+    MotionCsvImportProgressChanged? onProgress,
+  }) async {
     final db = await _trackerDb.database;
     final headers = _headers(csvRows);
+    _requireHeaders(headers, [
+      MotionDbColumns.date,
+      MotionDbColumns.mainCategoryName,
+      MotionDbColumns.subcategoryName,
+      MotionDbColumns.timeSpent,
+    ]);
     var importedRows = 0;
+    var skippedRows = 0;
+    var processedRows = 0;
+    final rebuiltDates = <String>{};
+    final totalRows = csvRows.length - 1;
+    _reportImportProgress(
+      onProgress,
+      processedRows: processedRows,
+      totalRows: totalRows,
+      importedRows: importedRows,
+      fileLabel: 'subcategory.csv',
+      force: true,
+    );
 
     await db.transaction((txn) async {
       await txn.delete(
@@ -174,39 +386,102 @@ class MotionCsvDataTransfer {
         where: '${MotionDbColumns.currentLoggedInUser} = ?',
         whereArgs: [currentUser],
       );
+      await txn.delete(
+        MotionDbTables.experiencePoints,
+        where: '${MotionDbColumns.currentLoggedInUser} = ?',
+        whereArgs: [currentUser],
+      );
+      await txn.delete(
+        MotionDbTables.mainCategory,
+        where: '${MotionDbColumns.currentLoggedInUser} = ?',
+        whereArgs: [currentUser],
+      );
 
       for (final row in csvRows.skip(1)) {
+        processedRows++;
         final rowMap = _rowMap(headers, row);
         final date = _normalizeDate(rowMap[MotionDbColumns.date]);
-        if (date.isEmpty) continue;
+        final mainCategoryName =
+            rowMap[MotionDbColumns.mainCategoryName] ?? '';
+        final subcategoryName =
+            rowMap[MotionDbColumns.subcategoryName] ?? '';
+        if (date.isEmpty ||
+            mainCategoryName.isEmpty ||
+            subcategoryName.isEmpty) {
+          skippedRows++;
+          _reportImportProgress(
+            onProgress,
+            processedRows: processedRows,
+            totalRows: totalRows,
+            importedRows: importedRows,
+            fileLabel: 'subcategory.csv',
+          );
+          continue;
+        }
 
         await _ensureDailyRows(txn, currentUser, date);
+        rebuiltDates.add(date);
         await txn.insert(MotionDbTables.subcategory, {
           MotionDbColumns.date: date,
-          MotionDbColumns.mainCategoryName:
-              rowMap[MotionDbColumns.mainCategoryName] ?? '',
-          MotionDbColumns.subcategoryName:
-              rowMap[MotionDbColumns.subcategoryName] ?? '',
+          MotionDbColumns.mainCategoryName: mainCategoryName,
+          MotionDbColumns.subcategoryName: subcategoryName,
           MotionDbColumns.timeSpent:
               _parseDouble(rowMap[MotionDbColumns.timeSpent]),
           MotionDbColumns.currentLoggedInUser: currentUser,
         });
 
         importedRows++;
+        _reportImportProgress(
+          onProgress,
+          processedRows: processedRows,
+          totalRows: totalRows,
+          importedRows: importedRows,
+          fileLabel: 'subcategory.csv',
+        );
       }
     });
 
     await _backfillXp(currentUser);
-    return importedRows;
+    _reportImportProgress(
+      onProgress,
+      processedRows: totalRows,
+      totalRows: totalRows,
+      importedRows: importedRows,
+      fileLabel: 'subcategory.csv',
+      force: true,
+    );
+    return MotionCsvImportResult(
+      importedRows: importedRows,
+      skippedRows: skippedRows,
+      rebuiltDailyRows: rebuiltDates.length,
+    );
   }
 
-  Future<int> _importAssigner(
+  Future<MotionCsvImportResult> _importAssigner(
     List<List<dynamic>> csvRows,
-    String currentUser,
-  ) async {
+    String currentUser, {
+    MotionCsvImportProgressChanged? onProgress,
+  }) async {
     final db = await _assignerDb.database;
     final headers = _headers(csvRows);
+    _requireHeaders(headers, [
+      MotionDbColumns.subcategoryName,
+      MotionDbColumns.mainCategoryName,
+      MotionDbColumns.isActive,
+      MotionDbColumns.dateCreated,
+    ]);
     var importedRows = 0;
+    var skippedRows = 0;
+    var processedRows = 0;
+    final totalRows = csvRows.length - 1;
+    _reportImportProgress(
+      onProgress,
+      processedRows: processedRows,
+      totalRows: totalRows,
+      importedRows: importedRows,
+      fileLabel: 'to_assign.csv',
+      force: true,
+    );
 
     await db.transaction((txn) async {
       await txn.delete(
@@ -216,15 +491,29 @@ class MotionCsvDataTransfer {
       );
 
       for (final row in csvRows.skip(1)) {
+        processedRows++;
         final rowMap = _rowMap(headers, row);
+        final subcategoryName = rowMap[MotionDbColumns.subcategoryName] ?? '';
+        final mainCategoryName =
+            rowMap[MotionDbColumns.mainCategoryName] ?? '';
+        if (subcategoryName.isEmpty || mainCategoryName.isEmpty) {
+          skippedRows++;
+          _reportImportProgress(
+            onProgress,
+            processedRows: processedRows,
+            totalRows: totalRows,
+            importedRows: importedRows,
+            fileLabel: 'to_assign.csv',
+          );
+          continue;
+        }
+
         await txn.insert(
           MotionDbTables.assigner,
           {
             MotionDbColumns.currentLoggedInUser: currentUser,
-            MotionDbColumns.subcategoryName:
-                rowMap[MotionDbColumns.subcategoryName] ?? '',
-            MotionDbColumns.mainCategoryName:
-                rowMap[MotionDbColumns.mainCategoryName] ?? '',
+            MotionDbColumns.subcategoryName: subcategoryName,
+            MotionDbColumns.mainCategoryName: mainCategoryName,
             MotionDbColumns.isActive:
                 _parseInt(rowMap[MotionDbColumns.isActive]),
             MotionDbColumns.isArchive:
@@ -244,10 +533,29 @@ class MotionCsvDataTransfer {
         );
 
         importedRows++;
+        _reportImportProgress(
+          onProgress,
+          processedRows: processedRows,
+          totalRows: totalRows,
+          importedRows: importedRows,
+          fileLabel: 'to_assign.csv',
+        );
       }
     });
 
-    return importedRows;
+    _reportImportProgress(
+      onProgress,
+      processedRows: totalRows,
+      totalRows: totalRows,
+      importedRows: importedRows,
+      fileLabel: 'to_assign.csv',
+      force: true,
+    );
+    return MotionCsvImportResult(
+      importedRows: importedRows,
+      skippedRows: skippedRows,
+      rebuiltDailyRows: 0,
+    );
   }
 
   Future<List<List<dynamic>>> _mainCategoryRows(String currentUser) async {
@@ -387,11 +695,56 @@ class MotionCsvDataTransfer {
     return map;
   }
 
-  String? _firstValue(Map<String, String> rowMap, List<String> keys) {
-    for (final key in keys) {
-      if (rowMap.containsKey(key)) return rowMap[key];
+  MotionCsvPreview _previewRows({
+    required String filePath,
+    required MotionCsvFileType fileType,
+    required List<List<dynamic>> csvRows,
+    required List<String> headers,
+    required bool Function(Map<String, String> rowMap) isValidRow,
+    required String Function(Map<String, String> rowMap) dateForRow,
+  }) {
+    var validRows = 0;
+    var skippedRows = 0;
+    String? firstDate;
+    String? lastDate;
+
+    for (final row in csvRows.skip(1)) {
+      final rowMap = _rowMap(headers, row);
+      if (!isValidRow(rowMap)) {
+        skippedRows++;
+        continue;
+      }
+
+      validRows++;
+      final date = dateForRow(rowMap);
+      if (date.isEmpty) continue;
+      if (firstDate == null || date.compareTo(firstDate) < 0) {
+        firstDate = date;
+      }
+      if (lastDate == null || date.compareTo(lastDate) > 0) {
+        lastDate = date;
+      }
     }
-    return null;
+
+    return MotionCsvPreview(
+      fileName: p.basename(filePath),
+      fileType: fileType,
+      totalRows: csvRows.length - 1,
+      validRows: validRows,
+      skippedRows: skippedRows,
+      firstDate: firstDate,
+      lastDate: lastDate,
+    );
+  }
+
+  void _requireHeaders(List<String> headers, List<String> requiredHeaders) {
+    final missingHeaders =
+        requiredHeaders.where((header) => !headers.contains(header)).toList();
+    if (missingHeaders.isNotEmpty) {
+      throw FormatException(
+        'Missing required CSV column(s): ${missingHeaders.join(', ')}',
+      );
+    }
   }
 
   double _parseDouble(String? value) {
@@ -491,5 +844,103 @@ class MotionCsvDataTransfer {
       FROM ${MotionDbTables.mainCategory}
       WHERE ${MotionDbColumns.currentLoggedInUser} = ?;
     ''', [currentUser]);
+  }
+
+  Future<void> _ensureHasExportableData(String currentUser) async {
+    final summary = await dataSummaryForUser(currentUser: currentUser);
+
+    if (!summary.hasExportableData) {
+      throw StateError('There is no Motion data to export yet.');
+    }
+  }
+
+  Future<MotionDataSummary> dataSummaryForUser({
+    required String currentUser,
+  }) async {
+    final trackerDb = await _trackerDb.database;
+    final assignerDb = await _assignerDb.database;
+
+    final subcategoryCount = Sqflite.firstIntValue(await trackerDb.rawQuery(
+          '''
+          SELECT COUNT(*)
+          FROM ${MotionDbTables.subcategory}
+          WHERE ${MotionDbColumns.currentLoggedInUser} = ?
+          ''',
+          [currentUser],
+        )) ??
+        0;
+
+    final mainCategoryCount = Sqflite.firstIntValue(await trackerDb.rawQuery(
+          '''
+          SELECT COUNT(*)
+          FROM ${MotionDbTables.mainCategory}
+          WHERE ${MotionDbColumns.currentLoggedInUser} = ?
+          ''',
+          [currentUser],
+        )) ??
+        0;
+
+    final experiencePointCount = Sqflite.firstIntValue(await trackerDb.rawQuery(
+          '''
+          SELECT COUNT(*)
+          FROM ${MotionDbTables.experiencePoints}
+          WHERE ${MotionDbColumns.currentLoggedInUser} = ?
+          ''',
+          [currentUser],
+        )) ??
+        0;
+
+    final assignerCount = Sqflite.firstIntValue(await assignerDb.rawQuery(
+          '''
+          SELECT COUNT(*)
+          FROM ${MotionDbTables.assigner}
+          WHERE ${MotionDbColumns.currentLoggedInUser} = ?
+          ''',
+          [currentUser],
+        )) ??
+        0;
+
+    final dateRange = await trackerDb.rawQuery(
+      '''
+      SELECT
+        MIN(${MotionDbColumns.date}) AS firstDate,
+        MAX(${MotionDbColumns.date}) AS lastDate
+      FROM ${MotionDbTables.subcategory}
+      WHERE ${MotionDbColumns.currentLoggedInUser} = ?
+      ''',
+      [currentUser],
+    );
+
+    return MotionDataSummary(
+      subcategoryRows: subcategoryCount,
+      mainCategoryRows: mainCategoryCount,
+      experiencePointRows: experiencePointCount,
+      assignerRows: assignerCount,
+      firstTrackedDate: dateRange.first['firstDate']?.toString(),
+      lastTrackedDate: dateRange.first['lastDate']?.toString(),
+    );
+  }
+
+  void _reportImportProgress(
+    MotionCsvImportProgressChanged? onProgress, {
+    required int processedRows,
+    required int totalRows,
+    required int importedRows,
+    required String fileLabel,
+    bool force = false,
+  }) {
+    if (onProgress == null) return;
+    if (!force && processedRows % 25 != 0 && processedRows != totalRows) {
+      return;
+    }
+
+    onProgress(
+      MotionCsvImportProgress(
+        processedRows: processedRows,
+        totalRows: totalRows,
+        importedRows: importedRows,
+        fileLabel: fileLabel,
+      ),
+    );
   }
 }
