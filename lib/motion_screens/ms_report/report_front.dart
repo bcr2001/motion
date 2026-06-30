@@ -375,34 +375,41 @@ class InfoAboutNoData extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        // no data image
-        AppImages.noDataAvailableYet,
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // no data image
+            AppImages.noDataAvailableYet,
 
-        // information about what the image illustrates
-        Padding(
-          padding: const EdgeInsets.only(top: 8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              // info icon
-              const Padding(
-                padding: EdgeInsets.only(right: 2.0),
-                child: Icon(Icons.info_outline),
-              ),
+            // information about what the image illustrates
+            const SizedBox(height: 8),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // info icon
+                const Padding(
+                  padding: EdgeInsets.only(right: 4.0),
+                  child: Icon(Icons.info_outline),
+                ),
 
-              // information about the specific section
-              Text(
-                AppString.informationAboutNoData,
-                style: AppTextStyle.subSectionTextStyle(
-                    fontsize: 10, fontweight: FontWeight.normal),
-              )
-            ],
-          ),
+                // information about the specific section
+                Flexible(
+                  child: Text(
+                    AppString.informationAboutNoData,
+                    textAlign: TextAlign.center,
+                    style: AppTextStyle.subSectionTextStyle(
+                        fontsize: 10, fontweight: FontWeight.normal),
+                  ),
+                )
+              ],
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

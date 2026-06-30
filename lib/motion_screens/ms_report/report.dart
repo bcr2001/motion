@@ -57,17 +57,26 @@ class MonthlyReportPage extends StatelessWidget {
               final snapshotData = snapshot.data;
 
               if (snapshotData! <= 0) {
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // default display image that is shown when the page is empty
-                    AppImages.noAnalysisGallary,
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // default display image that is shown when the page is empty
+                        AppImages.noAnalysisGallary,
 
-                    // information on why it is empty
-                    const InfoToTheUser(
-                        sectionInformation:
-                            AppString.infoAboutMonthlyReportEmpty)
-                  ],
+                        const SizedBox(height: 12),
+
+                        // information on why it is empty
+                        const InfoToTheUser(
+                          sectionInformation:
+                              AppString.infoAboutMonthlyReportEmpty,
+                          centered: true,
+                        )
+                      ],
+                    ),
+                  ),
                 );
               } else {
                 return ListView(

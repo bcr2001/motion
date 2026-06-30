@@ -298,7 +298,7 @@ class AppString {
   static const String faq5GeneralOrSpecificAnswer =
       "To prevent confusion and maintain a concise tracking list, it's advisable to keep the subcategories reasonably general. For instance, rather than tracking individual school subjects separately, you can encapsulate all the time spent under a broader category like 'Studied'";
   static const String faq6AssignToMainAnswer =
-      "It's important to carefully consider the assignment of subcategories to their respective main categories, as there can be a fine line between which main category certain subcategories belong to. We recommend reviewing the FOUNDERS gallery for inspiration and guidance on how to organize these categories effectively. However, keep in mind that the organization can be somewhat subjective, so feel free to make adjustments as needed based on your application's unique goals and user preferences.";
+      "It's important to carefully consider which main category a subcategory belongs to, because some activities can fit more than one category. We recommend reviewing Subcategory Examples for inspiration and guidance on how to organize your activities. The final choice can still be personal, so use the category that best matches your goals and how you want to analyze your time.";
   static const String faq7EFSAnswer =
       "EFS stands for Efficiency Score. It is a metric used to show how productive you are. The efficiency score is calculated for the current month, a specific year, and the overall efficiency score.";
 

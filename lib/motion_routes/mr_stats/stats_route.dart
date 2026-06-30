@@ -285,12 +285,15 @@ class _AnalyticsEmptyState extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(
-              height: 180,
-              child: FittedBox(
-                fit: BoxFit.contain,
-                child: AppImages.noAnalysisGallary,
+            Center(
+              child: SizedBox(
+                height: 180,
+                child: FittedBox(
+                  fit: BoxFit.contain,
+                  child: AppImages.noAnalysisGallary,
+                ),
               ),
             ),
             const SizedBox(height: 18),

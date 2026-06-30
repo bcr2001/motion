@@ -430,14 +430,22 @@ Widget chartColorPalette({required Color color}) {
 // information to the user
 class InfoToTheUser extends StatelessWidget {
   final String sectionInformation;
+  final bool centered;
 
-  const InfoToTheUser({super.key, required this.sectionInformation});
+  const InfoToTheUser({
+    super.key,
+    required this.sectionInformation,
+    this.centered = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Row(
+        mainAxisAlignment:
+            centered ? MainAxisAlignment.center : MainAxisAlignment.start,
+        mainAxisSize: centered ? MainAxisSize.min : MainAxisSize.max,
         children: [
           // info icon
           const Padding(
@@ -453,6 +461,7 @@ class InfoToTheUser extends StatelessWidget {
           Flexible(
             child: Text(
               sectionInformation,
+              textAlign: centered ? TextAlign.center : TextAlign.start,
               style: AppTextStyle.subSectionTextStyle(
                   fontsize: 10, fontweight: FontWeight.normal),
             ),
