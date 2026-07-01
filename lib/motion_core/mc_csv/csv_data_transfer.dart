@@ -112,11 +112,17 @@ class MotionCsvDataTransfer {
   MotionCsvDataTransfer({
     TrackerDatabaseHelper? trackerDb,
     AssignerDatabaseHelper? assignerDb,
-  })  : _trackerDb = trackerDb ?? TrackerDatabaseHelper(),
-        _assignerDb = assignerDb ?? AssignerDatabaseHelper();
+    Future<Database> Function()? trackerDatabase,
+    Future<Database> Function()? assignerDatabase,
+  })  : _trackerDatabase =
+            trackerDatabase ??
+                (() => (trackerDb ?? TrackerDatabaseHelper()).database),
+        _assignerDatabase =
+            assignerDatabase ??
+                (() => (assignerDb ?? AssignerDatabaseHelper()).database);
 
-  final TrackerDatabaseHelper _trackerDb;
-  final AssignerDatabaseHelper _assignerDb;
+  final Future<Database> Function() _trackerDatabase;
+  final Future<Database> Function() _assignerDatabase;
   static const MethodChannel _downloadsChannel =
       MethodChannel('motion/downloads');
 
@@ -315,8 +321,8 @@ class MotionCsvDataTransfer {
   Future<MotionDeletedDataSummary> deleteAllDataForUser({
     required String currentUser,
   }) async {
-    final trackerDb = await _trackerDb.database;
-    final assignerDb = await _assignerDb.database;
+    final trackerDb = await _trackerDatabase();
+    final assignerDb = await _assignerDatabase();
     var subcategoryRows = 0;
     var mainCategoryRows = 0;
     var experiencePointRows = 0;
@@ -358,7 +364,7 @@ class MotionCsvDataTransfer {
     String currentUser, {
     MotionCsvImportProgressChanged? onProgress,
   }) async {
-    final db = await _trackerDb.database;
+    final db = await _trackerDatabase();
     final headers = _headers(csvRows);
     _requireHeaders(headers, [
       MotionDbColumns.date,
@@ -462,7 +468,7 @@ class MotionCsvDataTransfer {
     String currentUser, {
     MotionCsvImportProgressChanged? onProgress,
   }) async {
-    final db = await _assignerDb.database;
+    final db = await _assignerDatabase();
     final headers = _headers(csvRows);
     _requireHeaders(headers, [
       MotionDbColumns.subcategoryName,
@@ -559,7 +565,7 @@ class MotionCsvDataTransfer {
   }
 
   Future<List<List<dynamic>>> _mainCategoryRows(String currentUser) async {
-    final db = await _trackerDb.database;
+    final db = await _trackerDatabase();
     final rows = await db.query(
       MotionDbTables.mainCategory,
       where: '${MotionDbColumns.currentLoggedInUser} = ?',
@@ -592,7 +598,7 @@ class MotionCsvDataTransfer {
   }
 
   Future<List<List<dynamic>>> _subcategoryRows(String currentUser) async {
-    final db = await _trackerDb.database;
+    final db = await _trackerDatabase();
     final rows = await db.query(
       MotionDbTables.subcategory,
       where: '${MotionDbColumns.currentLoggedInUser} = ?',
@@ -620,7 +626,7 @@ class MotionCsvDataTransfer {
   }
 
   Future<List<List<dynamic>>> _assignerRows(String currentUser) async {
-    final db = await _assignerDb.database;
+    final db = await _assignerDatabase();
     final rows = await db.query(
       MotionDbTables.assigner,
       where: '${MotionDbColumns.currentLoggedInUser} = ?',
@@ -832,7 +838,7 @@ class MotionCsvDataTransfer {
   }
 
   Future<void> _backfillXp(String currentUser) async {
-    final db = await _trackerDb.database;
+    final db = await _trackerDatabase();
     await db.execute('''
       INSERT OR IGNORE INTO ${MotionDbTables.experiencePoints}
         (${MotionDbColumns.date}, ${MotionDbColumns.currentLoggedInUser},
@@ -857,8 +863,8 @@ class MotionCsvDataTransfer {
   Future<MotionDataSummary> dataSummaryForUser({
     required String currentUser,
   }) async {
-    final trackerDb = await _trackerDb.database;
-    final assignerDb = await _assignerDb.database;
+    final trackerDb = await _trackerDatabase();
+    final assignerDb = await _assignerDatabase();
 
     final subcategoryCount = Sqflite.firstIntValue(await trackerDb.rawQuery(
           '''

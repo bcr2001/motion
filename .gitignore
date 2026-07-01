@@ -42,3 +42,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Local one-off exports and private signing material
+/exports/
+/upload_certificate.pem
