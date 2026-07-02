@@ -12,8 +12,22 @@ import 'edit_reusable.dart';
 
 // allows user to change the subcategory names, it's main category assignment
 // and whether to archive a subcategory
-class TrackEditingPage extends StatelessWidget {
+class TrackEditingPage extends StatefulWidget {
   const TrackEditingPage({super.key});
+
+  @override
+  State<TrackEditingPage> createState() => _TrackEditingPageState();
+}
+
+class _TrackEditingPageState extends State<TrackEditingPage> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   Color _categoryColor(String categoryName) {
     if (categoryName == AppString.educationMainCategory) {
@@ -34,9 +48,84 @@ class TrackEditingPage extends StatelessWidget {
     return AppColor.sleepPieChartColor;
   }
 
+  bool _matchesSearch(Assigner item) {
+    final query = _searchQuery.trim().toLowerCase();
+    if (query.isEmpty) return true;
+
+    return item.subcategoryName.toLowerCase().contains(query) ||
+        item.mainCategoryName.toLowerCase().contains(query);
+  }
+
+  Widget _searchField(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final borderColor =
+        isDarkMode ? Colors.white.withValues(alpha: 0.10) : Colors.black12;
+    final fillColor = isDarkMode
+        ? AppColor.darkModeContentWidget
+        : AppColor.lightModeContentWidget;
+    final hintColor = isDarkMode ? Colors.white60 : Colors.blueGrey;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: TextField(
+        controller: _searchController,
+        cursorColor: AppColor.blueMainColor,
+        textInputAction: TextInputAction.search,
+        onChanged: (value) {
+          setState(() => _searchQuery = value);
+        },
+        style: AppTextStyle.subSectionTextStyle(
+          fontsize: 13,
+          fontweight: FontWeight.normal,
+        ),
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: fillColor,
+          prefixIcon: const Icon(
+            Icons.search_rounded,
+            color: AppColor.blueMainColor,
+            size: 20,
+          ),
+          suffixIcon: _searchQuery.isEmpty
+              ? null
+              : IconButton(
+                  tooltip: 'Clear search',
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() => _searchQuery = '');
+                  },
+                  icon: Icon(
+                    Icons.close_rounded,
+                    color: hintColor,
+                    size: 19,
+                  ),
+                ),
+          hintText: 'Search subcategories',
+          hintStyle: AppTextStyle.subSectionTextStyle(
+            fontsize: 13,
+            fontweight: FontWeight.normal,
+            color: hintColor,
+          ),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide(color: borderColor),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide:
+                const BorderSide(color: AppColor.blueMainColor, width: 1.4),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _editHeader({
     required int totalCount,
     required int archivedCount,
+    required int visibleCount,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12, left: 4, right: 4),
@@ -44,7 +133,9 @@ class TrackEditingPage extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              "$totalCount subcategories",
+              _searchQuery.trim().isEmpty
+                  ? "$totalCount subcategories"
+                  : "$visibleCount of $totalCount subcategories",
               style: AppTextStyle.subSectionTextStyle(
                 fontsize: 13,
                 fontweight: FontWeight.w700,
@@ -54,6 +145,47 @@ class TrackEditingPage extends StatelessWidget {
           ),
           Text(
             "$archivedCount archived",
+            style: AppTextStyle.subSectionTextStyle(
+              fontsize: 12,
+              fontweight: FontWeight.normal,
+              color: Colors.blueGrey,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _emptySearchState() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 56),
+      child: Column(
+        children: [
+          Container(
+            height: 46,
+            width: 46,
+            decoration: BoxDecoration(
+              color: AppColor.blueMainColor.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Icon(
+              Icons.search_off_rounded,
+              color: AppColor.blueMainColor,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'No matching subcategories',
+            textAlign: TextAlign.center,
+            style: AppTextStyle.subSectionTextStyle(
+              fontsize: 14,
+              fontweight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            'Try a different subcategory or main category name.',
+            textAlign: TextAlign.center,
             style: AppTextStyle.subSectionTextStyle(
               fontsize: 12,
               fontweight: FontWeight.normal,
@@ -161,17 +293,24 @@ class TrackEditingPage extends StatelessWidget {
           final assignedItems = assigner.assignerItems
               .where((item) => item.currentLoggedInUser == currentUser)
               .toList();
+          final visibleItems = assignedItems.where(_matchesSearch).toList();
           final archivedCount =
               assignedItems.where((item) => item.isArchive == 1).length;
 
           return ListView(
             padding: const EdgeInsets.fromLTRB(12, 12, 12, 28),
             children: [
+              _searchField(context),
               _editHeader(
                 totalCount: assignedItems.length,
                 archivedCount: archivedCount,
+                visibleCount: visibleItems.length,
               ),
-              ...assignedItems.map((item) => _editItemCard(context, item)),
+              if (visibleItems.isEmpty)
+                _emptySearchState()
+              else ...[
+                ...visibleItems.map((item) => _editItemCard(context, item)),
+              ],
             ],
           );
         },
