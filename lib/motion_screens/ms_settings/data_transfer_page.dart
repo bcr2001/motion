@@ -1,5 +1,7 @@
 import 'package:file_picker/file_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:motion/motion_core/mc_cloud/google_drive_backup_service.dart';
 import 'package:motion/motion_core/mc_csv/csv_data_transfer.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/assigner_pvd.dart';
@@ -17,6 +19,8 @@ class DataTransferPage extends StatefulWidget {
 
 class _DataTransferPageState extends State<DataTransferPage> {
   final MotionCsvDataTransfer _csvTransfer = MotionCsvDataTransfer();
+  final GoogleDriveBackupService _driveBackupService =
+      GoogleDriveBackupService();
   bool _isBusy = false;
   String _busyTitle = 'Working';
   String _busyDetail = 'Please wait...';
@@ -178,6 +182,61 @@ class _DataTransferPageState extends State<DataTransferPage> {
         );
       }
     }, busyTitle: 'Exporting CSV Files', busyDetail: 'Preparing your data...');
+  }
+
+  Future<void> _showExportBackupOptions() async {
+    final selectedOption = await showDialog<_BackupExportOption>(
+      context: context,
+      builder: (dialogContext) {
+        return _ExportBackupOptionsDialog(
+          onDevice: () =>
+              Navigator.of(dialogContext).pop(_BackupExportOption.device),
+          onGoogleDrive: () =>
+              Navigator.of(dialogContext).pop(_BackupExportOption.googleDrive),
+          onCancel: () =>
+              Navigator.of(dialogContext).pop(_BackupExportOption.cancel),
+        );
+      },
+    );
+
+    switch (selectedOption) {
+      case _BackupExportOption.device:
+        await _exportCsv();
+        break;
+      case _BackupExportOption.googleDrive:
+        await _exportCsvToGoogleDrive();
+        break;
+      case _BackupExportOption.cancel:
+      case null:
+        break;
+    }
+  }
+
+  Future<void> _exportCsvToGoogleDrive() async {
+    await _runWithFeedback(
+      'Google Drive backup complete:',
+      (currentUser) async {
+        _updateBusyDetail('Preparing backup files from your database...');
+        final backupFiles = await _csvTransfer.backupFiles(
+          currentUser: currentUser,
+        );
+
+        _updateBusyDetail('Connecting to Google Drive...');
+        final motionEmail = FirebaseAuth.instance.currentUser?.email;
+        final result = await _driveBackupService.uploadBackupFiles(
+          files: backupFiles,
+          expectedEmail: motionEmail,
+        );
+
+        final accountNote = result.emailMatchesMotionAccount
+            ? ''
+            : '\nNote: this backup was saved to ${result.email}, which is not the same email currently shown on your Motion account.';
+        return '${result.fileCount} file(s) saved to '
+            '${result.folderName} in ${result.email}.$accountNote';
+      },
+      busyTitle: 'Backing Up To Google Drive',
+      busyDetail: 'Preparing your data...',
+    );
   }
 
   Future<bool> _confirmImport({
@@ -495,8 +554,9 @@ class _DataTransferPageState extends State<DataTransferPage> {
               _transferButton(
                 icon: Icons.download,
                 title: 'Export Backup',
-                subtitle: 'Save all three Motion data files to your device.',
-                onPressed: _exportCsv,
+                subtitle:
+                    'Save all three Motion data files to your device or Google Drive.',
+                onPressed: _showExportBackupOptions,
               ),
               _transferButton(
                 icon: Icons.upload_file,
@@ -548,6 +608,196 @@ class _DataTransferPageState extends State<DataTransferPage> {
             progress: _busyProgress,
           ),
         ],
+      ),
+    );
+  }
+}
+
+enum _BackupExportOption { device, googleDrive, cancel }
+
+class _ExportBackupOptionsDialog extends StatelessWidget {
+  const _ExportBackupOptionsDialog({
+    required this.onDevice,
+    required this.onGoogleDrive,
+    required this.onCancel,
+  });
+
+  final VoidCallback onDevice;
+  final VoidCallback onGoogleDrive;
+  final VoidCallback onCancel;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = isDarkMode
+        ? AppColor.darkModeContentWidget
+        : AppColor.lightModeContentWidget;
+    final borderColor =
+        isDarkMode ? Colors.white.withValues(alpha: 0.10) : Colors.black12;
+    final detailColor = isDarkMode ? Colors.white70 : Colors.blueGrey;
+
+    return Dialog(
+      backgroundColor: surfaceColor,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 24),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: BorderSide(color: borderColor),
+      ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 430),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    height: 42,
+                    width: 42,
+                    decoration: BoxDecoration(
+                      color: AppColor.blueMainColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(13),
+                    ),
+                    child: const Icon(
+                      Icons.backup_rounded,
+                      color: AppColor.blueMainColor,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Export Backup',
+                      style: AppTextStyle.subSectionTextStyle(
+                        fontsize: 17,
+                        fontweight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Choose where Motion should save your database backup files.',
+                style: AppTextStyle.subSectionTextStyle(
+                  fontsize: 12.5,
+                  fontweight: FontWeight.normal,
+                  color: detailColor,
+                ),
+              ),
+              const SizedBox(height: 14),
+              _BackupOptionTile(
+                icon: Icons.phone_android_rounded,
+                title: 'Save to Device',
+                subtitle: 'Creates CSV files in your Downloads folder.',
+                borderColor: borderColor,
+                onTap: onDevice,
+              ),
+              const SizedBox(height: 10),
+              _BackupOptionTile(
+                icon: Icons.cloud_upload_rounded,
+                title: 'Save to Google Drive',
+                subtitle: 'Updates the files in your Motion Backups folder.',
+                borderColor: borderColor,
+                onTap: onGoogleDrive,
+              ),
+              const SizedBox(height: 14),
+              OutlinedButton(
+                onPressed: onCancel,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: detailColor,
+                  minimumSize: const Size(0, 44),
+                  side: BorderSide(color: borderColor),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text('Cancel'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BackupOptionTile extends StatelessWidget {
+  const _BackupOptionTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.borderColor,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color borderColor;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final detailColor = isDarkMode ? Colors.white70 : Colors.blueGrey;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        decoration: BoxDecoration(
+          color: isDarkMode
+              ? Colors.white.withValues(alpha: 0.035)
+              : Colors.white.withValues(alpha: 0.65),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: borderColor),
+        ),
+        child: Row(
+          children: [
+            Container(
+              height: 38,
+              width: 38,
+              decoration: BoxDecoration(
+                color: AppColor.blueMainColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: AppColor.blueMainColor, size: 20),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: AppTextStyle.subSectionTextStyle(
+                      fontsize: 14,
+                      fontweight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    subtitle,
+                    style: AppTextStyle.subSectionTextStyle(
+                      fontsize: 12,
+                      fontweight: FontWeight.normal,
+                      color: detailColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColor.blueMainColor,
+            ),
+          ],
+        ),
       ),
     );
   }

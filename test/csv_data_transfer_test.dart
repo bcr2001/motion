@@ -159,6 +159,54 @@ old-user,,Skills,1,0,1/2/2026,0,,0,
       expect(rows.single[MotionDbColumns.streakStartDate], '2026-01-01');
     });
 
+    test('builds database-derived csv backup files', () async {
+      trackerDb.tables[MotionDbTables.mainCategory] = [
+        {
+          MotionDbColumns.date: '2026-01-01',
+          MotionDbColumns.education: 60.0,
+          MotionDbColumns.work: 0.0,
+          MotionDbColumns.skills: 45.0,
+          MotionDbColumns.entertainment: 20.0,
+          MotionDbColumns.selfDevelopment: 10.0,
+          MotionDbColumns.sleep: 480.0,
+          MotionDbColumns.currentLoggedInUser: 'user-1',
+        },
+      ];
+      trackerDb.tables[MotionDbTables.subcategory] = [
+        {
+          MotionDbColumns.date: '2026-01-01',
+          MotionDbColumns.mainCategoryName: MotionCategories.skills,
+          MotionDbColumns.subcategoryName: 'Chess',
+          MotionDbColumns.timeSpent: 45.0,
+          MotionDbColumns.currentLoggedInUser: 'user-1',
+        },
+      ];
+      assignerDb.tables[MotionDbTables.assigner] = [
+        {
+          MotionDbColumns.currentLoggedInUser: 'user-1',
+          MotionDbColumns.subcategoryName: 'Chess',
+          MotionDbColumns.mainCategoryName: MotionCategories.skills,
+          MotionDbColumns.isActive: 1,
+          MotionDbColumns.isArchive: 0,
+          MotionDbColumns.dateCreated: '2026-01-01',
+          MotionDbColumns.isStreakActive: 1,
+          MotionDbColumns.streakType: 'trackedToday',
+          MotionDbColumns.streakTargetMinutes: 0.0,
+          MotionDbColumns.streakStartDate: '2026-01-01',
+        },
+      ];
+
+      final files = await transfer.backupFiles(currentUser: 'user-1');
+
+      expect(
+        files.map((file) => file.fileName),
+        ['main_category.csv', 'subcategory.csv', 'to_assign.csv'],
+      );
+      expect(files[0].content, contains('education,work,skills'));
+      expect(files[1].content, contains('Skills,Chess,45.0,user-1'));
+      expect(files[2].content, contains('Chess,Skills,1,0'));
+    });
+
   });
 }
 

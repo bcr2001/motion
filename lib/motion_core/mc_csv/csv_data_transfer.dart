@@ -108,6 +108,16 @@ class MotionCsvImportResult {
   final int rebuiltDailyRows;
 }
 
+class MotionCsvBackupFile {
+  const MotionCsvBackupFile({
+    required this.fileName,
+    required this.content,
+  });
+
+  final String fileName;
+  final String content;
+}
+
 class MotionCsvDataTransfer {
   MotionCsvDataTransfer({
     TrackerDatabaseHelper? trackerDb,
@@ -160,6 +170,27 @@ class MotionCsvDataTransfer {
       currentUser: currentUser,
       directory: backupDirectory,
     );
+  }
+
+  Future<List<MotionCsvBackupFile>> backupFiles({
+    required String currentUser,
+  }) async {
+    await _ensureHasExportableData(currentUser);
+
+    return [
+      MotionCsvBackupFile(
+        fileName: 'main_category.csv',
+        content: await _csvContentFromRows(await _mainCategoryRows(currentUser)),
+      ),
+      MotionCsvBackupFile(
+        fileName: 'subcategory.csv',
+        content: await _csvContentFromRows(await _subcategoryRows(currentUser)),
+      ),
+      MotionCsvBackupFile(
+        fileName: 'to_assign.csv',
+        content: await _csvContentFromRows(await _assignerRows(currentUser)),
+      ),
+    ];
   }
 
   Future<String> _exportAllToAndroidDownloads({
@@ -668,7 +699,7 @@ class MotionCsvDataTransfer {
     required String fileName,
     required List<List<dynamic>> rows,
   }) async {
-    final csv = const ListToCsvConverter().convert(rows);
+    final csv = await _csvContentFromRows(rows);
     final file = File(p.join(directory.path, fileName));
     await file.writeAsString(csv);
   }
@@ -677,11 +708,15 @@ class MotionCsvDataTransfer {
     required String fileName,
     required List<List<dynamic>> rows,
   }) async {
-    final csv = const ListToCsvConverter().convert(rows);
+    final csv = await _csvContentFromRows(rows);
     await _downloadsChannel.invokeMethod<String>('saveCsv', {
       'fileName': fileName,
       'content': csv,
     });
+  }
+
+  Future<String> _csvContentFromRows(List<List<dynamic>> rows) async {
+    return const ListToCsvConverter().convert(rows);
   }
 
   Future<List<List<dynamic>>> _readCsvRows(String filePath) async {
