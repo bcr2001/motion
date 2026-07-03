@@ -1,4 +1,8 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:motion/motion_core/mc_sqlite/xp_policy.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_date_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_month_provider_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_year_pvd.dart';
@@ -7,9 +11,11 @@ import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/assigner_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/experience_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
+import 'package:motion/motion_core/motion_rewards/efs_badge_policy.dart';
 import 'package:motion/motion_reusable/date_re/year_progress.dart';
 import 'package:motion/motion_reusable/db_re/sub_logic.dart';
 import 'package:motion/motion_reusable/db_re/sub_ui.dart';
+import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_routes/mr_home/home_reusable/back_home.dart';
 import 'package:motion/motion_screens/ms_routes/manual_tracking.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
@@ -18,6 +24,493 @@ import '../../../motion_core/motion_providers/shared_pvd/share.dart';
 import '../../../motion_themes/mth_app/app_strings.dart';
 import '../../../motion_themes/mth_styling/motion_text_styling.dart';
 import '../home_windows/efficieny_window.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+Future<void> maybeShowDailyXpTargetCelebration(BuildContext context) async {
+  if (!context.mounted) return;
+
+  await Future<void>.delayed(const Duration(milliseconds: 250));
+  if (!context.mounted) return;
+
+  final currentUser = context.read<UserUidProvider>().userUid;
+  if (currentUser == null) {
+    logger.i('XP TARGET CELEBRATION DIRECT: skipped because UID is not ready.');
+    return;
+  }
+
+  final xpProvider = context.read<ExperiencePointTableProvider>();
+  final currentDate = context.read<CurrentDateProvider>().currentDate;
+  final currentYear = context.read<CurrentYearProvider>().currentYear;
+  final prefs = await SharedPreferences.getInstance();
+  final celebrationKey =
+      'daily_xp_target_celebration_v4_$currentUser-$currentDate';
+
+  final score = await xpProvider.retrieveYearExperiencePointsEfficiencyScore(
+    currentUser: currentUser,
+    currentYear: currentYear,
+  );
+  final results = await Future.wait<int>([
+    xpProvider.retrieveTotalXP(
+      currentUser: currentUser,
+      isEntire: false,
+      year: currentYear,
+    ),
+    xpProvider.retrieveYearExperiencePointDays(
+      currentUser: currentUser,
+      year: currentYear,
+    ),
+    xpProvider.retrieveDailyExperiencePoints(
+      currentUser: currentUser,
+      selectedDate: currentDate,
+    ),
+  ]);
+
+  final progress = EfsBadgePolicy.nextBadgeProgress(
+    currentScore: score,
+    currentYearXp: results[0],
+    trackedDays: results[1],
+  );
+  final targetXp = progress.isTopBadge
+      ? MotionXpPolicy.maxDailyXp
+      : progress.averageDailyXp.ceil();
+  final earnedXp = results[2];
+
+  logger.i(
+    'XP TARGET CELEBRATION DIRECT: date=$currentDate earned=$earnedXp target=$targetXp '
+    'score=$score yearXp=${results[0]} trackedDays=${results[1]}',
+  );
+
+  if (targetXp <= 0) return;
+
+  final hasAlreadyShown = prefs.getBool(celebrationKey) == true;
+  if (earnedXp < targetXp) {
+    if (hasAlreadyShown) {
+      await prefs.remove(celebrationKey);
+      logger.i(
+        'XP TARGET CELEBRATION DIRECT: reset shown state because earned XP dropped below target.',
+      );
+    }
+    return;
+  }
+
+  if (hasAlreadyShown) {
+    logger.i(
+      'XP TARGET CELEBRATION DIRECT: skipped because it was already shown for $currentDate.',
+    );
+    return;
+  }
+
+  if (!context.mounted) return;
+
+  await showDialog<void>(
+    context: context,
+    builder: (dialogContext) {
+      return _DailyXpTargetCelebrationDialog(
+        earnedXp: earnedXp,
+        targetXp: targetXp,
+      );
+    },
+  );
+
+  await prefs.setBool(celebrationKey, true);
+}
+
+class _DailyXpTargetCelebrationDialog extends StatefulWidget {
+  final int earnedXp;
+  final int targetXp;
+
+  const _DailyXpTargetCelebrationDialog({
+    required this.earnedXp,
+    required this.targetXp,
+  });
+
+  @override
+  State<_DailyXpTargetCelebrationDialog> createState() =>
+      _DailyXpTargetCelebrationDialogState();
+}
+
+class _DailyXpTargetCelebrationDialogState
+    extends State<_DailyXpTargetCelebrationDialog>
+    with TickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final AnimationController _confettiController;
+  late final Animation<double> _progress;
+  late final Animation<double> _iconTurns;
+  bool _hasVibrated = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final targetProgress = widget.targetXp <= 0
+        ? 1.0
+        : (widget.earnedXp / widget.targetXp).clamp(0.0, 1.0).toDouble();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 950),
+    );
+    _confettiController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2400),
+    );
+    _progress = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutCubic,
+    ).drive(Tween<double>(begin: 0, end: targetProgress));
+    _iconTurns = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutCubic,
+    ).drive(Tween<double>(begin: 0, end: 1));
+    _controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed && !_hasVibrated) {
+        _hasVibrated = true;
+        _playCelebrationHaptic();
+      }
+    });
+    _controller.forward();
+    _confettiController.forward();
+  }
+
+  Future<void> _playCelebrationHaptic() async {
+    await HapticFeedback.lightImpact();
+    await Future<void>.delayed(const Duration(milliseconds: 70));
+    await HapticFeedback.lightImpact();
+    await Future<void>.delayed(const Duration(milliseconds: 85));
+    await HapticFeedback.mediumImpact();
+    await Future<void>.delayed(const Duration(milliseconds: 120));
+    await HapticFeedback.heavyImpact();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _confettiController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = isDarkMode
+        ? AppColor.darkModeContentWidget
+        : AppColor.lightModeContentWidget;
+    final borderColor =
+        isDarkMode ? Colors.white.withValues(alpha: 0.10) : Colors.black12;
+    final detailColor = isDarkMode ? Colors.white70 : Colors.blueGrey;
+    final earnedBeyondTarget =
+        (widget.earnedXp - widget.targetXp).clamp(0, widget.earnedXp);
+
+    return Dialog(
+      backgroundColor: surfaceColor,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 22, vertical: 24),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(color: borderColor),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: AnimatedBuilder(
+                animation: _confettiController,
+                builder: (context, child) {
+                  return CustomPaint(
+                    painter: _CelebrationConfettiPainter(
+                      progress: _confettiController.value,
+                      isDarkMode: isDarkMode,
+                    ),
+                  );
+                },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                    decoration: BoxDecoration(
+                      color: AppColor.accountedColor.withValues(alpha: 0.09),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: AppColor.accountedColor.withValues(alpha: 0.18),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        RotationTransition(
+                          turns: _iconTurns,
+                          child: Container(
+                            height: 48,
+                            width: 48,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: AppColor.accountedColor
+                                  .withValues(alpha: 0.16),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: AppColor.accountedColor
+                                    .withValues(alpha: 0.32),
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.check_rounded,
+                              color: AppColor.accountedColor,
+                              size: 29,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Daily Target Met',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTextStyle.subSectionTextStyle(
+                                  fontsize: 17,
+                                  fontweight: FontWeight.w900,
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                earnedBeyondTarget > 0
+                                    ? '$earnedBeyondTarget XP above target'
+                                    : 'Right on target',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTextStyle.subSectionTextStyle(
+                                  fontsize: 12,
+                                  fontweight: FontWeight.w700,
+                                  color: AppColor.accountedColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    'You earned ${widget.earnedXp} XP today and reached your ${widget.targetXp} XP target.',
+                    textAlign: TextAlign.center,
+                    style: AppTextStyle.subSectionTextStyle(
+                      fontsize: 12.5,
+                      fontweight: FontWeight.normal,
+                      color: detailColor,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  AnimatedBuilder(
+                    animation: _progress,
+                    builder: (context, child) {
+                      return Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: isDarkMode
+                              ? Colors.white.withValues(alpha: 0.035)
+                              : Colors.black.withValues(alpha: 0.035),
+                          borderRadius: BorderRadius.circular(15),
+                          border: Border.all(color: borderColor),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _DailyTargetMetric(
+                                    label: 'Earned',
+                                    value: '${widget.earnedXp} XP',
+                                    color: AppColor.accountedColor,
+                                  ),
+                                ),
+                                Container(
+                                  height: 30,
+                                  width: 1,
+                                  color: borderColor,
+                                  margin: const EdgeInsets.symmetric(
+                                      horizontal: 10),
+                                ),
+                                Expanded(
+                                  child: _DailyTargetMetric(
+                                    label: 'Target',
+                                    value: '${widget.targetXp} XP',
+                                    color: detailColor,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(999),
+                              child: LinearProgressIndicator(
+                                minHeight: 11,
+                                value: _progress.value,
+                                color: AppColor.accountedColor,
+                                backgroundColor: AppColor.accountedColor
+                                    .withValues(alpha: 0.16),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: Text(
+                                '${(_progress.value * 100).round()}%',
+                                style: AppTextStyle.subSectionTextStyle(
+                                  fontsize: 11.5,
+                                  fontweight: FontWeight.w800,
+                                  color: detailColor,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 18),
+                  ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColor.blueMainColor,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      minimumSize: const Size(0, 46),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    child: const Text('Continue'),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CelebrationConfettiPainter extends CustomPainter {
+  final double progress;
+  final bool isDarkMode;
+
+  const _CelebrationConfettiPainter({
+    required this.progress,
+    required this.isDarkMode,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (progress <= 0) return;
+
+    final easedProgress = Curves.easeOutCubic.transform(progress);
+    final fade = progress < 0.72
+        ? 1.0
+        : (1 - ((progress - 0.72) / 0.28)).clamp(0.0, 1.0);
+    final colors = <Color>[
+      AppColor.accountedColor,
+      AppColor.blueMainColor,
+      Colors.amber,
+      Colors.orangeAccent,
+      isDarkMode ? Colors.white70 : Colors.black54,
+    ];
+
+    for (var i = 0; i < 34; i++) {
+      final lane = (i % 17) / 16;
+      final side = i.isEven ? -1.0 : 1.0;
+      final burst = 22 + (i % 5) * 8;
+      final drift = side * burst * math.sin((progress * math.pi) + i);
+      final x = (size.width * lane) + drift;
+      final y = 8 + (size.height * 0.58 * easedProgress) + ((i % 4) * 8);
+      final opacity = (fade * (0.35 + ((i % 3) * 0.18))).clamp(0.0, 1.0);
+      final paint = Paint()
+        ..color = colors[i % colors.length].withValues(alpha: opacity);
+
+      canvas.save();
+      canvas.translate(x, y);
+      canvas.rotate((progress * math.pi * 2) + i);
+
+      if (i % 3 == 0) {
+        canvas.drawCircle(Offset.zero, 2.2 + (i % 2), paint);
+      } else {
+        final width = 4.0 + (i % 3);
+        final height = 7.0 + (i % 4);
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(
+            Rect.fromCenter(
+              center: Offset.zero,
+              width: width,
+              height: height,
+            ),
+            const Radius.circular(1.5),
+          ),
+          paint,
+        );
+      }
+
+      canvas.restore();
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _CelebrationConfettiPainter oldDelegate) {
+    return oldDelegate.progress != progress ||
+        oldDelegate.isDarkMode != isDarkMode;
+  }
+}
+
+class _DailyTargetMetric extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color color;
+
+  const _DailyTargetMetric({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: AppTextStyle.subSectionTextStyle(
+            fontsize: 10.5,
+            fontweight: FontWeight.normal,
+            color: Colors.blueGrey,
+          ),
+        ),
+        const SizedBox(height: 3),
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: AppTextStyle.subSectionTextStyle(
+            fontsize: 14,
+            fontweight: FontWeight.w900,
+            color: color,
+          ),
+        ),
+      ],
+    );
+  }
+}
 
 //Displays a life progress bar based on a user's birthdate.
 class LifeCompleted extends StatelessWidget {
@@ -658,7 +1151,7 @@ class _SubcategoryAndCurrentDayTotalsState
                       )),
                     ),
                     onTap: () async {
-                      await Navigator.push(
+                      final hasChangedTrackedTime = await Navigator.push<bool>(
                         context,
                         MaterialPageRoute(
                           builder: (context) => ManualTimeRecordingRoute(
@@ -679,6 +1172,9 @@ class _SubcategoryAndCurrentDayTotalsState
                         context
                             .read<ExperiencePointTableProvider>()
                             .refreshExperiencePointViews();
+                        if (hasChangedTrackedTime == true) {
+                          await maybeShowDailyXpTargetCelebration(context);
+                        }
                       }
                     },
                   );

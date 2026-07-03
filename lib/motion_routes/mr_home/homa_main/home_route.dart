@@ -19,8 +19,6 @@ import '../home_reusable/front_home.dart';
 import '../home_windows/efficieny_window.dart';
 import '../home_windows/total_acc_unacc.dart';
 
-
-
 // home route
 class MotionHomeRoute extends StatelessWidget {
   const MotionHomeRoute({super.key});
@@ -29,96 +27,95 @@ class MotionHomeRoute extends StatelessWidget {
   SliverAppBar _buildAppBar(BuildContext context) {
     return SliverAppBar(
       elevation: 0,
-      backgroundColor: currentSelectedThemeMode(context) ==
-              ThemeModeSettingsN1.darkMode
-          ? Colors.black
-          : currentSelectedThemeMode(context) == ThemeModeSettingsN1.lightMode
-              ? Colors.white
-              : null,
+      backgroundColor:
+          currentSelectedThemeMode(context) == ThemeModeSettingsN1.darkMode
+              ? Colors.black
+              : currentSelectedThemeMode(context) == ThemeModeSettingsN1.lightMode
+                  ? Colors.white
+                  : null,
       actions: const [MotionActionButtons()],
       pinned: true,
       centerTitle: false,
-      title: // current month
-          Row(
-            children: [
-              // Current Month
-              Consumer<CurrentMonthProvider>(
-                      builder: (context, month, child) {
+      title: Row(
+        children: [
+          // Current Month
+          Consumer<CurrentMonthProvider>(
+            builder: (context, month, child) {
               return Text(
                 month.currentMonthName,
                 style: AppTextStyle.subSectionTextStyle(fontsize: 17),
               );
-                      },
-                    ),
-
-              // Users streak
-              Consumer2<UserUidProvider, MainCategoryTrackerProvider>(
-                  builder: (context, user, streak, child) {
-                    final String? currentUser = user.userUid;
-
-                    if (currentUser == null) {
-                      return const ShimmerWidget.rectangular(
-                          width: 5, height: 5);
-                    }
-
-                    return CachedFutureBuilder<int>(
-                      cacheKey: 'streak-$currentUser-${streak.refreshKey}',
-                      futureFactory: () =>
-                          streak.retrievedUserStreak(currentUser: currentUser),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return const ShimmerWidget.rectangular(
-                          width: 5, height: 5); // Show a loading indicator while fetching data
-                        } else if (snapshot.hasError) {
-                          return Text('Error: ${snapshot.error}'); // Handle error state
-                        } else if (!snapshot.hasData) {
-                          return const Text('0'); // Handle null data
-                        }
-
-                        return Padding(
-                          padding: const EdgeInsets.only(left: 20),
-                          child: Row(
-                            children: [
-                              // Streak fire image
-                              AppImages.streakFire,
-                          
-                              // Streak retrieved from the database
-                              Padding(
-                                padding: const EdgeInsets.only(left: 5.0),
-                                child: Text(
-                                  '${snapshot.data}', // Display the streak count
-                                  style: AppTextStyle.subSectionTextStyle(fontsize: 17),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    );
-                  },
-                )
-            ],
+            },
           ),
+
+          // Users streak
+          Consumer2<UserUidProvider, MainCategoryTrackerProvider>(
+            builder: (context, user, streak, child) {
+              final String? currentUser = user.userUid;
+
+              if (currentUser == null) {
+                return const ShimmerWidget.rectangular(width: 5, height: 5);
+              }
+
+              return CachedFutureBuilder<int>(
+                cacheKey: 'streak-$currentUser-${streak.refreshKey}',
+                futureFactory: () =>
+                    streak.retrievedUserStreak(currentUser: currentUser),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const ShimmerWidget.rectangular(
+                      width: 5,
+                      height: 5,
+                    );
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else if (!snapshot.hasData) {
+                    return const Text('0');
+                  }
+
+                  return Padding(
+                    padding: const EdgeInsets.only(left: 20),
+                    child: Row(
+                      children: [
+                        AppImages.streakFire,
+                        Padding(
+                          padding: const EdgeInsets.only(left: 5.0),
+                          child: Text(
+                            '${snapshot.data}',
+                            style:
+                                AppTextStyle.subSectionTextStyle(fontsize: 17),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              );
+            },
+          )
+        ],
+      ),
     );
   }
 
   // quote of the day
   Widget quoteOfTheDay() {
     return Padding(
-        padding: const EdgeInsets.only(bottom: 20, top: 20),
-        child: Consumer<ZenQuoteProvider>(
-          builder: (context, zenQuoteValue, child) {
-            return Text(
-              zenQuoteValue.todaysQuote,
-              textAlign: TextAlign.center,
-              style: AppTextStyle.subSectionTextStyle(fontsize: 13, fontweight: FontWeight.normal),
-            );
-          },
-        ));
+      padding: const EdgeInsets.only(bottom: 20, top: 20),
+      child: Consumer<ZenQuoteProvider>(
+        builder: (context, zenQuoteValue, child) {
+          return Text(
+            zenQuoteValue.todaysQuote,
+            textAlign: TextAlign.center,
+            style: AppTextStyle.subSectionTextStyle(
+              fontsize: 13,
+              fontweight: FontWeight.normal,
+            ),
+          );
+        },
+      ),
+    );
   }
-
-  
-
 
   @override
   Widget build(BuildContext context) {
@@ -129,47 +126,49 @@ class MotionHomeRoute extends StatelessWidget {
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 10.0),
             sliver: SliverList(
-                delegate: SliverChildListDelegate([
-              // SECTION ONE: Life Completed 
-              // Displays a life progress bar based on a user's birthdate.
-              const LifeCompleted(),
+              delegate: SliverChildListDelegate([
+                // SECTION ONE: Life Completed
+                // Displays a life progress bar based on a user's birthdate.
+                const LifeCompleted(),
 
+                // SECTION TWO: QUOTE OF THE DAY
+                // Fetches a random quote from the zenQuotes API.
+                quoteOfTheDay(),
 
-              // SECTION TWO: QUOTE OF THE DAY
-              // Fetches a random quote from the zenQuotes API.
-              quoteOfTheDay(),
-
-              // SECTION THREE: EFFICENCY SCORE AND NUMBER OF DAYS
-              // Displays the user's total efficiency score and the 
-              // total days recorded in the main_category table.
-              const EfficiencyAndNumberOfDays(
+                // SECTION THREE: EFFICENCY SCORE AND NUMBER OF DAYS
+                // Displays the user's total efficiency score and the
+                // total days recorded in the main_category table.
+                const EfficiencyAndNumberOfDays(
                   efficiencyScore: EfficienyScoreWindow(
                     getEntireScore: false,
                   ),
                   numberOfDays: NumberOfDaysMainCategory(
                     getAllDays: false,
-                  )),
+                  ),
+                ),
 
-              // SECTION THREE: ACCOUNTED AND UNACCOUNTED TOTALS
-              //  total accounted time and
-              //  total unaccounted time
-              const TotalAccountedAndUnaccounted(
-                getEntireTotal: false,
-              ),
+                // SECTION THREE: ACCOUNTED AND UNACCOUNTED TOTALS
+                //  total accounted time and
+                //  total unaccounted time
+                const TotalAccountedAndUnaccounted(
+                  getEntireTotal: false,
+                ),
 
-              // SECTION FOUR: TRACKING WINDOW
-              sectionTitle(titleName: AppString.trackingWindowTitle),
-              const TrackedSubcategories(),
+                // SECTION FOUR: TRACKING WINDOW
+                sectionTitle(titleName: AppString.trackingWindowTitle),
+                const TrackedSubcategories(),
 
-              // SECTION FIVE: SUMMARY WINDOW
-              Consumer<CurrentMonthProvider>(
-                builder: (context, month, child) {
-                  return sectionTitle(
-                      titleName: "${month.currentMonthName} Summary");
-                },
-              ),
-              const SummaryWindow()
-            ])),
+                // SECTION FIVE: SUMMARY WINDOW
+                Consumer<CurrentMonthProvider>(
+                  builder: (context, month, child) {
+                    return sectionTitle(
+                      titleName: "${month.currentMonthName} Summary",
+                    );
+                  },
+                ),
+                const SummaryWindow(),
+              ]),
+            ),
           )
         ],
       ),

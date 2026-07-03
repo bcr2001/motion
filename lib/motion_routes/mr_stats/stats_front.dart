@@ -222,6 +222,7 @@ class CategorySummaryReport extends StatelessWidget {
 class _CategorySummaryItem {
   final String name;
   final String initials;
+  final double totalHoursValue;
   final String totalHours;
   final String totalDays;
   final String average;
@@ -231,6 +232,7 @@ class _CategorySummaryItem {
   const _CategorySummaryItem({
     required this.name,
     required this.initials,
+    required this.totalHoursValue,
     required this.totalHours,
     required this.totalDays,
     required this.average,
@@ -246,10 +248,17 @@ List<_CategorySummaryItem> _categorySummaryItems(
     return "${totals[key] ?? 0} $suffix";
   }
 
+  double hoursValue(String key) {
+    final value = totals[key];
+    if (value is num) return value.toDouble();
+    return double.tryParse(value?.toString() ?? '') ?? 0.0;
+  }
+
   return [
     _CategorySummaryItem(
       name: AppString.sleepMainCategory,
       initials: "SP",
+      totalHoursValue: hoursValue("sleepHours"),
       totalHours: value("sleepHours", "HRS"),
       totalDays: value("sleepDays", "days"),
       average: value("sleepAverage", "hrs/day"),
@@ -259,6 +268,7 @@ List<_CategorySummaryItem> _categorySummaryItems(
     _CategorySummaryItem(
       name: AppString.educationMainCategory,
       initials: "ED",
+      totalHoursValue: hoursValue("educationHours"),
       totalHours: value("educationHours", "HRS"),
       totalDays: value("educationDays", "days"),
       average: value("educationAverage", "hrs/day"),
@@ -268,6 +278,7 @@ List<_CategorySummaryItem> _categorySummaryItems(
     _CategorySummaryItem(
       name: AppString.workMainCategory,
       initials: "WK",
+      totalHoursValue: hoursValue("workHours"),
       totalHours: value("workHours", "HRS"),
       totalDays: value("workDays", "days"),
       average: value("workAverage", "hrs/day"),
@@ -277,6 +288,7 @@ List<_CategorySummaryItem> _categorySummaryItems(
     _CategorySummaryItem(
       name: AppString.skillMainCategory,
       initials: "SK",
+      totalHoursValue: hoursValue("skillHours"),
       totalHours: value("skillHours", "HRS"),
       totalDays: value("skillDays", "days"),
       average: value("skillAverage", "hrs/day"),
@@ -286,6 +298,7 @@ List<_CategorySummaryItem> _categorySummaryItems(
     _CategorySummaryItem(
       name: AppString.entertainmentMainCategory,
       initials: "ET",
+      totalHoursValue: hoursValue("entertainmentHours"),
       totalHours: value("entertainmentHours", "HRS"),
       totalDays: value("entertainmentDays", "days"),
       average: value("entertainmentAverage", "hrs/day"),
@@ -295,13 +308,14 @@ List<_CategorySummaryItem> _categorySummaryItems(
     _CategorySummaryItem(
       name: AppString.selfDevelopmentMainCategory,
       initials: "PG",
+      totalHoursValue: hoursValue("pgHours"),
       totalHours: value("pgHours", "HRS"),
       totalDays: value("pgDays", "days"),
       average: value("pgAverage", "hrs/day"),
       accentColor: AppColor.selfDevelopmentPieChartColor,
       icon: Icons.self_improvement_rounded,
     ),
-  ];
+  ]..sort((a, b) => b.totalHoursValue.compareTo(a.totalHoursValue));
 }
 
 Widget _categoryLoadingState() {
