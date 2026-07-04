@@ -41,6 +41,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
   final Set<int> _deletingBlockIds = {};
   final List<Subcategories> _pastEntriesAdded = [];
   String? _loadedPastEntriesKey;
+  bool _hasChangedTrackedTime = false;
 
   // Text editing controllers for hours, minutes, and seconds input fields
   TextEditingController hourController = TextEditingController();
@@ -200,6 +201,18 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
     }
 
     await preferences.setStringList(storageKey, nextEntries);
+  }
+
+  Future<void> _resetDailyXpTargetCelebration(Subcategories block) async {
+    if (block.currentLoggedInUser.isEmpty || block.date.isEmpty) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    final celebrationKey =
+        'daily_xp_target_celebration_v4_${block.currentLoggedInUser}-${block.date}';
+    await prefs.remove(celebrationKey);
+    logger.i(
+      'XP TARGET CELEBRATION DIRECT: reset shown state after deleting a tracked block for ${block.date}.',
+    );
   }
 
   @override
@@ -1134,6 +1147,9 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                       blockId,
                       deletedSubcategory: block,
                     );
+                    _hasChangedTrackedTime = true;
+                    await _resetDailyXpTargetCelebration(block);
+                    xpProvider.refreshExperiencePointViews();
                   } finally {
                     if (mounted) {
                       setState(() => _deletingBlockIds.remove(blockId));
@@ -1396,6 +1412,8 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                                             .insertIntoSubcategoryTable(
                                                 subcategory);
                                     subcategory.id = insertedId;
+                                    _hasChangedTrackedTime = true;
+                                    xp.refreshExperiencePointViews();
                                     if (isHistorical && mounted) {
                                       await _rememberPastEntryAddedToday(
                                         entry: subcategory,
@@ -1444,8 +1462,17 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WillPopScope(
+      onWillPop: () async {
+        Navigator.pop(context, _hasChangedTrackedTime);
+        return false;
+      },
+      child: Scaffold(
         appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.pop(context, _hasChangedTrackedTime),
+          ),
           // the selected subcategory displayed as app bar title
           title: Text(widget.subcategoryName),
           centerTitle: true,
@@ -1514,6 +1541,8 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
               },
             );
           }),
-        ));
+        ),
+      ),
+    );
   }
 }

@@ -57,6 +57,24 @@ class AwardsPage extends StatelessWidget {
       fit: BoxFit.contain,
       cacheWidth: cacheWidth,
       filterQuality: FilterQuality.medium,
+      errorBuilder: (context, error, stackTrace) {
+        return Container(
+          width: size,
+          height: size,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: earned
+                ? AppColor.accountedColor.withValues(alpha: 0.12)
+                : Colors.blueGrey.withValues(alpha: 0.12),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            Icons.emoji_events_rounded,
+            color: earned ? AppColor.accountedColor : Colors.blueGrey,
+            size: size * 0.42,
+          ),
+        );
+      },
     );
   }
 

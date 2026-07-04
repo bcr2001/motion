@@ -631,6 +631,7 @@ class TrackerDatabaseHelper {
         FROM subcategory
         WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
         GROUP BY mainCategoryName
+        ORDER BY totalTimeSpent DESC
         ''', [currentUser, firstDay, lastDay]);
 
       return resultMTTSSD;

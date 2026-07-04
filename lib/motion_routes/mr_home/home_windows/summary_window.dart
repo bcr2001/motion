@@ -111,10 +111,8 @@ class SummaryWindow extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 14),
-                  Flexible(
-                    child: _dialogSummaryList(
-                      isSubcategory: isSubcategory,
-                    ),
+                  _dialogSummaryList(
+                    isSubcategory: isSubcategory,
                   ),
                 ],
               ),
@@ -462,9 +460,11 @@ class SummaryWindow extends StatelessWidget {
 
           final items = snapshot.data ?? [];
           if (items.isEmpty) {
-            return Center(
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 22),
               child: Text(
                 "No tracked time yet",
+                textAlign: TextAlign.center,
                 style: AppTextStyle.subSectionTextStyle(
                   fontsize: 13,
                   fontweight: FontWeight.normal,
@@ -480,6 +480,7 @@ class SummaryWindow extends StatelessWidget {
           );
 
           return Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Container(
                 margin: const EdgeInsets.fromLTRB(4, 0, 4, 10),
@@ -512,10 +513,12 @@ class SummaryWindow extends StatelessWidget {
                   ],
                 ),
               ),
-              Expanded(
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 420),
                 child: Scrollbar(
                   radius: const Radius.circular(10),
                   child: ListView.separated(
+                    shrinkWrap: true,
                     padding: const EdgeInsets.symmetric(horizontal: 4),
                     itemCount: items.length,
                     separatorBuilder: (context, index) =>
