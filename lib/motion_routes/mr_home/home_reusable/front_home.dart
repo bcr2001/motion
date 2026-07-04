@@ -26,6 +26,8 @@ import '../../../motion_themes/mth_styling/motion_text_styling.dart';
 import '../home_windows/efficieny_window.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+final Set<String> _activeDailyXpCelebrations = <String>{};
+
 Future<void> maybeShowDailyXpTargetCelebration(BuildContext context) async {
   if (!context.mounted) return;
 
@@ -86,6 +88,7 @@ Future<void> maybeShowDailyXpTargetCelebration(BuildContext context) async {
   if (earnedXp < targetXp) {
     if (hasAlreadyShown) {
       await prefs.remove(celebrationKey);
+      _activeDailyXpCelebrations.remove(celebrationKey);
       logger.i(
         'XP TARGET CELEBRATION DIRECT: reset shown state because earned XP dropped below target.',
       );
@@ -102,17 +105,27 @@ Future<void> maybeShowDailyXpTargetCelebration(BuildContext context) async {
 
   if (!context.mounted) return;
 
-  await showDialog<void>(
-    context: context,
-    builder: (dialogContext) {
-      return _DailyXpTargetCelebrationDialog(
-        earnedXp: earnedXp,
-        targetXp: targetXp,
-      );
-    },
-  );
+  if (!_activeDailyXpCelebrations.add(celebrationKey)) {
+    logger.i(
+      'XP TARGET CELEBRATION DIRECT: skipped because a congrats dialog is already active for $currentDate.',
+    );
+    return;
+  }
 
   await prefs.setBool(celebrationKey, true);
+  try {
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return _DailyXpTargetCelebrationDialog(
+          earnedXp: earnedXp,
+          targetXp: targetXp,
+        );
+      },
+    );
+  } finally {
+    _activeDailyXpCelebrations.remove(celebrationKey);
+  }
 }
 
 class _DailyXpTargetCelebrationDialog extends StatefulWidget {
