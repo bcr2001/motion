@@ -455,7 +455,7 @@ class GroupedBarChartOfAccountedAndUnaccountedTime extends StatelessWidget {
               if (snapshot.hasData &&
                   snapshot.data != null &&
                   snapshot.data!.isNotEmpty) {
-                logger.i(snapshot.data);
+                debugLog(snapshot.data);
                 return AppImages.chartNoData;
               } else {
                 return const SizedBox.shrink();

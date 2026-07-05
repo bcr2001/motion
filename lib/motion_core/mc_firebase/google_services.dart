@@ -19,7 +19,7 @@ class GoogleAuthService {
 
       // Check if the user canceled the Google sign-in
       if (gUser == null) {
-        logger.i("(signInWithGoogle): User canceled Google sign-in");
+        debugLog("(signInWithGoogle): User canceled Google sign-in");
         return null;
       }
 
@@ -36,7 +36,7 @@ class GoogleAuthService {
 
       // Get the user's UID from the authentication result
       final User? userUid = authResult.user;
-      logger.i("USER UID RETRIEVED:> ${userUid?.uid}");
+      debugLog("USER UID RETRIEVED:> ${userUid?.uid}");
       // Return the authentication result
       return authResult;
     } on FirebaseAuthException catch (e) {

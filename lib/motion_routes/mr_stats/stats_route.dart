@@ -66,13 +66,13 @@ class MotionStatesRoute extends StatelessWidget {
                       } else {
                         // if data is available,the analysis
                         // gallaries are displayed
-                        return Padding(
-                          padding: const EdgeInsets.fromLTRB(12, 12, 12, 28),
+                        return const Padding(
+                          padding: EdgeInsets.fromLTRB(12, 12, 12, 28),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const _AnalyticsHeroPanel(),
-                              const _AnalyticsSection(
+                              _AnalyticsHeroPanel(),
+                              _AnalyticsSection(
                                 title: "Tracked Time",
                                 subtitle:
                                     "Accounted and unaccounted time across your history",
@@ -80,8 +80,8 @@ class MotionStatesRoute extends StatelessWidget {
                                 child: TotalAccountedAndUnaccounted(
                                     getEntireTotal: true),
                               ),
-                              const CategorySummaryReport(),
-                              const _AnalyticsSection(
+                              CategorySummaryReport(),
+                              _AnalyticsSection(
                                 title: AppString.yearlyReportTitle,
                                 subtitle:
                                     "Explore yearly trends, XP, badges, and consistency",
@@ -400,7 +400,7 @@ class AnalysisGallery extends StatelessWidget {
                           return AnnualGallaryBuilder(
                             gallaryYear: year,
                             onTap: () {
-                              logger.i("$year clicked");
+                              debugLog("$year clicked");
                               Navigator.push(context, MaterialPageRoute(
                                   builder: (BuildContext context) {
                                 return YearsWorthOfSummaryStatitics(

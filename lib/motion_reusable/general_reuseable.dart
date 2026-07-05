@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_pvd.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
@@ -8,6 +9,12 @@ import '../motion_themes/mth_styling/app_color.dart';
 
 // logger instance
 var logger = Logger();
+
+void debugLog(Object? message) {
+  if (kDebugMode) {
+    logger.i(message);
+  }
+}
 
 // // return current theme mode (dark or light theme)
 ThemeModeSettingsN1 currentSelectedThemeMode(BuildContext context) {

@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:motion/motion_core/mc_sqlite/database_constants.dart';
 import 'package:motion/motion_core/mc_sqlite/sql_assigner_db.dart';
 import 'package:motion/motion_core/mc_sqlite/sql_tracker_db.dart';
+import 'package:motion/motion_core/motion_utils/motion_date_utils.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -800,23 +801,7 @@ class MotionCsvDataTransfer {
   }
 
   String _normalizeDate(String? value) {
-    if (value == null || value.trim().isEmpty) return '';
-    final trimmed = value.trim();
-    final isoDate = DateTime.tryParse(trimmed);
-    if (isoDate != null) {
-      return DateFormat('yyyy-MM-dd').format(isoDate);
-    }
-
-    for (final pattern in ['M/d/yyyy', 'd/M/yyyy']) {
-      try {
-        return DateFormat('yyyy-MM-dd')
-            .format(DateFormat(pattern).parseStrict(trimmed));
-      } catch (_) {
-        continue;
-      }
-    }
-
-    return '';
+    return MotionDateUtils.normalizeStoredDate(value);
   }
 
   Future<Directory> _downloadsDirectory() async {

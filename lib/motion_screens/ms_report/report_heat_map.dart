@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:motion/motion_core/motion_utils/motion_date_utils.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/first_and_last_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
@@ -68,7 +68,7 @@ class ContributionsHeatMap extends StatelessWidget {
                   onClick: (value) {
                     // yyyy-mm-dd date format
                     String formattedDate =
-                        DateFormat('yyyy-MM-dd').format(value);
+                        MotionDateUtils.formatDbDate(value);
 
                     // dd-mm-yyyy date format
                     String dateTitle = formatDateString(formattedDate);
@@ -115,30 +115,8 @@ Map<DateTime, int> datasetFormatConverter(
 }
 
 DateTime? parseHeatMapDate(dynamic value) {
-  if (value == null) return null;
-
-  if (value is DateTime) {
-    return DateTime(value.year, value.month, value.day);
-  }
-
-  final dateText = value.toString().trim();
-  if (dateText.isEmpty) return null;
-
-  final isoDate = DateTime.tryParse(dateText);
-  if (isoDate != null) {
-    return DateTime(isoDate.year, isoDate.month, isoDate.day);
-  }
-
-  for (final pattern in ['M/d/yyyy', 'd/M/yyyy']) {
-    try {
-      final parsedDate = DateFormat(pattern).parseStrict(dateText);
-      return DateTime(parsedDate.year, parsedDate.month, parsedDate.day);
-    } catch (_) {
-      continue;
-    }
-  }
-
-  return null;
+  if (value is DateTime) return MotionDateUtils.dateOnly(value);
+  return MotionDateUtils.parseStoredDate(value);
 }
 
 int parseHeatMapIntensity(dynamic value) {
@@ -153,12 +131,10 @@ int parseHeatMapIntensity(dynamic value) {
 /// string in "dd MMMM yyyy" format. For example, if inputDate is "2023-12-21",
 /// the function returns "21 December 2023".
 String formatDateString(String inputDate) {
-  // Parse the input date string into a DateTime object
-  DateTime dateTime = DateTime.parse(inputDate);
+  final dateTime = MotionDateUtils.parseStoredDate(inputDate);
+  if (dateTime == null) return inputDate;
 
-  // Format the date as "dd MMMM yyyy"
-  String formattedDate = DateFormat('dd MMMM yyyy').format(dateTime);
-  return formattedDate;
+  return MotionDateUtils.formatLongDisplayDate(dateTime);
 }
 
 /// Calculates the total time spent by summing the "totalTimeSpent" values
@@ -459,7 +435,7 @@ class _SpecificDaySummaryHeatMapState extends State<SpecificDaySummaryHeatMap> {
                               double finalContainerHeight =
                                   min(containerHeight2, maxHeight);
 
-                              logger.i(
+                              debugLog(
                                   "CONTAINER HEIGHT MAIN: $containerHeight2");
 
                               return _contentContainer(

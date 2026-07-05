@@ -1,3 +1,5 @@
+import 'package:motion/motion_core/motion_utils/motion_date_utils.dart';
+
 class SqlDateRange {
   final String startDate;
   final String endDate;
@@ -13,10 +15,8 @@ class SqlDateRange {
       throw FormatException('Invalid year for SQL date range: $year');
     }
 
-    return SqlDateRange._(
-      startDate: '$parsedYear-01-01',
-      endDate: '$parsedYear-12-31',
-    );
+    final range = MotionDateUtils.yearRange(parsedYear);
+    return SqlDateRange._(startDate: range.startIso, endDate: range.endIso);
   }
 
   List<String> get args => [startDate, endDate];

@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:motion/motion_core/mc_sqlite/database_constants.dart';
+import 'package:motion/motion_core/motion_utils/motion_date_utils.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/first_and_last_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
@@ -1279,7 +1280,7 @@ List<_DailyTrendPoint> _filledDailyTrend({
   for (var date = first;
       !date.isAfter(last);
       date = date.add(const Duration(days: 1))) {
-    final key = DateFormat('yyyy-MM-dd').format(date);
+    final key = MotionDateUtils.formatDbDate(date);
     points.add(_DailyTrendPoint(date: date, xp: xpByDate[key] ?? 0));
   }
 

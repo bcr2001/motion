@@ -15,7 +15,7 @@ Future<http.Response> _getZenQuote() async {
     return response;
   } catch (e) {
     // Log any error for debugging
-    logger.i("Error in HTTP request to ZenQuotes API: $e");
+    logger.e("Error in HTTP request to ZenQuotes API: $e");
 
     // Throw an exception or handle it as per your application's requirement
     rethrow;
@@ -46,7 +46,7 @@ Future<String> fetchZenQuote() async {
     }
   } catch (e) {
     // log any error for debugging
-    logger.i("Error fetching Zen quote: $e");
+    logger.e("Error fetching Zen quote: $e");
 
     // Return the default quote in case of an error.
     return AppString.defaultAppQuote;

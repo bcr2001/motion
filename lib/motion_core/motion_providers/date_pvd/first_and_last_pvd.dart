@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:motion/motion_core/motion_utils/motion_date_utils.dart';
 
 import 'calendar_clock.dart';
 
@@ -21,11 +21,10 @@ class FirstAndLastDay extends ChangeNotifier {
 
   void _calculate() {
     final today = _clock.today;
-    final formatter = DateFormat('yyyy-MM-dd');
-    _firstDay = formatter.format(DateTime(today.year, today.month, 1));
-    final lastDate = DateTime(today.year, today.month + 1, 0);
-    _lastDay = formatter.format(lastDate);
-    _days = lastDate.day;
+    final range = MotionDateUtils.monthRange(today);
+    _firstDay = range.startIso;
+    _lastDay = range.endIso;
+    _days = range.end.day;
   }
 
   void _updateFromClock() {

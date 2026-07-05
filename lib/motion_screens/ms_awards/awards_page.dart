@@ -4,9 +4,20 @@ import 'package:motion/motion_core/mc_awards/award_definition.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_reusable/db_re/sub_ui.dart';
+import 'package:motion/motion_reusable/motion_ui/motion_components.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:provider/provider.dart';
+
+class _AwardsProgress {
+  final double trackedHours;
+  final Map<int, String> earnedDates;
+
+  const _AwardsProgress({
+    required this.trackedHours,
+    required this.earnedDates,
+  });
+}
 
 class AwardsPage extends StatelessWidget {
   const AwardsPage({super.key});
@@ -19,7 +30,13 @@ class AwardsPage extends StatelessWidget {
     return '${NumberFormat('#,##0').format(hours)} hours';
   }
 
-  Future<double> _retrieveLifetimeHours({
+  String _earnedDateLabel(String date) {
+    final parsedDate = DateTime.tryParse(date);
+    if (parsedDate == null) return date;
+    return DateFormat('MMM d, yyyy').format(parsedDate);
+  }
+
+  Future<_AwardsProgress> _retrieveAwardsProgress({
     required SubcategoryTrackerDatabaseProvider tracker,
     required String currentUser,
   }) async {
@@ -29,7 +46,15 @@ class AwardsPage extends StatelessWidget {
       0,
       (sum, item) => sum + ((item['total'] as num?)?.toDouble() ?? 0),
     );
-    return minutes / 60;
+    final earnedDates = await tracker.retrieveAwardEarnedDates(
+      currentUser: currentUser,
+      requiredHours:
+          MotionAwards.all.map((award) => award.requiredHours).toList(),
+    );
+    return _AwardsProgress(
+      trackedHours: minutes / 60,
+      earnedDates: earnedDates,
+    );
   }
 
   double _progressFor({
@@ -83,13 +108,8 @@ class AwardsPage extends StatelessWidget {
     required double trackedHours,
     required MotionAward? currentAward,
     required MotionAward? nextAward,
+    required Map<int, String> earnedDates,
   }) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final panelColor = isDarkMode
-        ? AppColor.darkModeContentWidget
-        : AppColor.lightModeContentWidget;
-    final borderColor =
-        isDarkMode ? Colors.white.withValues(alpha: 0.10) : Colors.black12;
     final featuredAward = currentAward ?? nextAward ?? MotionAwards.all.last;
     final progress = _progressFor(
       trackedHours: trackedHours,
@@ -98,14 +118,13 @@ class AwardsPage extends StatelessWidget {
     );
     final remaining =
         nextAward == null ? 0.0 : nextAward.requiredHours - trackedHours;
+    final earnedDate = currentAward == null
+        ? null
+        : earnedDates[currentAward.requiredHours];
 
-    return Container(
+    return MotionPanel(
       padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
-      decoration: BoxDecoration(
-        color: panelColor,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: borderColor),
-      ),
+      borderRadius: 18,
       child: Column(
         children: [
           Container(
@@ -144,11 +163,18 @@ class AwardsPage extends StatelessWidget {
               color: Colors.blueGrey,
             ),
           ),
+          if (earnedDate != null) ...[
+            const SizedBox(height: 8),
+            MotionStatusPill(
+              label: 'Earned ${_earnedDateLabel(earnedDate)}',
+              color: Colors.green,
+            ),
+          ],
           const SizedBox(height: 16),
           Row(
             children: [
               Expanded(
-                child: _metric(
+                child: MotionMetric(
                   label: 'Lifetime tracked',
                   value: _hours(trackedHours),
                 ),
@@ -159,7 +185,7 @@ class AwardsPage extends StatelessWidget {
                 color: Colors.blueGrey.withValues(alpha: 0.18),
               ),
               Expanded(
-                child: _metric(
+                child: MotionMetric(
                   label: nextAward == null ? 'Status' : 'Next award',
                   value: nextAward?.name ?? 'Complete',
                   alignRight: true,
@@ -168,17 +194,7 @@ class AwardsPage extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 15),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 10,
-              backgroundColor:
-                  AppColor.blueMainColor.withValues(alpha: 0.14),
-              valueColor:
-                  const AlwaysStoppedAnimation<Color>(AppColor.blueMainColor),
-            ),
-          ),
+          MotionProgressBar(value: progress),
           const SizedBox(height: 8),
           Row(
             children: [
@@ -210,74 +226,48 @@ class AwardsPage extends StatelessWidget {
     );
   }
 
-  Widget _metric({
-    required String label,
-    required String value,
-    bool alignRight = false,
-  }) {
-    return Column(
-      crossAxisAlignment:
-          alignRight ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: AppTextStyle.subSectionTextStyle(
-            fontsize: 10.5,
-            fontweight: FontWeight.normal,
-            color: Colors.blueGrey,
-          ),
-        ),
-        const SizedBox(height: 3),
-        Text(
-          value,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: AppTextStyle.subSectionTextStyle(
-            fontsize: 13,
-            fontweight: FontWeight.w900,
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _awardTile({
     required BuildContext context,
     required MotionAward award,
     required bool earned,
+    required String? earnedDate,
   }) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final panelColor = isDarkMode
-        ? AppColor.darkModeContentWidget
-        : AppColor.lightModeContentWidget;
     final borderColor = earned
         ? AppColor.accountedColor.withValues(alpha: 0.32)
         : isDarkMode
             ? Colors.white.withValues(alpha: 0.08)
             : Colors.black12;
 
-    return Container(
+    return MotionPanel(
       padding: const EdgeInsets.all(6),
-      decoration: BoxDecoration(
-        color: panelColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: borderColor),
-      ),
+      borderRadius: 12,
+      borderColor: borderColor,
       child: LayoutBuilder(
         builder: (context, constraints) {
+          final hasEarnedDate = earned && earnedDate != null;
           final imageSize =
               constraints.maxWidth < constraints.maxHeight
                   ? constraints.maxWidth
                   : constraints.maxHeight;
+          final displayImageSize =
+              hasEarnedDate ? (imageSize - 34).clamp(0, imageSize) : imageSize;
 
           return Stack(
             alignment: Alignment.center,
             children: [
-              _awardImage(
-                award,
-                earned: earned,
-                size: imageSize,
-                cacheWidth: 450,
+              Positioned.fill(
+                bottom: hasEarnedDate ? 28 : 0,
+                child: Align(
+                  alignment:
+                      hasEarnedDate ? Alignment.topCenter : Alignment.center,
+                  child: _awardImage(
+                    award,
+                    earned: earned,
+                    size: displayImageSize.toDouble(),
+                    cacheWidth: 450,
+                  ),
+                ),
               ),
               Positioned(
                 top: 0,
@@ -298,6 +288,16 @@ class AwardsPage extends StatelessWidget {
                   ),
                 ),
               ),
+              if (hasEarnedDate)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: MotionStatusPill(
+                    label: _earnedDateLabel(earnedDate!),
+                    color: Colors.green,
+                  ),
+                ),
             ],
           );
         },
@@ -308,6 +308,7 @@ class AwardsPage extends StatelessWidget {
   Widget _awardsContent({
     required BuildContext context,
     required double trackedHours,
+    required Map<int, String> earnedDates,
   }) {
     final currentAward = MotionAwards.earnedAt(trackedHours);
     final nextAward = MotionAwards.nextAfter(trackedHours);
@@ -323,22 +324,13 @@ class AwardsPage extends StatelessWidget {
                 trackedHours: trackedHours,
                 currentAward: currentAward,
                 nextAward: nextAward,
+                earnedDates: earnedDates,
               ),
               const SizedBox(height: 22),
-              Text(
-                'Award Collection',
-                style: AppTextStyle.sectionTitleTextStyle(fontsize: 18).copyWith(
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '${MotionAwards.all.where((award) => trackedHours >= award.requiredHours).length} of ${MotionAwards.all.length} unlocked',
-                style: AppTextStyle.subSectionTextStyle(
-                  fontsize: 11.5,
-                  fontweight: FontWeight.normal,
-                  color: Colors.blueGrey,
-                ),
+              MotionSectionHeader(
+                title: 'Award Collection',
+                subtitle:
+                    '${MotionAwards.all.where((award) => trackedHours >= award.requiredHours).length} of ${MotionAwards.all.length} unlocked',
               ),
               const SizedBox(height: 12),
             ]),
@@ -360,6 +352,7 @@ class AwardsPage extends StatelessWidget {
                   context: context,
                   award: award,
                   earned: trackedHours >= award.requiredHours,
+                  earnedDate: earnedDates[award.requiredHours],
                 );
               },
               childCount: MotionAwards.all.length,
@@ -383,9 +376,9 @@ class AwardsPage extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
 
-          return CachedFutureBuilder<double>(
+          return CachedFutureBuilder<_AwardsProgress>(
             cacheKey: 'awards-$currentUser-${tracker.refreshKey}',
-            futureFactory: () => _retrieveLifetimeHours(
+            futureFactory: () => _retrieveAwardsProgress(
               tracker: tracker,
               currentUser: currentUser,
             ),
@@ -396,9 +389,15 @@ class AwardsPage extends StatelessWidget {
               if (snapshot.hasError) {
                 return Center(child: Text('Error: ${snapshot.error}'));
               }
+              final progress = snapshot.data ??
+                  const _AwardsProgress(
+                    trackedHours: 0,
+                    earnedDates: {},
+                  );
               return _awardsContent(
                 context: context,
-                trackedHours: snapshot.data ?? 0,
+                trackedHours: progress.trackedHours,
+                earnedDates: progress.earnedDates,
               );
             },
           );

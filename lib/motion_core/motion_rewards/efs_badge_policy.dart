@@ -1,4 +1,5 @@
 import 'package:motion/motion_core/mc_sqlite/xp_policy.dart';
+import 'package:motion/motion_core/motion_utils/motion_date_utils.dart';
 
 enum EfsBadgeLevel {
   timeNovice,
@@ -119,7 +120,9 @@ class EfsBadgePolicy {
             .clamp(0.0, 1.0)
             .toDouble();
 
-    final currentDate = today ?? DateTime.now();
+    final currentDate = today == null
+        ? MotionDateUtils.today()
+        : MotionDateUtils.dateOnly(today);
     final daysRemaining = _daysRemainingInYear(currentDate);
     final totalScoredDays = trackedDays + daysRemaining;
     final targetYearXp = ((nextBadge.minimumScore / 100) *

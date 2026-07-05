@@ -11,7 +11,7 @@ class DateOfBirthStorage {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString(key, date.toIso8601String());
 
-    logger.i("Date Saved for user $userId: $date");
+    debugLog("Date Saved for user $userId: $date");
   }
 
   // Retrieves the date of birth from shared preferences for the specified user
@@ -23,7 +23,7 @@ class DateOfBirthStorage {
     if (dateString != null) {
       return DateTime.parse(dateString);
     } else {
-      logger.i("(getDateOfBirth): Date of birth not set for user $userId!");
+      debugLog("(getDateOfBirth): Date of birth not set for user $userId!");
       return null;
     }
   }

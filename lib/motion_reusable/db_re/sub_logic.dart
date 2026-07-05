@@ -100,7 +100,7 @@ double timeAdder({required String h, required String m, required String s}) {
   // Format the result to two decimal places
   String formattedTime = addedTimeComponents.toStringAsFixed(2);
 
-  logger.i(formattedTime);
+  debugLog(formattedTime);
 
   // Parse the formatted string back to double if needed
   return double.parse(formattedTime);

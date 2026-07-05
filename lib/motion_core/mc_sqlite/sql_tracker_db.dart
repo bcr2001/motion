@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:motion/motion_core/mc_sql_table/experience_table.dart';
 import 'package:motion/motion_core/mc_sql_table/main_table.dart';
 import 'package:motion/motion_core/mc_sql_table/streak_status.dart';
@@ -8,9 +7,14 @@ import 'package:motion/motion_core/mc_sqlite/database_error.dart';
 import 'package:motion/motion_core/mc_sqlite/sql_date_range.dart';
 import 'package:motion/motion_core/mc_sqlite/tracker_database_schema.dart';
 import 'package:motion/motion_core/mc_sqlite/xp_policy.dart';
+import 'package:motion/motion_core/motion_utils/motion_date_utils.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+
+part 'sql_tracker_award_queries.dart';
+part 'sql_tracker_experience_queries.dart';
+part 'sql_tracker_report_queries.dart';
 
 // tracker database that store two tables
 // subcategory table and main category table
@@ -66,7 +70,7 @@ class TrackerDatabaseHelper {
 
   Future<void> _onUpgradeDatabase(
       Database db, int oldVersion, int newVersion) async {
-    logger.i("Database _onUpgradeDatabase function called");
+    debugLog("Database _onUpgradeDatabase function called");
     await TrackerDatabaseSchema.migrate(db, oldVersion, newVersion);
   }
 
@@ -265,7 +269,7 @@ class TrackerDatabaseHelper {
       bool getAllDays = true,
       String currentYear = ""}) async {
     try {
-      final today = _dateOnly(DateTime.now());
+      final today = MotionDateUtils.today();
       if (getAllDays) {
         return _inclusiveDaysBetween(_firstTrackingDate, today);
       }
@@ -375,7 +379,7 @@ class TrackerDatabaseHelper {
         if (totalETMCT is double) {
           return totalETMCT;
         } else {
-          logger.i("No data so a 0.0 is being returned");
+          debugLog("No data so a 0.0 is being returned");
           return 0.0;
         }
       } else {
@@ -418,7 +422,7 @@ class TrackerDatabaseHelper {
         if (totalETMCT is double) {
           return totalETMCT;
         } else {
-          logger.i("No data so a 0.0 is being returned");
+          debugLog("No data so a 0.0 is being returned");
           return 0.0;
         }
       } else {
@@ -515,7 +519,7 @@ class TrackerDatabaseHelper {
         if (totalEMTMC is double) {
           return totalEMTMC;
         } else {
-          logger.i("No data available : $totalEMTMC");
+          debugLog("No data available : $totalEMTMC");
           return 0.0;
         }
       } else {
@@ -1057,7 +1061,7 @@ class TrackerDatabaseHelper {
     );
     final savedStartDate = _parseStoredDate(startDate);
     final currentDay =
-        _dateOnly(_parseStoredDate(currentDate) ?? DateTime.now());
+        _dateOnly(_parseStoredDate(currentDate) ?? MotionDateUtils.today());
     final effectiveStartDay = _earliestDate(
       firstTrackedDate,
       savedStartDate,
@@ -1210,7 +1214,7 @@ class TrackerDatabaseHelper {
     );
     final savedStartDate = _parseStoredDate(startDate);
     final currentDay =
-        _dateOnly(_parseStoredDate(currentDate) ?? DateTime.now());
+        _dateOnly(_parseStoredDate(currentDate) ?? MotionDateUtils.today());
     final effectiveStartDay = _earliestDate(
       firstTrackedDate,
       savedStartDate,
@@ -1302,7 +1306,7 @@ class TrackerDatabaseHelper {
     );
     final savedStartDate = _parseStoredDate(startDate);
     final currentDay =
-        _dateOnly(_parseStoredDate(currentDate) ?? DateTime.now());
+        _dateOnly(_parseStoredDate(currentDate) ?? MotionDateUtils.today());
     final effectiveStartDay = _earliestDate(
       firstTrackedDate,
       savedStartDate,
@@ -1398,7 +1402,7 @@ class TrackerDatabaseHelper {
     );
     final savedStartDate = _parseStoredDate(startDate);
     final currentDay =
-        _dateOnly(_parseStoredDate(currentDate) ?? DateTime.now());
+        _dateOnly(_parseStoredDate(currentDate) ?? MotionDateUtils.today());
     final effectiveStartDay = _earliestDate(
       firstTrackedDate,
       savedStartDate,
@@ -1494,170 +1498,6 @@ class TrackerDatabaseHelper {
     }
   }
 
-  Future<Map<String, dynamic>> getMonthlyReportSnapshot({
-    required String currentUser,
-    required String firstDay,
-    required String lastDay,
-  }) async {
-    try {
-      final db = await database;
-
-      final totals = await db.rawQuery('''
-        SELECT
-          COUNT(DISTINCT ${MotionDbColumns.date}) AS trackedDays,
-          COALESCE(SUM(${MotionDbColumns.timeSpent}), 0) AS accountedMinutes,
-          COALESCE(
-            (COUNT(DISTINCT ${MotionDbColumns.date}) * 1440) -
-            SUM(${MotionDbColumns.timeSpent}),
-            0
-          ) AS unaccountedMinutes
-        FROM ${MotionDbTables.subcategory}
-        WHERE ${MotionDbColumns.currentLoggedInUser} = ?
-          AND ${MotionDbColumns.date} BETWEEN ? AND ?
-          AND ${MotionDbColumns.timeSpent} > 0
-      ''', [currentUser, firstDay, lastDay]);
-
-      final xpTotals = await db.rawQuery('''
-        SELECT
-          ($_totalXpExpression) AS totalXp,
-          COUNT(DISTINCT ${MotionDbColumns.date}) AS xpDays,
-          ROUND(
-            COALESCE(($_totalXpExpression), 0) * 100.0 /
-            NULLIF(COUNT(DISTINCT ${MotionDbColumns.date}) * ${MotionXpPolicy.maxDailyXp}, 0),
-            2
-          ) AS efficiencyScore
-        FROM ${MotionDbTables.experiencePoints}
-        WHERE ${MotionDbColumns.currentLoggedInUser} = ?
-          AND ${MotionDbColumns.date} BETWEEN ? AND ?
-      ''', [currentUser, firstDay, lastDay]);
-
-      final bestDay = await db.rawQuery('''
-        SELECT ${MotionDbColumns.date}, ($_totalXpExpression) AS totalXp
-        FROM ${MotionDbTables.experiencePoints}
-        WHERE ${MotionDbColumns.currentLoggedInUser} = ?
-          AND ${MotionDbColumns.date} BETWEEN ? AND ?
-        GROUP BY ${MotionDbColumns.date}
-        ORDER BY totalXp DESC, ${MotionDbColumns.date} DESC
-        LIMIT 1
-      ''', [currentUser, firstDay, lastDay]);
-
-      final lowestDay = await db.rawQuery('''
-        SELECT ${MotionDbColumns.date}, ($_totalXpExpression) AS totalXp
-        FROM ${MotionDbTables.experiencePoints}
-        WHERE ${MotionDbColumns.currentLoggedInUser} = ?
-          AND ${MotionDbColumns.date} BETWEEN ? AND ?
-        GROUP BY ${MotionDbColumns.date}
-        ORDER BY totalXp ASC, ${MotionDbColumns.date} ASC
-        LIMIT 1
-      ''', [currentUser, firstDay, lastDay]);
-
-      return {
-        'trackedDays': totals.first['trackedDays'] ?? 0,
-        'accountedMinutes': totals.first['accountedMinutes'] ?? 0,
-        'unaccountedMinutes': totals.first['unaccountedMinutes'] ?? 0,
-        'totalXp': xpTotals.first['totalXp'] ?? 0,
-        'xpDays': xpTotals.first['xpDays'] ?? 0,
-        'efficiencyScore': xpTotals.first['efficiencyScore'] ?? 0.0,
-        'bestDay': bestDay.isEmpty ? null : bestDay.first[MotionDbColumns.date],
-        'bestDayXp': bestDay.isEmpty ? 0 : bestDay.first['totalXp'],
-        'lowestDay':
-            lowestDay.isEmpty ? null : lowestDay.first[MotionDbColumns.date],
-        'lowestDayXp': lowestDay.isEmpty ? 0 : lowestDay.first['totalXp'],
-      };
-    } catch (e, stackTrace) {
-      logDatabaseError(
-          "TrackerDatabaseHelper.getMonthlyReportSnapshot", e, stackTrace);
-    }
-
-    return const {};
-  }
-
-  Future<List<Map<String, dynamic>>> getMonthlyDailyXpTrend({
-    required String currentUser,
-    required String firstDay,
-    required String lastDay,
-  }) async {
-    try {
-      final db = await database;
-
-      final rows = await db.rawQuery('''
-        SELECT
-          ${MotionDbColumns.date},
-          ${MotionDbColumns.mainCategoryName},
-          COALESCE(SUM(${MotionDbColumns.timeSpent}), 0) AS totalTimeSpent
-        FROM ${MotionDbTables.subcategory}
-        WHERE ${MotionDbColumns.currentLoggedInUser} = ?
-          AND ${MotionDbColumns.date} BETWEEN ? AND ?
-          AND ${MotionDbColumns.timeSpent} > 0
-        GROUP BY ${MotionDbColumns.date}, ${MotionDbColumns.mainCategoryName}
-        ORDER BY ${MotionDbColumns.date}
-      ''', [currentUser, firstDay, lastDay]);
-
-      final xpByDate = <String, int>{};
-      final trackedByDate = <String, int>{};
-
-      for (final row in rows) {
-        final date = row[MotionDbColumns.date]?.toString();
-        final categoryName = row[MotionDbColumns.mainCategoryName]?.toString();
-        if (date == null || categoryName == null) continue;
-
-        final totalMinutes = _readDouble(row['totalTimeSpent']).floor();
-        trackedByDate[date] = (trackedByDate[date] ?? 0) + totalMinutes;
-        xpByDate[date] = (xpByDate[date] ?? 0) +
-            MotionXpPolicy.categoryXp(categoryName, totalMinutes);
-      }
-
-      for (final entry in trackedByDate.entries) {
-        xpByDate[entry.key] = (xpByDate[entry.key] ?? 0) +
-            MotionXpPolicy.accountabilityBonusXp(entry.value);
-      }
-
-      final sortedDates = xpByDate.keys.toList()..sort();
-      return [
-        for (final date in sortedDates)
-          {
-            MotionDbColumns.date: date,
-            'totalXp': xpByDate[date] ?? 0,
-          }
-      ];
-    } catch (e, stackTrace) {
-      logDatabaseError(
-          "TrackerDatabaseHelper.getMonthlyDailyXpTrend", e, stackTrace);
-    }
-
-    return const [];
-  }
-
-  Future<List<Map<String, dynamic>>> getTopSubcategoriesForPeriod({
-    required String currentUser,
-    required String firstDay,
-    required String lastDay,
-    int limit = 5,
-  }) async {
-    try {
-      final db = await database;
-
-      return await db.rawQuery('''
-        SELECT
-          ${MotionDbColumns.subcategoryName},
-          ${MotionDbColumns.mainCategoryName},
-          COALESCE(SUM(${MotionDbColumns.timeSpent}), 0) AS totalTimeSpent
-        FROM ${MotionDbTables.subcategory}
-        WHERE ${MotionDbColumns.currentLoggedInUser} = ?
-          AND ${MotionDbColumns.date} BETWEEN ? AND ?
-        GROUP BY ${MotionDbColumns.subcategoryName}, ${MotionDbColumns.mainCategoryName}
-        HAVING totalTimeSpent > 0
-        ORDER BY totalTimeSpent DESC
-        LIMIT ?
-      ''', [currentUser, firstDay, lastDay, limit]);
-    } catch (e, stackTrace) {
-      logDatabaseError(
-          "TrackerDatabaseHelper.getTopSubcategoriesForPeriod", e, stackTrace);
-    }
-
-    return const [];
-  }
-
   List<_StreakHistoryBucket> _weeklyStreakHistoryBuckets(DateTime today) {
     final yearStart = DateTime(today.year, 1, 1);
     final weekCount = today.difference(yearStart).inDays ~/ 7 + 1;
@@ -1732,43 +1572,19 @@ class TrackerDatabaseHelper {
   }
 
   static String _formatIsoDate(DateTime date) {
-    final normalized = _dateOnly(date);
-    final month = normalized.month.toString().padLeft(2, '0');
-    final day = normalized.day.toString().padLeft(2, '0');
-    return '${normalized.year}-$month-$day';
+    return MotionDateUtils.formatDbDate(date);
   }
 
   static DateTime _dateOnly(DateTime date) {
-    return DateTime(date.year, date.month, date.day);
+    return MotionDateUtils.dateOnly(date);
   }
 
   static DateTime? _parseStoredDate(Object? value) {
-    final text = value?.toString().trim();
-    if (text == null || text.isEmpty) return null;
-
-    final isoDate = DateTime.tryParse(text);
-    if (isoDate != null) return _dateOnly(isoDate);
-
-    final slashParts = text.split('/');
-    if (slashParts.length != 3) return null;
-
-    final first = int.tryParse(slashParts[0]);
-    final second = int.tryParse(slashParts[1]);
-    final year = int.tryParse(slashParts[2]);
-    if (first == null || second == null || year == null) return null;
-
-    final month = first > 12 ? second : first;
-    final day = first > 12 ? first : second;
-    if (month < 1 || month > 12 || day < 1 || day > 31) return null;
-
-    return DateTime(year, month, day);
+    return MotionDateUtils.parseStoredDate(value);
   }
 
   static int _inclusiveDaysBetween(DateTime startDate, DateTime endDate) {
-    final start = _dateOnly(startDate);
-    final end = _dateOnly(endDate);
-    if (end.isBefore(start)) return 0;
-    return end.difference(start).inDays + 1;
+    return MotionDateUtils.inclusiveDaysBetween(startDate, endDate);
   }
 
   static double _readDouble(Object? value) {
@@ -1872,7 +1688,7 @@ class TrackerDatabaseHelper {
       await db.update(MotionDbTables.subcategory, subcategory.toMap(),
           where: '${MotionDbColumns.id} = ?', whereArgs: [subcategory.id]);
 
-      logger.i("Update successfull");
+      debugLog("Update successful");
     } catch (e, stackTrace) {
       logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
@@ -1887,516 +1703,6 @@ class TrackerDatabaseHelper {
     } catch (e, stackTrace) {
       logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
-  }
-
-  // Comprehensive CRUD Operations for the ExperiencePoints Table
-
-  // insert new rows into the experience_points table
-  Future<void> insertExperiencePoint(ExperiencePoints experience) async {
-    try {
-      final db = await database;
-      await db.transaction((txn) async {
-        await _ensureMainCategoryRow(
-          txn,
-          date: experience.date,
-          currentUser: experience.currentLoggedInUser,
-        );
-        await _upsertExperiencePoint(txn, experience);
-      });
-    } catch (e, stackTrace) {
-      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
-    }
-  }
-
-  // get  all data from the experience_points table.
-  Future<List<ExperiencePoints>> getAllExperiencePoints(
-      {required String date}) async {
-    final db = await database;
-    final yearRange = SqlDateRange.year(date);
-    final result = await db.rawQuery('''
-      SELECT *
-      FROM experience_points
-      WHERE date BETWEEN ? AND ?;
-      ''', yearRange.args);
-
-    return result.map((map) => ExperiencePoints.fromMap(map)).toList();
-  }
-
-  /// Calculates the average daily efficiency score for the specified user.
-  /// Aggregates experience points across categories from `experience_points`
-  /// table.
-  /// Returns the average score or 0.0 in case of no data or errors.
-  ///
-  /// Param:
-  ///   - `currentUser`: User ID to calculate the score for.
-  /// (entire)
-  Future<double> entireExperiencePointsEfficiencyScore(
-      {required String currentUser}) async {
-    try {
-      final db = await database;
-
-      final resultEPES = await db.rawQuery('''
-          SELECT ROUND((($_totalXpExpression) / COUNT(DISTINCT date)) * 100.0 / ${MotionXpPolicy.maxDailyXp}, 2) AS efficiencyScore
-          FROM experience_points
-          WHERE currentLoggedInUser = ?
-        ''', [currentUser]);
-
-      if (resultEPES.isNotEmpty) {
-        // first row and column
-        final totalEPES = resultEPES.first['efficiencyScore'];
-        if (totalEPES is double) {
-          return totalEPES;
-        } else {
-          return 0.0; // Handle the case where the result is not a double
-        }
-      } else {
-        return 0.0; // Return 0.0 if no matching records are found
-      }
-    } catch (e, stackTrace) {
-      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
-    }
-  }
-
-  // (year)
-  Future<double> entireYearExperiencePointsEfficiencyScore(
-      {required String currentUser, required String currentYear}) async {
-    try {
-      final db = await database;
-      final yearRange = SqlDateRange.year(currentYear);
-
-      final resultEPES = await db.rawQuery('''
-          SELECT ROUND(
-            (($_totalXpExpression) / COUNT(DISTINCT date)) * 100.0 / ${MotionXpPolicy.maxDailyXp}, 2
-          ) AS efficiencyScore
-          FROM experience_points
-          WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
-      ''', [currentUser, ...yearRange.args]);
-
-      if (resultEPES.isNotEmpty) {
-        // first row and column
-        final totalEPES = resultEPES.first['efficiencyScore'];
-        if (totalEPES is double) {
-          return totalEPES;
-        } else {
-          return 0.0; // Handle the case where the result is not a double
-        }
-      } else {
-        return 0.0; // Return 0.0 if no matching records are found
-      }
-    } catch (e, stackTrace) {
-      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
-    }
-  }
-
-  /// Calculates the average monthly efficiency score for a user over a
-  /// specified date range.
-  /// The score is computed as the sum of experience points across categories
-  /// (educationXP, workXP, skillsXP, sdXP, sleepXP, accountabilityBonusXP),
-  /// divided by the count of distinct days with data within the month.
-  /// This ensures an accurate average, considering only days where data is
-  /// present.
-  ///
-  /// Params:
-  ///   - `currentUser`: User ID for whom the score is calculated.
-  ///   - `firstDayOfMonth`: The start date of the month.
-  ///   - `lastDayOfMonth`: The end date of the month.
-  /// Returns a double representing the monthly average efficiency score, or
-  /// 0.0 if no data is found or in case of an error.
-  Future<double> monthlyEfficiencyScore(
-      {required String currentUser,
-      required String firstDayOfMonth,
-      required String lastDayOfMonth}) async {
-    try {
-      final db = await database;
-
-      final resultMES = await db.rawQuery('''
-      SELECT ROUND((($_totalXpExpression) / COUNT(DISTINCT date)) * 100.0 / ${MotionXpPolicy.maxDailyXp}, 2) AS efficiencyScore
-      FROM experience_points
-      WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
-    ''', [currentUser, firstDayOfMonth, lastDayOfMonth]);
-
-      if (resultMES.isNotEmpty) {
-        // first row and column
-        final totalMES = resultMES.first['efficiencyScore'];
-        if (totalMES is double) {
-          return totalMES;
-        } else {
-          return 0.0; // Handle the case where the result is not a double
-        }
-      } else {
-        return 0.0; // Return 0.0 if no matching records are found
-      }
-    } catch (e, stackTrace) {
-      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
-    }
-  }
-
-  // Gets the all time total XP points
-  // or XP points for the current year
-  Future<int> getTotalXP(
-      {required String currentUser,
-      required bool isEntire,
-      String? year}) async {
-    try {
-      final db = await database;
-      final yearRange = year == null ? null : SqlDateRange.year(year);
-
-      final resultGTXP = isEntire ? await db.rawQuery("""
-        SELECT ($_totalXpExpression) AS entireTotalXP
-        FROM experience_points
-        WHERE currentLoggedInUser = ?
-        """, [currentUser]) : await db.rawQuery("""
-        SELECT ($_totalXpExpression) AS entireTotalXP
-        FROM experience_points
-        WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
-          """, [currentUser, ...yearRange!.args]);
-
-      if (resultGTXP.isNotEmpty) {
-        // first row and column
-        final totalGTXP = resultGTXP.first['entireTotalXP'];
-        if (totalGTXP is int) {
-          return totalGTXP;
-        } else {
-          return 0; // Handle the case where the result is not a int
-        }
-      } else {
-        return 0; // Return 0 if no matching records are found
-      }
-    } catch (e, stackTrace) {
-      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
-    }
-  }
-
-  Future<int> getYearExperiencePointDays({
-    required String currentUser,
-    required String year,
-  }) async {
-    try {
-      final db = await database;
-      final yearRange = SqlDateRange.year(year);
-
-      final result = await db.rawQuery('''
-        SELECT COUNT(DISTINCT date) AS trackedDays
-        FROM experience_points
-        WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
-      ''', [currentUser, ...yearRange.args]);
-
-      if (result.isEmpty) return 0;
-
-      final trackedDays = result.first['trackedDays'];
-      if (trackedDays is int) return trackedDays;
-      return int.tryParse(trackedDays?.toString() ?? '') ?? 0;
-    } catch (e, stackTrace) {
-      logDatabaseError(
-          "TrackerDatabaseHelper.getYearExperiencePointDays", e, stackTrace);
-    }
-
-    return 0;
-  }
-
-  // Gets the efficiency score for the selected date
-  // Gets the total experience points for the selected date
-  Future<int> dailyExperiencePoints(
-      {required String currentUser, required String selectedDate}) async {
-    try {
-      final db = await database;
-
-      final resultDES = await db.rawQuery('''
-      SELECT ($_totalXpExpression) AS totalXP
-      FROM experience_points
-      WHERE currentLoggedInUser = ? AND date = ?
-    ''', [currentUser, selectedDate]);
-
-      if (resultDES.isNotEmpty) {
-        final totalXP = resultDES.first['totalXP'];
-        final storedXp = totalXP is num
-            ? totalXP.toInt()
-            : int.tryParse(totalXP?.toString() ?? '') ?? 0;
-
-        if (storedXp > 0) {
-          return storedXp;
-        }
-      }
-
-      return await _calculateDailyExperiencePointsFromSubcategories(
-        db,
-        currentUser: currentUser,
-        selectedDate: selectedDate,
-      );
-    } catch (e, stackTrace) {
-      logDatabaseError(
-          "TrackerDatabaseHelper.dailyExperiencePoints", e, stackTrace);
-    }
-
-    return 0;
-  }
-
-  Future<int> _calculateDailyExperiencePointsFromSubcategories(
-    DatabaseExecutor db, {
-    required String currentUser,
-    required String selectedDate,
-  }) async {
-    final result = await db.rawQuery('''
-      SELECT
-        ${MotionDbColumns.mainCategoryName},
-        COALESCE(SUM(${MotionDbColumns.timeSpent}), 0) AS totalTimeSpent
-      FROM ${MotionDbTables.subcategory}
-      WHERE ${MotionDbColumns.currentLoggedInUser} = ?
-        AND ${MotionDbColumns.date} = ?
-        AND ${MotionDbColumns.timeSpent} > 0
-      GROUP BY ${MotionDbColumns.mainCategoryName}
-    ''', [currentUser, selectedDate]);
-
-    var totalTrackedMinutes = 0;
-    var totalXp = 0;
-
-    for (final row in result) {
-      final categoryName = row[MotionDbColumns.mainCategoryName]?.toString();
-      final totalMinutes = _readDouble(row['totalTimeSpent']).floor();
-      totalTrackedMinutes += totalMinutes;
-
-      if (categoryName == null) continue;
-      totalXp += MotionXpPolicy.categoryXp(categoryName, totalMinutes);
-    }
-
-    totalXp += MotionXpPolicy.accountabilityBonusXp(totalTrackedMinutes);
-    return totalXp;
-  }
-
-  Future<Map<String, int>> dailyExperiencePointBreakdown({
-    required String currentUser,
-    required String selectedDate,
-  }) async {
-    try {
-      final db = await database;
-
-      final result = await db.query(
-        MotionDbTables.experiencePoints,
-        columns: const [
-          MotionDbColumns.educationXp,
-          MotionDbColumns.workXp,
-          MotionDbColumns.skillsXp,
-          MotionDbColumns.selfDevelopmentXp,
-          MotionDbColumns.sleepXp,
-          MotionDbColumns.accountabilityBonusXp,
-        ],
-        where:
-            '${MotionDbColumns.currentLoggedInUser} = ? AND ${MotionDbColumns.date} = ?',
-        whereArgs: [currentUser, selectedDate],
-        limit: 1,
-      );
-
-      if (result.isEmpty) {
-        return const {
-          'Education': 0,
-          'Work': 0,
-          'Skills': 0,
-          'Self Development': 0,
-          'Sleep': 0,
-          'Tracking Bonus': 0,
-        };
-      }
-
-      final row = result.first;
-      int readXp(String column) {
-        final value = row[column];
-        return value is int ? value : int.tryParse('$value') ?? 0;
-      }
-
-      return {
-        'Education': readXp(MotionDbColumns.educationXp),
-        'Work': readXp(MotionDbColumns.workXp),
-        'Skills': readXp(MotionDbColumns.skillsXp),
-        'Self Development': readXp(MotionDbColumns.selfDevelopmentXp),
-        'Sleep': readXp(MotionDbColumns.sleepXp),
-        'Tracking Bonus': readXp(MotionDbColumns.accountabilityBonusXp),
-      };
-    } catch (e, stackTrace) {
-      logDatabaseError(
-          "TrackerDatabaseHelper.dailyExperiencePointBreakdown", e, stackTrace);
-    }
-
-    return const {
-      'Education': 0,
-      'Work': 0,
-      'Skills': 0,
-      'Self Development': 0,
-      'Sleep': 0,
-      'Tracking Bonus': 0,
-    };
-  }
-
-  Future<Map<String, double>> dailyMainCategoryTimeBreakdown({
-    required String currentUser,
-    required String selectedDate,
-  }) async {
-    try {
-      final db = await database;
-
-      final result = await db.rawQuery('''
-        SELECT
-          ${MotionDbColumns.mainCategoryName},
-          COALESCE(SUM(${MotionDbColumns.timeSpent}), 0) AS total
-        FROM ${MotionDbTables.subcategory}
-        WHERE ${MotionDbColumns.currentLoggedInUser} = ?
-          AND ${MotionDbColumns.date} = ?
-        GROUP BY ${MotionDbColumns.mainCategoryName}
-      ''', [currentUser, selectedDate]);
-
-      final breakdown = <String, double>{
-        'Education': 0,
-        'Work': 0,
-        'Skills': 0,
-        'Self Development': 0,
-        'Sleep': 0,
-        'Tracking Bonus': 0,
-      };
-
-      var totalTracked = 0.0;
-      for (final row in result) {
-        final category = row[MotionDbColumns.mainCategoryName]?.toString();
-        final totalValue = row['total'];
-        final total = totalValue is num
-            ? totalValue.toDouble()
-            : double.tryParse('$totalValue') ?? 0.0;
-
-        totalTracked += total;
-        if (category != null && breakdown.containsKey(category)) {
-          breakdown[category] = total;
-        }
-      }
-
-      breakdown['Tracking Bonus'] = totalTracked;
-      return breakdown;
-    } catch (e, stackTrace) {
-      logDatabaseError(
-          "TrackerDatabaseHelper.dailyMainCategoryTimeBreakdown",
-          e,
-          stackTrace);
-    }
-
-    return const {
-      'Education': 0,
-      'Work': 0,
-      'Skills': 0,
-      'Self Development': 0,
-      'Sleep': 0,
-      'Tracking Bonus': 0,
-    };
-  }
-
-  // this function get the most and least productive months
-  Future<List<Map<String, dynamic>>> getMostAndLeastProductiveMonths(
-      {required bool getMostProductiveMonth,
-      required String currentUser,
-      required String year}) async {
-    try {
-      final db = await database;
-      final yearRange = SqlDateRange.year(year);
-
-      final resultMALPM = getMostProductiveMonth ? await db.rawQuery("""
-          SELECT CASE
-                    WHEN month_num = 1 THEN 'January'
-                    WHEN month_num = 2 THEN 'February'
-                    WHEN month_num = 3 THEN 'March'
-                    WHEN month_num = 4 THEN 'April'
-                    WHEN month_num = 5 THEN 'May'
-                    WHEN month_num = 6 THEN 'June'
-                    WHEN month_num = 7 THEN 'July'
-                    WHEN month_num = 8 THEN 'August'
-                    WHEN month_num = 9 THEN 'September'
-                    WHEN month_num = 10 THEN 'October'
-                    WHEN month_num = 11 THEN 'November'
-                    WHEN month_num = 12 THEN 'December'
-                    ELSE 'TBD'
-                END AS month,
-                COALESCE(MAX(totalMostXP), 0) AS most_productive
-          FROM (
-              SELECT CAST(strftime('%m', date) AS INTEGER) AS month_num,
-                    ($_totalXpExpression) AS totalMostXP
-              FROM experience_points
-              WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
-              GROUP BY month_num
-          ) AS totalMostXP
-        """, [currentUser, ...yearRange.args]) : await db.rawQuery("""
-        SELECT CASE
-                  WHEN month_num = 1 THEN 'January'
-                  WHEN month_num = 2 THEN 'February'
-                  WHEN month_num = 3 THEN 'March'
-                  WHEN month_num = 4 THEN 'April'
-                  WHEN month_num = 5 THEN 'May'
-                  WHEN month_num = 6 THEN 'June'
-                  WHEN month_num = 7 THEN 'July'
-                  WHEN month_num = 8 THEN 'August'
-                  WHEN month_num = 9 THEN 'September'
-                  WHEN month_num = 10 THEN 'October'
-                  WHEN month_num = 11 THEN 'November'
-                  WHEN month_num = 12 THEN 'December'
-                  ELSE 'TBD'
-              END AS month,
-              COALESCE(MIN(totalLeastXP), 0) AS totalLeastXP
-        FROM (
-            SELECT CAST(strftime('%m', date) AS INTEGER) AS month_num,
-                  ($_totalXpExpression) AS totalLeastXP
-            FROM experience_points
-            WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
-            GROUP BY month_num
-        ) AS totalLeastXP
-          """, [currentUser, ...yearRange.args]);
-      return resultMALPM;
-    } catch (e, stackTrace) {
-      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
-    }
-  }
-
-  // get the most and least productive days
-  Future<List<Map<String, dynamic>>> getMostAndLeastProductiveDays(
-      {required String currentUser,
-      required String firstDay,
-      required String lastDay,
-      required bool getMostProductiveDay}) async {
-    try {
-      final db = await database;
-
-      // the most and least productive days result
-      final resultMALPD = getMostProductiveDay ? await db.rawQuery("""
-      SELECT COALESCE(date, 'TBD') AS date, COALESCE(MAX(totalMostXP),0) AS most_productive
-      FROM (
-        SELECT date, ($_totalXpExpression) AS totalMostXP
-        FROM experience_points
-        WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
-        GROUP BY date
-      ) AS totalMostXP
-        """, [currentUser, firstDay, lastDay]) : await db.rawQuery("""
-      SELECT COALESCE(date, 'TBD') AS date, COALESCE(MIN(totalLeastXP),0) AS least_productive
-      FROM (
-        SELECT date, ($_totalXpExpression) AS totalLeastXP
-        FROM experience_points
-        WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
-        GROUP BY date
-      ) AS totalLeastXP
-        """, [currentUser, firstDay, lastDay]);
-
-      return resultMALPD;
-    } catch (e, stackTrace) {
-      logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
-    }
-  }
-
-  /// Fetches *all* experience_points rows for [currentUser].
-  Future<List<ExperiencePoints>> getAllExperiencePointsForUser({
-    required String currentUser,
-  }) async {
-    final db = await database;
-    // Query every column in the table, filtered by the user
-    final result = await db.query(
-      MotionDbTables.experiencePoints,
-      where: '${MotionDbColumns.currentLoggedInUser} = ?',
-      whereArgs: [currentUser],
-    );
-
-    // Map each row to your model
-    return result.map((row) => ExperiencePoints.fromMap(row)).toList();
   }
 
   /// Back-fills experience_points for every date the user already has in main_category.
@@ -2490,7 +1796,7 @@ class TrackerDatabaseHelper {
       WHERE currentLoggedInUser = ?;
     ''', [currentUser]);
 
-    logger.i('🔄 Back-filled experience_points for all existing dates.');
+    debugLog('Back-filled experience_points for all existing dates.');
   }
 
   Future<void> deleteSubcategoriesByDate(String date) async {
@@ -2502,7 +1808,7 @@ class TrackerDatabaseHelper {
         where: "${MotionDbColumns.date} = ?",
         whereArgs: [date],
       );
-      debugPrint("✅ Subcategories with date $date deleted successfully");
+      debugLog("Subcategories with date $date deleted successfully");
     } catch (e, stackTrace) {
       logDatabaseError(
           "TrackerDatabaseHelper.deleteSubcategoriesByDate", e, stackTrace);

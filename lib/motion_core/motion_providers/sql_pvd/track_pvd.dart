@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:motion/motion_core/mc_sql_table/main_table.dart';
 import 'package:motion/motion_core/mc_sql_table/streak_status.dart';
 import 'package:motion/motion_core/mc_sql_table/sub_table.dart';
+import 'package:motion/motion_core/mc_sqlite/sql_tracker_db.dart';
 
 import '../../../main.dart';
 import 'current_user_guard.dart';
@@ -420,6 +421,16 @@ class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
       {required currentUser}) async {
     return await trackDbInstance.getAllSubcategoryTotals(
         currentUser: requireCurrentUser(currentUser));
+  }
+
+  Future<Map<int, String>> retrieveAwardEarnedDates({
+    required String currentUser,
+    required List<int> requiredHours,
+  }) async {
+    return await trackDbInstance.getAwardEarnedDates(
+      currentUser: requireCurrentUser(currentUser),
+      requiredHours: requiredHours,
+    );
   }
 
   // retrive the total and average for each subcategory for a specific month

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:motion/motion_core/motion_utils/motion_date_utils.dart';
 
 import 'calendar_clock.dart';
 
 class CurrentDateProvider extends ChangeNotifier {
   CurrentDateProvider({CalendarClock? clock})
       : _clock = clock ?? CalendarClock.instance {
-    _currentDate = _formatDate(_clock.today);
+    _currentDate = MotionDateUtils.formatDbDate(_clock.today);
     _clock.addListener(_updateFromClock);
   }
 
@@ -21,33 +21,18 @@ class CurrentDateProvider extends ChangeNotifier {
   }
 
   String getFormattedDate() {
-    final dateTime = DateTime.tryParse(_currentDate);
+    final dateTime = MotionDateUtils.parseStoredDate(_currentDate);
     if (dateTime == null) return "Invalid Date";
 
-    final day = dateTime.day;
-    final daySuffix = (day >= 11 && day <= 13)
-        ? 'th'
-        : (day % 10 == 1)
-            ? 'st'
-            : (day % 10 == 2)
-                ? 'nd'
-                : (day % 10 == 3)
-                    ? 'rd'
-                    : 'th';
-
-    return '${DateFormat('EEEE').format(dateTime)} $day$daySuffix ';
+    return MotionDateUtils.formatWeekdayOrdinal(dateTime);
   }
 
   void _updateFromClock() {
-    final currentDate = _formatDate(_clock.today);
+    final currentDate = MotionDateUtils.formatDbDate(_clock.today);
     if (currentDate == _currentDate) return;
 
     _currentDate = currentDate;
     notifyListeners();
-  }
-
-  static String _formatDate(DateTime date) {
-    return DateFormat('yyyy-MM-dd').format(date);
   }
 
   @override

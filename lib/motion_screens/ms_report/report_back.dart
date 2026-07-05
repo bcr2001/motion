@@ -98,7 +98,7 @@ class MainCategoryDistributionPieChart extends StatelessWidget {
 
   Color getCategoryColorByName(String? categoryName) {
     // Debugging: Print the category name
-    logger.i("Category Name: $categoryName");
+    debugLog("Category Name: $categoryName");
 
     switch (categoryName) {
       case AppString.educationMainCategory:
@@ -115,7 +115,7 @@ class MainCategoryDistributionPieChart extends StatelessWidget {
         return AppColor.sleepPieChartColor;
       default:
         // Debugging: Handle unexpected category names
-        logger.i("Unexpected Category Name: $categoryName");
+        debugLog("Unexpected Category Name: $categoryName");
         return Colors.grey; // Default color for null or unrecognized category
     }
   }

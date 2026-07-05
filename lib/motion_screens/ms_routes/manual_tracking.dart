@@ -6,7 +6,9 @@ import 'package:motion/main.dart';
 import 'package:motion/motion_core/mc_sql_table/sub_table.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_date_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
+import 'package:motion/motion_core/motion_providers/sql_pvd/experience_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
+import 'package:motion/motion_core/motion_utils/motion_date_utils.dart';
 import 'package:motion/motion_reusable/db_re/sub_logic.dart';
 import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
@@ -16,6 +18,8 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../motion_themes/mth_styling/app_color.dart';
+
+part 'manual_tracking_widgets.dart';
 
 // this returns the page where users can add data into the database tables
 class ManualTimeRecordingRoute extends StatefulWidget {
@@ -210,7 +214,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
     final celebrationKey =
         'daily_xp_target_celebration_v4_${block.currentLoggedInUser}-${block.date}';
     await prefs.remove(celebrationKey);
-    logger.i(
+    debugLog(
       'XP TARGET CELEBRATION DIRECT: reset shown state after deleting a tracked block for ${block.date}.',
     );
   }
@@ -374,10 +378,8 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
     required DateTime selectedDate,
     required VoidCallback onTap,
   }) {
-    final today = DateTime.now();
-    final isToday = selectedDate.year == today.year &&
-        selectedDate.month == today.month &&
-        selectedDate.day == today.day;
+    final today = MotionDateUtils.today();
+    final isToday = MotionDateUtils.isSameDate(selectedDate, today);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final borderColor =
         isDarkMode ? Colors.white.withValues(alpha: 0.10) : Colors.black12;
@@ -418,7 +420,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      DateFormat('EEE, MMM d, yyyy').format(selectedDate),
+                      MotionDateUtils.formatDisplayDate(selectedDate),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppTextStyle.subSectionTextStyle(
@@ -560,8 +562,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                             ),
                             const Spacer(),
                             Text(
-                              DateFormat('EEE, MMM d, yyyy')
-                                  .format(pendingDate),
+                              MotionDateUtils.formatDisplayDate(pendingDate),
                               style: AppTextStyle.subSectionTextStyle(
                                 fontsize: 12.5,
                                 fontweight: FontWeight.w900,
@@ -863,228 +864,11 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
     return result ?? false;
   }
 
-  Widget _timeDialogActions({
-    required VoidCallback onCancel,
-    required VoidCallback onAdd,
-    required bool isBusy,
-  }) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final borderColor =
-        isDarkMode ? Colors.white.withValues(alpha: 0.16) : Colors.black12;
-    final cancelTextColor = isDarkMode ? Colors.white70 : Colors.blueGrey;
-
-    return Row(
-      children: [
-        Expanded(
-          child: OutlinedButton(
-            onPressed: isBusy ? null : onCancel,
-            style: OutlinedButton.styleFrom(
-              foregroundColor: cancelTextColor,
-              minimumSize: const Size(0, 42),
-              side: BorderSide(color: borderColor),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: Text(
-              AppString.trackCancelTextButton,
-              style: AppTextStyle.subSectionTextStyle(
-                fontsize: 12,
-                fontweight: FontWeight.w700,
-                color: cancelTextColor,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: ElevatedButton(
-            onPressed: isBusy ? null : onAdd,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColor.blueMainColor,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              minimumSize: const Size(0, 42),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: isBusy
-                ? const SizedBox(
-                    height: 18,
-                    width: 18,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
-                : Text(
-                    AppString.trackAddTextButton,
-                    style: AppTextStyle.subSectionTextStyle(
-                      fontsize: 12,
-                      fontweight: FontWeight.w800,
-                      color: Colors.white,
-                    ),
-                  ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _todaysBlocksHeader({
-    required String title,
-    required String emptyLabel,
-    required int blockCount,
-    required double totalMinutes,
-    required IconData icon,
-    Color accentColor = AppColor.blueMainColor,
-  }) {
-    final convertedTotal = convertMinutesToTime(totalMinutes);
-
-    return Row(
-      children: [
-        Container(
-          height: 36,
-          width: 36,
-          decoration: BoxDecoration(
-            color: accentColor.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(11),
-          ),
-          child: Icon(
-            icon,
-            color: accentColor,
-            size: 19,
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: AppTextStyle.subSectionTextStyle(
-                  fontsize: 15,
-                  fontweight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 3),
-              Text(
-                blockCount == 0
-                    ? emptyLabel
-                    : "$blockCount ${blockCount == 1 ? "block" : "blocks"} | $convertedTotal",
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: AppTextStyle.subSectionTextStyle(
-                  fontsize: 12,
-                  fontweight: FontWeight.normal,
-                  color: Colors.blueGrey,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _trackedBlockTile({
-    required int index,
-    required String convertedTimeRecorded,
-    String? subtitle,
-    required VoidCallback onDelete,
-    required bool isDeleting,
-  }) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final borderColor =
-        isDarkMode ? Colors.white.withValues(alpha: 0.08) : Colors.black12;
-    final tileColor = isDarkMode
-        ? Colors.white.withValues(alpha: 0.03)
-        : Colors.black.withValues(alpha: 0.025);
-
-    return Container(
-      margin: const EdgeInsets.only(top: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: tileColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: borderColor),
-      ),
-      child: Row(
-        children: [
-          Container(
-            height: 28,
-            width: 28,
-            decoration: BoxDecoration(
-              color: AppColor.blueMainColor.withValues(alpha: 0.10),
-              borderRadius: BorderRadius.circular(9),
-            ),
-            child: Center(
-              child: Text(
-                "${index + 1}",
-                style: AppTextStyle.subSectionTextStyle(
-                  fontsize: 11,
-                  fontweight: FontWeight.w800,
-                  color: AppColor.blueMainColor,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  convertedTimeRecorded,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyle.subSectionTextStyle(
-                    fontsize: 15,
-                    fontweight: FontWeight.w700,
-                  ),
-                ),
-                if (subtitle != null) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTextStyle.subSectionTextStyle(
-                      fontsize: 10.5,
-                      fontweight: FontWeight.normal,
-                      color: Colors.blueGrey,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          IconButton(
-            onPressed: isDeleting ? null : onDelete,
-            visualDensity: VisualDensity.compact,
-            icon: isDeleting
-                ? const SizedBox(
-                    height: 18,
-                    width: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(
-                    Icons.delete_outline,
-                    size: 18,
-                    color: Colors.redAccent,
-                  ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _todaysBlocksPanel({
     required List<Subcategories> blocks,
     required SubcategoryTrackerDatabaseProvider subs,
   }) {
+    final xpProvider = context.read<ExperiencePointTableProvider>();
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final borderColor =
         isDarkMode ? Colors.white.withValues(alpha: 0.10) : Colors.black12;
@@ -1105,7 +889,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _todaysBlocksHeader(
+          _TrackedBlocksHeader(
             title: AppString.blockTitle,
             emptyLabel: 'No time blocks added yet',
             blockCount: blocks.length,
@@ -1130,7 +914,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
               final convertedTimeRecorded =
                   convertMinutesToTime(block.timeSpent);
 
-              return _trackedBlockTile(
+              return _TrackedBlockTile(
                 index: entry.key,
                 convertedTimeRecorded: convertedTimeRecorded,
                 isDeleting:
@@ -1191,7 +975,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _todaysBlocksHeader(
+          _TrackedBlocksHeader(
             title: 'Past Entries Added',
             emptyLabel: 'No past entries added',
             blockCount: _pastEntriesAdded.length,
@@ -1201,12 +985,12 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
           ),
           ..._pastEntriesAdded.asMap().entries.map((entry) {
             final block = entry.value;
-            final parsedDate = DateTime.tryParse(block.date);
+            final parsedDate = MotionDateUtils.parseStoredDate(block.date);
             final dateLabel = parsedDate == null
                 ? block.date
-                : DateFormat('EEE, MMM d, yyyy').format(parsedDate);
+                : MotionDateUtils.formatDisplayDate(parsedDate);
 
-            return _trackedBlockTile(
+            return _TrackedBlockTile(
               index: entry.key,
               convertedTimeRecorded: convertMinutesToTime(block.timeSpent),
               subtitle: dateLabel,
@@ -1248,7 +1032,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
   void _showTimeAlertDialog(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
-    final today = DateTime.now();
+    final today = MotionDateUtils.today();
     var selectedDate = DateTime(today.year, today.month, today.day);
 
     showDialog(
@@ -1257,6 +1041,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
           var isAddingBlock = false;
           var subTrackerProvider =
               context.read<SubcategoryTrackerDatabaseProvider>();
+          final xpProvider = context.read<ExperiencePointTableProvider>();
 
           return StatefulBuilder(
             builder: (dialogContext, setDialogState) {
@@ -1297,7 +1082,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                       // cancel and add button
                       Consumer<UserUidProvider>(
                         builder: (context, uid, child) {
-                          return _timeDialogActions(
+                          return _ManualTrackingTimeDialogActions(
                             onCancel: () {
                               // exits the alart dialog and resets the text
                               // contoller content
@@ -1358,12 +1143,13 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                                         errorMessage:
                                             AppString.manualRangeValueError,
                                         requiresColor: true);
-                                    logger.i("Failed Validation");
+                                    debugLog("Failed Validation");
                                   } else {
-                                    logger.i("Passed Validation");
+                                    debugLog("Passed Validation");
                                     final selectedDateIso =
-                                        DateFormat('yyyy-MM-dd')
-                                            .format(selectedDate);
+                                        MotionDateUtils.formatDbDate(
+                                      selectedDate,
+                                    );
                                     final enteredMinutes = timeAdder(
                                       h: hourController.text,
                                       m: minuteController.text,
@@ -1381,11 +1167,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                                     }
 
                                     final isHistorical =
-                                        selectedDate.isBefore(DateTime(
-                                      today.year,
-                                      today.month,
-                                      today.day,
-                                    ));
+                                        selectedDate.isBefore(today);
                                     if (isHistorical) {
                                       final confirmed =
                                           await _confirmHistoricalEntry(
@@ -1413,16 +1195,14 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                                                 subcategory);
                                     subcategory.id = insertedId;
                                     _hasChangedTrackedTime = true;
-                                    xp.refreshExperiencePointViews();
+                                    xpProvider.refreshExperiencePointViews();
                                     if (isHistorical && mounted) {
                                       await _rememberPastEntryAddedToday(
                                         entry: subcategory,
-                                        currentDate: DateFormat('yyyy-MM-dd')
-                                            .format(DateTime(
-                                          today.year,
-                                          today.month,
-                                          today.day,
-                                        )),
+                                        currentDate:
+                                            MotionDateUtils.formatDbDate(
+                                          today,
+                                        ),
                                       );
                                       setState(() {
                                         _pastEntriesAdded.insert(

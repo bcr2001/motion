@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:motion/motion_core/motion_utils/motion_date_utils.dart';
 
 import 'calendar_clock.dart';
 
@@ -18,12 +18,9 @@ class FirstAndLastWithSevenDaysDiff extends ChangeNotifier {
   String get lastDay => _lastDay;
 
   void _calculate() {
-    final today = _clock.today;
-    final firstDate = today.subtract(Duration(days: today.weekday - 1));
-    final lastDate = firstDate.add(const Duration(days: 6));
-    final formatter = DateFormat('yyyy-MM-dd');
-    _firstDay = formatter.format(firstDate);
-    _lastDay = formatter.format(lastDate);
+    final range = MotionDateUtils.weekRange(_clock.today);
+    _firstDay = range.startIso;
+    _lastDay = range.endIso;
   }
 
   void _updateFromClock() {

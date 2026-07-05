@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
+import 'package:motion/motion_core/motion_utils/motion_date_utils.dart';
 
 class CalendarClock extends ChangeNotifier with WidgetsBindingObserver {
   CalendarClock._() {
@@ -10,13 +11,13 @@ class CalendarClock extends ChangeNotifier with WidgetsBindingObserver {
 
   static final CalendarClock instance = CalendarClock._();
 
-  DateTime _today = _dateOnly(DateTime.now());
+  DateTime _today = MotionDateUtils.today();
   Timer? _midnightTimer;
 
   DateTime get today => _today;
 
   void refresh() {
-    final currentDate = _dateOnly(DateTime.now());
+    final currentDate = MotionDateUtils.today();
     if (currentDate != _today) {
       _today = currentDate;
       notifyListeners();
@@ -39,10 +40,6 @@ class CalendarClock extends ChangeNotifier with WidgetsBindingObserver {
       nextMidnight.difference(now) + const Duration(seconds: 1),
       refresh,
     );
-  }
-
-  static DateTime _dateOnly(DateTime date) {
-    return DateTime(date.year, date.month, date.day);
   }
 
   @override

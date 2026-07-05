@@ -41,7 +41,7 @@ class SettingsPage extends StatelessWidget {
             leadingDateTextStyle:
                 AppTextStyle.accountedAndUnaccountedGallaryStyle(),
             onDateSelected: (value) async {
-              logger.i("Date Of Birth: $value");
+              debugLog("Date Of Birth: $value");
 
               await dateOfBirthStorage.saveDateOfBirth(userUID!, value);
             },

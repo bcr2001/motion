@@ -25,7 +25,7 @@ class AuthServices {
 
       // If sign-in is successful and a user is authenticated.
       if (_auth.currentUser != null) {
-        logger.i("(signInUser): authenticated successfully");
+        debugLog("(signInUser): authenticated successfully");
       }
     } on FirebaseAuthException catch (e) {
       if (e.code == "user-not-found") {

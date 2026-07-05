@@ -36,7 +36,7 @@ Future<void> maybeShowDailyXpTargetCelebration(BuildContext context) async {
 
   final currentUser = context.read<UserUidProvider>().userUid;
   if (currentUser == null) {
-    logger.i('XP TARGET CELEBRATION DIRECT: skipped because UID is not ready.');
+    debugLog('XP TARGET CELEBRATION DIRECT: skipped because UID is not ready.');
     return;
   }
 
@@ -77,7 +77,7 @@ Future<void> maybeShowDailyXpTargetCelebration(BuildContext context) async {
       : progress.averageDailyXp.ceil();
   final earnedXp = results[2];
 
-  logger.i(
+  debugLog(
     'XP TARGET CELEBRATION DIRECT: date=$currentDate earned=$earnedXp target=$targetXp '
     'score=$score yearXp=${results[0]} trackedDays=${results[1]}',
   );
@@ -89,7 +89,7 @@ Future<void> maybeShowDailyXpTargetCelebration(BuildContext context) async {
     if (hasAlreadyShown) {
       await prefs.remove(celebrationKey);
       _activeDailyXpCelebrations.remove(celebrationKey);
-      logger.i(
+      debugLog(
         'XP TARGET CELEBRATION DIRECT: reset shown state because earned XP dropped below target.',
       );
     }
@@ -97,7 +97,7 @@ Future<void> maybeShowDailyXpTargetCelebration(BuildContext context) async {
   }
 
   if (hasAlreadyShown) {
-    logger.i(
+    debugLog(
       'XP TARGET CELEBRATION DIRECT: skipped because it was already shown for $currentDate.',
     );
     return;
@@ -106,7 +106,7 @@ Future<void> maybeShowDailyXpTargetCelebration(BuildContext context) async {
   if (!context.mounted) return;
 
   if (!_activeDailyXpCelebrations.add(celebrationKey)) {
-    logger.i(
+    debugLog(
       'XP TARGET CELEBRATION DIRECT: skipped because a congrats dialog is already active for $currentDate.',
     );
     return;
