@@ -868,7 +868,6 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
     required List<Subcategories> blocks,
     required SubcategoryTrackerDatabaseProvider subs,
   }) {
-    final xpProvider = context.read<ExperiencePointTableProvider>();
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final borderColor =
         isDarkMode ? Colors.white.withValues(alpha: 0.10) : Colors.black12;
@@ -933,7 +932,9 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                     );
                     _hasChangedTrackedTime = true;
                     await _resetDailyXpTargetCelebration(block);
-                    xpProvider.refreshExperiencePointViews();
+                    context
+                        .read<ExperiencePointTableProvider>()
+                        .refreshExperiencePointViews();
                   } finally {
                     if (mounted) {
                       setState(() => _deletingBlockIds.remove(blockId));
@@ -1041,7 +1042,6 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
           var isAddingBlock = false;
           var subTrackerProvider =
               context.read<SubcategoryTrackerDatabaseProvider>();
-          final xpProvider = context.read<ExperiencePointTableProvider>();
 
           return StatefulBuilder(
             builder: (dialogContext, setDialogState) {
@@ -1195,7 +1195,9 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                                                 subcategory);
                                     subcategory.id = insertedId;
                                     _hasChangedTrackedTime = true;
-                                    xpProvider.refreshExperiencePointViews();
+                                    context
+                                        .read<ExperiencePointTableProvider>()
+                                        .refreshExperiencePointViews();
                                     if (isHistorical && mounted) {
                                       await _rememberPastEntryAddedToday(
                                         entry: subcategory,

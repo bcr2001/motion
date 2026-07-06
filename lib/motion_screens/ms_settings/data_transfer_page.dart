@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:motion/motion_core/mc_cloud/google_drive_backup_service.dart';
 import 'package:motion/motion_core/mc_csv/csv_data_transfer.dart';
+import 'package:motion/motion_core/motion_providers/cloud_backup_pvd/auto_drive_backup_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/assigner_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
@@ -229,6 +230,12 @@ class _DataTransferPageState extends State<DataTransferPage> {
           files: backupFiles,
           expectedEmail: motionEmail,
         );
+        if (mounted) {
+          await context.read<AutoDriveBackupProvider>().recordSuccessfulBackup(
+                fileCount: result.fileCount,
+                emailMatchesMotionAccount: result.emailMatchesMotionAccount,
+              );
+        }
 
         final accountNote = result.emailMatchesMotionAccount
             ? ''
@@ -552,6 +559,20 @@ class _DataTransferPageState extends State<DataTransferPage> {
                     return _DataSummaryCard(summary: snapshot.data!);
                   },
                 ),
+              const SizedBox(height: 12),
+              Consumer<AutoDriveBackupProvider>(
+                builder: (context, backup, child) {
+                  return _AutoDriveBackupCard(
+                    backup: backup,
+                    onChanged: _isBusy
+                        ? null
+                        : (value) => backup.setEnabled(value),
+                    onRunNow: _isBusy || !backup.isEnabled || backup.isRunning
+                        ? null
+                        : () => backup.runBackupIfEligible(force: true),
+                  );
+                },
+              ),
               const SizedBox(height: 12),
               _transferButton(
                 icon: Icons.download,

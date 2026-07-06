@@ -1,30 +1,19 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../motion_reusable/general_reuseable.dart';
-import '../../motion_themes/mth_app/app_strings.dart';
 
 // Function to make an HTTP request to the ZenQuotes API.
 // Returns the HTTP response containing the Zen quote data.
 Future<http.Response> _getZenQuote() async {
   const String zenQuotesApiUrl = "https://zenquotes.io/api/today";
-  try {
-    // Perform the HTTP GET request with a timeout of 10 seconds.
-    final response = await http
-        .get(Uri.parse(zenQuotesApiUrl))
-        .timeout(const Duration(seconds: 10));
-    return response;
-  } catch (e) {
-    // Log any error for debugging
-    logger.e("Error in HTTP request to ZenQuotes API: $e");
-
-    // Throw an exception or handle it as per your application's requirement
-    rethrow;
-  }
+  return http
+      .get(Uri.parse(zenQuotesApiUrl))
+      .timeout(const Duration(seconds: 10));
 }
 
 // Function to fetch a Zen quote from the remote API.
 // Returns the daily quote in the format: "Quote" - Author
-Future<String> fetchZenQuote() async {
+Future<String?> fetchZenQuote() async {
   try {
     // Send an HTTP GET request to the ZenQuotes API.
     final request = await _getZenQuote();
@@ -41,14 +30,10 @@ Future<String> fetchZenQuote() async {
       // Return the formatted quote string.
       return '"$quote" - $author';
     } else {
-      // If the response status code is not 200, return a default quote
-      return AppString.defaultAppQuote;
+      return null;
     }
   } catch (e) {
-    // log any error for debugging
-    logger.e("Error fetching Zen quote: $e");
-
-    // Return the default quote in case of an error.
-    return AppString.defaultAppQuote;
+    debugLog("Unable to fetch Zen quote: $e");
+    return null;
   }
 }

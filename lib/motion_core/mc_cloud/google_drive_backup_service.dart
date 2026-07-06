@@ -36,16 +36,21 @@ class GoogleDriveBackupService {
   Future<GoogleDriveBackupResult> uploadBackupFiles({
     required List<MotionCsvBackupFile> files,
     String? expectedEmail,
+    bool allowInteractiveSignIn = true,
   }) async {
     if (files.isEmpty) {
       throw StateError('There are no backup files to upload.');
     }
 
     try {
-      final account =
-          await _googleSignIn.signInSilently() ?? await _googleSignIn.signIn();
+      final account = await _googleSignIn.signInSilently() ??
+          (allowInteractiveSignIn ? await _googleSignIn.signIn() : null);
       if (account == null) {
-        throw StateError('Google Drive backup was cancelled.');
+        throw StateError(
+          allowInteractiveSignIn
+              ? 'Google Drive backup was cancelled.'
+              : 'Google Drive is not connected. Export to Google Drive manually once, then automatic backups can continue.',
+        );
       }
 
       final client = await _googleSignIn.authenticatedClient();
@@ -88,6 +93,13 @@ class GoogleDriveBackupService {
       if (_isNetworkClientError(error)) {
         throw StateError(
           'No internet connection. Please connect to the internet and try Google Drive backup again.',
+        );
+      }
+      rethrow;
+    } catch (error) {
+      if (_isDriveStorageFull(error)) {
+        throw StateError(
+          'Google Drive is full. Free up space in Google Drive, then try backup again.',
         );
       }
       rethrow;
@@ -183,5 +195,14 @@ class GoogleDriveBackupService {
         message.contains('failed host lookup') ||
         message.contains('connection failed') ||
         message.contains('network is unreachable');
+  }
+
+  bool _isDriveStorageFull(Object error) {
+    final message = error.toString().toLowerCase();
+    return message.contains('storagequotaexceeded') ||
+        message.contains('storage quota') ||
+        message.contains('insufficient storage') ||
+        message.contains('drive is full') ||
+        message.contains('quota exceeded');
   }
 }

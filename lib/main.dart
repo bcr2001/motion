@@ -5,6 +5,7 @@ import 'package:motion/motion_core/motion_providers/date_pvd/current_month_provi
 import 'package:motion/motion_core/motion_providers/date_pvd/current_year_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/first_and_last_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/seven_days_pvd.dart';
+import 'package:motion/motion_core/motion_providers/cloud_backup_pvd/auto_drive_backup_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/experience_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
@@ -44,6 +45,11 @@ void main() async {
   final userUidProvider = UserUidProvider();
   await userUidProvider.initializeUidSharedPreferences();
 
+  final autoDriveBackupProvider = AutoDriveBackupProvider(
+    userUidProvider: userUidProvider,
+  );
+  await autoDriveBackupProvider.initialize();
+
   // AssignerProvider
   final assignerProvider = AssignerMainProvider();
   await assignerProvider.getAllUserItems();
@@ -78,6 +84,7 @@ void main() async {
       ChangeNotifierProvider.value(value: trackSubcategoryDatabaseProvider),
       ChangeNotifierProvider.value(value: assignerProvider),
       ChangeNotifierProvider.value(value: userUidProvider),
+      ChangeNotifierProvider.value(value: autoDriveBackupProvider),
       ChangeNotifierProvider(create: (context) => DropDownTrackProvider()),
       ChangeNotifierProvider(create: (context) => CurrentDateProvider()),
       ChangeNotifierProvider(create: (context) => zenQuoteProvider),

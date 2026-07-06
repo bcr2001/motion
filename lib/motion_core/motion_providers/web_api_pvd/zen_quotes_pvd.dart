@@ -1,27 +1,28 @@
 import 'dart:async';
-import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:flutter/material.dart';
-import '../../../motion_reusable/general_reuseable.dart';
-import '../../../motion_core/mc_api/api_requests.dart';
-import '../../../motion_themes/mth_app/app_strings.dart';
+import 'package:motion/motion_core/mc_api/api_requests.dart';
+import 'package:motion/motion_core/motion_utils/motion_date_utils.dart';
+import 'package:motion/motion_reusable/general_reuseable.dart';
+import 'package:motion/motion_themes/mth_app/app_strings.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-// this class handles fetching and
-// persisting the Zen Quote of the day
-class ZenQuoteProvider extends ChangeNotifier {
-  // today's quote
+// Handles fetching and persisting the Zen Quote of the day.
+class ZenQuoteProvider extends ChangeNotifier with WidgetsBindingObserver {
+  ZenQuoteProvider() {
+    WidgetsBinding.instance.addObserver(this);
+  }
+
   String _todaysQuote = AppString.zenQuotesDefault;
+  SharedPreferences? _prefs;
+  Timer? _retryTimer;
+  bool _isFetchingQuote = false;
 
-  // get today's quote
   String get todaysQuote => _todaysQuote;
 
-  // shared preferences instance
-  SharedPreferences? _prefs;
-
-  // shared preference keys
   static const quoteKey = "zenQuote";
   static const dateKey = "zenQuoteDate";
 
-  // initializeSharedPreferences function
   Future<void> initializeSharedPreferences() async {
     if (_prefs != null) return;
 
@@ -29,59 +30,100 @@ class ZenQuoteProvider extends ChangeNotifier {
     await _loadSavedQuote();
   }
 
-  // Check the date and fetch a new quote if it's a new day
   Future<void> _checkAndFetchNewQuote() async {
-    final savedDate = _prefs?.getString(dateKey);
-    final parsedDate =
-        savedDate == null ? null : DateTime.tryParse(savedDate);
-    if (parsedDate == null || !_isToday(parsedDate)) {
-      await fetchTodaysQuote();
+    final savedQuote = _prefs?.getString(quoteKey);
+    final savedDate = MotionDateUtils.parseStoredDate(
+      _prefs?.getString(dateKey),
+    );
+
+    if (_hasFreshRemoteQuote(savedQuote: savedQuote, savedDate: savedDate)) {
+      _retryTimer?.cancel();
+      return;
     }
+
+    final didFetchQuote = await fetchTodaysQuote();
+    if (!didFetchQuote) _scheduleRetry();
   }
 
-  Future<void> fetchTodaysQuote() async {
-    // fetches the Future<String> returned
-    // when fetchQuote() is executed
+  Future<bool> fetchTodaysQuote() async {
+    if (_isFetchingQuote) return false;
+    _isFetchingQuote = true;
+
     try {
-      _todaysQuote = await fetchZenQuote();
+      final fetchedQuote = await fetchZenQuote();
+      if (!_isRemoteQuote(fetchedQuote)) {
+        if (_todaysQuote.trim().isEmpty) {
+          _todaysQuote = AppString.zenQuotesDefault;
+          notifyListeners();
+        }
+        return false;
+      }
 
-      // save preferences
-      _prefs?.setString(quoteKey, _todaysQuote);
-      _prefs?.setString(dateKey, DateTime.now().toIso8601String());
-
-      // notify listeners of changes
+      _retryTimer?.cancel();
+      _todaysQuote = fetchedQuote!;
+      await _prefs?.setString(quoteKey, _todaysQuote);
+      await _prefs?.setString(dateKey, MotionDateUtils.todayIso());
       notifyListeners();
-    } catch (e) {
-      logger.e("Error: $e");
-      _todaysQuote =
-          "“Time is what we want most, but what we use worst.” - William Penn";
-      notifyListeners();
+      return true;
+    } catch (error) {
+      logger.e("Error fetching today's quote: $error");
+      return false;
+    } finally {
+      _isFetchingQuote = false;
     }
   }
 
-  // load saved quote
   Future<void> _loadSavedQuote() async {
     final savedQuote = _prefs?.getString(quoteKey);
-    final savedDate = _prefs?.getString(dateKey);
+    final savedDate = MotionDateUtils.parseStoredDate(
+      _prefs?.getString(dateKey),
+    );
 
-    if (savedQuote != null) {
+    if (savedQuote != null && savedQuote.trim().isNotEmpty) {
       _todaysQuote = savedQuote;
       notifyListeners();
     }
 
-    final parsedDate =
-        savedDate == null ? null : DateTime.tryParse(savedDate);
-    if (parsedDate == null || !_isToday(parsedDate)) {
+    if (!_hasFreshRemoteQuote(savedQuote: savedQuote, savedDate: savedDate)) {
       unawaited(_checkAndFetchNewQuote());
     }
   }
 
-  // this function checks whether it's the next day
-  // or still the current date
-  bool _isToday(DateTime date) {
-    final now = DateTime.now();
-    return now.year == date.year &&
-        now.month == date.month &&
-        now.day == date.day;
+  void _scheduleRetry() {
+    _retryTimer?.cancel();
+    _retryTimer = Timer(const Duration(minutes: 2), () {
+      unawaited(_checkAndFetchNewQuote());
+    });
+  }
+
+  bool _hasFreshRemoteQuote({
+    required String? savedQuote,
+    required DateTime? savedDate,
+  }) {
+    return savedDate != null &&
+        MotionDateUtils.isSameDate(savedDate, MotionDateUtils.today()) &&
+        _isRemoteQuote(savedQuote);
+  }
+
+  bool _isRemoteQuote(String? quote) {
+    final trimmed = quote?.trim();
+    return trimmed != null &&
+        trimmed.isNotEmpty &&
+        trimmed != AppString.defaultAppQuote &&
+        trimmed != AppString.zenQuotesDefault;
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      unawaited(_checkAndFetchNewQuote());
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _retryTimer?.cancel();
+    super.dispose();
   }
 }

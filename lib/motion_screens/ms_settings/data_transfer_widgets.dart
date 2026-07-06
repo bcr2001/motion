@@ -437,6 +437,192 @@ class _SummaryPill extends StatelessWidget {
   }
 }
 
+class _AutoDriveBackupCard extends StatelessWidget {
+  const _AutoDriveBackupCard({
+    required this.backup,
+    required this.onChanged,
+    required this.onRunNow,
+  });
+
+  final AutoDriveBackupProvider backup;
+  final ValueChanged<bool>? onChanged;
+  final VoidCallback? onRunNow;
+
+  Color _statusColor() {
+    switch (backup.status) {
+      case AutoDriveBackupStatus.success:
+        return AppColor.accountedColor;
+      case AutoDriveBackupStatus.pendingOffline:
+        return AppColor.workPieChartColor;
+      case AutoDriveBackupStatus.blocked:
+        return Colors.redAccent;
+      case AutoDriveBackupStatus.running:
+        return AppColor.blueMainColor;
+      case AutoDriveBackupStatus.noData:
+      case AutoDriveBackupStatus.idle:
+        return Colors.blueGrey;
+    }
+  }
+
+  IconData _statusIcon() {
+    switch (backup.status) {
+      case AutoDriveBackupStatus.success:
+        return Icons.check_circle_rounded;
+      case AutoDriveBackupStatus.pendingOffline:
+        return Icons.cloud_off_rounded;
+      case AutoDriveBackupStatus.blocked:
+        return Icons.error_rounded;
+      case AutoDriveBackupStatus.running:
+        return Icons.sync_rounded;
+      case AutoDriveBackupStatus.noData:
+        return Icons.info_rounded;
+      case AutoDriveBackupStatus.idle:
+        return Icons.schedule_rounded;
+    }
+  }
+
+  String _formatTimestamp(String? value) {
+    if (value == null || value.isEmpty) return 'Not backed up yet';
+    final parsed = DateTime.tryParse(value);
+    if (parsed == null) return value;
+
+    final hour = parsed.hour % 12 == 0 ? 12 : parsed.hour % 12;
+    final minute = parsed.minute.toString().padLeft(2, '0');
+    final period = parsed.hour >= 12 ? 'PM' : 'AM';
+    return '${parsed.year}-${parsed.month.toString().padLeft(2, '0')}-'
+        '${parsed.day.toString().padLeft(2, '0')} at $hour:$minute $period';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final borderColor =
+        isDarkMode ? Colors.white.withValues(alpha: 0.08) : Colors.black12;
+    final detailColor = isDarkMode ? Colors.white70 : Colors.blueGrey;
+    final statusColor = _statusColor();
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  height: 38,
+                  width: 38,
+                  decoration: BoxDecoration(
+                    color: AppColor.blueMainColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.cloud_sync_rounded,
+                    color: AppColor.blueMainColor,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Automatic Google Drive Backup',
+                        style: AppTextStyle.subSectionTextStyle(
+                          fontsize: 15,
+                          fontweight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Runs once per day after 8 PM, or the next time Motion is opened.',
+                        style: AppTextStyle.manualHintTextStyle(fontsize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+                Switch.adaptive(
+                  value: backup.isEnabled,
+                  onChanged: onChanged,
+                  activeColor: AppColor.blueMainColor,
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 10),
+              decoration: BoxDecoration(
+                color: statusColor.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(13),
+                border: Border.all(color: borderColor),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(_statusIcon(), size: 20, color: statusColor),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          backup.message,
+                          style: AppTextStyle.subSectionTextStyle(
+                            fontsize: 12.5,
+                            fontweight: FontWeight.w800,
+                            color: statusColor,
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          'Last successful backup: '
+                          '${_formatTimestamp(backup.lastSuccessAt)}',
+                          style: AppTextStyle.subSectionTextStyle(
+                            fontsize: 11.5,
+                            fontweight: FontWeight.normal,
+                            color: detailColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (backup.isEnabled) ...[
+              const SizedBox(height: 10),
+              Align(
+                alignment: Alignment.centerRight,
+                child: OutlinedButton.icon(
+                  onPressed: onRunNow,
+                  icon: backup.isRunning
+                      ? const SizedBox(
+                          height: 16,
+                          width: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.cloud_upload_rounded, size: 17),
+                  label: Text(backup.isRunning ? 'Backing Up' : 'Back Up Now'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColor.blueMainColor,
+                    side: BorderSide(
+                      color: AppColor.blueMainColor.withValues(alpha: 0.45),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _DataTransferDialog extends StatelessWidget {
   const _DataTransferDialog({
     required this.icon,
