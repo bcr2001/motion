@@ -2,7 +2,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:motion/motion_core/mc_sqlite/xp_policy.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_date_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_month_provider_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_year_pvd.dart';
@@ -11,7 +10,7 @@ import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/assigner_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/experience_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
-import 'package:motion/motion_core/motion_rewards/efs_badge_policy.dart';
+import 'package:motion/motion_core/motion_rewards/daily_xp_target_status.dart';
 import 'package:motion/motion_reusable/date_re/year_progress.dart';
 import 'package:motion/motion_reusable/db_re/sub_logic.dart';
 import 'package:motion/motion_reusable/db_re/sub_ui.dart';
@@ -51,43 +50,28 @@ Future<void> maybeShowDailyXpTargetCelebration(BuildContext context) async {
     currentUser: currentUser,
     currentYear: currentYear,
   );
-  final results = await Future.wait<int>([
-    xpProvider.retrieveTotalXP(
-      currentUser: currentUser,
-      isEntire: false,
-      year: currentYear,
-    ),
-    xpProvider.retrieveYearExperiencePointDays(
-      currentUser: currentUser,
-      year: currentYear,
-    ),
-    xpProvider.retrieveDailyExperiencePoints(
-      currentUser: currentUser,
-      selectedDate: currentDate,
-    ),
-  ]);
-
-  final progress = EfsBadgePolicy.nextBadgeProgress(
+  final status = await loadDailyXpTargetStatus(
+    xpProvider: xpProvider,
+    currentUser: currentUser,
+    currentYear: currentYear,
+    currentDate: currentDate,
     currentScore: score,
-    currentYearXp: results[0],
-    trackedDays: results[1],
   );
-  final targetXp = progress.isTopBadge
-      ? MotionXpPolicy.maxDailyXp
-      : progress.averageDailyXp.ceil();
-  final earnedXp = results[2];
+  final targetXp = status.targetXp;
+  final earnedXp = status.earnedXp;
 
   debugLog(
     'XP TARGET CELEBRATION DIRECT: date=$currentDate earned=$earnedXp target=$targetXp '
-    'score=$score yearXp=${results[0]} trackedDays=${results[1]}',
+    'score=$score',
   );
 
   if (targetXp <= 0) return;
 
   final hasAlreadyShown = prefs.getBool(celebrationKey) == true;
-  if (earnedXp < targetXp) {
+  if (!status.hasMetTarget) {
     if (hasAlreadyShown) {
       await prefs.remove(celebrationKey);
+      await prefs.remove('${celebrationKey}_earned_xp');
       _activeDailyXpCelebrations.remove(celebrationKey);
       debugLog(
         'XP TARGET CELEBRATION DIRECT: reset shown state because earned XP dropped below target.',
@@ -98,7 +82,7 @@ Future<void> maybeShowDailyXpTargetCelebration(BuildContext context) async {
 
   if (hasAlreadyShown) {
     debugLog(
-      'XP TARGET CELEBRATION DIRECT: skipped because it was already shown for $currentDate.',
+      'XP TARGET CELEBRATION DIRECT: skipped because the target star is already visible for $currentDate.',
     );
     return;
   }

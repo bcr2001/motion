@@ -207,18 +207,6 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
     await preferences.setStringList(storageKey, nextEntries);
   }
 
-  Future<void> _resetDailyXpTargetCelebration(Subcategories block) async {
-    if (block.currentLoggedInUser.isEmpty || block.date.isEmpty) return;
-
-    final prefs = await SharedPreferences.getInstance();
-    final celebrationKey =
-        'daily_xp_target_celebration_v4_${block.currentLoggedInUser}-${block.date}';
-    await prefs.remove(celebrationKey);
-    debugLog(
-      'XP TARGET CELEBRATION DIRECT: reset shown state after deleting a tracked block for ${block.date}.',
-    );
-  }
-
   @override
   void dispose() {
     // Dispose of the text editing controllers to prevent memory leaks
@@ -931,7 +919,6 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                       deletedSubcategory: block,
                     );
                     _hasChangedTrackedTime = true;
-                    await _resetDailyXpTargetCelebration(block);
                     context
                         .read<ExperiencePointTableProvider>()
                         .refreshExperiencePointViews();

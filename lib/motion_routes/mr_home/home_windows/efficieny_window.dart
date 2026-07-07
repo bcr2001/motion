@@ -5,6 +5,7 @@ import 'package:motion/motion_core/motion_providers/date_pvd/current_year_pvd.da
 import 'package:motion/motion_core/motion_providers/date_pvd/first_and_last_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
+import 'package:motion/motion_core/motion_rewards/daily_xp_target_status.dart';
 import 'package:motion/motion_core/motion_rewards/efs_badge_policy.dart';
 import 'package:motion/motion_core/motion_widgets/home_analytics_widget.dart';
 import 'package:motion/motion_reusable/db_re/sub_ui.dart';
@@ -68,10 +69,30 @@ class EfficienyScoreSelectedDay extends StatelessWidget {
 class XPForTheCurrentDay extends StatelessWidget {
   const XPForTheCurrentDay({super.key});
 
+  Future<DailyXpTargetStatus> _loadStatus({
+    required ExperiencePointTableProvider xpProvider,
+    required String currentUser,
+    required String currentYear,
+    required String currentDate,
+  }) async {
+    final score = await xpProvider.retrieveYearExperiencePointsEfficiencyScore(
+      currentUser: currentUser,
+      currentYear: currentYear,
+    );
+    return loadDailyXpTargetStatus(
+      xpProvider: xpProvider,
+      currentUser: currentUser,
+      currentYear: currentYear,
+      currentDate: currentDate,
+      currentScore: score,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Consumer3<ExperiencePointTableProvider, CurrentDateProvider,
-        UserUidProvider>(builder: (context, xp, date, user, child) {
+    return Consumer4<ExperiencePointTableProvider, CurrentDateProvider,
+            CurrentYearProvider, UserUidProvider>(
+        builder: (context, xp, date, year, user, child) {
       // current date
       final today = date.currentDate;
 
@@ -82,24 +103,45 @@ class XPForTheCurrentDay extends StatelessWidget {
         return const ShimmerWidget.rectangular(width: 120, height: 40);
       }
 
-      return CachedFutureBuilder<int>(
-          cacheKey: 'today-xp-$currentUserUid-$today-${xp.refreshKey}',
-          futureFactory: () => xp.retrieveDailyExperiencePoints(
-              currentUser: currentUserUid, selectedDate: today),
+      return CachedFutureBuilder<DailyXpTargetStatus>(
+          cacheKey:
+              'today-xp-status-$currentUserUid-${year.currentYear}-$today-${xp.refreshKey}',
+          futureFactory: () => _loadStatus(
+                xpProvider: xp,
+                currentUser: currentUserUid,
+                currentYear: year.currentYear,
+                currentDate: today,
+              ),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const ShimmerWidget.rectangular(width: 120, height: 40);
             } else if (snapshot.hasError) {
               return Text('Error: ${snapshot.error}');
             } else {
-              final totalXPEarned = snapshot.data ?? 0;
+              final status = snapshot.data;
+              final totalXPEarned = status?.earnedXp ?? 0;
+              final hasMetDailyTarget = status?.hasMetTarget ?? false;
 
-              return Text(
-                " $totalXPEarned XP\nEarned",
-                style: const TextStyle(
-                    fontSize: 21,
-                    fontWeight: FontWeight.w600,
-                    color: AppColor.accountedColor),
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (hasMetDailyTarget) ...[
+                    Image.asset(
+                      'assets/images/motion_badges/xp_earned_star.png',
+                      width: 25,
+                      height: 25,
+                      fit: BoxFit.contain,
+                    ),
+                    const SizedBox(width: 3),
+                  ],
+                  Text(
+                    " $totalXPEarned XP\nEarned",
+                    style: const TextStyle(
+                        fontSize: 21,
+                        fontWeight: FontWeight.w600,
+                        color: AppColor.accountedColor),
+                  ),
+                ],
               );
             }
           });
@@ -388,43 +430,68 @@ class CurrentYearEFSDisplay extends StatelessWidget {
     required String currentYear,
     required String currentDate,
   }) async {
-    final results = await Future.wait<int>([
-      xpProvider.retrieveTotalXP(
+    final results = await Future.wait<Object>([
+      loadDailyXpTargetStatus(
+        xpProvider: xpProvider,
         currentUser: currentUser,
-        isEntire: false,
-        year: currentYear,
-      ),
-      xpProvider.retrieveYearExperiencePointDays(
-        currentUser: currentUser,
-        year: currentYear,
-      ),
-      xpProvider.retrieveDailyExperiencePoints(
-        currentUser: currentUser,
-        selectedDate: currentDate,
+        currentYear: currentYear,
+        currentDate: currentDate,
+        currentScore: score,
       ),
       trackerProvider.retrievedUserStreak(currentUser: currentUser),
     ]);
-    final totalXp = results[0];
-    final trackedDays = results[1];
-    final todayXp = results[2];
-    final currentStreak = results[3];
-
-    final progress = EfsBadgePolicy.nextBadgeProgress(
-      currentScore: score,
-      currentYearXp: totalXp,
-      trackedDays: trackedDays,
-    );
+    final status = results[0] as DailyXpTargetStatus;
+    final currentStreak = results[1] as int;
 
     await HomeAnalyticsWidget.update(
-      todayXp: todayXp,
-      targetXp: progress.isTopBadge
-          ? MotionXpPolicy.maxDailyXp
-          : progress.averageDailyXp.ceil(),
+      todayXp: status.earnedXp,
+      targetXp: status.targetXp,
       currentStreak: currentStreak,
       badge: EfsBadgePolicy.badgeForScore(score),
     );
 
-    return progress;
+    return status.progress;
+  }
+
+  Widget _dailyXpTargetStar({
+    required ExperiencePointTableProvider xpProvider,
+    required String currentUser,
+    required String currentYear,
+    required String currentDate,
+  }) {
+    return CachedFutureBuilder<DailyXpTargetStatus>(
+      cacheKey:
+          'daily-xp-target-star-$currentUser-$currentYear-$currentDate-$score-${xpProvider.refreshKey}',
+      futureFactory: () => loadDailyXpTargetStatus(
+        xpProvider: xpProvider,
+        currentUser: currentUser,
+        currentYear: currentYear,
+        currentDate: currentDate,
+        currentScore: score,
+      ),
+      builder: (context, snapshot) {
+        final status = snapshot.data;
+        if (snapshot.connectionState == ConnectionState.waiting ||
+            snapshot.hasError ||
+            status == null ||
+            !status.hasMetTarget) {
+          return const SizedBox.shrink();
+        }
+
+        return Padding(
+          padding: const EdgeInsets.only(left: 5),
+          child: Tooltip(
+            message: 'Daily XP target met',
+            child: Image.asset(
+              'assets/images/motion_badges/xp_earned_star.png',
+              width: 22,
+              height: 22,
+              fit: BoxFit.contain,
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Future<_XpTargetDialogData> _loadXpTargetDialogData({
@@ -1003,8 +1070,9 @@ class CurrentYearEFSDisplay extends StatelessWidget {
         efficiencySection(score: "$score", getEntire: isEntire),
 
         // total XP for the current year
-        Consumer3<ExperiencePointTableProvider, UserUidProvider,
-            CurrentYearProvider>(builder: (context, xps, user, year, child) {
+        Consumer4<ExperiencePointTableProvider, UserUidProvider,
+                CurrentYearProvider, CurrentDateProvider>(
+            builder: (context, xps, user, year, date, child) {
           // current user that's logged in
           final String? currentUser = user.userUid;
           if (currentUser == null) {
@@ -1075,6 +1143,12 @@ class CurrentYearEFSDisplay extends StatelessWidget {
                                 Icons.info_outline_rounded,
                                 size: 14,
                                 color: AppColor.accountedColor,
+                              ),
+                              _dailyXpTargetStar(
+                                xpProvider: xps,
+                                currentUser: currentUser,
+                                currentYear: currentYear,
+                                currentDate: date.currentDate,
                               ),
                             ],
                           ),
