@@ -453,47 +453,6 @@ class CurrentYearEFSDisplay extends StatelessWidget {
     return status.progress;
   }
 
-  Widget _dailyXpTargetStar({
-    required ExperiencePointTableProvider xpProvider,
-    required String currentUser,
-    required String currentYear,
-    required String currentDate,
-  }) {
-    return CachedFutureBuilder<DailyXpTargetStatus>(
-      cacheKey:
-          'daily-xp-target-star-$currentUser-$currentYear-$currentDate-$score-${xpProvider.refreshKey}',
-      futureFactory: () => loadDailyXpTargetStatus(
-        xpProvider: xpProvider,
-        currentUser: currentUser,
-        currentYear: currentYear,
-        currentDate: currentDate,
-        currentScore: score,
-      ),
-      builder: (context, snapshot) {
-        final status = snapshot.data;
-        if (snapshot.connectionState == ConnectionState.waiting ||
-            snapshot.hasError ||
-            status == null ||
-            !status.hasMetTarget) {
-          return const SizedBox.shrink();
-        }
-
-        return Padding(
-          padding: const EdgeInsets.only(left: 5),
-          child: Tooltip(
-            message: 'Daily XP target met',
-            child: Image.asset(
-              'assets/images/motion_badges/xp_earned_star.png',
-              width: 22,
-              height: 22,
-              fit: BoxFit.contain,
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   Future<_XpTargetDialogData> _loadXpTargetDialogData({
     required ExperiencePointTableProvider xpProvider,
     required MainCategoryTrackerProvider trackerProvider,
@@ -1143,12 +1102,6 @@ class CurrentYearEFSDisplay extends StatelessWidget {
                                 Icons.info_outline_rounded,
                                 size: 14,
                                 color: AppColor.accountedColor,
-                              ),
-                              _dailyXpTargetStar(
-                                xpProvider: xps,
-                                currentUser: currentUser,
-                                currentYear: currentYear,
-                                currentDate: date.currentDate,
                               ),
                             ],
                           ),

@@ -82,6 +82,13 @@ class MotionAwards {
       assetPath: 'assets/images/motion_badges/50000_hour_award.png',
       lockedAssetPath: 'assets/images/motion_badges/50000_hour_award_locked.png',
     ),
+    MotionAward(
+      name: 'Eternal',
+      requiredHours: 100000,
+      assetPath: 'assets/images/motion_badges/100000_hour_award.png',
+      lockedAssetPath:
+          'assets/images/motion_badges/100000_hour_award_locked.png',
+    ),
   ];
 
   static MotionAward? earnedAt(double trackedHours) {
