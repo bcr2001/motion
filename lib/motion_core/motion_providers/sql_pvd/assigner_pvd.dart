@@ -6,11 +6,12 @@ import 'package:motion/motion_core/mc_sqlite/sql_assigner_db.dart';
 
 import 'current_user_guard.dart';
 
-// database instance
-final AssignerDatabaseHelper dbInstance = AssignerDatabaseHelper();
-
 // handles the database operations for the to_assign table
 class AssignerMainProvider extends ChangeNotifier {
+  AssignerMainProvider({AssignerDatabaseHelper? databaseHelper})
+      : dbInstance = databaseHelper ?? AssignerDatabaseHelper();
+
+  final AssignerDatabaseHelper dbInstance;
   int _refreshKey = 0;
 
   int get refreshKey => _refreshKey;

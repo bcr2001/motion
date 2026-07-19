@@ -33,14 +33,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.13.0"
-  avatar_glow:
-    dependency: "direct main"
-    description:
-      name: avatar_glow
-      sha256: "848d9a85065e398241d8ffae0dcc50902980c24490aef21fd4c6b6342d4c26b4"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.1"
   boolean_selector:
     dependency: transitive
     description:
@@ -121,14 +113,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.0"
-  decimal:
-    dependency: transitive
-    description:
-      name: decimal
-      sha256: "24a261d5d5c87e86c7651c417a5dbdf8bcd7080dd592533910e8d0505a279f21"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.3.3"
   equatable:
     dependency: transitive
     description:
@@ -238,14 +222,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_charts:
-    dependency: "direct main"
-    description:
-      name: flutter_charts
-      sha256: eb9d2bf98bfc779c1da9cf1fe80afd598094aed33e536cf04845d8f266f48c11
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.5.2"
   flutter_heatmap_calendar:
     dependency: "direct main"
     description:
@@ -576,14 +552,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.0"
-  percent_indicator:
-    dependency: "direct main"
-    description:
-      name: percent_indicator
-      sha256: "157d29133bbc6ecb11f923d36e7960a96a3f28837549a20b65e5135729f0f9fd"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.2.5"
   petitparser:
     dependency: transitive
     description:
@@ -624,14 +592,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.0"
-  rational:
-    dependency: transitive
-    description:
-      name: rational
-      sha256: cb808fb6f1a839e6fc5f7d8cb3b0a10e1db48b3be102de73938c627f0b636336
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.2.3"
   shared_preferences:
     dependency: "direct main"
     description:
@@ -797,14 +757,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.9"
-  tuple:
-    dependency: transitive
-    description:
-      name: tuple
-      sha256: a97ce2013f240b2f3807bcbaf218765b6f301c3eff91092bcfa23a039e7dd151
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.2"
   typed_data:
     dependency: transitive
     description:
@@ -862,7 +814,7 @@ packages:
     source: hosted
     version: "1.1.1"
   win32:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: win32
       sha256: d7cb55e04cd34096cd3a79b3330245f54cb96a370a1c27adb3c84b917de8b08e

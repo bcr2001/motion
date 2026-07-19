@@ -1,8 +1,7 @@
 // minutes to respective time components
 import 'package:motion/motion_reusable/general_reuseable.dart';
+import 'package:motion/motion_core/mc_sqlite/sql_tracker_db.dart';
 import 'package:sqflite/sqflite.dart';
-
-import '../../main.dart';
 
 // returns the full time representation of minutes
 // for example 150mins => 2hrs 50mins
@@ -108,7 +107,7 @@ double timeAdder({required String h, required String m, required String s}) {
 
 // Check if the date and currentLoggedInUser exist in the main category table
 Future<bool> mainCategoryExists(String date, String currentUser) async {
-  final Database db = await trackDbInstance.database;
+  final Database db = await TrackerDatabaseHelper().database;
 
   final mainCategoryExistsQuery = await db.rawQuery('''
     SELECT 1
@@ -120,7 +119,7 @@ Future<bool> mainCategoryExists(String date, String currentUser) async {
 
 // Check if the date and currentLoggedInUser exist in the experience_points table
 Future<bool> experiencePointsExists(String date, String currentUser) async {
-  final Database db = await trackDbInstance.database;
+  final Database db = await TrackerDatabaseHelper().database;
 
   final expPointsExistsQuery = await db.rawQuery('''
     SELECT 1

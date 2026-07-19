@@ -11,8 +11,17 @@ class AuthPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<UserUidProvider>(
-      builder: (context, user, child) =>
-          user.userUid == null ? const AppDirection() : const MainMotionHome(),
+      builder: (context, user, child) {
+        if (!user.isInitialized) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        return user.userUid == null
+            ? const AppDirection()
+            : const MainMotionHome();
+      },
     );
   }
 }

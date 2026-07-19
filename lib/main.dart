@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:motion/firebase_options.dart';
@@ -27,49 +29,49 @@ final GlobalKey<NavigatorState> navigationKey = GlobalKey<NavigatorState>();
 
 // This instantiates a database helper class (TrackerDatabaseHelper) for
 // managing database operations, likely related to tracking functionality.
-final TrackerDatabaseHelper trackDbInstance = TrackerDatabaseHelper();
-
-final TrackerDatabaseHelper databaseHelper = TrackerDatabaseHelper();
-
 void main() async {
   // Ensures that the Flutter framework is fully initialized before running the app.
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
+  final trackerDatabase = TrackerDatabaseHelper();
+
   // ZenQuoteProvider
   final zenQuoteProvider = ZenQuoteProvider();
-  await zenQuoteProvider.initializeSharedPreferences();
 
   // UserUidProvider
   final userUidProvider = UserUidProvider();
-  await userUidProvider.initializeUidSharedPreferences();
 
   final autoDriveBackupProvider = AutoDriveBackupProvider(
     userUidProvider: userUidProvider,
   );
-  await autoDriveBackupProvider.initialize();
 
   // AssignerProvider
   final assignerProvider = AssignerMainProvider();
-  await assignerProvider.getAllUserItems();
 
   // theme mode provider N1
   final themeModeProviderN1 = AppThemeModeProviderN1();
-  await themeModeProviderN1.initSharedPreferences();
+  await _initializeSafely(
+    'Theme',
+    themeModeProviderN1.initSharedPreferences,
+  );
 
   // TrackDatabaseProvider
   final trackingDataRevisions = TrackingDataRevisions();
 
   final trackSubcategoryDatabaseProvider = SubcategoryTrackerDatabaseProvider(
     revisions: trackingDataRevisions,
+    databaseHelper: trackerDatabase,
   );
 
   final trackMainCategoryDatabaseProvider = MainCategoryTrackerProvider(
     revisions: trackingDataRevisions,
+    databaseHelper: trackerDatabase,
   );
   final experiencePointTableProvider = ExperiencePointTableProvider(
     revisions: trackingDataRevisions,
+    databaseHelper: trackerDatabase,
   );
 
   runApp(MultiProvider(
@@ -92,6 +94,39 @@ void main() async {
     ],
     child: const MainMotionApp(),
   ));
+
+  unawaited(
+    Future.wait([
+      _initializeSafely(
+        'Zen quotes',
+        zenQuoteProvider.initializeSharedPreferences,
+      ),
+      _initializeSafely(
+        'User session',
+        userUidProvider.initializeUidSharedPreferences,
+      ),
+      _initializeSafely(
+        'Automatic Drive backup',
+        autoDriveBackupProvider.initialize,
+      ),
+      _initializeSafely(
+        'Assigned subcategories',
+        assignerProvider.getAllUserItems,
+      ),
+    ]),
+  );
+}
+
+Future<void> _initializeSafely(
+  String serviceName,
+  Future<void> Function() initialize,
+) async {
+  try {
+    await initialize();
+  } catch (error, stackTrace) {
+    debugPrint('$serviceName initialization failed: $error');
+    debugPrintStack(stackTrace: stackTrace);
+  }
 }
 
 // Material App and theme configuration

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:motion/motion_core/mc_firebase/firebase_services.dart';
 import 'package:motion/motion_core/mc_firebase/google_services.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
+import 'package:motion/motion_screens/ms_analysis/date_range_analysis_page.dart';
 import 'package:motion/motion_screens/ms_awards/awards_page.dart';
 import 'package:motion/motion_screens/ms_settings/settings_page.dart';
 import 'package:motion/motion_screens/ms_tips/tips_page.dart';
@@ -23,14 +24,14 @@ class MotionActionButtons extends StatelessWidget {
       children: [
         // report gif
         GestureDetector(
-          onTap: (){
-            Navigator.push(
+            onTap: () {
+              Navigator.push(
                   context,
                   MaterialPageRoute(
                       builder: (BuildContext context) =>
                           const MonthlyReportPage()));
-          },
-          child: AppImages.animatedBarChart),
+            },
+            child: AppImages.animatedBarChart),
 
         // popup menu button
         const MainRoutePopUpMenu()
@@ -119,6 +120,7 @@ showAlertDialog(BuildContext context) {
                       onPressed: () async {
                         Navigator.pop(dialogContext);
                         await AuthServices.signOutUser(context);
+                        if (!context.mounted) return;
                         await GoogleAuthService.signOutGoogle(context);
                       },
                       style: ElevatedButton.styleFrom(
@@ -224,6 +226,14 @@ class MainRoutePopUpMenu extends StatelessWidget {
                 builder: (BuildContext context) => const AwardsPage(),
               ),
             );
+          } else if (value == AppString.dateRangeAnalysisValue) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (BuildContext context) =>
+                    const DateRangeAnalysisPage(),
+              ),
+            );
           } else if (value == AppString.tipsValue) {
             Navigator.push(
                 context,
@@ -245,6 +255,15 @@ class MainRoutePopUpMenu extends StatelessWidget {
               itemName: AppString.awardsTitle,
               icon: Icons.emoji_events_outlined,
               itemColor: Colors.amber.shade700,
+            ),
+
+            // Range Analysis
+            _popUpItemBuilder(
+              context: context,
+              value: AppString.dateRangeAnalysisValue,
+              itemName: AppString.dateRangeAnalysisTitle,
+              icon: Icons.query_stats_rounded,
+              itemColor: AppColor.accountedColor,
             ),
 
             // Tips

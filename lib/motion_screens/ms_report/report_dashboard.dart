@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:motion/motion_core/mc_analytics/analytics_models.dart';
 import 'package:motion/motion_core/mc_sqlite/database_constants.dart';
 import 'package:motion/motion_core/motion_utils/motion_date_utils.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/first_and_last_pvd.dart';
@@ -48,8 +49,8 @@ class MonthlySnapshotDashboard extends StatelessWidget {
           return const _SnapshotSkeleton();
         }
 
-        return FutureBuilder<Map<String, dynamic>>(
-          future: main.retrieveMonthlyReportSnapshot(
+        return FutureBuilder<ReportSnapshot>(
+          future: main.retrieveReportSnapshot(
             currentUser: currentUser,
             firstDay: days.firstDay,
             lastDay: days.lastDay,
@@ -59,14 +60,14 @@ class MonthlySnapshotDashboard extends StatelessWidget {
               return const _SnapshotSkeleton();
             }
 
-            final data = snapshot.data ?? const {};
-            final efs = _asDouble(data['efficiencyScore']);
+            final data = snapshot.data ?? ReportSnapshot.empty;
+            final efs = data.efficiencyScore;
             final badge = EfsBadgePolicy.badgeForScore(efs);
-            final trackedDays = _asInt(data['trackedDays']);
-            final totalXp = _asInt(data['totalXp']);
-            final accountedMinutes = _asDouble(data['accountedMinutes']);
-            final bestDay = _formatDate(data['bestDay']);
-            final bestDayXp = _asInt(data['bestDayXp']);
+            final trackedDays = data.trackedDays;
+            final totalXp = data.totalXp;
+            final accountedMinutes = data.accountedMinutes;
+            final bestDay = _formatDate(data.bestDay);
+            final bestDayXp = data.bestDayXp;
 
             return _ReportPanel(
               padding: const EdgeInsets.all(16),
@@ -203,8 +204,8 @@ class _MonthlyDailyXpTrendChartState extends State<MonthlyDailyXpTrendChart> {
           return const _ChartSkeleton(titleWidth: 112);
         }
 
-        return FutureBuilder<List<Map<String, dynamic>>>(
-          future: main.retrieveMonthlyDailyXpTrend(
+        return FutureBuilder<List<DailyXpPoint>>(
+          future: main.retrieveDailyXpTrendPoints(
             currentUser: currentUser,
             firstDay: days.firstDay,
             lastDay: days.lastDay,
@@ -300,8 +301,9 @@ class _MonthlyDailyXpTrendChartState extends State<MonthlyDailyXpTrendChart> {
                                       padding: const EdgeInsets.only(top: 7),
                                       child: Text(
                                         '$day',
-                                        style: AppTextStyle.chartLabelTextStyle()
-                                            .copyWith(fontSize: 9.0),
+                                        style:
+                                            AppTextStyle.chartLabelTextStyle()
+                                                .copyWith(fontSize: 9.0),
                                       ),
                                     );
                                   },
@@ -359,8 +361,8 @@ class MonthlyCategoryBreakdownBars extends StatelessWidget {
           return const _ListSkeleton(titleWidth: 120, rows: 6);
         }
 
-        return FutureBuilder<List<Map<String, dynamic>>>(
-          future: main.retrieveMainTotalTimeSpentSpecificDates(
+        return FutureBuilder<List<CategoryTimeTotal>>(
+          future: main.retrieveCategoryTimeTotalsForPeriod(
             currentUser: currentUser,
             firstDay: days.firstDay,
             lastDay: days.lastDay,
@@ -370,14 +372,11 @@ class MonthlyCategoryBreakdownBars extends StatelessWidget {
               return const _ListSkeleton(titleWidth: 120, rows: 6);
             }
 
-            final rows = [...snapshot.data ?? const <Map<String, dynamic>>[]]
-              ..sort(
-                (a, b) => _asDouble(b['totalTimeSpent'])
-                    .compareTo(_asDouble(a['totalTimeSpent'])),
-              );
+            final rows = [...snapshot.data ?? const <CategoryTimeTotal>[]]
+              ..sort((a, b) => b.totalHours.compareTo(a.totalHours));
             final totalHours = rows.fold<double>(
               0,
-              (sum, row) => sum + _asDouble(row['totalTimeSpent']),
+              (sum, row) => sum + row.totalHours,
             );
 
             return _ReportPanel(
@@ -395,9 +394,8 @@ class MonthlyCategoryBreakdownBars extends StatelessWidget {
                   else
                     ...rows.map(
                       (row) {
-                        final category =
-                            row[MotionDbColumns.mainCategoryName].toString();
-                        final hours = _asDouble(row['totalTimeSpent']);
+                        final category = row.mainCategoryName;
+                        final hours = row.totalHours;
                         final percentage =
                             totalHours <= 0 ? 0.0 : hours / totalHours;
 
@@ -431,8 +429,8 @@ class MonthlyTopSubcategorySection extends StatelessWidget {
           return const _ListSkeleton(titleWidth: 142, rows: 5);
         }
 
-        return FutureBuilder<List<Map<String, dynamic>>>(
-          future: main.retrieveTopSubcategoriesForPeriod(
+        return FutureBuilder<List<SubcategoryTimeTotal>>(
+          future: main.retrieveTopSubcategoryTotalsForPeriod(
             currentUser: currentUser,
             firstDay: days.firstDay,
             lastDay: days.lastDay,
@@ -443,10 +441,10 @@ class MonthlyTopSubcategorySection extends StatelessWidget {
               return const _ListSkeleton(titleWidth: 142, rows: 5);
             }
 
-            final rows = snapshot.data ?? const <Map<String, dynamic>>[];
+            final rows = snapshot.data ?? const <SubcategoryTimeTotal>[];
             final maxMinutes = rows.fold<double>(
               0,
-              (value, row) => max(value, _asDouble(row['totalTimeSpent'])),
+              (value, row) => max(value, row.totalMinutes),
             );
 
             return _ReportPanel(
@@ -465,13 +463,10 @@ class MonthlyTopSubcategorySection extends StatelessWidget {
                     for (var i = 0; i < rows.length; i++)
                       _TopSubcategoryRow(
                         rank: i + 1,
-                        subcategory:
-                            rows[i][MotionDbColumns.subcategoryName].toString(),
-                        mainCategory:
-                            rows[i][MotionDbColumns.mainCategoryName].toString(),
-                        minutes: _asDouble(rows[i]['totalTimeSpent']),
-                        progress: _asDouble(rows[i]['totalTimeSpent']) /
-                            maxMinutes,
+                        subcategory: rows[i].subcategoryName,
+                        mainCategory: rows[i].mainCategoryName,
+                        minutes: rows[i].totalMinutes,
+                        progress: rows[i].totalMinutes / maxMinutes,
                       ),
                 ],
               ),
@@ -496,8 +491,8 @@ class MonthlyInsightCards extends StatelessWidget {
           return const _InsightsSkeleton();
         }
 
-        return FutureBuilder<Map<String, dynamic>>(
-          future: main.retrieveMonthlyReportSnapshot(
+        return FutureBuilder<ReportSnapshot>(
+          future: main.retrieveReportSnapshot(
             currentUser: currentUser,
             firstDay: days.firstDay,
             lastDay: days.lastDay,
@@ -507,12 +502,12 @@ class MonthlyInsightCards extends StatelessWidget {
               return const _InsightsSkeleton();
             }
 
-            final data = snapshot.data ?? const {};
-            final trackedDays = _asInt(data['trackedDays']);
-            final totalXp = _asInt(data['totalXp']);
+            final data = snapshot.data ?? ReportSnapshot.empty;
+            final trackedDays = data.trackedDays;
+            final totalXp = data.totalXp;
             final avgXp = trackedDays == 0 ? 0 : totalXp / trackedDays;
-            final accountedMinutes = _asDouble(data['accountedMinutes']);
-            final unaccountedMinutes = _asDouble(data['unaccountedMinutes']);
+            final accountedMinutes = data.accountedMinutes;
+            final unaccountedMinutes = data.unaccountedMinutes;
             final totalMinutes = accountedMinutes + unaccountedMinutes;
             final accountedPercent =
                 totalMinutes <= 0 ? 0 : accountedMinutes / totalMinutes * 100;
@@ -556,7 +551,7 @@ class MonthlyInsightCards extends StatelessWidget {
                         icon: Icons.north_east_rounded,
                         title: 'Best Day',
                         value:
-                            '${_formatDate(data['bestDay'])} - ${_asInt(data['bestDayXp'])} XP',
+                            '${_formatDate(data.bestDay)} - ${data.bestDayXp} XP',
                         color: AppColor.accountedColor,
                       ),
                     ),
@@ -566,7 +561,7 @@ class MonthlyInsightCards extends StatelessWidget {
                         icon: Icons.south_east_rounded,
                         title: 'Lowest Day',
                         value:
-                            '${_formatDate(data['lowestDay'])} - ${_asInt(data['lowestDayXp'])} XP',
+                            '${_formatDate(data.lowestDay)} - ${data.lowestDayXp} XP',
                         color: AppColor.unAccountedColor,
                       ),
                     ),
@@ -649,8 +644,7 @@ class _SnapshotSkeleton extends StatelessWidget {
             spacing: 10,
             runSpacing: 10,
             children: [
-              for (var i = 0; i < 4; i++)
-                const _MetricSkeletonTile(),
+              for (var i = 0; i < 4; i++) const _MetricSkeletonTile(),
             ],
           ),
         ],
@@ -809,23 +803,23 @@ class _InsightsSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return const Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
+        Padding(
           padding: EdgeInsets.only(left: 4, bottom: 8),
           child: ShimmerWidget.rectangular(width: 118, height: 18),
         ),
         Row(
-          children: const [
+          children: [
             Expanded(child: _InsightSkeletonTile()),
             SizedBox(width: 10),
             Expanded(child: _InsightSkeletonTile()),
           ],
         ),
-        const SizedBox(height: 10),
+        SizedBox(height: 10),
         Row(
-          children: const [
+          children: [
             Expanded(child: _InsightSkeletonTile()),
             SizedBox(width: 10),
             Expanded(child: _InsightSkeletonTile()),
@@ -1264,7 +1258,7 @@ class _DailyTrendPoint {
 List<_DailyTrendPoint> _filledDailyTrend({
   required String firstDay,
   required String lastDay,
-  required List<Map<String, dynamic>> rows,
+  required List<DailyXpPoint> rows,
 }) {
   final first = DateTime.parse(firstDay);
   final rawLast = DateTime.parse(lastDay);
@@ -1272,8 +1266,7 @@ List<_DailyTrendPoint> _filledDailyTrend({
   final today = DateTime(now.year, now.month, now.day);
   final last = rawLast.isAfter(today) ? today : rawLast;
   final xpByDate = {
-    for (final row in rows)
-      row[MotionDbColumns.date].toString(): _asInt(row['totalXp'])
+    for (final row in rows) row.date: row.totalXp,
   };
 
   final points = <_DailyTrendPoint>[];
@@ -1309,17 +1302,6 @@ Color _categoryColor(String category) {
     default:
       return AppColor.blueMainColor;
   }
-}
-
-double _asDouble(dynamic value) {
-  if (value is num) return value.toDouble();
-  return double.tryParse(value?.toString() ?? '') ?? 0.0;
-}
-
-int _asInt(dynamic value) {
-  if (value is int) return value;
-  if (value is num) return value.toInt();
-  return int.tryParse(value?.toString() ?? '') ?? 0;
 }
 
 String _formatDate(dynamic value) {

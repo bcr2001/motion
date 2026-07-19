@@ -38,7 +38,6 @@ dependencies:
   flutter_svg:
   intl: ^0.20.2
   http: ^1.6.0
-  win32: ^5.10.0
   
 
   # The following adds the Cupertino Icons font to your application.
@@ -52,11 +51,8 @@ dependencies:
   fl_chart: ^0.68.0
   google_sign_in: ^6.2.2
   path_provider: ^2.1.5
-  flutter_charts: ^0.5.2
   flutter_heatmap_calendar: ^1.0.5
-  avatar_glow: ^3.0.1
   date_picker_plus: ^6.0.0
-  percent_indicator: ^4.2.3
   google_sign_in_android: ^6.1.35
   csv: ^6.0.0
   file_picker: ^8.1.7
@@ -93,9 +89,6 @@ flutter:
   assets:
     - assets/images/motion_icons/
     - assets/images/motion_badges/
-    - assets/data_csv/to_assign.csv
-    - assets/data_csv/main_category.csv
-    - assets/data_csv/subcategory.csv
 
 
 

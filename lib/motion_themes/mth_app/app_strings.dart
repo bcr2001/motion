@@ -35,6 +35,7 @@ class AppString {
   static const String cancelTitle = "Cancel";
   static const String settingsTitle = "Settings";
   static const String awardsTitle = "Awards";
+  static const String dateRangeAnalysisTitle = "Range Analysis";
   static const String tipsTitle = "FAQ";
   static const String themeSettingsTitle = "Theme Settings";
   static const String subcategoryExampleTitles = "Subcategory Examples";
@@ -45,6 +46,7 @@ class AppString {
   static const String logOutValue = "logout";
   static const String settingsValue = "setting";
   static const String awardsValue = "awards";
+  static const String dateRangeAnalysisValue = "range_analysis";
   static const String tipsValue = "faq";
 
   // settings page

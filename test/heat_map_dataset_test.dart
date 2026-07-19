@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'dart:io';
 
 import 'package:motion/motion_screens/ms_report/report_heat_map.dart';
 
@@ -36,28 +35,23 @@ void main() {
       expect(data[DateTime(2026, 6, 4)], 25);
     });
 
-    test('June 1 to June 3 2026 seed rows have shadeable intensity', () {
-      final subcategoryCsv =
-          File('assets/data_csv/subcategory.csv').readAsStringSync();
-      final rows = subcategoryCsv.split(RegExp(r'\r?\n'));
+    test('tracked minutes produce shadeable heat-map intensity', () {
+      const dailyMinutesByDate = {
+        '6/1/2026': 360.0,
+        '6/2/2026': 180.0,
+        '6/3/2026': 45.0,
+      };
 
-      for (final date in ['6/1/2026', '6/2/2026', '6/3/2026']) {
-        final dailyMinutes =
-            rows.where((row) => row.startsWith('$date,')).map((row) {
-          final columns = row.split(',');
-          return double.tryParse(columns[3].replaceAll('mins', '').trim()) ??
-              0.0;
-        }).fold<double>(0.0, (sum, minutes) => sum + minutes);
-
+      for (final entry in dailyMinutesByDate.entries) {
         final heatMapData = datasetFormatConverter(data: [
           {
-            'date': date,
-            'intensity': int.parse(calculateScoreFromMinutes(dailyMinutes)),
+            'date': entry.key,
+            'intensity':
+                int.parse(calculateScoreFromMinutes(entry.value)),
           },
         ]);
 
-        expect(dailyMinutes, greaterThan(0));
-        expect(heatMapData[parseHeatMapDate(date)], greaterThan(0));
+        expect(heatMapData[parseHeatMapDate(entry.key)], greaterThan(0));
       }
     });
   });

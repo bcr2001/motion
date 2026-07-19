@@ -6,25 +6,38 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 // A class responsible for managing the user's UID and saving it to SharedPreferences.
 class UserUidProvider extends ChangeNotifier {
+  UserUidProvider({
+    String? initialUserUid,
+    bool isInitialized = false,
+  })  : _userUid = initialUserUid,
+        _isInitialized = isInitialized;
+
   SharedPreferences? _pref;
   StreamSubscription<User?>? _authSubscription;
+  bool _isInitialized;
 
   static const String uidKey = "uidKeys";
 
   // Initialize SharedPreferences for UID storage.
   Future<void> initializeUidSharedPreferences() async {
-    if (_pref != null) return;
+    if (_isInitialized) return;
 
-    _pref = await SharedPreferences.getInstance();
-    await _loadSavedUid();
-    await _syncFirebaseUser(FirebaseAuth.instance.currentUser);
-    _authSubscription =
-        FirebaseAuth.instance.authStateChanges().listen(_syncFirebaseUser);
+    try {
+      _pref ??= await SharedPreferences.getInstance();
+      await _loadSavedUid();
+      await _syncFirebaseUser(FirebaseAuth.instance.currentUser);
+      _authSubscription ??=
+          FirebaseAuth.instance.authStateChanges().listen(_syncFirebaseUser);
+    } finally {
+      _isInitialized = true;
+      notifyListeners();
+    }
   }
 
   String? _userUid;
 
   String? get userUid => _userUid;
+  bool get isInitialized => _isInitialized;
 
   // Set the user's UID, save it to SharedPreferences, and notify listeners.
   void setUserUid(String uid) {

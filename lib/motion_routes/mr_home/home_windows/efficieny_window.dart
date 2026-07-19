@@ -9,7 +9,6 @@ import 'package:motion/motion_core/motion_rewards/daily_xp_target_status.dart';
 import 'package:motion/motion_core/motion_rewards/efs_badge_policy.dart';
 import 'package:motion/motion_core/motion_widgets/home_analytics_widget.dart';
 import 'package:motion/motion_reusable/db_re/sub_ui.dart';
-import 'package:motion/motion_reusable/general_reuseable.dart';
 import 'package:motion/motion_routes/mr_home/home_reusable/back_home.dart';
 import 'package:motion/motion_screens/ms_tips/badge_assignment.dart';
 import 'package:motion/motion_themes/mth_app/app_images.dart';
@@ -90,9 +89,11 @@ class XPForTheCurrentDay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer4<ExperiencePointTableProvider, CurrentDateProvider,
-            CurrentYearProvider, UserUidProvider>(
-        builder: (context, xp, date, year, user, child) {
+    return Consumer4<
+        ExperiencePointTableProvider,
+        CurrentDateProvider,
+        CurrentYearProvider,
+        UserUidProvider>(builder: (context, xp, date, year, user, child) {
       // current date
       final today = date.currentDate;
 
@@ -131,6 +132,8 @@ class XPForTheCurrentDay extends StatelessWidget {
                       width: 25,
                       height: 25,
                       fit: BoxFit.contain,
+                      cacheWidth: 75,
+                      filterQuality: FilterQuality.medium,
                     ),
                     const SizedBox(width: 3),
                   ],
@@ -293,6 +296,7 @@ class EfficienyScoreSelectedYearOrMonth extends StatelessWidget {
       ),
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return Consumer3<ExperiencePointTableProvider, UserUidProvider,
@@ -312,8 +316,9 @@ class EfficienyScoreSelectedYearOrMonth extends StatelessWidget {
           ? CachedFutureBuilder<double>(
               cacheKey:
                   'selected-year-efs-$currentUserUid-$selectedYear-${xp.refreshKey}',
-              futureFactory: () => xp.retrieveYearExperiencePointsEfficiencyScore(
-                  currentUser: currentUserUid, currentYear: selectedYear),
+              futureFactory: () =>
+                  xp.retrieveYearExperiencePointsEfficiencyScore(
+                      currentUser: currentUserUid, currentYear: selectedYear),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const ShimmerWidget.rectangular(width: 50, height: 30);
@@ -384,8 +389,9 @@ class EfficienyScoreWindow extends StatelessWidget {
               })
           : CachedFutureBuilder<double>(
               cacheKey: 'year-efs-$currentUser-$currentYear-${xp.refreshKey}',
-              futureFactory: () => xp.retrieveYearExperiencePointsEfficiencyScore(
-                  currentUser: currentUser, currentYear: currentYear),
+              futureFactory: () =>
+                  xp.retrieveYearExperiencePointsEfficiencyScore(
+                      currentUser: currentUser, currentYear: currentYear),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const ShimmerWidget.rectangular(width: 50, height: 30);
@@ -702,7 +708,8 @@ class CurrentYearEFSDisplay extends StatelessWidget {
     required int earnedToday,
     required int dailyTarget,
   }) {
-    final remainingXp = dailyTarget > earnedToday ? dailyTarget - earnedToday : 0;
+    final remainingXp =
+        dailyTarget > earnedToday ? dailyTarget - earnedToday : 0;
     final hasMetDailyTarget = earnedToday >= dailyTarget;
 
     return Row(
@@ -857,7 +864,8 @@ class CurrentYearEFSDisplay extends StatelessWidget {
     showDialog<void>(
       context: context,
       builder: (dialogContext) {
-        final isDarkMode = Theme.of(dialogContext).brightness == Brightness.dark;
+        final isDarkMode =
+            Theme.of(dialogContext).brightness == Brightness.dark;
 
         return Consumer4<ExperiencePointTableProvider, UserUidProvider,
             CurrentYearProvider, CurrentDateProvider>(
@@ -1168,9 +1176,11 @@ class CurrentYearEFSDisplay extends StatelessWidget {
   }
 
   Widget _nextBadgeProgressRow(BuildContext context) {
-    return Consumer4<ExperiencePointTableProvider, UserUidProvider,
-        CurrentYearProvider, CurrentDateProvider>(
-        builder: (context, xp, user, year, date, child) {
+    return Consumer4<
+        ExperiencePointTableProvider,
+        UserUidProvider,
+        CurrentYearProvider,
+        CurrentDateProvider>(builder: (context, xp, user, year, date, child) {
       final String? currentUser = user.userUid;
       if (currentUser == null) {
         return const ShimmerWidget.rectangular(width: 160, height: 24);

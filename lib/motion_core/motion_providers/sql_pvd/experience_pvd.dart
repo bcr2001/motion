@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:motion/motion_core/mc_sqlite/sql_tracker_db.dart';
-import '../../../main.dart';
 import '../../mc_sql_table/experience_table.dart';
 import 'current_user_guard.dart';
 import 'tracking_data_revisions.dart';
@@ -8,13 +7,17 @@ import 'tracking_data_revisions.dart';
 // EXPERIENCE POINT TABLE
 // handles database operations for the experience_points table
 class ExperiencePointTableProvider extends ChangeNotifier {
-  ExperiencePointTableProvider({TrackingDataRevisions? revisions})
-      : _revisions = revisions ?? TrackingDataRevisions() {
+  ExperiencePointTableProvider({
+    TrackingDataRevisions? revisions,
+    TrackerDatabaseHelper? databaseHelper,
+  })  : trackDbInstance = databaseHelper ?? TrackerDatabaseHelper(),
+        _revisions = revisions ?? TrackingDataRevisions() {
     _lastRevision = _revisions.experiencePointRevision;
     _revisions.addListener(_handleRevisionChange);
   }
 
   final TrackingDataRevisions _revisions;
+  final TrackerDatabaseHelper trackDbInstance;
   late int _lastRevision;
 
   int get refreshKey => _revisions.experiencePointRevision;

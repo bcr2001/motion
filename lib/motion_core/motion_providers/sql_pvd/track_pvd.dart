@@ -1,23 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:motion/motion_core/mc_analytics/analytics_models.dart';
 import 'package:motion/motion_core/mc_sql_table/main_table.dart';
 import 'package:motion/motion_core/mc_sql_table/streak_status.dart';
 import 'package:motion/motion_core/mc_sql_table/sub_table.dart';
 import 'package:motion/motion_core/mc_sqlite/sql_tracker_db.dart';
 
-import '../../../main.dart';
 import 'current_user_guard.dart';
 import 'tracking_data_revisions.dart';
 
 // MAIN CATEGORY TABLE
 //handles database operations for the main_category table
 class MainCategoryTrackerProvider extends ChangeNotifier {
-  MainCategoryTrackerProvider({TrackingDataRevisions? revisions})
-      : _revisions = revisions ?? TrackingDataRevisions() {
+  MainCategoryTrackerProvider({
+    TrackingDataRevisions? revisions,
+    TrackerDatabaseHelper? databaseHelper,
+  })  : trackDbInstance = databaseHelper ?? TrackerDatabaseHelper(),
+        _revisions = revisions ?? TrackingDataRevisions() {
     _lastRevision = _revisions.mainCategoryRevision;
     _revisions.addListener(_handleRevisionChange);
   }
 
   final TrackingDataRevisions _revisions;
+  final TrackerDatabaseHelper trackDbInstance;
   late int _lastRevision;
 
   int get refreshKey => _revisions.mainCategoryRevision;
@@ -291,6 +295,60 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
     );
   }
 
+  Future<ReportSnapshot> retrieveReportSnapshot({
+    required String currentUser,
+    required String firstDay,
+    required String lastDay,
+  }) async {
+    final row = await retrieveMonthlyReportSnapshot(
+      currentUser: currentUser,
+      firstDay: firstDay,
+      lastDay: lastDay,
+    );
+    return ReportSnapshot.fromMap(row);
+  }
+
+  Future<List<DailyXpPoint>> retrieveDailyXpTrendPoints({
+    required String currentUser,
+    required String firstDay,
+    required String lastDay,
+  }) async {
+    final rows = await retrieveMonthlyDailyXpTrend(
+      currentUser: currentUser,
+      firstDay: firstDay,
+      lastDay: lastDay,
+    );
+    return rows.map(DailyXpPoint.fromMap).toList(growable: false);
+  }
+
+  Future<List<CategoryTimeTotal>> retrieveCategoryTimeTotalsForPeriod({
+    required String currentUser,
+    required String firstDay,
+    required String lastDay,
+  }) async {
+    final rows = await retrieveMainTotalTimeSpentSpecificDates(
+      currentUser: currentUser,
+      firstDay: firstDay,
+      lastDay: lastDay,
+    );
+    return rows.map(CategoryTimeTotal.fromMap).toList(growable: false);
+  }
+
+  Future<List<SubcategoryTimeTotal>> retrieveTopSubcategoryTotalsForPeriod({
+    required String currentUser,
+    required String firstDay,
+    required String lastDay,
+    int limit = 5,
+  }) async {
+    final rows = await retrieveTopSubcategoriesForPeriod(
+      currentUser: currentUser,
+      firstDay: firstDay,
+      lastDay: lastDay,
+      limit: limit,
+    );
+    return rows.map(SubcategoryTimeTotal.fromMap).toList(growable: false);
+  }
+
   // accounted time and unaccounted time for everyday
   // for a particular week
   Future<List<Map<String, dynamic>>> retrieveAWeekOfAccountedAndAccountedData(
@@ -361,13 +419,17 @@ class MainCategoryTrackerProvider extends ChangeNotifier {
 // SUBCATEGORY TABLE
 // handles database operation for the subcategory table
 class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
-  SubcategoryTrackerDatabaseProvider({TrackingDataRevisions? revisions})
-      : _revisions = revisions ?? TrackingDataRevisions() {
+  SubcategoryTrackerDatabaseProvider({
+    TrackingDataRevisions? revisions,
+    TrackerDatabaseHelper? databaseHelper,
+  })  : trackDbInstance = databaseHelper ?? TrackerDatabaseHelper(),
+        _revisions = revisions ?? TrackingDataRevisions() {
     _lastRevision = _revisions.subcategoryRevision;
     _revisions.addListener(_handleRevisionChange);
   }
 
   final TrackingDataRevisions _revisions;
+  final TrackerDatabaseHelper trackDbInstance;
   late int _lastRevision;
 
   int get refreshKey => _revisions.subcategoryRevision;
@@ -448,7 +510,7 @@ class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
 
   // get the entire month total for all subcategories
   Future<double> retrieveMonthTotalTimeSpent(
-      String currentUser, startingDate, endingDate) async {
+      String currentUser, String startingDate, String endingDate) async {
     return await trackDbInstance.getMonthTotalTimeSpent(
         requireCurrentUser(currentUser), startingDate, endingDate);
   }

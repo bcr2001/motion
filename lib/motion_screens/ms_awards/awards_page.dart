@@ -118,9 +118,8 @@ class AwardsPage extends StatelessWidget {
     );
     final remaining =
         nextAward == null ? 0.0 : nextAward.requiredHours - trackedHours;
-    final earnedDate = currentAward == null
-        ? null
-        : earnedDates[currentAward.requiredHours];
+    final earnedDate =
+        currentAward == null ? null : earnedDates[currentAward.requiredHours];
 
     return MotionPanel(
       padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
@@ -246,10 +245,9 @@ class AwardsPage extends StatelessWidget {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final hasEarnedDate = earned && earnedDate != null;
-          final imageSize =
-              constraints.maxWidth < constraints.maxHeight
-                  ? constraints.maxWidth
-                  : constraints.maxHeight;
+          final imageSize = constraints.maxWidth < constraints.maxHeight
+              ? constraints.maxWidth
+              : constraints.maxHeight;
           final displayImageSize =
               hasEarnedDate ? (imageSize - 34).clamp(0, imageSize) : imageSize;
 
@@ -294,7 +292,7 @@ class AwardsPage extends StatelessWidget {
                   right: 0,
                   bottom: 0,
                   child: MotionStatusPill(
-                    label: _earnedDateLabel(earnedDate!),
+                    label: _earnedDateLabel(earnedDate),
                     color: Colors.green,
                   ),
                 ),
