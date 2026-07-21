@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:motion/motion_core/motion_providers/date_pvd/first_and_last_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_reusable/db_re/sub_logic.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
+import 'package:motion/motion_reusable/motion_ui/subcategory_rank_indicator.dart';
+import 'package:motion/motion_routes/mr_home/home_windows/subcategory_rank_movement.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:provider/provider.dart';
@@ -38,6 +41,8 @@ class _SubTotalsListState extends State<SubTotalsList> {
   Future<List<Map<String, dynamic>>>? _subcategoryTotalsFuture;
   String? _loadedUserUid;
   int? _loadedRefreshKey;
+  String? _loadedPeriodStart;
+  String? _loadedPeriodEnd;
   String _searchQuery = "";
 
   @override
@@ -50,18 +55,56 @@ class _SubTotalsListState extends State<SubTotalsList> {
   Future<List<Map<String, dynamic>>> _getSubcategoryTotalsFuture({
     required SubcategoryTrackerDatabaseProvider sub,
     required String userUid,
+    required String periodStart,
+    required String periodEnd,
   }) {
     if (_subcategoryTotalsFuture == null ||
         _loadedUserUid != userUid ||
-        _loadedRefreshKey != sub.refreshKey) {
+        _loadedRefreshKey != sub.refreshKey ||
+        _loadedPeriodStart != periodStart ||
+        _loadedPeriodEnd != periodEnd) {
       _loadedUserUid = userUid;
       _loadedRefreshKey = sub.refreshKey;
-      _subcategoryTotalsFuture = sub.retrieveAllSubcategoryTotals(
-        currentUser: userUid,
+      _loadedPeriodStart = periodStart;
+      _loadedPeriodEnd = periodEnd;
+      _subcategoryTotalsFuture = _loadRankedSubcategoryTotals(
+        sub: sub,
+        userUid: userUid,
+        periodStart: periodStart,
+        periodEnd: periodEnd,
       );
     }
 
     return _subcategoryTotalsFuture!;
+  }
+
+  Future<List<Map<String, dynamic>>> _loadRankedSubcategoryTotals({
+    required SubcategoryTrackerDatabaseProvider sub,
+    required String userUid,
+    required String periodStart,
+    required String periodEnd,
+  }) async {
+    final totalsFuture = sub.retrieveAllSubcategoryTotals(
+      currentUser: userUid,
+    );
+    final currentMonthItemsFuture = sub.retrieveMonthTotalAndAverage(
+      userUid,
+      periodStart,
+      periodEnd,
+      true,
+    );
+
+    final totals = await totalsFuture;
+    final currentMonthItems = await currentMonthItemsFuture;
+    final currentMonthTotals = <String, double>{
+      for (final item in currentMonthItems)
+        item['subcategoryName'].toString():
+            (item['total'] as num?)?.toDouble() ?? 0,
+    };
+    return applySubcategoryRankMovement(
+      rankedItems: totals,
+      comparisonPeriodTotals: currentMonthTotals,
+    );
   }
 
   Widget _summaryHeader({
@@ -291,7 +334,6 @@ class _SubTotalsListState extends State<SubTotalsList> {
 
   Widget _subcategoryTotalCard({
     required BuildContext context,
-    required int index,
     required Map<String, dynamic> subTotalItem,
   }) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
@@ -305,7 +347,13 @@ class _SubTotalsListState extends State<SubTotalsList> {
     final convertedSubTotal = convertMinutesToTime(total);
     final convertedSubAverage = convertMinutesToHoursOnly(average);
     final convertedTotalDays = (total / 1440).toStringAsFixed(2);
-    final rankColor = index < 3 ? AppColor.accountedColor : Colors.blueGrey;
+    final currentRank = (subTotalItem['currentRank'] as num?)?.toInt() ?? 0;
+    final rankMovement = (subTotalItem['rankMovement'] as num?)?.toInt() ?? 0;
+    final isNewRank = subTotalItem['isNewRank'] == true;
+    final mainCategoryName = subTotalItem['mainCategoryName']?.toString() ?? '';
+    final rankColor = currentRank > 0 && currentRank <= 3
+        ? AppColor.accountedColor
+        : Colors.blueGrey;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
@@ -329,7 +377,7 @@ class _SubTotalsListState extends State<SubTotalsList> {
                 ),
                 child: Center(
                   child: Text(
-                    "${index + 1}",
+                    "$currentRank",
                     style: AppTextStyle.subSectionTextStyle(
                       fontsize: 12,
                       fontweight: FontWeight.w800,
@@ -340,16 +388,42 @@ class _SubTotalsListState extends State<SubTotalsList> {
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: Text(
-                  subTotalItem["subcategoryName"]?.toString() ?? "",
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyle.subSectionTextStyle(
-                    fontsize: 14,
-                    fontweight: FontWeight.w800,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      subTotalItem["subcategoryName"]?.toString() ?? "",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyle.subSectionTextStyle(
+                        fontsize: 14,
+                        fontweight: FontWeight.w800,
+                      ),
+                    ),
+                    if (mainCategoryName.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        mainCategoryName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyle.subSectionTextStyle(
+                          fontsize: 10.5,
+                          fontweight: FontWeight.normal,
+                          color: Colors.blueGrey,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
+              if (rankMovement != 0 || isNewRank) ...[
+                const SizedBox(width: 8),
+                SubcategoryRankIndicator(
+                  rankMovement: rankMovement,
+                  isNewRank: isNewRank,
+                  periodLabel: 'this month',
+                ),
+              ],
             ],
           ),
           const SizedBox(height: 14),
@@ -384,8 +458,8 @@ class _SubTotalsListState extends State<SubTotalsList> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<SubcategoryTrackerDatabaseProvider, UserUidProvider>(
-        builder: (context, sub, user, child) {
+    return Consumer3<SubcategoryTrackerDatabaseProvider, UserUidProvider,
+        FirstAndLastDay>(builder: (context, sub, user, monthRange, child) {
       // current user uid
       final userUid = user.userUid;
 
@@ -394,7 +468,12 @@ class _SubTotalsListState extends State<SubTotalsList> {
       }
 
       return FutureBuilder<List<Map<String, dynamic>>>(
-          future: _getSubcategoryTotalsFuture(sub: sub, userUid: userUid),
+          future: _getSubcategoryTotalsFuture(
+            sub: sub,
+            userUid: userUid,
+            periodStart: monthRange.firstDay,
+            periodEnd: monthRange.lastDay,
+          ),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
@@ -413,7 +492,11 @@ class _SubTotalsListState extends State<SubTotalsList> {
                       final subcategoryName =
                           item["subcategoryName"]?.toString().toLowerCase() ??
                               "";
-                      return subcategoryName.contains(_searchQuery);
+                      final mainCategoryName =
+                          item["mainCategoryName"]?.toString().toLowerCase() ??
+                              "";
+                      return subcategoryName.contains(_searchQuery) ||
+                          mainCategoryName.contains(_searchQuery);
                     }).toList();
               final totalMinutes = allSubcategoryTotals.fold<double>(
                   0.0,
@@ -448,8 +531,7 @@ class _SubTotalsListState extends State<SubTotalsList> {
                       context: context,
                       subcategoryCount: allSubcategoryTotals.length,
                       totalMinutes: totalMinutes,
-                      visibleSubcategoryCount:
-                          filteredSubcategoryTotals.length,
+                      visibleSubcategoryCount: filteredSubcategoryTotals.length,
                     );
                   }
 
@@ -462,15 +544,9 @@ class _SubTotalsListState extends State<SubTotalsList> {
                   }
 
                   final subTotalItem = filteredSubcategoryTotals[index - 2];
-                  final originalIndex = allSubcategoryTotals.indexWhere(
-                    (item) =>
-                        item["subcategoryName"] ==
-                        subTotalItem["subcategoryName"],
-                  );
 
                   return _subcategoryTotalCard(
                     context: context,
-                    index: originalIndex < 0 ? index - 2 : originalIndex,
                     subTotalItem: subTotalItem,
                   );
                 },

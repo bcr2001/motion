@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:motion/motion_core/mc_csv/csv_data_transfer.dart';
 import 'package:motion/motion_core/mc_sqlite/database_constants.dart';
+import 'package:motion/motion_core/mc_sqlite/tracking_time_policy.dart';
 import 'package:sqflite/sqflite.dart';
 
 void main() {
@@ -134,6 +135,37 @@ not-a-date,Skills,Bad Row,10,old-user
       expect(trackerDb.executedSql, isNotEmpty);
     });
 
+    test('rejects imports exceeding 24 hours before replacing existing data',
+        () async {
+      trackerDb.tables[MotionDbTables.subcategory] = [
+        {
+          MotionDbColumns.date: '2025-12-31',
+          MotionDbColumns.mainCategoryName: MotionCategories.skills,
+          MotionDbColumns.subcategoryName: 'Existing',
+          MotionDbColumns.timeSpent: 30.0,
+          MotionDbColumns.currentLoggedInUser: 'user-1',
+        },
+      ];
+      final file = writeCsv('subcategory.csv', '''
+date,mainCategoryName,subcategoryName,timeSpent,currentLoggedInUser
+1/1/2026,Skills,Chess,1000,old-user
+1/1/2026,Sleep,Sleep,500,old-user
+''');
+
+      await expectLater(
+        transfer.importCsv(
+          fileType: MotionCsvFileType.subcategory,
+          filePath: file.path,
+          currentUser: 'user-1',
+        ),
+        throwsA(isA<DailyTimeLimitExceeded>()),
+      );
+
+      final rows = trackerDb.tables[MotionDbTables.subcategory]!;
+      expect(rows, hasLength(1));
+      expect(rows.single[MotionDbColumns.subcategoryName], 'Existing');
+    });
+
     test('imports assigner csv with streak settings', () async {
       final file = writeCsv('to_assign.csv', '''
 currentLoggedInUser,subcategoryName,mainCategoryName,isActive,isArchive,dateCreated,isStreakActive,streakType,streakTargetMinutes,streakStartDate
@@ -206,7 +238,6 @@ old-user,,Skills,1,0,1/2/2026,0,,0,
       expect(files[1].content, contains('Skills,Chess,45.0,user-1'));
       expect(files[2].content, contains('Chess,Skills,1,0'));
     });
-
   });
 }
 
@@ -331,6 +362,9 @@ class _FakeMotionDatabase implements Database, Transaction {
   }
 
   String _tableFromSql(String sql) {
+    if (sql.contains(MotionDbTables.activeTimerSession)) {
+      return MotionDbTables.activeTimerSession;
+    }
     if (sql.contains(MotionDbTables.subcategory)) {
       return MotionDbTables.subcategory;
     }

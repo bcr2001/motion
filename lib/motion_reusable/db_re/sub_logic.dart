@@ -90,9 +90,15 @@ String convertHoursToDays(double minutes) {
 // time measurement adder
 // converts all non-mintutes time components adds them and returns a minute value
 double timeAdder({required String h, required String m, required String s}) {
-  double hours = double.parse(h) * 60;
-  double minutes = double.parse(m);
-  double seconds = double.parse(s) / 60;
+  double parseComponent(String value) {
+    final normalized = value.trim();
+    if (normalized.isEmpty) return 0;
+    return double.parse(normalized);
+  }
+
+  final hours = parseComponent(h) * 60;
+  final minutes = parseComponent(m);
+  final seconds = parseComponent(s) / 60;
 
   double addedTimeComponents = hours + minutes + seconds;
 

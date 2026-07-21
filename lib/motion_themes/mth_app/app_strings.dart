@@ -35,7 +35,6 @@ class AppString {
   static const String cancelTitle = "Cancel";
   static const String settingsTitle = "Settings";
   static const String awardsTitle = "Awards";
-  static const String dateRangeAnalysisTitle = "Range Analysis";
   static const String tipsTitle = "FAQ";
   static const String themeSettingsTitle = "Theme Settings";
   static const String subcategoryExampleTitles = "Subcategory Examples";
@@ -46,7 +45,6 @@ class AppString {
   static const String logOutValue = "logout";
   static const String settingsValue = "setting";
   static const String awardsValue = "awards";
-  static const String dateRangeAnalysisValue = "range_analysis";
   static const String tipsValue = "faq";
 
   // settings page
@@ -246,8 +244,7 @@ class AppString {
   static const String mainCategorySummaryTitle = "Category Summary Report";
   static const String mainCategoryTotalTitle = "Category Breakdown";
   static const String yearlyReportTitle = "Yearly Reports";
-  static const String viewSubcategoryTotalsTitle =
-      "View Subcategory Breakdown";
+  static const String viewSubcategoryTotalsTitle = "View Subcategory Breakdown";
   static const String subcategoryTotalsTitle = "Subcategory Totals";
 
   static const String chartingAYearInLinesTitle = "Graphing a Year in Lines";

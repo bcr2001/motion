@@ -3,6 +3,7 @@ class MotionDbTables {
   static const String subcategory = 'subcategory';
   static const String experiencePoints = 'experience_points';
   static const String assigner = 'to_assign';
+  static const String activeTimerSession = 'active_timer_session';
 }
 
 class MotionDbColumns {
@@ -31,6 +32,13 @@ class MotionDbColumns {
   static const String streakType = 'streakType';
   static const String streakTargetMinutes = 'streakTargetMinutes';
   static const String streakStartDate = 'streakStartDate';
+  static const String timerStartedAtEpochMs = 'timerStartedAtEpochMs';
+  static const String currentSegmentStartedAtEpochMs =
+      'currentSegmentStartedAtEpochMs';
+  static const String completedTimerSegments = 'completedTimerSegments';
+  static const String timerStatus = 'timerStatus';
+  static const String timerUpdatedAtEpochMs = 'timerUpdatedAtEpochMs';
+  static const String nextTimerReminderAtSeconds = 'nextTimerReminderAtSeconds';
 }
 
 class MotionCategories {

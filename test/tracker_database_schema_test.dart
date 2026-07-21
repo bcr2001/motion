@@ -3,8 +3,15 @@ import 'package:motion/motion_core/mc_sqlite/tracker_database_schema.dart';
 
 void main() {
   group('TrackerDatabaseSchema', () {
-    test('uses version 14 after changing productive XP pace', () {
-      expect(TrackerDatabaseSchema.version, 14);
+    test('uses version 16 after adding tracked-time limits', () {
+      expect(TrackerDatabaseSchema.version, 16);
+    });
+
+    test('defines the active timer session table', () {
+      expect(
+        TrackerDatabaseSchema.activeTimerSessionTable,
+        'active_timer_session',
+      );
     });
 
     test(
@@ -13,6 +20,10 @@ void main() {
       expect(
         TrackerDatabaseSchema.triggerNames,
         containsAll(<String>[
+          'validate_subcategory_time_insert',
+          'validate_subcategory_daily_total_insert',
+          'validate_subcategory_time_update',
+          'validate_subcategory_daily_total_update',
           'update_experience_points',
           'update_experience_points_after_update',
           'update_experience_points_after_delete',

@@ -9,6 +9,7 @@ import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_reusable/db_re/sub_logic.dart';
 import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
+import 'package:motion/motion_reusable/motion_ui/subcategory_rank_indicator.dart';
 import 'package:motion/motion_routes/mr_home/home_reusable/back_home.dart';
 import 'package:motion/motion_screens/ms_report/report_back.dart';
 import 'package:motion/motion_screens/ms_streak/streak_detail_page.dart';
@@ -16,6 +17,8 @@ import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:provider/provider.dart';
+
+import 'subcategory_rank_movement.dart';
 
 // Where the summary for the month is displayed
 // button toggles (Subcategory and Category)
@@ -31,7 +34,8 @@ class SummaryWindow extends StatelessWidget {
     showDialog<void>(
       context: context,
       builder: (dialogContext) {
-        final isDarkMode = Theme.of(dialogContext).brightness == Brightness.dark;
+        final isDarkMode =
+            Theme.of(dialogContext).brightness == Brightness.dark;
         final panelColor = isDarkMode
             ? AppColor.darkModeContentWidget
             : AppColor.lightModeContentWidget;
@@ -40,9 +44,8 @@ class SummaryWindow extends StatelessWidget {
         final accentColor = isSubcategory
             ? AppColor.blueMainColor
             : AppColor.selfDevelopmentPieChartColor;
-        final icon = isSubcategory
-            ? Icons.view_list_rounded
-            : Icons.donut_large_rounded;
+        final icon =
+            isSubcategory ? Icons.view_list_rounded : Icons.donut_large_rounded;
 
         return Dialog(
           backgroundColor: panelColor,
@@ -91,7 +94,9 @@ class SummaryWindow extends StatelessWidget {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              "Totals and daily averages",
+                              isSubcategory
+                                  ? "Monthly totals and today's rank movement"
+                                  : "Totals and daily averages",
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: AppTextStyle.subSectionTextStyle(
@@ -220,6 +225,8 @@ class SummaryWindow extends StatelessWidget {
     final total = convertMinutesToTime(item["total"]);
     final average = convertMinutesToHoursOnly(item["average"]);
     final rankMovement = (item["rankMovement"] as num?)?.toInt() ?? 0;
+    final isNewRank = item["isNewRank"] == true;
+    final displayRank = (item["currentRank"] as num?)?.toInt() ?? index + 1;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final accentColor =
         isSubcategory ? AppColor.blueMainColor : _summaryAccentForName(name);
@@ -247,7 +254,7 @@ class SummaryWindow extends StatelessWidget {
             ),
             child: Center(
               child: Text(
-                '${index + 1}',
+                '$displayRank',
                 style: AppTextStyle.subSectionTextStyle(
                   fontsize: 12,
                   fontweight: FontWeight.w900,
@@ -274,9 +281,12 @@ class SummaryWindow extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (isSubcategory && rankMovement != 0) ...[
+                    if (isSubcategory && (rankMovement != 0 || isNewRank)) ...[
                       const SizedBox(width: 5),
-                      _rankMovementIcon(rankMovement),
+                      SubcategoryRankIndicator(
+                        rankMovement: rankMovement,
+                        isNewRank: isNewRank,
+                      ),
                     ],
                   ],
                 ),
@@ -316,20 +326,6 @@ class SummaryWindow extends StatelessWidget {
     );
   }
 
-  Widget _rankMovementIcon(int rankMovement) {
-    final movedUp = rankMovement > 0;
-    final color = movedUp ? AppColor.accountedColor : Colors.redAccent;
-
-    return Tooltip(
-      message: movedUp ? 'Moved up this month' : 'Moved down this month',
-      child: Icon(
-        movedUp ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded,
-        color: color,
-        size: 16,
-      ),
-    );
-  }
-
   Future<List<Map<String, dynamic>>> _summaryItemsWithRankMovement({
     required SubcategoryTrackerDatabaseProvider sub,
     required String currentUser,
@@ -354,71 +350,13 @@ class SummaryWindow extends StatelessWidget {
       return items;
     }
 
-    items.sort((a, b) {
-      final totalCompare = ((b["total"] as num?)?.toDouble() ?? 0)
-          .compareTo((a["total"] as num?)?.toDouble() ?? 0);
-      if (totalCompare != 0) return totalCompare;
-      return a["subcategoryName"]
-          .toString()
-          .compareTo(b["subcategoryName"].toString());
-    });
-
     final todaysTotals =
         await sub.retrieveSubcategoryTotalsForDate(currentDate, currentUser);
-    final currentRanks = <String, int>{};
 
-    for (var i = 0; i < items.length; i++) {
-      currentRanks[items[i]["subcategoryName"].toString()] = i + 1;
-    }
-
-    final previousTotals = <Map<String, dynamic>>[];
-    for (final item in items) {
-      final name = item["subcategoryName"].toString();
-      final currentTotal = ((item["total"] as num?)?.toDouble() ?? 0);
-      final todayTotal = todaysTotals[name] ?? 0;
-      final previousTotal = currentTotal - todayTotal;
-
-      if (previousTotal > 0.0001) {
-        previousTotals.add({
-          "subcategoryName": name,
-          "total": previousTotal,
-        });
-      }
-    }
-
-    previousTotals.sort((a, b) {
-      final totalCompare = ((b["total"] as num).toDouble())
-          .compareTo((a["total"] as num).toDouble());
-      if (totalCompare != 0) return totalCompare;
-      return a["subcategoryName"]
-          .toString()
-          .compareTo(b["subcategoryName"].toString());
-    });
-
-    final previousRanks = <String, int>{};
-    for (var i = 0; i < previousTotals.length; i++) {
-      previousRanks[previousTotals[i]["subcategoryName"].toString()] = i + 1;
-    }
-
-    return items.map((item) {
-      final name = item["subcategoryName"].toString();
-      final currentRank = currentRanks[name];
-      final previousRank = previousRanks[name];
-      int rankMovement = 0;
-
-      if (currentRank != null && previousRank != null) {
-        if (currentRank < previousRank) {
-          rankMovement = 1;
-        } else if (currentRank > previousRank) {
-          rankMovement = -1;
-        }
-      }
-
-      return {
-        ...item,
-        "rankMovement": rankMovement,
-      };
-    }).toList();
+    return applySubcategoryRankMovement(
+      rankedItems: items,
+      comparisonPeriodTotals: todaysTotals,
+    );
   }
 
   Widget _dialogSummaryList({
@@ -586,19 +524,20 @@ class SummaryWindow extends StatelessWidget {
         if (currentUser == null) {
           return userLoadingIndicator();
         }
-    
+
         // first and last day of the current month
         final String firstDayOfMonth = day.firstDay;
         final String lastDayOfMonth = day.lastDay;
-    
+
         // if the total amount of time for the current
         // month is 0, then the summary page info
         // is displayed
         return CachedFutureBuilder<double>(
             cacheKey:
                 'summary-month-$currentUser-$firstDayOfMonth-$lastDayOfMonth-${main.refreshKey}',
-            futureFactory: () => main.retrieveEntireMonthlyTotalMainCategoryTable(
-                currentUser, firstDayOfMonth, lastDayOfMonth, false),
+            futureFactory: () =>
+                main.retrieveEntireMonthlyTotalMainCategoryTable(
+                    currentUser, firstDayOfMonth, lastDayOfMonth, false),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 // While the data is loading, a shimmer effect is shown
@@ -611,7 +550,7 @@ class SummaryWindow extends StatelessWidget {
                 return Text('Error: ${snapshot.error}');
               } else {
                 final snapshotData = snapshot.data;
-    
+
                 if (snapshotData! <= 0) {
                   return const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -716,7 +655,8 @@ class HomeStreaksSection extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Padding(
             padding: EdgeInsets.only(bottom: 8),
-            child: ShimmerWidget.rectangular(width: double.infinity, height: 58),
+            child:
+                ShimmerWidget.rectangular(width: double.infinity, height: 58),
           );
         }
 

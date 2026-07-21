@@ -158,8 +158,8 @@ class CategorySummaryReport extends StatelessWidget {
             height: 32,
             width: 32,
             decoration: BoxDecoration(
-              color: AppColor.selfDevelopmentPieChartColor
-                  .withValues(alpha: 0.12),
+              color:
+                  AppColor.selfDevelopmentPieChartColor.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Icon(
@@ -182,33 +182,13 @@ class CategorySummaryReport extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final panelColor = isDarkMode
-        ? AppColor.darkModeContentWidget
-        : AppColor.lightModeContentWidget;
-    final borderColor =
-        isDarkMode ? Colors.white.withValues(alpha: 0.10) : Colors.black12;
-
-    return Container(
-      margin: const EdgeInsets.fromLTRB(10, 0, 10, 22),
-      padding: const EdgeInsets.fromLTRB(14, 14, 14, 18),
-      decoration: BoxDecoration(
-        color: panelColor,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: borderColor),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDarkMode ? 0.18 : 0.045),
-            blurRadius: 18,
-            offset: const Offset(0, 9),
-          ),
-        ],
-      ),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _summaryHeader(context),
-          const SizedBox(height: 14),
+          const SizedBox(height: 16),
           const EntireDataStatistic(),
           _subcategoryViewTotals(context),
           _pieChartHeader(context),
@@ -432,7 +412,6 @@ class _CategoryBuilder extends StatelessWidget {
   final double width;
 
   const _CategoryBuilder({
-    super.key,
     required this.item,
     required this.width,
   });

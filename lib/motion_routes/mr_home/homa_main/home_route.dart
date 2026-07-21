@@ -4,11 +4,14 @@ import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_pvd.dart';
 import 'package:motion/motion_core/motion_providers/web_api_pvd/zen_quotes_pvd.dart';
+import 'package:motion/motion_core/motion_utils/motion_date_utils.dart';
 import 'package:motion/motion_reusable/db_re/sub_ui.dart';
 import 'package:motion/motion_routes/mr_home/home_windows/tracking_window.dart';
 import 'package:motion/motion_routes/mr_home/home_windows/summary_window.dart';
+import 'package:motion/motion_screens/ms_daily_review/daily_review_page.dart';
 import 'package:motion/motion_themes/mth_app/app_images.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
+import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:provider/provider.dart';
 import 'package:motion/motion_routes/route_action.dart';
@@ -26,12 +29,12 @@ class MotionHomeRoute extends StatelessWidget {
   SliverAppBar _buildAppBar(BuildContext context) {
     return SliverAppBar(
       elevation: 0,
-      backgroundColor:
-          currentSelectedThemeMode(context) == ThemeModeSettingsN1.darkMode
-              ? Colors.black
-              : currentSelectedThemeMode(context) == ThemeModeSettingsN1.lightMode
-                  ? Colors.white
-                  : null,
+      backgroundColor: currentSelectedThemeMode(context) ==
+              ThemeModeSettingsN1.darkMode
+          ? Colors.black
+          : currentSelectedThemeMode(context) == ThemeModeSettingsN1.lightMode
+              ? Colors.white
+              : null,
       actions: const [MotionActionButtons()],
       pinned: true,
       centerTitle: false,
@@ -146,18 +149,19 @@ class MotionHomeRoute extends StatelessWidget {
                   ),
                 ),
 
-                // SECTION THREE: ACCOUNTED AND UNACCOUNTED TOTALS
-                //  total accounted time and
-                //  total unaccounted time
-                const TotalAccountedAndUnaccounted(
-                  getEntireTotal: false,
-                ),
-
                 // SECTION FOUR: TRACKING WINDOW
                 sectionTitle(titleName: AppString.trackingWindowTitle),
                 const TrackedSubcategories(),
 
-                // SECTION FIVE: SUMMARY WINDOW
+                // SECTION FIVE: ACCOUNTED AND UNACCOUNTED TOTALS
+                // total accounted and unaccounted time
+                const TotalAccountedAndUnaccounted(
+                  getEntireTotal: false,
+                ),
+
+                const _DailyReviewShortcut(),
+
+                // SECTION SIX: SUMMARY WINDOW
                 Consumer<CurrentMonthProvider>(
                   builder: (context, month, child) {
                     return sectionTitle(
@@ -170,6 +174,92 @@ class MotionHomeRoute extends StatelessWidget {
             ),
           )
         ],
+      ),
+    );
+  }
+}
+
+class _DailyReviewShortcut extends StatelessWidget {
+  const _DailyReviewShortcut();
+
+  @override
+  Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final borderColor = isDarkMode
+        ? Colors.white.withValues(alpha: 0.10)
+        : AppColor.blueMainColor.withValues(alpha: 0.16);
+    final dateLabel = MaterialLocalizations.of(context).formatFullDate(
+      MotionDateUtils.today(),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(2, 1, 2, 20),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const DailyReviewPage()),
+          ),
+          child: Ink(
+            padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
+            decoration: BoxDecoration(
+              color: AppColor.blueMainColor.withValues(
+                alpha: isDarkMode ? 0.10 : 0.055,
+              ),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: borderColor),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 39,
+                  height: 39,
+                  decoration: BoxDecoration(
+                    color: AppColor.blueMainColor.withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(11),
+                  ),
+                  child: const Icon(
+                    Icons.today_rounded,
+                    color: AppColor.blueMainColor,
+                    size: 21,
+                  ),
+                ),
+                const SizedBox(width: 11),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Daily Review',
+                        style: AppTextStyle.subSectionTextStyle(
+                          fontsize: 14,
+                          fontweight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        dateLabel,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyle.subSectionTextStyle(
+                          fontsize: 10.5,
+                          fontweight: FontWeight.normal,
+                          color: Colors.blueGrey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: isDarkMode ? Colors.white54 : Colors.black45,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

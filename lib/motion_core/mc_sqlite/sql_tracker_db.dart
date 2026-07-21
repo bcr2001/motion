@@ -1,10 +1,13 @@
+import 'package:flutter/foundation.dart';
 import 'package:motion/motion_core/mc_sql_table/experience_table.dart';
+import 'package:motion/motion_core/mc_sql_table/activity_timer_session.dart';
 import 'package:motion/motion_core/mc_sql_table/main_table.dart';
 import 'package:motion/motion_core/mc_sql_table/streak_status.dart';
 import 'package:motion/motion_core/mc_sql_table/sub_table.dart';
 import 'package:motion/motion_core/mc_sqlite/database_constants.dart';
 import 'package:motion/motion_core/mc_sqlite/database_error.dart';
 import 'package:motion/motion_core/mc_sqlite/sql_date_range.dart';
+import 'package:motion/motion_core/mc_sqlite/tracking_time_policy.dart';
 import 'package:motion/motion_core/mc_sqlite/tracker_database_schema.dart';
 import 'package:motion/motion_core/mc_sqlite/xp_policy.dart';
 import 'package:motion/motion_core/motion_utils/motion_date_utils.dart';
@@ -15,6 +18,7 @@ import 'package:path/path.dart';
 part 'sql_tracker_award_queries.dart';
 part 'sql_tracker_experience_queries.dart';
 part 'sql_tracker_report_queries.dart';
+part 'sql_tracker_timer_queries.dart';
 
 // tracker database that store two tables
 // subcategory table and main category table
@@ -37,8 +41,13 @@ class TrackerDatabaseHelper {
 
   // Database instance
   static Database? _database;
+  final Future<Database> Function()? _databaseOverride;
 
-  TrackerDatabaseHelper._privateConstructor();
+  TrackerDatabaseHelper._privateConstructor() : _databaseOverride = null;
+
+  @visibleForTesting
+  TrackerDatabaseHelper.forDatabase(Database database)
+      : _databaseOverride = (() async => database);
 
   factory TrackerDatabaseHelper() {
     return _instance;
@@ -46,6 +55,9 @@ class TrackerDatabaseHelper {
 
   // Initialize and/or return the database instance
   Future<Database> get database async {
+    final databaseOverride = _databaseOverride;
+    if (databaseOverride != null) return databaseOverride();
+
     if (_database != null) {
       return _database!;
     } else {
@@ -415,7 +427,8 @@ class TrackerDatabaseHelper {
         WHERE currentLoggedInUser = ? AND date BETWEEN ? AND ?
         ''';
 
-      final resultETMCT = await db.rawQuery(query, [currentUser, ...yearRange.args]);
+      final resultETMCT =
+          await db.rawQuery(query, [currentUser, ...yearRange.args]);
 
       if (resultETMCT.isNotEmpty) {
         final totalETMCT = resultETMCT.first["EntireTotalResult"];
@@ -791,12 +804,15 @@ class TrackerDatabaseHelper {
           date: subcategory.date,
           currentUser: subcategory.currentLoggedInUser,
         );
+        await _validateSubcategoryWrite(txn, subcategory);
         return txn.insert(
           MotionDbTables.subcategory,
           subcategory.toMap(),
           conflictAlgorithm: ConflictAlgorithm.abort,
         );
       });
+    } on TrackingTimeLimitException {
+      rethrow;
     } catch (e, stackTrace) {
       logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
@@ -822,12 +838,25 @@ class TrackerDatabaseHelper {
       final db = await database;
 
       final allSubTotals = await db.rawQuery("""
-        SELECT subcategoryName, COALESCE(SUM(timeSpent), 0) AS total,
-        COALESCE(AVG(timeSpent), 0) AS average
-        FROM subcategory
-        WHERE currentLoggedInUser = ?
-        GROUP BY subcategoryName
-        ORDER BY total DESC
+        SELECT s.${MotionDbColumns.subcategoryName},
+          COALESCE((
+            SELECT latest.${MotionDbColumns.mainCategoryName}
+            FROM ${MotionDbTables.subcategory} AS latest
+            WHERE latest.${MotionDbColumns.currentLoggedInUser} =
+                    s.${MotionDbColumns.currentLoggedInUser}
+              AND latest.${MotionDbColumns.subcategoryName} =
+                    s.${MotionDbColumns.subcategoryName}
+            ORDER BY latest.${MotionDbColumns.date} DESC,
+                     latest.${MotionDbColumns.id} DESC
+            LIMIT 1
+          ), '') AS ${MotionDbColumns.mainCategoryName},
+          COALESCE(SUM(s.${MotionDbColumns.timeSpent}), 0) AS total,
+          COALESCE(AVG(s.${MotionDbColumns.timeSpent}), 0) AS average
+        FROM ${MotionDbTables.subcategory} AS s
+        WHERE s.${MotionDbColumns.currentLoggedInUser} = ?
+        GROUP BY s.${MotionDbColumns.subcategoryName}
+        ORDER BY total DESC,
+                 s.${MotionDbColumns.subcategoryName} COLLATE NOCASE
         """, [currentUser]);
 
       return allSubTotals;
@@ -852,6 +881,29 @@ class TrackerDatabaseHelper {
           .toList();
     } catch (e, stackTrace) {
       logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
+    }
+  }
+
+  Future<List<Subcategories>> getSubcategoryEntriesForDate({
+    required String date,
+    required String currentUser,
+  }) async {
+    try {
+      final db = await database;
+      final rows = await db.query(
+        MotionDbTables.subcategory,
+        where:
+            '${MotionDbColumns.date} = ? AND ${MotionDbColumns.currentLoggedInUser} = ?',
+        whereArgs: [date, currentUser],
+        orderBy: '${MotionDbColumns.id} DESC',
+      );
+      return rows.map(Subcategories.fromMap).toList(growable: false);
+    } catch (error, stackTrace) {
+      logDatabaseError(
+        'TrackerDatabaseHelper.getSubcategoryEntriesForDate',
+        error,
+        stackTrace,
+      );
     }
   }
 
@@ -1063,9 +1115,10 @@ class TrackerDatabaseHelper {
     final currentDay =
         _dateOnly(_parseStoredDate(currentDate) ?? MotionDateUtils.today());
     final effectiveStartDay = _earliestDate(
-      firstTrackedDate,
-      savedStartDate,
-    ) ?? currentDay;
+          firstTrackedDate,
+          savedStartDate,
+        ) ??
+        currentDay;
     final effectiveStartDate = _formatIsoDate(effectiveStartDay);
 
     final records = await db.rawQuery('''
@@ -1216,9 +1269,10 @@ class TrackerDatabaseHelper {
     final currentDay =
         _dateOnly(_parseStoredDate(currentDate) ?? MotionDateUtils.today());
     final effectiveStartDay = _earliestDate(
-      firstTrackedDate,
-      savedStartDate,
-    ) ?? currentDay;
+          firstTrackedDate,
+          savedStartDate,
+        ) ??
+        currentDay;
     final effectiveStartDate = _formatIsoDate(effectiveStartDay);
 
     final records = await db.rawQuery('''
@@ -1308,9 +1362,10 @@ class TrackerDatabaseHelper {
     final currentDay =
         _dateOnly(_parseStoredDate(currentDate) ?? MotionDateUtils.today());
     final effectiveStartDay = _earliestDate(
-      firstTrackedDate,
-      savedStartDate,
-    ) ?? currentDay;
+          firstTrackedDate,
+          savedStartDate,
+        ) ??
+        currentDay;
     final effectiveStartDate = _formatIsoDate(effectiveStartDay);
 
     final records = await db.rawQuery('''
@@ -1404,9 +1459,10 @@ class TrackerDatabaseHelper {
     final currentDay =
         _dateOnly(_parseStoredDate(currentDate) ?? MotionDateUtils.today());
     final effectiveStartDay = _earliestDate(
-      firstTrackedDate,
-      savedStartDate,
-    ) ?? currentDay;
+          firstTrackedDate,
+          savedStartDate,
+        ) ??
+        currentDay;
     final effectiveStartDate = _formatIsoDate(effectiveStartDay);
 
     final records = await db.rawQuery('''
@@ -1684,14 +1740,77 @@ class TrackerDatabaseHelper {
   // updates existing subcategory categories rows
   Future<void> updateSubcategory(Subcategories subcategory) async {
     try {
+      final id = subcategory.id;
+      if (id == null) {
+        throw StateError('A saved time block must have an ID before update.');
+      }
       final db = await database;
-      await db.update(MotionDbTables.subcategory, subcategory.toMap(),
-          where: '${MotionDbColumns.id} = ?', whereArgs: [subcategory.id]);
+      await db.transaction((txn) async {
+        await _ensureDailyRows(
+          txn,
+          date: subcategory.date,
+          currentUser: subcategory.currentLoggedInUser,
+        );
+        await _validateSubcategoryWrite(
+          txn,
+          subcategory,
+          excludeId: id,
+        );
+        await txn.update(
+          MotionDbTables.subcategory,
+          subcategory.toMap(),
+          where: '${MotionDbColumns.id} = ?',
+          whereArgs: [id],
+        );
+      });
 
       debugLog("Update successful");
+    } on TrackingTimeLimitException {
+      rethrow;
     } catch (e, stackTrace) {
       logDatabaseError("TrackerDatabaseHelper", e, stackTrace);
     }
+  }
+
+  Future<void> _validateSubcategoryWrite(
+    DatabaseExecutor executor,
+    Subcategories subcategory, {
+    int? excludeId,
+  }) async {
+    TrackingTimePolicy.validateBlock(subcategory.timeSpent);
+    final existingMinutes = await _trackedMinutesForDate(
+      executor,
+      date: subcategory.date,
+      currentUser: subcategory.currentLoggedInUser,
+      excludeId: excludeId,
+    );
+    TrackingTimePolicy.validateDailyTotal(
+      existingMinutes: existingMinutes,
+      additionalMinutes: subcategory.timeSpent,
+      date: subcategory.date,
+    );
+  }
+
+  Future<double> _trackedMinutesForDate(
+    DatabaseExecutor executor, {
+    required String date,
+    required String currentUser,
+    int? excludeId,
+  }) async {
+    final excludedRow =
+        excludeId == null ? '' : ' AND ${MotionDbColumns.id} <> ?';
+    final arguments = <Object?>[date, currentUser];
+    if (excludeId != null) arguments.add(excludeId);
+    final result = await executor.rawQuery(
+      '''
+      SELECT COALESCE(SUM(${MotionDbColumns.timeSpent}), 0) AS total
+      FROM ${MotionDbTables.subcategory}
+      WHERE ${MotionDbColumns.date} = ?
+        AND ${MotionDbColumns.currentLoggedInUser} = ?$excludedRow
+      ''',
+      arguments,
+    );
+    return (result.first['total'] as num?)?.toDouble() ?? 0;
   }
 
   // deletes subcategory rows

@@ -7,6 +7,7 @@ import 'package:motion/motion_core/motion_providers/cloud_backup_pvd/auto_drive_
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/assigner_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
+import 'package:motion/motion_core/motion_providers/timer_pvd/activity_timer_pvd.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:provider/provider.dart';
@@ -395,45 +396,47 @@ class _DataTransferPageState extends State<DataTransferPage> {
       return;
     }
 
-    await _runWithFeedback('Imported', (currentUser) async {
-      _updateBusyDetail('Creating automatic backup...');
-      final backupMessage = await _createAutomaticBackup(currentUser);
-      _updateBusyDetail('Importing ${preview.fileName}...');
+    await _runWithFeedback(
+      'Imported',
+      (currentUser) async {
+        _updateBusyDetail('Creating automatic backup...');
+        final backupMessage = await _createAutomaticBackup(currentUser);
+        _updateBusyDetail('Importing ${preview.fileName}...');
 
-      final result = await _csvTransfer.importCsv(
-        fileType: fileType,
-        filePath: filePath,
-        currentUser: currentUser,
-        onProgress: _updateImportProgress,
-      );
+        final result = await _csvTransfer.importCsv(
+          fileType: fileType,
+          filePath: filePath,
+          currentUser: currentUser,
+          onProgress: _updateImportProgress,
+        );
 
-      if (!mounted) {
-        return '${result.importedRows} row(s) from $expectedFileName.';
-      }
+        if (!mounted) {
+          return '${result.importedRows} row(s) from $expectedFileName.';
+        }
 
-      switch (fileType) {
-        case MotionCsvFileType.mainCategory:
-          break;
-        case MotionCsvFileType.subcategory:
-          context
-              .read<SubcategoryTrackerDatabaseProvider>()
-              .refreshAllTrackingData();
-          break;
-        case MotionCsvFileType.assigner:
-          await context.read<AssignerMainProvider>().getAllUserItems();
-          break;
-      }
-      _refreshDataSummary();
+        switch (fileType) {
+          case MotionCsvFileType.mainCategory:
+            break;
+          case MotionCsvFileType.subcategory:
+            context
+                .read<SubcategoryTrackerDatabaseProvider>()
+                .refreshAllTrackingData();
+            break;
+          case MotionCsvFileType.assigner:
+            await context.read<AssignerMainProvider>().getAllUserItems();
+            break;
+        }
+        _refreshDataSummary();
 
-      final rebuiltMessage = result.rebuiltDailyRows > 0
-          ? '\nRebuilt ${result.rebuiltDailyRows} daily summaries.'
-          : '';
-      return '${result.importedRows} row(s) from ${preview.fileName}.\n'
-          'Skipped ${result.skippedRows} invalid row(s).'
-          '$rebuiltMessage\n$backupMessage';
-    },
-        busyTitle: 'Importing $expectedFileName',
-        busyDetail: 'Preparing the selected file...',
+        final rebuiltMessage = result.rebuiltDailyRows > 0
+            ? '\nRebuilt ${result.rebuiltDailyRows} daily summaries.'
+            : '';
+        return '${result.importedRows} row(s) from ${preview.fileName}.\n'
+            'Skipped ${result.skippedRows} invalid row(s).'
+            '$rebuiltMessage\n$backupMessage';
+      },
+      busyTitle: 'Importing $expectedFileName',
+      busyDetail: 'Preparing the selected file...',
     );
   }
 
@@ -447,6 +450,7 @@ class _DataTransferPageState extends State<DataTransferPage> {
 
   Future<void> _deleteAllData() async {
     final currentUser = context.read<UserUidProvider>().userUid;
+    final timerProvider = context.read<ActivityTimerProvider>();
     if (currentUser == null) {
       await _showTransferResultDialog(
         title: 'User Loading',
@@ -479,30 +483,34 @@ class _DataTransferPageState extends State<DataTransferPage> {
       return;
     }
 
-    await _runWithFeedback('Deleted', (currentUser) async {
-      _updateBusyDetail('Creating automatic backup...');
-      final backupMessage = await _createAutomaticBackup(currentUser);
-      _updateBusyDetail('Deleting local Motion data...');
-      final summary = await _csvTransfer.deleteAllDataForUser(
-        currentUser: currentUser,
-      );
+    await _runWithFeedback(
+      'Deleted',
+      (currentUser) async {
+        _updateBusyDetail('Creating automatic backup...');
+        final backupMessage = await _createAutomaticBackup(currentUser);
+        _updateBusyDetail('Deleting local Motion data...');
+        final summary = await _csvTransfer.deleteAllDataForUser(
+          currentUser: currentUser,
+        );
+        await timerProvider.discard();
 
-      if (!mounted) return '${summary.totalRows} row(s).';
+        if (!mounted) return '${summary.totalRows} row(s).';
 
-      context
-          .read<SubcategoryTrackerDatabaseProvider>()
-          .refreshAllTrackingData();
-      await context.read<AssignerMainProvider>().getAllUserItems();
-      _refreshDataSummary();
+        context
+            .read<SubcategoryTrackerDatabaseProvider>()
+            .refreshAllTrackingData();
+        await context.read<AssignerMainProvider>().getAllUserItems();
+        _refreshDataSummary();
 
-      return '${summary.totalRows} row(s): '
-          '${summary.subcategoryRows} tracking, '
-          '${summary.mainCategoryRows} main category, '
-          '${summary.experiencePointRows} XP, '
-          '${summary.assignerRows} assigned.\n$backupMessage';
-    },
-        busyTitle: 'Deleting Data',
-        busyDetail: 'Removing your local Motion records...',
+        return '${summary.totalRows} row(s): '
+            '${summary.subcategoryRows} tracking, '
+            '${summary.mainCategoryRows} main category, '
+            '${summary.experiencePointRows} XP, '
+            '${summary.assignerRows} assigned, '
+            '${summary.activeTimerRows} timer.\n$backupMessage';
+      },
+      busyTitle: 'Deleting Data',
+      busyDetail: 'Removing your local Motion records...',
     );
   }
 
@@ -564,9 +572,8 @@ class _DataTransferPageState extends State<DataTransferPage> {
                 builder: (context, backup, child) {
                   return _AutoDriveBackupCard(
                     backup: backup,
-                    onChanged: _isBusy
-                        ? null
-                        : (value) => backup.setEnabled(value),
+                    onChanged:
+                        _isBusy ? null : (value) => backup.setEnabled(value),
                     onRunNow: _isBusy || !backup.isEnabled || backup.isRunning
                         ? null
                         : () => backup.runBackupIfEligible(force: true),
@@ -625,11 +632,12 @@ class _DataTransferPageState extends State<DataTransferPage> {
               ),
             ],
           ),
-          if (_isBusy) _BusyTransferOverlay(
-            title: _busyTitle,
-            detail: _busyDetail,
-            progress: _busyProgress,
-          ),
+          if (_isBusy)
+            _BusyTransferOverlay(
+              title: _busyTitle,
+              detail: _busyDetail,
+              progress: _busyProgress,
+            ),
         ],
       ),
     );

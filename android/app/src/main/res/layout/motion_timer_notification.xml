@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:minHeight="44dp"
+    android:orientation="horizontal"
+    android:paddingStart="10dp"
+    android:paddingTop="2dp"
+    android:paddingEnd="12dp"
+    android:paddingBottom="2dp">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/timer_notification_subcategory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:fontFamily="sans-serif-medium"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:text="Activity"
+            android:textColor="@color/motion_widget_primary_text"
+            android:textSize="13sp" />
+
+        <Chronometer
+            android:id="@+id/timer_notification_elapsed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
+            android:includeFontPadding="false"
+            android:textColor="@color/motion_timer_accent"
+            android:textSize="17sp" />
+
+        <TextView
+            android:id="@+id/timer_notification_paused_elapsed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
+            android:includeFontPadding="false"
+            android:text="00:00:00"
+            android:textColor="@color/motion_timer_accent"
+            android:textSize="17sp"
+            android:visibility="gone" />
+    </LinearLayout>
+</LinearLayout>

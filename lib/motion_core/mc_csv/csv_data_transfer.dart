@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:motion/motion_core/mc_sqlite/database_constants.dart';
 import 'package:motion/motion_core/mc_sqlite/sql_assigner_db.dart';
 import 'package:motion/motion_core/mc_sqlite/sql_tracker_db.dart';
+import 'package:motion/motion_core/mc_sqlite/tracking_time_policy.dart';
 import 'package:motion/motion_core/motion_utils/motion_date_utils.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -43,15 +44,21 @@ class MotionDeletedDataSummary {
     required this.mainCategoryRows,
     required this.experiencePointRows,
     required this.assignerRows,
+    required this.activeTimerRows,
   });
 
   final int subcategoryRows;
   final int mainCategoryRows;
   final int experiencePointRows;
   final int assignerRows;
+  final int activeTimerRows;
 
   int get totalRows =>
-      subcategoryRows + mainCategoryRows + experiencePointRows + assignerRows;
+      subcategoryRows +
+      mainCategoryRows +
+      experiencePointRows +
+      assignerRows +
+      activeTimerRows;
 }
 
 class MotionDataSummary {
@@ -60,6 +67,7 @@ class MotionDataSummary {
     required this.mainCategoryRows,
     required this.experiencePointRows,
     required this.assignerRows,
+    required this.activeTimerRows,
     required this.firstTrackedDate,
     required this.lastTrackedDate,
   });
@@ -68,11 +76,16 @@ class MotionDataSummary {
   final int mainCategoryRows;
   final int experiencePointRows;
   final int assignerRows;
+  final int activeTimerRows;
   final String? firstTrackedDate;
   final String? lastTrackedDate;
 
   int get totalRows =>
-      subcategoryRows + mainCategoryRows + experiencePointRows + assignerRows;
+      subcategoryRows +
+      mainCategoryRows +
+      experiencePointRows +
+      assignerRows +
+      activeTimerRows;
 
   bool get hasExportableData => subcategoryRows > 0 || assignerRows > 0;
 }
@@ -125,12 +138,10 @@ class MotionCsvDataTransfer {
     AssignerDatabaseHelper? assignerDb,
     Future<Database> Function()? trackerDatabase,
     Future<Database> Function()? assignerDatabase,
-  })  : _trackerDatabase =
-            trackerDatabase ??
-                (() => (trackerDb ?? TrackerDatabaseHelper()).database),
-        _assignerDatabase =
-            assignerDatabase ??
-                (() => (assignerDb ?? AssignerDatabaseHelper()).database);
+  })  : _trackerDatabase = trackerDatabase ??
+            (() => (trackerDb ?? TrackerDatabaseHelper()).database),
+        _assignerDatabase = assignerDatabase ??
+            (() => (assignerDb ?? AssignerDatabaseHelper()).database);
 
   final Future<Database> Function() _trackerDatabase;
   final Future<Database> Function() _assignerDatabase;
@@ -181,7 +192,8 @@ class MotionCsvDataTransfer {
     return [
       MotionCsvBackupFile(
         fileName: 'main_category.csv',
-        content: await _csvContentFromRows(await _mainCategoryRows(currentUser)),
+        content:
+            await _csvContentFromRows(await _mainCategoryRows(currentUser)),
       ),
       MotionCsvBackupFile(
         fileName: 'subcategory.csv',
@@ -358,8 +370,14 @@ class MotionCsvDataTransfer {
     var subcategoryRows = 0;
     var mainCategoryRows = 0;
     var experiencePointRows = 0;
+    var activeTimerRows = 0;
 
     await trackerDb.transaction((txn) async {
+      activeTimerRows = await txn.delete(
+        MotionDbTables.activeTimerSession,
+        where: '${MotionDbColumns.currentLoggedInUser} = ?',
+        whereArgs: [currentUser],
+      );
       subcategoryRows = await txn.delete(
         MotionDbTables.subcategory,
         where: '${MotionDbColumns.currentLoggedInUser} = ?',
@@ -388,6 +406,7 @@ class MotionCsvDataTransfer {
       mainCategoryRows: mainCategoryRows,
       experiencePointRows: experiencePointRows,
       assignerRows: assignerRows,
+      activeTimerRows: activeTimerRows,
     );
   }
 
@@ -409,6 +428,32 @@ class MotionCsvDataTransfer {
     var processedRows = 0;
     final rebuiltDates = <String>{};
     final totalRows = csvRows.length - 1;
+
+    final importedMinutesByDate = <String, double>{};
+    for (final row in csvRows.skip(1)) {
+      final rowMap = _rowMap(headers, row);
+      final date = _normalizeDate(rowMap[MotionDbColumns.date]);
+      final mainCategoryName = rowMap[MotionDbColumns.mainCategoryName] ?? '';
+      final subcategoryName = rowMap[MotionDbColumns.subcategoryName] ?? '';
+      if (date.isEmpty || mainCategoryName.isEmpty || subcategoryName.isEmpty) {
+        continue;
+      }
+      final minutes = _parseDouble(rowMap[MotionDbColumns.timeSpent]);
+      TrackingTimePolicy.validateBlock(minutes);
+      importedMinutesByDate.update(
+        date,
+        (total) => total + minutes,
+        ifAbsent: () => minutes,
+      );
+    }
+    for (final dailyTotal in importedMinutesByDate.entries) {
+      TrackingTimePolicy.validateDailyTotal(
+        existingMinutes: 0,
+        additionalMinutes: dailyTotal.value,
+        date: dailyTotal.key,
+      );
+    }
+
     _reportImportProgress(
       onProgress,
       processedRows: processedRows,
@@ -439,10 +484,8 @@ class MotionCsvDataTransfer {
         processedRows++;
         final rowMap = _rowMap(headers, row);
         final date = _normalizeDate(rowMap[MotionDbColumns.date]);
-        final mainCategoryName =
-            rowMap[MotionDbColumns.mainCategoryName] ?? '';
-        final subcategoryName =
-            rowMap[MotionDbColumns.subcategoryName] ?? '';
+        final mainCategoryName = rowMap[MotionDbColumns.mainCategoryName] ?? '';
+        final subcategoryName = rowMap[MotionDbColumns.subcategoryName] ?? '';
         if (date.isEmpty ||
             mainCategoryName.isEmpty ||
             subcategoryName.isEmpty) {
@@ -532,8 +575,7 @@ class MotionCsvDataTransfer {
         processedRows++;
         final rowMap = _rowMap(headers, row);
         final subcategoryName = rowMap[MotionDbColumns.subcategoryName] ?? '';
-        final mainCategoryName =
-            rowMap[MotionDbColumns.mainCategoryName] ?? '';
+        final mainCategoryName = rowMap[MotionDbColumns.mainCategoryName] ?? '';
         if (subcategoryName.isEmpty || mainCategoryName.isEmpty) {
           skippedRows++;
           _reportImportProgress(
@@ -916,6 +958,16 @@ class MotionCsvDataTransfer {
         )) ??
         0;
 
+    final activeTimerCount = Sqflite.firstIntValue(await trackerDb.rawQuery(
+          '''
+          SELECT COUNT(*)
+          FROM ${MotionDbTables.activeTimerSession}
+          WHERE ${MotionDbColumns.currentLoggedInUser} = ?
+          ''',
+          [currentUser],
+        )) ??
+        0;
+
     final assignerCount = Sqflite.firstIntValue(await assignerDb.rawQuery(
           '''
           SELECT COUNT(*)
@@ -942,6 +994,7 @@ class MotionCsvDataTransfer {
       mainCategoryRows: mainCategoryCount,
       experiencePointRows: experiencePointCount,
       assignerRows: assignerCount,
+      activeTimerRows: activeTimerCount,
       firstTrackedDate: dateRange.first['firstDate']?.toString(),
       lastTrackedDate: dateRange.first['lastDate']?.toString(),
     );

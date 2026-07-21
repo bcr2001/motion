@@ -478,6 +478,16 @@ class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
     );
   }
 
+  Future<List<Subcategories>> retrieveSubcategoryEntriesForDate({
+    required String date,
+    required String currentUser,
+  }) async {
+    return trackDbInstance.getSubcategoryEntriesForDate(
+      date: date,
+      currentUser: requireCurrentUser(currentUser),
+    );
+  }
+
   // retrieve the entire totals of subcategories
   Future<List<Map<String, dynamic>>> retrieveAllSubcategoryTotals(
       {required currentUser}) async {
@@ -567,6 +577,23 @@ class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
 
     _revisions.markSubcategoryChanged(guardedSubcategory);
     return insertedId;
+  }
+
+  Future<List<Subcategories>> completeActivityTimer({
+    required String currentUser,
+    required List<Subcategories> entries,
+  }) async {
+    final guardedEntries = entries.map(requireSubcategoryUser).toList();
+    final insertedIds = await trackDbInstance.completeActiveTimerSession(
+      currentUser: requireCurrentUser(currentUser),
+      entries: guardedEntries,
+    );
+
+    for (var index = 0; index < guardedEntries.length; index++) {
+      guardedEntries[index].id = insertedIds[index];
+      _revisions.markSubcategoryChanged(guardedEntries[index]);
+    }
+    return guardedEntries;
   }
 
   // update data in the subcategory table

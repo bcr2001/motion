@@ -4,4 +4,5 @@
     <color name="motion_widget_border">#1F000000</color>
     <color name="motion_widget_primary_text">#FF20232A</color>
     <color name="motion_widget_secondary_text">#FF607D8B</color>
+    <color name="motion_timer_accent">#FF00B0F0</color>
 </resources>

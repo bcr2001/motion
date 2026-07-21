@@ -2,12 +2,14 @@ import 'package:motion/motion_core/mc_sqlite/database_constants.dart';
 import 'package:sqflite/sqflite.dart';
 
 class TrackerDatabaseSchema {
-  static const int version = 14;
+  static const int version = 16;
   static const String _legacyTimeRecordedColumn = 'timeRecorded';
 
   static const String mainCategoryTable = MotionDbTables.mainCategory;
   static const String subcategoryTable = MotionDbTables.subcategory;
   static const String experiencePointsTable = MotionDbTables.experiencePoints;
+  static const String activeTimerSessionTable =
+      MotionDbTables.activeTimerSession;
   static const List<String> indexNames = [
     'idx_main_category_user_date',
     'idx_experience_points_user_date',
@@ -16,6 +18,10 @@ class TrackerDatabaseSchema {
     'idx_subcategory_user_date_subcategory',
   ];
   static const List<String> triggerNames = [
+    'validate_subcategory_time_insert',
+    'validate_subcategory_daily_total_insert',
+    'validate_subcategory_time_update',
+    'validate_subcategory_daily_total_update',
     'update_experience_points',
     'update_experience_points_after_update',
     'update_experience_points_after_delete',
@@ -90,6 +96,20 @@ class TrackerDatabaseSchema {
         ${MotionDbColumns.currentLoggedInUser} TEXT,
         FOREIGN KEY (${MotionDbColumns.date}, ${MotionDbColumns.currentLoggedInUser})
         REFERENCES $mainCategoryTable(${MotionDbColumns.date}, ${MotionDbColumns.currentLoggedInUser})
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS $activeTimerSessionTable(
+        ${MotionDbColumns.currentLoggedInUser} TEXT PRIMARY KEY,
+        ${MotionDbColumns.mainCategoryName} TEXT NOT NULL,
+        ${MotionDbColumns.subcategoryName} TEXT NOT NULL,
+        ${MotionDbColumns.timerStartedAtEpochMs} INTEGER NOT NULL,
+        ${MotionDbColumns.currentSegmentStartedAtEpochMs} INTEGER,
+        ${MotionDbColumns.completedTimerSegments} TEXT NOT NULL DEFAULT '[]',
+        ${MotionDbColumns.timerStatus} TEXT NOT NULL,
+        ${MotionDbColumns.timerUpdatedAtEpochMs} INTEGER NOT NULL,
+        ${MotionDbColumns.nextTimerReminderAtSeconds} INTEGER NOT NULL DEFAULT 7200
       )
     ''');
   }
@@ -260,6 +280,57 @@ class TrackerDatabaseSchema {
 
   static Future<void> _createTriggers(Database db) async {
     await _dropTriggers(db);
+
+    await db.execute('''
+      CREATE TRIGGER validate_subcategory_time_insert
+      BEFORE INSERT ON $subcategoryTable
+      WHEN NEW.${MotionDbColumns.timeSpent} < 0
+        OR NEW.${MotionDbColumns.timeSpent} > 1440.000001
+      BEGIN
+        SELECT RAISE(ABORT, 'subcategory_time_out_of_range');
+      END;
+    ''');
+
+    await db.execute('''
+      CREATE TRIGGER validate_subcategory_daily_total_insert
+      BEFORE INSERT ON $subcategoryTable
+      WHEN (
+        SELECT COALESCE(SUM(${MotionDbColumns.timeSpent}), 0)
+        FROM $subcategoryTable
+        WHERE ${MotionDbColumns.date} = NEW.${MotionDbColumns.date}
+          AND ${MotionDbColumns.currentLoggedInUser} =
+              NEW.${MotionDbColumns.currentLoggedInUser}
+      ) + NEW.${MotionDbColumns.timeSpent} > 1440.000001
+      BEGIN
+        SELECT RAISE(ABORT, 'subcategory_daily_total_exceeded');
+      END;
+    ''');
+
+    await db.execute('''
+      CREATE TRIGGER validate_subcategory_time_update
+      BEFORE UPDATE ON $subcategoryTable
+      WHEN NEW.${MotionDbColumns.timeSpent} < 0
+        OR NEW.${MotionDbColumns.timeSpent} > 1440.000001
+      BEGIN
+        SELECT RAISE(ABORT, 'subcategory_time_out_of_range');
+      END;
+    ''');
+
+    await db.execute('''
+      CREATE TRIGGER validate_subcategory_daily_total_update
+      BEFORE UPDATE ON $subcategoryTable
+      WHEN (
+        SELECT COALESCE(SUM(${MotionDbColumns.timeSpent}), 0)
+        FROM $subcategoryTable
+        WHERE ${MotionDbColumns.date} = NEW.${MotionDbColumns.date}
+          AND ${MotionDbColumns.currentLoggedInUser} =
+              NEW.${MotionDbColumns.currentLoggedInUser}
+          AND ${MotionDbColumns.id} <> OLD.${MotionDbColumns.id}
+      ) + NEW.${MotionDbColumns.timeSpent} > 1440.000001
+      BEGIN
+        SELECT RAISE(ABORT, 'subcategory_daily_total_exceeded');
+      END;
+    ''');
 
     await db.execute('''
       CREATE TRIGGER update_experience_points

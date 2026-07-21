@@ -3,11 +3,14 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:motion/main.dart';
+import 'package:motion/motion_core/mc_sql_table/activity_timer_session.dart';
 import 'package:motion/motion_core/mc_sql_table/sub_table.dart';
+import 'package:motion/motion_core/mc_sqlite/tracking_time_policy.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_date_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/experience_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
+import 'package:motion/motion_core/motion_providers/timer_pvd/activity_timer_pvd.dart';
 import 'package:motion/motion_core/motion_utils/motion_date_utils.dart';
 import 'package:motion/motion_reusable/db_re/sub_logic.dart';
 import 'package:motion/motion_reusable/db_re/sub_ui.dart';
@@ -122,10 +125,8 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
 
     if (!mounted) return;
     setState(() {
-      final existingIds = _pastEntriesAdded
-          .map((entry) => entry.id)
-          .whereType<int>()
-          .toSet();
+      final existingIds =
+          _pastEntriesAdded.map((entry) => entry.id).whereType<int>().toSet();
       final entriesToAdd = restoredEntries
           .where((entry) => entry.id != null && existingIds.add(entry.id!))
           .toList();
@@ -220,7 +221,8 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
   // time component
   Widget _titleAndTextFieldBuilder(
       {required String title,
-      required TextEditingController textEditingController}) {
+      required TextEditingController textEditingController,
+      required int maximum}) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final borderColor =
         isDarkMode ? Colors.white.withValues(alpha: 0.10) : Colors.black12;
@@ -259,9 +261,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
               keyboardType: TextInputType.number,
               maxLength: 2,
               buildCounter: (BuildContext context,
-                      {int? currentLength,
-                      int? maxLength,
-                      bool? isFocused}) =>
+                      {int? currentLength, int? maxLength, bool? isFocused}) =>
                   null,
               textAlign: TextAlign.center,
               cursorColor: AppColor.blueMainColor,
@@ -273,8 +273,11 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                 hintStyle: AppTextStyle.manualHintTextStyle(fontsize: 24),
               ),
               validator: (value) {
-                // check whether the field is empty
-                if (value == null || value.isEmpty) {
+                final normalized = value?.trim() ?? '';
+                if (normalized.isEmpty) return null;
+
+                final parsed = int.tryParse(normalized);
+                if (parsed == null || parsed < 0 || parsed > maximum) {
                   return "??";
                 }
                 return null;
@@ -342,19 +345,28 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
             children: [
               // hour time component
               _titleAndTextFieldBuilder(
-                  title: "Hours", textEditingController: hourController),
+                title: "Hours",
+                textEditingController: hourController,
+                maximum: 24,
+              ),
 
               const SizedBox(width: 8),
 
               // minute time component
               _titleAndTextFieldBuilder(
-                  title: "Minutes", textEditingController: minuteController),
+                title: "Minutes",
+                textEditingController: minuteController,
+                maximum: 59,
+              ),
 
               const SizedBox(width: 8),
 
               // seconds time component
               _titleAndTextFieldBuilder(
-                  title: "Seconds", textEditingController: secondController)
+                title: "Seconds",
+                textEditingController: secondController,
+                maximum: 59,
+              )
             ],
           ),
         ],
@@ -390,8 +402,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
           ),
           child: Row(
             children: [
-              Icon(Icons.calendar_month_outlined,
-                  size: 19, color: accentColor),
+              Icon(Icons.calendar_month_outlined, size: 19, color: accentColor),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(
@@ -419,8 +430,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right_rounded,
-                  size: 20, color: accentColor),
+              Icon(Icons.chevron_right_rounded, size: 20, color: accentColor),
             ],
           ),
         ),
@@ -479,221 +489,224 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                      Row(
-                        children: [
-                          Container(
-                            height: 42,
-                            width: 42,
-                            decoration: BoxDecoration(
-                              color: AppColor.blueMainColor
-                                  .withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(13),
-                            ),
-                            child: const Icon(
-                              Icons.calendar_month_rounded,
-                              color: AppColor.blueMainColor,
-                              size: 22,
-                            ),
-                          ),
-                          const SizedBox(width: 11),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Select Tracking Date',
-                                  style: AppTextStyle.subSectionTextStyle(
-                                    fontsize: 17,
-                                    fontweight: FontWeight.w900,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'Choose today or an earlier date',
-                                  style: AppTextStyle.subSectionTextStyle(
-                                    fontsize: 10.5,
-                                    fontweight: FontWeight.normal,
-                                    color: secondaryText,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          IconButton(
-                            tooltip: 'Close',
-                            visualDensity: VisualDensity.compact,
-                            onPressed: () => Navigator.of(dialogContext).pop(),
-                            icon: Icon(
-                              Icons.close_rounded,
-                              color: secondaryText,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 9),
-                        decoration: BoxDecoration(
-                          color: AppColor.blueMainColor.withValues(alpha: 0.07),
-                          borderRadius: BorderRadius.circular(13),
-                        ),
-                        child: Row(
+                        Row(
                           children: [
-                            Text(
-                              'Selected',
-                              style: AppTextStyle.subSectionTextStyle(
-                                fontsize: 10.5,
-                                fontweight: FontWeight.normal,
-                                color: secondaryText,
+                            Container(
+                              height: 42,
+                              width: 42,
+                              decoration: BoxDecoration(
+                                color: AppColor.blueMainColor
+                                    .withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(13),
+                              ),
+                              child: const Icon(
+                                Icons.calendar_month_rounded,
+                                color: AppColor.blueMainColor,
+                                size: 22,
                               ),
                             ),
-                            const Spacer(),
-                            Text(
-                              MotionDateUtils.formatDisplayDate(pendingDate),
-                              style: AppTextStyle.subSectionTextStyle(
-                                fontsize: 12.5,
-                                fontweight: FontWeight.w900,
-                                color: AppColor.blueMainColor,
+                            const SizedBox(width: 11),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Select Tracking Date',
+                                    style: AppTextStyle.subSectionTextStyle(
+                                      fontsize: 17,
+                                      fontweight: FontWeight.w900,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Choose today or an earlier date',
+                                    style: AppTextStyle.subSectionTextStyle(
+                                      fontsize: 10.5,
+                                      fontweight: FontWeight.normal,
+                                      color: secondaryText,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              tooltip: 'Close',
+                              visualDensity: VisualDensity.compact,
+                              onPressed: () =>
+                                  Navigator.of(dialogContext).pop(),
+                              icon: Icon(
+                                Icons.close_rounded,
+                                color: secondaryText,
                               ),
                             ),
                           ],
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: isDarkMode
-                              ? Colors.white.withValues(alpha: 0.025)
-                              : Colors.white.withValues(alpha: 0.55),
-                          borderRadius: BorderRadius.circular(15),
-                          border: Border.all(color: borderColor),
-                        ),
-                        child: Theme(
-                          data: Theme.of(dialogContext).copyWith(
-                            colorScheme:
-                                Theme.of(dialogContext).colorScheme.copyWith(
-                                      primary: AppColor.blueMainColor,
-                                      onPrimary: Colors.white,
-                                      surface: surfaceColor,
-                                      onSurface: textColor,
-                                    ),
-                            datePickerTheme: DatePickerThemeData(
-                              backgroundColor: Colors.transparent,
-                              headerBackgroundColor: Colors.transparent,
-                              headerForegroundColor: textColor,
-                              weekdayStyle:
-                                  AppTextStyle.subSectionTextStyle(
-                                fontsize: 10.5,
-                                fontweight: FontWeight.w700,
-                                color: secondaryText,
-                              ),
-                              dayStyle: AppTextStyle.subSectionTextStyle(
-                                fontsize: 12,
-                                fontweight: FontWeight.w700,
-                              ),
-                              dayBackgroundColor:
-                                  WidgetStateProperty.resolveWith((states) {
-                                if (states.contains(WidgetState.selected)) {
-                                  return AppColor.blueMainColor
-                                      .withValues(alpha: 0.14);
-                                }
-                                return Colors.transparent;
-                              }),
-                              dayForegroundColor:
-                                  WidgetStateProperty.resolveWith((states) {
-                                if (states.contains(WidgetState.selected)) {
-                                  return AppColor.blueMainColor;
-                                }
-                                if (states.contains(WidgetState.disabled)) {
-                                  return secondaryText.withValues(alpha: 0.35);
-                                }
-                                return textColor;
-                              }),
-                              dayShape:
-                                  WidgetStateProperty.resolveWith((states) {
-                                return RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  side: states.contains(WidgetState.selected)
-                                      ? const BorderSide(
-                                          color: AppColor.blueMainColor,
-                                          width: 1.4,
-                                        )
-                                      : BorderSide.none,
-                                );
-                              }),
-                              dayOverlayColor: WidgetStatePropertyAll(
-                                AppColor.blueMainColor.withValues(alpha: 0.08),
-                              ),
-                              todayBackgroundColor:
-                                  WidgetStateProperty.resolveWith((states) {
-                                if (states.contains(WidgetState.selected)) {
-                                  return AppColor.blueMainColor
-                                      .withValues(alpha: 0.14);
-                                }
-                                return Colors.transparent;
-                              }),
-                              todayForegroundColor:
-                                  const WidgetStatePropertyAll(
-                                AppColor.blueMainColor,
-                              ),
-                              todayBorder: const BorderSide(
-                                color: AppColor.blueMainColor,
-                                width: 1.4,
-                              ),
-                              yearStyle: AppTextStyle.subSectionTextStyle(
-                                fontsize: 13,
-                                fontweight: FontWeight.w700,
-                              ),
-                            ),
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 9),
+                          decoration: BoxDecoration(
+                            color:
+                                AppColor.blueMainColor.withValues(alpha: 0.07),
+                            borderRadius: BorderRadius.circular(13),
                           ),
-                          child: CalendarDatePicker(
-                            initialDate: pendingDate,
-                            firstDate: DateTime(2021, 7, 1),
-                            lastDate: today,
-                            onDateChanged: (date) {
-                              setDialogState(() => pendingDate = date);
-                            },
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 13),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: () =>
-                                  Navigator.of(dialogContext).pop(),
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: secondaryText,
-                                minimumSize: const Size(0, 44),
-                                side: BorderSide(color: borderColor),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                          child: Row(
+                            children: [
+                              Text(
+                                'Selected',
+                                style: AppTextStyle.subSectionTextStyle(
+                                  fontsize: 10.5,
+                                  fontweight: FontWeight.normal,
+                                  color: secondaryText,
                                 ),
                               ),
-                              child: const Text('Cancel'),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: () => Navigator.of(dialogContext)
-                                  .pop(pendingDate),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColor.blueMainColor,
-                                foregroundColor: Colors.white,
-                                elevation: 0,
-                                minimumSize: const Size(0, 44),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                              const Spacer(),
+                              Text(
+                                MotionDateUtils.formatDisplayDate(pendingDate),
+                                style: AppTextStyle.subSectionTextStyle(
+                                  fontsize: 12.5,
+                                  fontweight: FontWeight.w900,
+                                  color: AppColor.blueMainColor,
                                 ),
                               ),
-                              child: const Text('Select Date'),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: isDarkMode
+                                ? Colors.white.withValues(alpha: 0.025)
+                                : Colors.white.withValues(alpha: 0.55),
+                            borderRadius: BorderRadius.circular(15),
+                            border: Border.all(color: borderColor),
+                          ),
+                          child: Theme(
+                            data: Theme.of(dialogContext).copyWith(
+                              colorScheme:
+                                  Theme.of(dialogContext).colorScheme.copyWith(
+                                        primary: AppColor.blueMainColor,
+                                        onPrimary: Colors.white,
+                                        surface: surfaceColor,
+                                        onSurface: textColor,
+                                      ),
+                              datePickerTheme: DatePickerThemeData(
+                                backgroundColor: Colors.transparent,
+                                headerBackgroundColor: Colors.transparent,
+                                headerForegroundColor: textColor,
+                                weekdayStyle: AppTextStyle.subSectionTextStyle(
+                                  fontsize: 10.5,
+                                  fontweight: FontWeight.w700,
+                                  color: secondaryText,
+                                ),
+                                dayStyle: AppTextStyle.subSectionTextStyle(
+                                  fontsize: 12,
+                                  fontweight: FontWeight.w700,
+                                ),
+                                dayBackgroundColor:
+                                    WidgetStateProperty.resolveWith((states) {
+                                  if (states.contains(WidgetState.selected)) {
+                                    return AppColor.blueMainColor
+                                        .withValues(alpha: 0.14);
+                                  }
+                                  return Colors.transparent;
+                                }),
+                                dayForegroundColor:
+                                    WidgetStateProperty.resolveWith((states) {
+                                  if (states.contains(WidgetState.selected)) {
+                                    return AppColor.blueMainColor;
+                                  }
+                                  if (states.contains(WidgetState.disabled)) {
+                                    return secondaryText.withValues(
+                                        alpha: 0.35);
+                                  }
+                                  return textColor;
+                                }),
+                                dayShape:
+                                    WidgetStateProperty.resolveWith((states) {
+                                  return RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    side: states.contains(WidgetState.selected)
+                                        ? const BorderSide(
+                                            color: AppColor.blueMainColor,
+                                            width: 1.4,
+                                          )
+                                        : BorderSide.none,
+                                  );
+                                }),
+                                dayOverlayColor: WidgetStatePropertyAll(
+                                  AppColor.blueMainColor
+                                      .withValues(alpha: 0.08),
+                                ),
+                                todayBackgroundColor:
+                                    WidgetStateProperty.resolveWith((states) {
+                                  if (states.contains(WidgetState.selected)) {
+                                    return AppColor.blueMainColor
+                                        .withValues(alpha: 0.14);
+                                  }
+                                  return Colors.transparent;
+                                }),
+                                todayForegroundColor:
+                                    const WidgetStatePropertyAll(
+                                  AppColor.blueMainColor,
+                                ),
+                                todayBorder: const BorderSide(
+                                  color: AppColor.blueMainColor,
+                                  width: 1.4,
+                                ),
+                                yearStyle: AppTextStyle.subSectionTextStyle(
+                                  fontsize: 13,
+                                  fontweight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                            child: CalendarDatePicker(
+                              initialDate: pendingDate,
+                              firstDate: DateTime(2021, 7, 1),
+                              lastDate: today,
+                              onDateChanged: (date) {
+                                setDialogState(() => pendingDate = date);
+                              },
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(height: 13),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: () =>
+                                    Navigator.of(dialogContext).pop(),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: secondaryText,
+                                  minimumSize: const Size(0, 44),
+                                  side: BorderSide(color: borderColor),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: const Text('Cancel'),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: () => Navigator.of(dialogContext)
+                                    .pop(pendingDate),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColor.blueMainColor,
+                                  foregroundColor: Colors.white,
+                                  elevation: 0,
+                                  minimumSize: const Size(0, 44),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: const Text('Select Date'),
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
@@ -1049,8 +1062,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                           final pickedDate = await _selectTrackingDate(
                             context: dialogContext,
                             selectedDate: selectedDate,
-                            today:
-                                DateTime(today.year, today.month, today.day),
+                            today: DateTime(today.year, today.month, today.day),
                           );
                           if (pickedDate != null) {
                             setDialogState(() {
@@ -1120,10 +1132,18 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                                   // checks whether the values entered fall within
                                   // a specific range, if not then an error message
                                   // will be displayed
-                                  else if (int.parse(hourController.text) >
-                                          25 ||
-                                      int.parse(minuteController.text) > 59 ||
-                                      int.parse(secondController.text) > 59) {
+                                  else if ((int.tryParse(
+                                                  hourController.text.trim()) ??
+                                              0) >
+                                          24 ||
+                                      (int.tryParse(minuteController.text
+                                                  .trim()) ??
+                                              0) >
+                                          59 ||
+                                      (int.tryParse(secondController.text
+                                                  .trim()) ??
+                                              0) >
+                                          59) {
                                     // snack bar that alerts the user when the
                                     // entries are out of range
                                     snackBarMessage(context,
@@ -1152,6 +1172,9 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                                       );
                                       return;
                                     }
+                                    TrackingTimePolicy.validateBlock(
+                                      enteredMinutes,
+                                    );
 
                                     final isHistorical =
                                         selectedDate.isBefore(today);
@@ -1165,8 +1188,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                                       if (!confirmed) return;
                                     }
 
-                                    setDialogState(
-                                        () => isAddingBlock = true);
+                                    setDialogState(() => isAddingBlock = true);
 
                                     final subcategory = Subcategories(
                                         date: selectedDateIso,
@@ -1176,10 +1198,9 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                                         currentLoggedInUser: currentUser,
                                         timeSpent: enteredMinutes);
 
-                                    final insertedId =
-                                        await subTrackerProvider
-                                            .insertIntoSubcategoryTable(
-                                                subcategory);
+                                    final insertedId = await subTrackerProvider
+                                        .insertIntoSubcategoryTable(
+                                            subcategory);
                                     subcategory.id = insertedId;
                                     _hasChangedTrackedTime = true;
                                     context
@@ -1204,10 +1225,17 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                                     minuteController.text = "";
                                     secondController.text = "";
                                   }
+                                } on TrackingTimeLimitException catch (error) {
+                                  if (context.mounted) {
+                                    snackBarMessage(
+                                      context,
+                                      errorMessage: '$error',
+                                      requiresColor: true,
+                                    );
+                                  }
                                 } finally {
                                   if (!shouldCloseDialog && context.mounted) {
-                                    setDialogState(
-                                        () => isAddingBlock = false);
+                                    setDialogState(() => isAddingBlock = false);
                                   }
                                 }
 
@@ -1229,6 +1257,133 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
         });
   }
 
+  Future<void> _startActivityTimer(ActivityTimerProvider timer) async {
+    try {
+      await timer.start(
+        mainCategoryName: widget.mainCategoryName,
+        subcategoryName: widget.subcategoryName,
+      );
+      if (mounted && timer.notificationPermissionGranted == false) {
+        snackBarMessage(
+          context,
+          errorMessage:
+              'Timer started. Allow Motion notifications to see it outside the app.',
+          requiresColor: false,
+        );
+      }
+    } on ActivityTimerAlreadyRunning catch (error) {
+      if (!mounted) return;
+      snackBarMessage(
+        context,
+        errorMessage:
+            '${error.session.subcategoryName} already has an active timer.',
+        requiresColor: true,
+      );
+    } catch (error) {
+      if (!mounted) return;
+      snackBarMessage(
+        context,
+        errorMessage: '$error',
+        requiresColor: true,
+      );
+    }
+  }
+
+  void _openRunningTimer(ActivityTimerProvider timer) {
+    final session = timer.session;
+    if (session == null ||
+        (session.mainCategoryName == widget.mainCategoryName &&
+            session.subcategoryName == widget.subcategoryName)) {
+      return;
+    }
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ManualTimeRecordingRoute(
+          subcategoryName: session.subcategoryName,
+          mainCategoryName: session.mainCategoryName,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _discardActivityTimer(ActivityTimerProvider timer) async {
+    final session = timer.session;
+    if (session == null) return;
+    final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => _DiscardActivityTimerDialog(
+            session: session,
+            elapsedSeconds: timer.elapsedSeconds,
+          ),
+        ) ??
+        false;
+    if (!confirmed) return;
+    await timer.discard();
+    if (!mounted) return;
+    snackBarMessage(
+      context,
+      errorMessage: 'Timer discarded',
+      requiresColor: false,
+    );
+  }
+
+  Future<void> _finishActivityTimer(ActivityTimerProvider timer) async {
+    final session = timer.session;
+    if (session == null) return;
+    final wasRunning = timer.isRunning;
+    if (wasRunning) await timer.pause();
+    if (!mounted) return;
+
+    final initialSeconds = timer.elapsedSeconds;
+    final selectedSeconds = await showDialog<int>(
+      context: context,
+      builder: (dialogContext) => _FinishActivityTimerDialog(
+        session: session,
+        initialSeconds: initialSeconds,
+        needsReview: timer.needsReview,
+      ),
+    );
+
+    if (selectedSeconds == null) {
+      if (wasRunning) await timer.resume();
+      return;
+    }
+
+    try {
+      final result = await timer.finish(
+        correctedSeconds:
+            selectedSeconds == initialSeconds ? null : selectedSeconds,
+      );
+      _hasChangedTrackedTime = true;
+      final currentDate = MotionDateUtils.todayIso();
+      for (final entry in result.entries.where(
+        (entry) => entry.date != currentDate,
+      )) {
+        await _rememberPastEntryAddedToday(
+          entry: entry,
+          currentDate: currentDate,
+        );
+        if (mounted) _pastEntriesAdded.insert(0, entry);
+      }
+      if (!mounted) return;
+      setState(() {});
+      snackBarMessage(
+        context,
+        errorMessage:
+            '${formatActivityTimerDuration(result.totalSeconds)} saved',
+        requiresColor: false,
+      );
+    } catch (error) {
+      if (!mounted) return;
+      snackBarMessage(
+        context,
+        errorMessage: 'Could not save timer: $error',
+        requiresColor: true,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -1245,12 +1400,6 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
           // the selected subcategory displayed as app bar title
           title: Text(widget.subcategoryName),
           centerTitle: true,
-          actions: [
-            // alert dialog to record time
-            IconButton(
-                onPressed: () => _showTimeAlertDialog(context),
-                icon: const Icon(Icons.add))
-          ],
         ),
         body: SingleChildScrollView(
           child: Consumer3<
@@ -1266,48 +1415,85 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
               currentDate: date.currentDate,
             );
 
-            return CachedFutureBuilder<List<Subcategories>>(
-              cacheKey:
-                  'manual-blocks-$currentUser-${date.currentDate}-${widget.subcategoryName}-'
-                  '${subs.refreshKeyForDate(currentUser: currentUser, date: date.currentDate)}',
-              futureFactory: () => subs.retrieveCurrentDateSubcategories(
-                date.currentDate,
-                currentUser,
-                widget.subcategoryName,
-              ),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting &&
-                    !snapshot.hasData) {
-                  return const Padding(
-                    padding: EdgeInsets.all(18),
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        color: AppColor.blueMainColor,
-                      ),
-                    ),
-                  );
-                }
-                if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                }
+            return Column(
+              children: [
+                Consumer<ActivityTimerProvider>(
+                  builder: (context, timer, child) {
+                    final isCurrentActivity = timer.isActiveFor(
+                      mainCategoryName: widget.mainCategoryName,
+                      subcategoryName: widget.subcategoryName,
+                    );
+                    final hasOtherTimer =
+                        timer.hasActiveTimer && !isCurrentActivity;
+                    return Column(
+                      children: [
+                        _TrackingMethodSelector(
+                          timer: timer,
+                          isCurrentActivity: isCurrentActivity,
+                          onTimer: timer.hasActiveTimer
+                              ? hasOtherTimer
+                                  ? () => _openRunningTimer(timer)
+                                  : null
+                              : () => _startActivityTimer(timer),
+                          onManual: () => _showTimeAlertDialog(context),
+                        ),
+                        _ActivityTimerPanel(
+                          timer: timer,
+                          isCurrentActivity: isCurrentActivity,
+                          onPause: timer.pause,
+                          onResume: timer.resume,
+                          onFinish: () => _finishActivityTimer(timer),
+                          onDiscard: () => _discardActivityTimer(timer),
+                          onOpenRunningTimer: () => _openRunningTimer(timer),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+                CachedFutureBuilder<List<Subcategories>>(
+                  cacheKey:
+                      'manual-blocks-$currentUser-${date.currentDate}-${widget.subcategoryName}-'
+                      '${subs.refreshKeyForDate(currentUser: currentUser, date: date.currentDate)}',
+                  futureFactory: () => subs.retrieveCurrentDateSubcategories(
+                    date.currentDate,
+                    currentUser,
+                    widget.subcategoryName,
+                  ),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting &&
+                        !snapshot.hasData) {
+                      return const Padding(
+                        padding: EdgeInsets.all(18),
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: AppColor.blueMainColor,
+                          ),
+                        ),
+                      );
+                    }
+                    if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    }
 
-                final blocks = snapshot.data ?? const <Subcategories>[];
-                return Column(
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.only(top: 10),
-                      child: _todaysBlocksPanel(
-                        blocks: blocks,
-                        subs: subs,
-                      ),
-                    ),
-                    _pastEntriesPanel(
-                      subs: subs,
-                      currentDate: date.currentDate,
-                    ),
-                  ],
-                );
-              },
+                    final blocks = snapshot.data ?? const <Subcategories>[];
+                    return Column(
+                      children: [
+                        Container(
+                          margin: const EdgeInsets.only(top: 2),
+                          child: _todaysBlocksPanel(
+                            blocks: blocks,
+                            subs: subs,
+                          ),
+                        ),
+                        _pastEntriesPanel(
+                          subs: subs,
+                          currentDate: date.currentDate,
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ],
             );
           }),
         ),

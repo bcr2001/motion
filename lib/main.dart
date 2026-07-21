@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:motion/firebase_options.dart';
@@ -12,6 +11,7 @@ import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/experience_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_pvd.dart';
+import 'package:motion/motion_core/motion_providers/timer_pvd/activity_timer_pvd.dart';
 import 'package:motion/motion_core/motion_providers/dropDown_pvd/drop_down_pvd.dart';
 import 'package:motion/motion_user/mu_ops/auth_page.dart';
 import 'package:provider/provider.dart';
@@ -73,6 +73,11 @@ void main() async {
     revisions: trackingDataRevisions,
     databaseHelper: trackerDatabase,
   );
+  final activityTimerProvider = ActivityTimerProvider(
+    userUidProvider: userUidProvider,
+    subcategoryProvider: trackSubcategoryDatabaseProvider,
+    databaseHelper: trackerDatabase,
+  );
 
   runApp(MultiProvider(
     providers: [
@@ -87,6 +92,7 @@ void main() async {
       ChangeNotifierProvider.value(value: assignerProvider),
       ChangeNotifierProvider.value(value: userUidProvider),
       ChangeNotifierProvider.value(value: autoDriveBackupProvider),
+      ChangeNotifierProvider(create: (context) => activityTimerProvider),
       ChangeNotifierProvider(create: (context) => DropDownTrackProvider()),
       ChangeNotifierProvider(create: (context) => CurrentDateProvider()),
       ChangeNotifierProvider(create: (context) => zenQuoteProvider),
@@ -112,6 +118,10 @@ void main() async {
       _initializeSafely(
         'Assigned subcategories',
         assignerProvider.getAllUserItems,
+      ),
+      _initializeSafely(
+        'Activity timer',
+        activityTimerProvider.initialize,
       ),
     ]),
   );
