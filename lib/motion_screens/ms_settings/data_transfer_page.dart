@@ -220,29 +220,35 @@ class _DataTransferPageState extends State<DataTransferPage> {
     await _runWithFeedback(
       'Google Drive backup complete:',
       (currentUser) async {
+        final firebaseUser = FirebaseAuth.instance.currentUser;
+        final motionEmail = firebaseUser?.uid == currentUser
+            ? firebaseUser?.email?.trim()
+            : null;
+        if (motionEmail == null || motionEmail.isEmpty) {
+          throw StateError(
+            'Motion could not verify the email for your signed-in account. No files were uploaded.',
+          );
+        }
+
         _updateBusyDetail('Preparing backup files from your database...');
         final backupFiles = await _csvTransfer.backupFiles(
           currentUser: currentUser,
         );
 
         _updateBusyDetail('Connecting to Google Drive...');
-        final motionEmail = FirebaseAuth.instance.currentUser?.email;
         final result = await _driveBackupService.uploadBackupFiles(
           files: backupFiles,
           expectedEmail: motionEmail,
         );
         if (mounted) {
           await context.read<AutoDriveBackupProvider>().recordSuccessfulBackup(
+                currentUser: currentUser,
                 fileCount: result.fileCount,
-                emailMatchesMotionAccount: result.emailMatchesMotionAccount,
               );
         }
 
-        final accountNote = result.emailMatchesMotionAccount
-            ? ''
-            : '\nNote: this backup was saved to ${result.email}, which is not the same email currently shown on your Motion account.';
         return '${result.fileCount} file(s) saved to '
-            '${result.folderName} in ${result.email}.$accountNote';
+            '${result.folderName} in ${result.email}.';
       },
       busyTitle: 'Backing Up To Google Drive',
       busyDetail: 'Preparing your data...',

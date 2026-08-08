@@ -12,40 +12,82 @@ class GoogleDriveBackupResult {
     required this.email,
     required this.folderName,
     required this.fileCount,
-    required this.emailMatchesMotionAccount,
   });
 
   final String email;
   final String folderName;
   final int fileCount;
-  final bool emailMatchesMotionAccount;
 }
 
-class GoogleDriveBackupService {
-  GoogleDriveBackupService({
-    GoogleSignIn? googleSignIn,
-  }) : _googleSignIn = googleSignIn ??
+abstract interface class GoogleDriveAccountSession {
+  Future<String?> signInSilently();
+
+  Future<String?> signIn();
+
+  Future<void> signOut();
+
+  Future<http.Client?> authenticatedClient();
+}
+
+class GoogleSignInDriveAccountSession implements GoogleDriveAccountSession {
+  GoogleSignInDriveAccountSession({GoogleSignIn? googleSignIn})
+      : _googleSignIn = googleSignIn ??
             GoogleSignIn(
               scopes: const [drive.DriveApi.driveFileScope],
             );
 
+  final GoogleSignIn _googleSignIn;
+
+  @override
+  Future<String?> signInSilently() async {
+    return (await _googleSignIn.signInSilently())?.email;
+  }
+
+  @override
+  Future<String?> signIn() async {
+    return (await _googleSignIn.signIn())?.email;
+  }
+
+  @override
+  Future<void> signOut() => _googleSignIn.signOut();
+
+  @override
+  Future<http.Client?> authenticatedClient() {
+    return _googleSignIn.authenticatedClient();
+  }
+}
+
+class GoogleDriveBackupService {
+  GoogleDriveBackupService({
+    GoogleDriveAccountSession? accountSession,
+  }) : _accountSession = accountSession ?? GoogleSignInDriveAccountSession();
+
   static const String backupFolderName = 'Motion Backups';
 
-  final GoogleSignIn _googleSignIn;
+  final GoogleDriveAccountSession _accountSession;
 
   Future<GoogleDriveBackupResult> uploadBackupFiles({
     required List<MotionCsvBackupFile> files,
-    String? expectedEmail,
+    required String expectedEmail,
     bool allowInteractiveSignIn = true,
   }) async {
     if (files.isEmpty) {
       throw StateError('There are no backup files to upload.');
     }
 
+    final normalizedExpectedEmail = expectedEmail.trim().toLowerCase();
+    if (normalizedExpectedEmail.isEmpty) {
+      throw StateError(
+        'Motion could not verify the email for the signed-in account. No files were uploaded.',
+      );
+    }
+
     try {
-      final account = await _googleSignIn.signInSilently() ??
-          (allowInteractiveSignIn ? await _googleSignIn.signIn() : null);
-      if (account == null) {
+      var driveEmail = await _accountSession.signInSilently();
+      if (driveEmail == null && allowInteractiveSignIn) {
+        driveEmail = await _accountSession.signIn();
+      }
+      if (driveEmail == null) {
         throw StateError(
           allowInteractiveSignIn
               ? 'Google Drive backup was cancelled.'
@@ -53,7 +95,23 @@ class GoogleDriveBackupService {
         );
       }
 
-      final client = await _googleSignIn.authenticatedClient();
+      if (driveEmail.trim().toLowerCase() != normalizedExpectedEmail &&
+          allowInteractiveSignIn) {
+        await _accountSession.signOut();
+        driveEmail = await _accountSession.signIn();
+      }
+
+      if (driveEmail == null ||
+          driveEmail.trim().toLowerCase() != normalizedExpectedEmail) {
+        if (allowInteractiveSignIn) {
+          await _accountSession.signOut();
+        }
+        throw StateError(
+          'Google Drive must use the same email as your Motion account ($expectedEmail). No files were uploaded.',
+        );
+      }
+
+      final client = await _accountSession.authenticatedClient();
       if (client == null) {
         throw StateError(
           'Motion could not connect to Google Drive. Please try signing in again.',
@@ -72,15 +130,10 @@ class GoogleDriveBackupService {
           );
         }
 
-        final normalizedExpectedEmail = expectedEmail?.trim().toLowerCase();
-        final actualEmail = account.email.trim();
         return GoogleDriveBackupResult(
-          email: actualEmail,
+          email: driveEmail.trim(),
           folderName: backupFolderName,
           fileCount: files.length,
-          emailMatchesMotionAccount: normalizedExpectedEmail == null ||
-              normalizedExpectedEmail.isEmpty ||
-              normalizedExpectedEmail == actualEmail.toLowerCase(),
         );
       } finally {
         client.close();
@@ -129,7 +182,8 @@ class GoogleDriveBackupService {
 
     final folderId = createdFolder.id;
     if (folderId == null || folderId.isEmpty) {
-      throw StateError('Motion could not create the Google Drive backup folder.');
+      throw StateError(
+          'Motion could not create the Google Drive backup folder.');
     }
     return folderId;
   }

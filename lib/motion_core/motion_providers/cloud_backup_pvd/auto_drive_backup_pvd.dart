@@ -23,12 +23,14 @@ class AutoDriveBackupProvider extends ChangeNotifier
     required UserUidProvider userUidProvider,
     MotionCsvDataTransfer? csvTransfer,
     GoogleDriveBackupService? driveBackupService,
+    String? Function(String currentUser)? motionEmailForUser,
   })  : _userUidProvider = userUidProvider,
         _csvTransfer = csvTransfer ?? MotionCsvDataTransfer(),
-        _driveBackupService =
-            driveBackupService ?? GoogleDriveBackupService() {
+        _driveBackupService = driveBackupService ?? GoogleDriveBackupService(),
+        _motionEmailForUser =
+            motionEmailForUser ?? _firebaseEmailForCurrentUser {
     WidgetsBinding.instance.addObserver(this);
-    _userUidProvider.addListener(_scheduleEligibilityCheck);
+    _userUidProvider.addListener(_handleUserChanged);
   }
 
   static const int eveningBackupHour = 20;
@@ -42,19 +44,22 @@ class AutoDriveBackupProvider extends ChangeNotifier
   final UserUidProvider _userUidProvider;
   final MotionCsvDataTransfer _csvTransfer;
   final GoogleDriveBackupService _driveBackupService;
+  final String? Function(String currentUser) _motionEmailForUser;
 
   SharedPreferences? _prefs;
   Timer? _retryTimer;
   Timer? _eligibilityTimer;
+  String? _loadedUser;
+  String? _activeBackupUser;
+  int _accountGeneration = 0;
   bool _isEnabled = false;
-  bool _isRunning = false;
   AutoDriveBackupStatus _status = AutoDriveBackupStatus.idle;
   String? _lastSuccessAt;
   String? _lastAttemptAt;
   String _message = 'Automatic Google Drive backup is off.';
 
   bool get isEnabled => _isEnabled;
-  bool get isRunning => _isRunning;
+  bool get isRunning => _activeBackupUser == _loadedUser;
   AutoDriveBackupStatus get status => _status;
   String? get lastSuccessAt => _lastSuccessAt;
   String? get lastAttemptAt => _lastAttemptAt;
@@ -62,50 +67,66 @@ class AutoDriveBackupProvider extends ChangeNotifier
 
   Future<void> initialize() async {
     _prefs = await SharedPreferences.getInstance();
-    _isEnabled = _prefs?.getBool(_enabledKey) ?? false;
-    _lastSuccessAt = _prefs?.getString(_lastSuccessAtKey);
-    _lastAttemptAt = _prefs?.getString(_lastAttemptAtKey);
-    _message = _prefs?.getString(_lastMessageKey) ?? _message;
-    _status = _statusFromName(_prefs?.getString(_lastStatusKey));
-
-    if (_isEnabled) _scheduleEligibilityCheck();
+    await _removeUnscopedLegacyState();
+    await _loadStateForUser(_userUidProvider.userUid);
   }
 
   Future<void> setEnabled(bool enabled) async {
+    final currentUser = _userUidProvider.userUid;
+    if (currentUser == null || currentUser != _loadedUser || _prefs == null) {
+      throw StateError(
+        'Your Motion account is still loading. Please try again.',
+      );
+    }
+
+    final generation = _accountGeneration;
     _isEnabled = enabled;
-    await _prefs?.setBool(_enabledKey, enabled);
+    await _prefs!.setBool(_userKey(_enabledKey, currentUser), enabled);
+    if (generation != _accountGeneration || currentUser != _loadedUser) return;
 
     if (!enabled) {
       _retryTimer?.cancel();
       _eligibilityTimer?.cancel();
       _status = AutoDriveBackupStatus.idle;
       _message = 'Automatic Google Drive backup is off.';
-      await _saveStatus();
+      await _saveStatus(currentUser: currentUser);
       notifyListeners();
       return;
     }
 
     _message = 'Automatic backup is on. Motion will back up after 8 PM.';
-    await _saveStatus();
+    await _saveStatus(currentUser: currentUser);
     notifyListeners();
     unawaited(runBackupIfEligible(force: true));
   }
 
   Future<void> runBackupIfEligible({bool force = false}) async {
-    if (!_isEnabled || _isRunning) return;
-
     final currentUser = _userUidProvider.userUid;
     if (currentUser == null) {
-      _message = 'Waiting for your account to finish loading.';
-      _status = AutoDriveBackupStatus.idle;
-      await _saveStatus();
-      notifyListeners();
+      return;
+    }
+    if (_loadedUser != currentUser) {
+      await _loadStateForUser(currentUser);
+    }
+    if (!_isEnabled || _activeBackupUser != null) return;
+    final generation = _accountGeneration;
+
+    final expectedEmail = _motionEmailForUser(currentUser)?.trim();
+    if (expectedEmail == null || expectedEmail.isEmpty) {
+      _status = AutoDriveBackupStatus.blocked;
+      _message =
+          'Motion could not verify your account email. Automatic backup did not run.';
+      await _saveStatus(currentUser: currentUser);
+      if (generation == _accountGeneration && currentUser == _loadedUser) {
+        notifyListeners();
+      }
       return;
     }
 
     final now = DateTime.now();
     final today = MotionDateUtils.formatDbDate(now);
-    final lastSuccessDate = _prefs?.getString(_lastSuccessDateKey);
+    final lastSuccessDate =
+        _prefs?.getString(_userKey(_lastSuccessDateKey, currentUser));
     final isEveningWindow = now.hour >= eveningBackupHour;
     final missedEarlierBackup = lastSuccessDate != null &&
         lastSuccessDate.compareTo(today) < 0 &&
@@ -120,41 +141,51 @@ class AutoDriveBackupProvider extends ChangeNotifier
       _message = 'Next automatic backup window opens after 8 PM.';
       _status = AutoDriveBackupStatus.idle;
       _scheduleEveningBackupWindow(now);
-      await _saveStatus();
-      notifyListeners();
+      await _saveStatus(currentUser: currentUser);
+      if (generation == _accountGeneration && currentUser == _loadedUser) {
+        notifyListeners();
+      }
       return;
     }
 
-    await _runBackup(currentUser: currentUser);
+    await _runBackup(
+      currentUser: currentUser,
+      expectedEmail: expectedEmail,
+    );
   }
 
   Future<void> recordSuccessfulBackup({
+    required String currentUser,
     required int fileCount,
-    required bool emailMatchesMotionAccount,
   }) async {
+    if (currentUser != _loadedUser) return;
     _retryTimer?.cancel();
-    _scheduleEveningBackupWindow(DateTime.now());
-    _lastSuccessAt = DateTime.now().toIso8601String();
+    final completedAt = DateTime.now();
     await _prefs?.setString(
-      _lastSuccessDateKey,
-      MotionDateUtils.todayIso(),
+      _userKey(_lastSuccessDateKey, currentUser),
+      MotionDateUtils.formatDbDate(completedAt),
     );
+    if (currentUser != _loadedUser) return;
+
+    _scheduleEveningBackupWindow(completedAt);
+    _lastSuccessAt = completedAt.toIso8601String();
     _status = AutoDriveBackupStatus.success;
-    _message = emailMatchesMotionAccount
-        ? 'Last Google Drive backup saved $fileCount file(s).'
-        : 'Backup saved, but the Drive account differs from your Motion email.';
-    await _saveStatus();
+    _message = 'Last Google Drive backup saved $fileCount file(s).';
+    await _saveStatus(currentUser: currentUser);
     notifyListeners();
   }
 
-  Future<void> _runBackup({required String currentUser}) async {
+  Future<void> _runBackup({
+    required String currentUser,
+    required String expectedEmail,
+  }) async {
     _retryTimer?.cancel();
     _eligibilityTimer?.cancel();
-    _isRunning = true;
+    _activeBackupUser = currentUser;
     _status = AutoDriveBackupStatus.running;
     _lastAttemptAt = DateTime.now().toIso8601String();
     _message = 'Automatic Google Drive backup is running...';
-    await _saveStatus();
+    await _saveStatus(currentUser: currentUser);
     notifyListeners();
 
     try {
@@ -163,28 +194,40 @@ class AutoDriveBackupProvider extends ChangeNotifier
       );
       final result = await _driveBackupService.uploadBackupFiles(
         files: backupFiles,
-        expectedEmail: FirebaseAuth.instance.currentUser?.email,
+        expectedEmail: expectedEmail,
         allowInteractiveSignIn: false,
       );
 
-      _lastSuccessAt = DateTime.now().toIso8601String();
+      if (currentUser != _loadedUser) return;
+
+      final completedAt = DateTime.now();
       await _prefs?.setString(
-        _lastSuccessDateKey,
-        MotionDateUtils.todayIso(),
+        _userKey(_lastSuccessDateKey, currentUser),
+        MotionDateUtils.formatDbDate(completedAt),
       );
+      if (currentUser != _loadedUser) return;
+
+      _lastSuccessAt = completedAt.toIso8601String();
       _status = AutoDriveBackupStatus.success;
-      _message = result.emailMatchesMotionAccount
-          ? 'Last automatic backup saved ${result.fileCount} file(s) to Google Drive.'
-          : 'Backup saved, but the Drive account differs from your Motion email.';
-      _scheduleEveningBackupWindow(DateTime.now());
+      _message =
+          'Last automatic backup saved ${result.fileCount} file(s) to Google Drive.';
+      _scheduleEveningBackupWindow(completedAt);
     } on StateError catch (error) {
-      _handleBackupFailure(error.message);
+      if (currentUser == _loadedUser) {
+        _handleBackupFailure(error.message);
+      }
     } catch (error) {
-      _handleBackupFailure('$error');
+      if (currentUser == _loadedUser) {
+        _handleBackupFailure('$error');
+      }
     } finally {
-      _isRunning = false;
-      await _saveStatus();
-      notifyListeners();
+      _activeBackupUser = null;
+      if (currentUser == _loadedUser) {
+        await _saveStatus(currentUser: currentUser);
+        notifyListeners();
+      } else if (_isEnabled) {
+        _scheduleEligibilityCheck();
+      }
     }
   }
 
@@ -216,6 +259,53 @@ class AutoDriveBackupProvider extends ChangeNotifier
     unawaited(Future.microtask(() => runBackupIfEligible()));
   }
 
+  void _handleUserChanged() {
+    unawaited(_loadStateForUser(_userUidProvider.userUid));
+  }
+
+  Future<void> _loadStateForUser(String? currentUser) async {
+    final generation = ++_accountGeneration;
+    _retryTimer?.cancel();
+    _eligibilityTimer?.cancel();
+    _loadedUser = currentUser;
+
+    if (currentUser == null || _prefs == null) {
+      _resetVisibleState();
+      notifyListeners();
+      return;
+    }
+
+    final prefs = _prefs!;
+    final isEnabled =
+        prefs.getBool(_userKey(_enabledKey, currentUser)) ?? false;
+    final lastSuccessAt =
+        prefs.getString(_userKey(_lastSuccessAtKey, currentUser));
+    final lastAttemptAt =
+        prefs.getString(_userKey(_lastAttemptAtKey, currentUser));
+    final message = prefs.getString(_userKey(_lastMessageKey, currentUser));
+    final status = _statusFromName(
+      prefs.getString(_userKey(_lastStatusKey, currentUser)),
+    );
+
+    if (generation != _accountGeneration || currentUser != _loadedUser) return;
+    _isEnabled = isEnabled;
+    _lastSuccessAt = lastSuccessAt;
+    _lastAttemptAt = lastAttemptAt;
+    _message = message ?? 'Automatic Google Drive backup is off.';
+    _status = status;
+    notifyListeners();
+
+    if (_isEnabled) _scheduleEligibilityCheck();
+  }
+
+  void _resetVisibleState() {
+    _isEnabled = false;
+    _lastSuccessAt = null;
+    _lastAttemptAt = null;
+    _status = AutoDriveBackupStatus.idle;
+    _message = 'Automatic Google Drive backup is off.';
+  }
+
   void _scheduleRetry() {
     _retryTimer?.cancel();
     _retryTimer = Timer(const Duration(minutes: 15), () {
@@ -241,15 +331,58 @@ class AutoDriveBackupProvider extends ChangeNotifier
     });
   }
 
-  Future<void> _saveStatus() async {
-    await _prefs?.setString(_lastStatusKey, _status.name);
-    await _prefs?.setString(_lastMessageKey, _message);
-    if (_lastSuccessAt != null) {
-      await _prefs?.setString(_lastSuccessAtKey, _lastSuccessAt!);
+  Future<void> _saveStatus({required String currentUser}) async {
+    final prefs = _prefs;
+    if (prefs == null) return;
+
+    final statusName = _status.name;
+    final message = _message;
+    final lastSuccessAt = _lastSuccessAt;
+    final lastAttemptAt = _lastAttemptAt;
+
+    await prefs.setString(
+      _userKey(_lastStatusKey, currentUser),
+      statusName,
+    );
+    await prefs.setString(
+      _userKey(_lastMessageKey, currentUser),
+      message,
+    );
+    if (lastSuccessAt != null) {
+      await prefs.setString(
+        _userKey(_lastSuccessAtKey, currentUser),
+        lastSuccessAt,
+      );
     }
-    if (_lastAttemptAt != null) {
-      await _prefs?.setString(_lastAttemptAtKey, _lastAttemptAt!);
+    if (lastAttemptAt != null) {
+      await prefs.setString(
+        _userKey(_lastAttemptAtKey, currentUser),
+        lastAttemptAt,
+      );
     }
+  }
+
+  String _userKey(String key, String currentUser) => '$key.$currentUser';
+
+  Future<void> _removeUnscopedLegacyState() async {
+    final prefs = _prefs;
+    if (prefs == null) return;
+    for (final key in const [
+      _enabledKey,
+      _lastSuccessAtKey,
+      _lastSuccessDateKey,
+      _lastAttemptAtKey,
+      _lastMessageKey,
+      _lastStatusKey,
+    ]) {
+      await prefs.remove(key);
+    }
+  }
+
+  static String? _firebaseEmailForCurrentUser(String currentUser) {
+    final firebaseUser = FirebaseAuth.instance.currentUser;
+    if (firebaseUser == null || firebaseUser.uid != currentUser) return null;
+    return firebaseUser.email;
   }
 
   AutoDriveBackupStatus _statusFromName(String? value) {
@@ -269,7 +402,7 @@ class AutoDriveBackupProvider extends ChangeNotifier
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _userUidProvider.removeListener(_scheduleEligibilityCheck);
+    _userUidProvider.removeListener(_handleUserChanged);
     _retryTimer?.cancel();
     _eligibilityTimer?.cancel();
     super.dispose();
