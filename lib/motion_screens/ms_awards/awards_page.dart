@@ -57,18 +57,6 @@ class AwardsPage extends StatelessWidget {
     );
   }
 
-  double _progressFor({
-    required double trackedHours,
-    required MotionAward? currentAward,
-    required MotionAward? nextAward,
-  }) {
-    if (nextAward == null) return 1;
-    final lowerBound = currentAward?.requiredHours.toDouble() ?? 0;
-    final targetRange = nextAward.requiredHours - lowerBound;
-    if (targetRange <= 0) return 1;
-    return ((trackedHours - lowerBound) / targetRange).clamp(0, 1).toDouble();
-  }
-
   Widget _awardImage(
     MotionAward award, {
     required bool earned,
@@ -111,11 +99,7 @@ class AwardsPage extends StatelessWidget {
     required Map<int, String> earnedDates,
   }) {
     final featuredAward = currentAward ?? nextAward ?? MotionAwards.all.last;
-    final progress = _progressFor(
-      trackedHours: trackedHours,
-      currentAward: currentAward,
-      nextAward: nextAward,
-    );
+    final progress = MotionAwards.lifetimeProgressToNext(trackedHours);
     final remaining =
         nextAward == null ? 0.0 : nextAward.requiredHours - trackedHours;
     final earnedDate =

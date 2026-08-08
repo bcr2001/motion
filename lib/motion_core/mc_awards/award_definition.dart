@@ -68,19 +68,22 @@ class MotionAwards {
       name: 'Time Mastery',
       requiredHours: 10000,
       assetPath: 'assets/images/motion_badges/10000_hour_award.png',
-      lockedAssetPath: 'assets/images/motion_badges/10000_hour_award_locked.png',
+      lockedAssetPath:
+          'assets/images/motion_badges/10000_hour_award_locked.png',
     ),
     MotionAward(
       name: 'Immortal',
       requiredHours: 25000,
       assetPath: 'assets/images/motion_badges/25000_hour_award.png',
-      lockedAssetPath: 'assets/images/motion_badges/25000_hour_award_locked.png',
+      lockedAssetPath:
+          'assets/images/motion_badges/25000_hour_award_locked.png',
     ),
     MotionAward(
       name: 'Legacy',
       requiredHours: 50000,
       assetPath: 'assets/images/motion_badges/50000_hour_award.png',
-      lockedAssetPath: 'assets/images/motion_badges/50000_hour_award_locked.png',
+      lockedAssetPath:
+          'assets/images/motion_badges/50000_hour_award_locked.png',
     ),
     MotionAward(
       name: 'Eternal',
@@ -105,5 +108,13 @@ class MotionAwards {
       if (trackedHours < award.requiredHours) return award;
     }
     return null;
+  }
+
+  static double lifetimeProgressToNext(double trackedHours) {
+    final nextAward = nextAfter(trackedHours);
+    if (nextAward == null) return 1;
+    if (nextAward.requiredHours <= 0) return 1;
+
+    return (trackedHours / nextAward.requiredHours).clamp(0.0, 1.0).toDouble();
   }
 }
