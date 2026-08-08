@@ -233,10 +233,14 @@ class _DailyTimeBlockDialogState extends State<_DailyTimeBlockDialog> {
         : AppColor.lightModeContentWidget;
     final secondary = isDark ? Colors.white60 : Colors.blueGrey;
     final border = isDark ? Colors.white12 : Colors.black12;
+    final fieldFill = isDark
+        ? Colors.white.withValues(alpha: 0.045)
+        : Colors.black.withValues(alpha: 0.028);
 
     return Dialog(
       backgroundColor: surface,
       insetPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
+      clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(18),
         side: BorderSide(color: border),
@@ -244,126 +248,110 @@ class _DailyTimeBlockDialogState extends State<_DailyTimeBlockDialog> {
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 430),
         child: SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(
-            16,
-            16,
-            16,
-            14 + MediaQuery.viewInsetsOf(context).bottom,
-          ),
+          padding: const EdgeInsets.fromLTRB(17, 16, 17, 15),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Row(
-                children: [
-                  Container(
-                    height: 40,
-                    width: 40,
-                    decoration: BoxDecoration(
-                      color: AppColor.blueMainColor.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      _isEditing
-                          ? Icons.edit_calendar_rounded
-                          : Icons.add_alarm_rounded,
-                      color: AppColor.blueMainColor,
-                    ),
-                  ),
-                  const SizedBox(width: 11),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _isEditing ? 'Edit Time Block' : 'Add Missing Time',
-                          style: AppTextStyle.subSectionTextStyle(
-                            fontsize: 17,
-                            fontweight: FontWeight.w900,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          MotionDateUtils.formatDisplayDate(widget.date),
-                          style: AppTextStyle.subSectionTextStyle(
-                            fontsize: 10.5,
-                            fontweight: FontWeight.normal,
-                            color: secondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    tooltip: 'Close',
-                    onPressed: () => Navigator.pop(context),
-                    icon: Icon(Icons.close_rounded, color: secondary),
-                  ),
-                ],
+              _DailyTimeBlockDialogHeader(
+                isEditing: _isEditing,
+                date: widget.date,
+                secondaryColor: secondary,
+                onClose: () => Navigator.pop(context),
               ),
-              const SizedBox(height: 15),
+              const SizedBox(height: 19),
+              const _DailyDialogSectionLabel(
+                icon: Icons.category_outlined,
+                label: 'Activity',
+              ),
+              const SizedBox(height: 8),
               if (_isEditing)
                 _SelectedActivity(entry: widget.existingEntry!)
               else
                 DropdownButtonFormField<Assigner>(
                   initialValue: _selectedAssignment,
                   isExpanded: true,
+                  isDense: false,
+                  itemHeight: 58,
+                  menuMaxHeight: 320,
+                  dropdownColor: surface,
+                  icon: const Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: AppColor.blueMainColor,
+                  ),
                   decoration: InputDecoration(
-                    labelText: 'Subcategory',
-                    prefixIcon: const Icon(Icons.category_outlined),
-                    border: OutlineInputBorder(
+                    filled: true,
+                    fillColor: fieldFill,
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                    enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: border),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: AppColor.blueMainColor,
+                        width: 1.4,
+                      ),
                     ),
                   ),
                   items: widget.assignments
                       .map(
                         (assignment) => DropdownMenuItem(
                           value: assignment,
-                          child: Text(
-                            '${assignment.subcategoryName} | ${assignment.mainCategoryName}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                          child: _AssignmentOption(assignment: assignment),
                         ),
                       )
                       .toList(),
-                  onChanged: (value) =>
-                      setState(() => _selectedAssignment = value),
+                  onChanged: (value) => setState(() {
+                    _selectedAssignment = value;
+                    _error = null;
+                  }),
                 ),
-              const SizedBox(height: 14),
-              Row(
-                children: [
-                  _DurationField(
-                    label: 'Hours',
-                    controller: _hoursController,
-                    hint: '00',
-                  ),
-                  const SizedBox(width: 8),
-                  _DurationField(
-                    label: 'Minutes',
-                    controller: _minutesController,
-                    hint: '00',
-                  ),
-                  const SizedBox(width: 8),
-                  _DurationField(
-                    label: 'Seconds',
-                    controller: _secondsController,
-                    hint: '00',
-                  ),
-                ],
+              const SizedBox(height: 17),
+              const _DailyDialogSectionLabel(
+                icon: Icons.timer_outlined,
+                label: 'Duration',
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: fieldFill,
+                  borderRadius: BorderRadius.circular(13),
+                  border: Border.all(color: border),
+                ),
+                child: Row(
+                  children: [
+                    _DurationField(
+                      label: 'Hours',
+                      controller: _hoursController,
+                      hint: '00',
+                      onChanged: (_) => _clearError(),
+                    ),
+                    const SizedBox(width: 8),
+                    _DurationField(
+                      label: 'Minutes',
+                      controller: _minutesController,
+                      hint: '00',
+                      onChanged: (_) => _clearError(),
+                    ),
+                    const SizedBox(width: 8),
+                    _DurationField(
+                      label: 'Seconds',
+                      controller: _secondsController,
+                      hint: '00',
+                      onChanged: (_) => _clearError(),
+                    ),
+                  ],
+                ),
               ),
               if (_error != null) ...[
                 const SizedBox(height: 10),
-                Text(
-                  _error!,
-                  style: AppTextStyle.subSectionTextStyle(
-                    fontsize: 11,
-                    fontweight: FontWeight.w700,
-                    color: Colors.redAccent,
-                  ),
-                ),
+                _DailyDialogErrorMessage(message: _error!),
               ],
-              const SizedBox(height: 18),
+              const SizedBox(height: 20),
               Row(
                 children: [
                   Expanded(
@@ -371,8 +359,11 @@ class _DailyTimeBlockDialogState extends State<_DailyTimeBlockDialog> {
                       onPressed: () => Navigator.pop(context),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: secondary,
-                        minimumSize: const Size(0, 44),
+                        minimumSize: const Size(0, 46),
                         side: BorderSide(color: border),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                       child: const Text('Cancel'),
                     ),
@@ -384,9 +375,25 @@ class _DailyTimeBlockDialogState extends State<_DailyTimeBlockDialog> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColor.blueMainColor,
                         foregroundColor: Colors.white,
-                        minimumSize: const Size(0, 44),
+                        elevation: 0,
+                        minimumSize: const Size(0, 46),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      child: Text(_isEditing ? 'Save Changes' : 'Add Time'),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            _isEditing
+                                ? Icons.check_rounded
+                                : Icons.add_rounded,
+                            size: 18,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(_isEditing ? 'Save Changes' : 'Add Time'),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -395,6 +402,177 @@ class _DailyTimeBlockDialogState extends State<_DailyTimeBlockDialog> {
           ),
         ),
       ),
+    );
+  }
+
+  void _clearError() {
+    if (_error != null) setState(() => _error = null);
+  }
+}
+
+class _DailyTimeBlockDialogHeader extends StatelessWidget {
+  const _DailyTimeBlockDialogHeader({
+    required this.isEditing,
+    required this.date,
+    required this.secondaryColor,
+    required this.onClose,
+  });
+
+  final bool isEditing;
+  final DateTime date;
+  final Color secondaryColor;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          height: 42,
+          width: 42,
+          decoration: BoxDecoration(
+            color: AppColor.blueMainColor.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(
+            isEditing ? Icons.edit_calendar_rounded : Icons.add_alarm_rounded,
+            color: AppColor.blueMainColor,
+            size: 22,
+          ),
+        ),
+        const SizedBox(width: 11),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                isEditing ? 'Edit Time Block' : 'Add Missing Time',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyle.subSectionTextStyle(
+                  fontsize: 17,
+                  fontweight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 3),
+              Row(
+                children: [
+                  Icon(
+                    Icons.calendar_today_rounded,
+                    size: 12,
+                    color: secondaryColor,
+                  ),
+                  const SizedBox(width: 5),
+                  Flexible(
+                    child: Text(
+                      MotionDateUtils.formatDisplayDate(date),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyle.subSectionTextStyle(
+                        fontsize: 10.5,
+                        fontweight: FontWeight.normal,
+                        color: secondaryColor,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        IconButton(
+          tooltip: 'Close',
+          onPressed: onClose,
+          visualDensity: VisualDensity.compact,
+          icon: Icon(Icons.close_rounded, color: secondaryColor),
+        ),
+      ],
+    );
+  }
+}
+
+class _DailyDialogSectionLabel extends StatelessWidget {
+  const _DailyDialogSectionLabel({
+    required this.icon,
+    required this.label,
+  });
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: AppColor.blueMainColor),
+        const SizedBox(width: 7),
+        Text(
+          label,
+          style: AppTextStyle.subSectionTextStyle(
+            fontsize: 11.5,
+            fontweight: FontWeight.w800,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _AssignmentOption extends StatelessWidget {
+  const _AssignmentOption({required this.assignment});
+
+  final Assigner assignment;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final secondary = isDark ? Colors.white60 : Colors.blueGrey;
+
+    return Row(
+      children: [
+        Container(
+          height: 32,
+          width: 32,
+          decoration: BoxDecoration(
+            color: AppColor.blueMainColor.withValues(alpha: 0.10),
+            borderRadius: BorderRadius.circular(9),
+          ),
+          child: const Icon(
+            Icons.bolt_rounded,
+            size: 17,
+            color: AppColor.blueMainColor,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                assignment.subcategoryName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyle.subSectionTextStyle(
+                  fontsize: 12,
+                  fontweight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 1),
+              Text(
+                assignment.mainCategoryName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyle.subSectionTextStyle(
+                  fontsize: 9.5,
+                  fontweight: FontWeight.normal,
+                  color: secondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -406,20 +584,53 @@ class _SelectedActivity extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final secondary = isDark ? Colors.white60 : Colors.blueGrey;
+    final border = isDark ? Colors.white12 : Colors.black12;
+
     return Container(
-      padding: const EdgeInsets.all(11),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: AppColor.blueMainColor.withValues(alpha: 0.07),
+        color: AppColor.blueMainColor.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: border),
       ),
-      child: Text(
-        '${entry.subcategoryName} | ${entry.mainCategoryName}',
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: AppTextStyle.subSectionTextStyle(
-          fontsize: 12.5,
-          fontweight: FontWeight.w800,
-        ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.bolt_rounded,
+            size: 18,
+            color: AppColor.blueMainColor,
+          ),
+          const SizedBox(width: 9),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  entry.subcategoryName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyle.subSectionTextStyle(
+                    fontsize: 12.5,
+                    fontweight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 1),
+                Text(
+                  entry.mainCategoryName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyle.subSectionTextStyle(
+                    fontsize: 9.5,
+                    fontweight: FontWeight.normal,
+                    color: secondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -430,37 +641,115 @@ class _DurationField extends StatelessWidget {
     required this.label,
     required this.controller,
     required this.hint,
+    required this.onChanged,
   });
 
   final String label;
   final TextEditingController controller;
   final String hint;
+  final ValueChanged<String> onChanged;
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black87;
+    final secondary = isDark ? Colors.white60 : Colors.blueGrey;
+    final border = isDark ? Colors.white12 : Colors.black12;
+
     return Expanded(
-      child: TextField(
-        controller: controller,
-        keyboardType: TextInputType.number,
-        textAlign: TextAlign.center,
-        maxLength: 2,
-        buildCounter: (
-          _, {
-          int? currentLength,
-          bool? isFocused,
-          int? maxLength,
-        }) =>
-            null,
-        decoration: InputDecoration(
-          labelText: label,
-          hintText: hint,
-          isDense: true,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 8, vertical: 13),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(11),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTextStyle.subSectionTextStyle(
+              fontsize: 9.5,
+              fontweight: FontWeight.normal,
+              color: secondary,
+            ),
           ),
-        ),
+          const SizedBox(height: 5),
+          Container(
+            height: 52,
+            decoration: BoxDecoration(
+              color: isDark
+                  ? Colors.black.withValues(alpha: 0.12)
+                  : Colors.white.withValues(alpha: 0.72),
+              borderRadius: BorderRadius.circular(11),
+              border: Border.all(color: border),
+            ),
+            child: TextField(
+              controller: controller,
+              onChanged: onChanged,
+              keyboardType: TextInputType.number,
+              textAlign: TextAlign.center,
+              maxLength: 2,
+              buildCounter: (
+                _, {
+                int? currentLength,
+                bool? isFocused,
+                int? maxLength,
+              }) =>
+                  null,
+              style: AppTextStyle.subSectionTextStyle(
+                fontsize: 21,
+                fontweight: FontWeight.w800,
+                color: textColor,
+              ),
+              decoration: InputDecoration(
+                hintText: hint,
+                hintStyle: AppTextStyle.subSectionTextStyle(
+                  fontsize: 21,
+                  fontweight: FontWeight.normal,
+                  color: secondary.withValues(alpha: 0.55),
+                ),
+                isDense: true,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 6, vertical: 12),
+                border: InputBorder.none,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DailyDialogErrorMessage extends StatelessWidget {
+  const _DailyDialogErrorMessage({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      liveRegion: true,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(top: 1),
+            child: Icon(
+              Icons.error_outline_rounded,
+              size: 17,
+              color: Colors.redAccent,
+            ),
+          ),
+          const SizedBox(width: 7),
+          Expanded(
+            child: Text(
+              message,
+              style: AppTextStyle.subSectionTextStyle(
+                fontsize: 11,
+                fontweight: FontWeight.w700,
+                color: Colors.redAccent,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

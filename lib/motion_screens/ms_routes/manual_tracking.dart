@@ -222,7 +222,8 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
   Widget _titleAndTextFieldBuilder(
       {required String title,
       required TextEditingController textEditingController,
-      required int maximum}) {
+      required int maximum,
+      ValueChanged<String>? onChanged}) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final borderColor =
         isDarkMode ? Colors.white.withValues(alpha: 0.10) : Colors.black12;
@@ -258,6 +259,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
             // text field for each time component
             TextFormField(
               controller: textEditingController,
+              onChanged: onChanged,
               keyboardType: TextInputType.number,
               maxLength: 2,
               buildCounter: (BuildContext context,
@@ -289,7 +291,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
     );
   }
 
-  Widget _timeEntryBlock() {
+  Widget _timeEntryBlock({ValueChanged<String>? onChanged}) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final borderColor =
         isDarkMode ? Colors.white.withValues(alpha: 0.10) : Colors.black12;
@@ -348,6 +350,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                 title: "Hours",
                 textEditingController: hourController,
                 maximum: 24,
+                onChanged: onChanged,
               ),
 
               const SizedBox(width: 8),
@@ -357,6 +360,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                 title: "Minutes",
                 textEditingController: minuteController,
                 maximum: 59,
+                onChanged: onChanged,
               ),
 
               const SizedBox(width: 8),
@@ -366,6 +370,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                 title: "Seconds",
                 textEditingController: secondController,
                 maximum: 59,
+                onChanged: onChanged,
               )
             ],
           ),
@@ -1040,6 +1045,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
         context: context,
         builder: (BuildContext context) {
           var isAddingBlock = false;
+          String? trackingLimitError;
           var subTrackerProvider =
               context.read<SubcategoryTrackerDatabaseProvider>();
 
@@ -1067,6 +1073,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                           if (pickedDate != null) {
                             setDialogState(() {
                               selectedDate = pickedDate;
+                              trackingLimitError = null;
                             });
                           }
                         },
@@ -1074,7 +1081,20 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
 
                       const SizedBox(height: 10),
 
-                      _timeEntryBlock(),
+                      _timeEntryBlock(
+                        onChanged: (_) {
+                          if (trackingLimitError != null) {
+                            setDialogState(() => trackingLimitError = null);
+                          }
+                        },
+                      ),
+
+                      if (trackingLimitError != null) ...[
+                        const SizedBox(height: 10),
+                        _TrackingTimeLimitWarning(
+                          message: trackingLimitError!,
+                        ),
+                      ],
 
                       const SizedBox(height: 16),
 
@@ -1096,6 +1116,23 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                                 return;
                               }
 
+                              if (trackingLimitError != null) {
+                                setDialogState(
+                                  () => trackingLimitError = null,
+                                );
+                              }
+
+                              final enteredHours = int.tryParse(
+                                hourController.text.trim(),
+                              );
+                              if (enteredHours != null && enteredHours > 24) {
+                                setDialogState(
+                                  () => trackingLimitError =
+                                      const TimeBlockLimitExceeded().toString(),
+                                );
+                                return;
+                              }
+
                               final currentUser = uid.userUid;
                               if (currentUser == null) {
                                 snackBarMessage(context,
@@ -1104,6 +1141,8 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                                     requiresColor: true);
                                 return;
                               }
+                              final experienceProvider =
+                                  context.read<ExperiencePointTableProvider>();
 
                               // adds the necessary data to the subcategory
                               // table if validation passes
@@ -1203,8 +1242,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                                             subcategory);
                                     subcategory.id = insertedId;
                                     _hasChangedTrackedTime = true;
-                                    context
-                                        .read<ExperiencePointTableProvider>()
+                                    experienceProvider
                                         .refreshExperiencePointViews();
                                     if (isHistorical && mounted) {
                                       await _rememberPastEntryAddedToday(
@@ -1226,15 +1264,14 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                                     secondController.text = "";
                                   }
                                 } on TrackingTimeLimitException catch (error) {
-                                  if (context.mounted) {
-                                    snackBarMessage(
-                                      context,
-                                      errorMessage: '$error',
-                                      requiresColor: true,
+                                  if (dialogContext.mounted) {
+                                    setDialogState(
+                                      () => trackingLimitError = '$error',
                                     );
                                   }
                                 } finally {
-                                  if (!shouldCloseDialog && context.mounted) {
+                                  if (!shouldCloseDialog &&
+                                      dialogContext.mounted) {
                                     setDialogState(() => isAddingBlock = false);
                                   }
                                 }

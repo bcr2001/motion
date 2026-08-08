@@ -209,27 +209,9 @@ class _CurrentMilestoneAward extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Image.asset(
-            currentAward?.assetPath ?? displayedAward.lockedAssetPath,
-            width: 150,
-            height: 150,
-            fit: BoxFit.contain,
-            cacheWidth: 450,
-            filterQuality: FilterQuality.medium,
-            errorBuilder: (context, error, stackTrace) => Container(
-              width: 150,
-              height: 150,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: AppColor.accountedColor.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.emoji_events_rounded,
-                color: AppColor.accountedColor,
-                size: 60,
-              ),
-            ),
+          _AnimatedMilestoneBadge(
+            assetPath:
+                currentAward?.assetPath ?? displayedAward.lockedAssetPath,
           ),
           const SizedBox(height: 7),
           Text(
@@ -268,6 +250,95 @@ class _CurrentMilestoneAward extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _AnimatedMilestoneBadge extends StatefulWidget {
+  const _AnimatedMilestoneBadge({required this.assetPath});
+
+  final String assetPath;
+
+  @override
+  State<_AnimatedMilestoneBadge> createState() =>
+      _AnimatedMilestoneBadgeState();
+}
+
+class _AnimatedMilestoneBadgeState extends State<_AnimatedMilestoneBadge>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  bool? _animationsDisabled;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2800),
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final animationsDisabled =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    if (_animationsDisabled == animationsDisabled) return;
+    _animationsDisabled = animationsDisabled;
+
+    if (animationsDisabled) {
+      _controller
+        ..stop()
+        ..value = 0;
+    } else {
+      _controller.repeat(reverse: true);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) {
+          final progress = Curves.easeInOut.transform(_controller.value);
+          return Transform.translate(
+            offset: Offset(0, -4 * progress),
+            child: Transform.scale(
+              scale: 1 + (0.025 * progress),
+              child: child,
+            ),
+          );
+        },
+        child: Image.asset(
+          widget.assetPath,
+          width: 150,
+          height: 150,
+          fit: BoxFit.contain,
+          cacheWidth: 450,
+          filterQuality: FilterQuality.medium,
+          errorBuilder: (context, error, stackTrace) => Container(
+            width: 150,
+            height: 150,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: AppColor.accountedColor.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.emoji_events_rounded,
+              color: AppColor.accountedColor,
+              size: 60,
+            ),
+          ),
+        ),
       ),
     );
   }

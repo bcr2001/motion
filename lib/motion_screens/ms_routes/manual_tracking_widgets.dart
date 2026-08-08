@@ -907,6 +907,43 @@ class _ManualTrackingTimeDialogActions extends StatelessWidget {
   }
 }
 
+class _TrackingTimeLimitWarning extends StatelessWidget {
+  const _TrackingTimeLimitWarning({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      liveRegion: true,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(top: 1),
+            child: Icon(
+              Icons.error_outline_rounded,
+              size: 17,
+              color: Colors.redAccent,
+            ),
+          ),
+          const SizedBox(width: 7),
+          Expanded(
+            child: Text(
+              message,
+              style: AppTextStyle.subSectionTextStyle(
+                fontsize: 11,
+                fontweight: FontWeight.w700,
+                color: Colors.redAccent,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _TrackedBlocksHeader extends StatelessWidget {
   const _TrackedBlocksHeader({
     required this.title,

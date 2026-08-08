@@ -56,6 +56,7 @@ class ContributionsHeatMap extends StatelessWidget {
                   defaultColor: AppColor.defaultHeatMapBlockColor,
                   flexible: true,
                   colorMode: ColorMode.color,
+                  showColorTip: false,
                   datasets: convertedResults,
                   colorsets: const {
                     0: AppColor.defaultHeatMapBlockColor,
@@ -67,8 +68,7 @@ class ContributionsHeatMap extends StatelessWidget {
                   },
                   onClick: (value) {
                     // yyyy-mm-dd date format
-                    String formattedDate =
-                        MotionDateUtils.formatDbDate(value);
+                    String formattedDate = MotionDateUtils.formatDbDate(value);
 
                     // dd-mm-yyyy date format
                     String dateTitle = formatDateString(formattedDate);
