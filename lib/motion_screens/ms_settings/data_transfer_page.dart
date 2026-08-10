@@ -1,8 +1,12 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:motion/motion_core/mc_cloud/google_drive_backup_service.dart';
 import 'package:motion/motion_core/mc_csv/csv_data_transfer.dart';
+import 'package:motion/motion_core/mc_csv/motion_backup_restore.dart';
 import 'package:motion/motion_core/motion_providers/cloud_backup_pvd/auto_drive_backup_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/assigner_pvd.dart';
@@ -23,12 +27,13 @@ class DataTransferPage extends StatefulWidget {
 
 class _DataTransferPageState extends State<DataTransferPage> {
   final MotionCsvDataTransfer _csvTransfer = MotionCsvDataTransfer();
+  final MotionBackupRestoreService _backupRestoreService =
+      MotionBackupRestoreService();
   final GoogleDriveBackupService _driveBackupService =
       GoogleDriveBackupService();
   bool _isBusy = false;
   String _busyTitle = 'Working';
   String _busyDetail = 'Please wait...';
-  double? _busyProgress;
   int _summaryRefreshKey = 0;
 
   Future<void> _runWithFeedback(
@@ -36,6 +41,7 @@ class _DataTransferPageState extends State<DataTransferPage> {
     Future<String> Function(String currentUser) action, {
     String busyTitle = 'Working',
     String busyDetail = 'Please wait...',
+    String failureTitle = 'Transfer Failed',
   }) async {
     final currentUser = context.read<UserUidProvider>().userUid;
     if (currentUser == null) {
@@ -66,7 +72,7 @@ class _DataTransferPageState extends State<DataTransferPage> {
       }
     } catch (error) {
       if (!mounted) return;
-      title = 'Transfer Failed';
+      title = failureTitle;
       if (error is StateError) {
         message = error.message;
       } else if (error is UnsupportedError) {
@@ -92,14 +98,12 @@ class _DataTransferPageState extends State<DataTransferPage> {
   void _startBusy({
     required String title,
     required String detail,
-    double? progress,
   }) {
     if (!mounted) return;
     setState(() {
       _isBusy = true;
       _busyTitle = title;
       _busyDetail = detail;
-      _busyProgress = progress;
     });
   }
 
@@ -107,17 +111,6 @@ class _DataTransferPageState extends State<DataTransferPage> {
     if (!mounted) return;
     setState(() {
       _isBusy = false;
-      _busyProgress = null;
-    });
-  }
-
-  void _updateImportProgress(MotionCsvImportProgress progress) {
-    if (!mounted) return;
-    setState(() {
-      _busyTitle = 'Importing ${progress.fileLabel}';
-      _busyDetail =
-          '${progress.importedRows} imported - ${progress.processedRows} of ${progress.totalRows} rows checked';
-      _busyProgress = progress.value.clamp(0.0, 1.0).toDouble();
     });
   }
 
@@ -131,28 +124,6 @@ class _DataTransferPageState extends State<DataTransferPage> {
     int refreshKey,
   ) {
     return _csvTransfer.dataSummaryForUser(currentUser: currentUser);
-  }
-
-  String _formatDateRange(String? firstDate, String? lastDate) {
-    if (firstDate == null || firstDate.isEmpty) return 'No tracked dates yet';
-    if (lastDate == null || lastDate.isEmpty || firstDate == lastDate) {
-      return firstDate;
-    }
-    return '$firstDate - $lastDate';
-  }
-
-  String _formatPreviewMessage({
-    required MotionCsvPreview preview,
-    required String confirmationMessage,
-  }) {
-    final dateRange = _formatDateRange(preview.firstDate, preview.lastDate);
-    return '$confirmationMessage\n\n'
-        'File: ${preview.fileName}\n'
-        'Rows found: ${preview.totalRows}\n'
-        'Rows ready to import: ${preview.validRows}\n'
-        'Rows that will be skipped: ${preview.skippedRows}\n'
-        'Date range: $dateRange\n\n'
-        'Motion will create an automatic backup before importing this file.';
   }
 
   Future<String> _createAutomaticBackup(String currentUser) async {
@@ -189,31 +160,227 @@ class _DataTransferPageState extends State<DataTransferPage> {
   }
 
   Future<void> _showExportBackupOptions() async {
-    final selectedOption = await showDialog<_BackupExportOption>(
+    final selectedOption = await showDialog<_BackupLocationOption>(
       context: context,
       builder: (dialogContext) {
-        return _ExportBackupOptionsDialog(
+        return _BackupLocationOptionsDialog(
+          mode: _BackupLocationMode.export,
           onDevice: () =>
-              Navigator.of(dialogContext).pop(_BackupExportOption.device),
-          onGoogleDrive: () =>
-              Navigator.of(dialogContext).pop(_BackupExportOption.googleDrive),
+              Navigator.of(dialogContext).pop(_BackupLocationOption.device),
+          onGoogleDrive: () => Navigator.of(dialogContext)
+              .pop(_BackupLocationOption.googleDrive),
           onCancel: () =>
-              Navigator.of(dialogContext).pop(_BackupExportOption.cancel),
+              Navigator.of(dialogContext).pop(_BackupLocationOption.cancel),
         );
       },
     );
 
     switch (selectedOption) {
-      case _BackupExportOption.device:
+      case _BackupLocationOption.device:
         await _exportCsv();
         break;
-      case _BackupExportOption.googleDrive:
+      case _BackupLocationOption.googleDrive:
         await _exportCsvToGoogleDrive();
         break;
-      case _BackupExportOption.cancel:
+      case _BackupLocationOption.cancel:
       case null:
         break;
     }
+  }
+
+  Future<void> _showRestoreBackupOptions() async {
+    final selectedOption = await showDialog<_BackupLocationOption>(
+      context: context,
+      builder: (dialogContext) {
+        return _BackupLocationOptionsDialog(
+          mode: _BackupLocationMode.restore,
+          onDevice: () =>
+              Navigator.of(dialogContext).pop(_BackupLocationOption.device),
+          onGoogleDrive: () => Navigator.of(dialogContext)
+              .pop(_BackupLocationOption.googleDrive),
+          onCancel: () =>
+              Navigator.of(dialogContext).pop(_BackupLocationOption.cancel),
+        );
+      },
+    );
+
+    switch (selectedOption) {
+      case _BackupLocationOption.device:
+        await _restoreBackupFromDevice();
+        break;
+      case _BackupLocationOption.googleDrive:
+        await _restoreBackupFromGoogleDrive();
+        break;
+      case _BackupLocationOption.cancel:
+      case null:
+        break;
+    }
+  }
+
+  Future<void> _restoreBackupFromDevice() async {
+    try {
+      final selection = await FilePicker.platform.pickFiles(
+        allowMultiple: true,
+        type: FileType.custom,
+        allowedExtensions: const ['csv'],
+        withData: true,
+      );
+      if (selection == null) return;
+
+      final files = <MotionCsvBackupFile>[];
+      for (final selectedFile in selection.files) {
+        final bytes = selectedFile.bytes ??
+            (selectedFile.path == null
+                ? null
+                : await File(selectedFile.path!).readAsBytes());
+        if (bytes == null) {
+          throw StateError('Motion could not read ${selectedFile.name}.');
+        }
+        files.add(
+          MotionCsvBackupFile(
+            fileName: selectedFile.name,
+            content: utf8.decode(bytes),
+          ),
+        );
+      }
+      await _prepareBackupRestore(files, source: 'your device');
+    } catch (error) {
+      if (!mounted) return;
+      await _showTransferResultDialog(
+        title: 'Restore Failed',
+        message: error is StateError ? error.message : '$error',
+        icon: Icons.restore_page_rounded,
+        isError: true,
+      );
+    }
+  }
+
+  Future<void> _restoreBackupFromGoogleDrive() async {
+    final currentUser = context.read<UserUidProvider>().userUid;
+    final firebaseUser = FirebaseAuth.instance.currentUser;
+    final motionEmail =
+        firebaseUser?.uid == currentUser ? firebaseUser?.email?.trim() : null;
+    if (currentUser == null || motionEmail == null || motionEmail.isEmpty) {
+      await _showTransferResultDialog(
+        title: 'Account Unavailable',
+        message: 'Motion could not verify your signed-in account email.',
+        icon: Icons.person_search_rounded,
+        isError: true,
+      );
+      return;
+    }
+
+    _startBusy(
+      title: 'Loading Google Drive Backup',
+      detail: 'Downloading your latest Motion backup...',
+    );
+    try {
+      final result = await _driveBackupService.downloadBackupFiles(
+        expectedEmail: motionEmail,
+      );
+      if (!mounted) return;
+      _stopBusy();
+      await _prepareBackupRestore(
+        result.files,
+        source: '${result.folderName} in ${result.email}',
+      );
+    } catch (error) {
+      _stopBusy();
+      if (!mounted) return;
+      await _showTransferResultDialog(
+        title: 'Restore Failed',
+        message: error is StateError ? error.message : '$error',
+        icon: Icons.cloud_off_rounded,
+        isError: true,
+      );
+    }
+  }
+
+  Future<void> _prepareBackupRestore(
+    List<MotionCsvBackupFile> files, {
+    required String source,
+  }) async {
+    final currentUser = context.read<UserUidProvider>().userUid;
+    if (currentUser == null) {
+      throw StateError('Your Motion account is still loading.');
+    }
+
+    final backup = _backupRestoreService.validateBackup(
+      files: files,
+      currentUser: currentUser,
+    );
+    final preview = backup.preview;
+    final dateRange = preview.firstTrackedDate == null
+        ? 'No tracked dates'
+        : preview.firstTrackedDate == preview.lastTrackedDate
+            ? preview.firstTrackedDate!
+            : '${preview.firstTrackedDate} - ${preview.lastTrackedDate}';
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return _DataTransferDialog(
+          icon: Icons.restore_rounded,
+          iconColor: AppColor.blueMainColor,
+          title: 'Restore Motion Backup?',
+          message: 'Source: $source\n'
+              'Tracked dates: $dateRange\n'
+              'Tracking rows: ${preview.trackingRows}\n'
+              'Assigned subcategories: ${preview.assignedRows}\n\n'
+              'This replaces the local Motion data for this account. '
+              'Your current data will be backed up to Downloads first.',
+          primaryLabel: 'Restore Backup',
+          secondaryLabel: 'Cancel',
+          onPrimary: () => Navigator.of(dialogContext).pop(true),
+          onSecondary: () => Navigator.of(dialogContext).pop(false),
+        );
+      },
+    );
+    if (confirmed != true || !mounted) return;
+
+    final timerProvider = context.read<ActivityTimerProvider>();
+    await _runWithFeedback(
+      'Restore complete:',
+      (activeUser) async {
+        if (activeUser != backup.currentUser) {
+          throw StateError(
+            'The signed-in Motion account changed. Restore was cancelled.',
+          );
+        }
+
+        _updateBusyDetail('Backing up your current local data...');
+        final currentSummary = await _csvTransfer.dataSummaryForUser(
+          currentUser: activeUser,
+        );
+        var safetyBackupMessage =
+            'There was no previous local data to back up.';
+        if (currentSummary.hasExportableData) {
+          safetyBackupMessage = await _createAutomaticBackup(activeUser);
+        }
+
+        _updateBusyDetail('Validating and rebuilding Motion data...');
+        await timerProvider.discard();
+        final result = await _backupRestoreService.restoreBackup(
+          backup: backup,
+          currentUser: activeUser,
+        );
+
+        if (!mounted) return '${result.trackingRows} tracking row(s).';
+        context
+            .read<SubcategoryTrackerDatabaseProvider>()
+            .refreshAllTrackingData();
+        await context.read<AssignerMainProvider>().getAllUserItems();
+        _refreshDataSummary();
+
+        return '${result.trackingRows} tracking, '
+            '${result.dailyTotalRows} daily total, '
+            '${result.experiencePointRows} XP, and '
+            '${result.assignedRows} assigned row(s) restored.\n'
+            '$safetyBackupMessage';
+      },
+      busyTitle: 'Restoring Motion Backup',
+      busyDetail: 'Preparing the restore...',
+      failureTitle: 'Restore Failed',
+    );
   }
 
   Future<void> _exportCsvToGoogleDrive() async {
@@ -255,29 +422,6 @@ class _DataTransferPageState extends State<DataTransferPage> {
     );
   }
 
-  Future<bool> _confirmImport({
-    required String title,
-    required String message,
-  }) async {
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) {
-        return _DataTransferDialog(
-          icon: Icons.warning_amber_rounded,
-          iconColor: AppColor.workPieChartColor,
-          title: title,
-          message: message,
-          primaryLabel: 'Continue',
-          secondaryLabel: 'Cancel',
-          onPrimary: () => Navigator.of(dialogContext).pop(true),
-          onSecondary: () => Navigator.of(dialogContext).pop(false),
-        );
-      },
-    );
-
-    return result ?? false;
-  }
-
   Future<bool> _confirmDeleteAllData() async {
     final firstConfirm = await showDialog<bool>(
       context: context,
@@ -297,6 +441,7 @@ class _DataTransferPageState extends State<DataTransferPage> {
       },
     );
     if (firstConfirm != true) return false;
+    if (!mounted) return false;
 
     final finalConfirm = await showDialog<bool>(
       context: context,
@@ -340,117 +485,10 @@ class _DataTransferPageState extends State<DataTransferPage> {
     );
   }
 
-  Future<void> _importCsv({
-    required MotionCsvFileType fileType,
-    required String expectedFileName,
-    required String confirmationMessage,
-  }) async {
-    final selectedFile = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: const ['csv'],
-      allowMultiple: false,
-    );
-    final filePath = selectedFile?.files.single.path;
-    if (filePath == null) {
-      await _showTransferResultDialog(
-        title: 'Cancelled',
-        message: 'No file was selected.',
-        icon: Icons.info_outline_rounded,
-      );
-      return;
-    }
-
-    MotionCsvPreview preview;
-    try {
-      preview = await _csvTransfer.previewCsv(
-        fileType: fileType,
-        filePath: filePath,
-      );
-    } catch (error) {
-      await _showTransferResultDialog(
-        title: 'Invalid CSV',
-        message: '$error',
-        icon: Icons.error_outline_rounded,
-        isError: true,
-      );
-      return;
-    }
-    if (preview.validRows == 0) {
-      await _showTransferResultDialog(
-        title: 'No Importable Rows',
-        message:
-            '${preview.fileName} does not contain any valid rows for this import action.',
-        icon: Icons.error_outline_rounded,
-        isError: true,
-      );
-      return;
-    }
-
-    final confirmed = await _confirmImport(
-      title: 'Import ${preview.fileName}?',
-      message: _formatPreviewMessage(
-        preview: preview,
-        confirmationMessage: confirmationMessage,
-      ),
-    );
-    if (!confirmed) {
-      await _showTransferResultDialog(
-        title: 'Cancelled',
-        message: 'Import cancelled.',
-        icon: Icons.info_outline_rounded,
-      );
-      return;
-    }
-
-    await _runWithFeedback(
-      'Imported',
-      (currentUser) async {
-        _updateBusyDetail('Creating automatic backup...');
-        final backupMessage = await _createAutomaticBackup(currentUser);
-        _updateBusyDetail('Importing ${preview.fileName}...');
-
-        final result = await _csvTransfer.importCsv(
-          fileType: fileType,
-          filePath: filePath,
-          currentUser: currentUser,
-          onProgress: _updateImportProgress,
-        );
-
-        if (!mounted) {
-          return '${result.importedRows} row(s) from $expectedFileName.';
-        }
-
-        switch (fileType) {
-          case MotionCsvFileType.mainCategory:
-            break;
-          case MotionCsvFileType.subcategory:
-            context
-                .read<SubcategoryTrackerDatabaseProvider>()
-                .refreshAllTrackingData();
-            break;
-          case MotionCsvFileType.assigner:
-            await context.read<AssignerMainProvider>().getAllUserItems();
-            break;
-        }
-        _refreshDataSummary();
-
-        final rebuiltMessage = result.rebuiltDailyRows > 0
-            ? '\nRebuilt ${result.rebuiltDailyRows} daily summaries.'
-            : '';
-        return '${result.importedRows} row(s) from ${preview.fileName}.\n'
-            'Skipped ${result.skippedRows} invalid row(s).'
-            '$rebuiltMessage\n$backupMessage';
-      },
-      busyTitle: 'Importing $expectedFileName',
-      busyDetail: 'Preparing the selected file...',
-    );
-  }
-
   void _updateBusyDetail(String detail) {
     if (!mounted) return;
     setState(() {
       _busyDetail = detail;
-      _busyProgress = null;
     });
   }
 
@@ -557,7 +595,7 @@ class _DataTransferPageState extends State<DataTransferPage> {
             padding: const EdgeInsets.all(12),
             children: [
               Text(
-                'Export creates a backup of your Motion data. Import uses subcategory.csv and to_assign.csv; main_category.csv is rebuilt from tracking history.',
+                'Create or restore complete Motion backups using your device or Google Drive.',
                 style: AppTextStyle.manualHintTextStyle(fontsize: 13),
               ),
               const SizedBox(height: 12),
@@ -594,29 +632,13 @@ class _DataTransferPageState extends State<DataTransferPage> {
                     'Save all three Motion data files to your device or Google Drive.',
                 onPressed: _showExportBackupOptions,
               ),
+              const SizedBox(height: 12),
               _transferButton(
-                icon: Icons.upload_file,
-                title: 'Import Tracking Data',
+                icon: Icons.restore_rounded,
+                title: 'Restore Motion Backup',
                 subtitle:
-                    'Use subcategory.csv to replace tracking history and rebuild XP.',
-                onPressed: () => _importCsv(
-                  fileType: MotionCsvFileType.subcategory,
-                  expectedFileName: 'subcategory.csv',
-                  confirmationMessage:
-                      'This will replace your current tracking history. Motion will rebuild main category totals and XP from the imported subcategory rows.',
-                ),
-              ),
-              _transferButton(
-                icon: Icons.playlist_add_check_rounded,
-                title: 'Import Assigned Subcategories',
-                subtitle:
-                    'Use to_assign.csv to replace assignments and streak settings.',
-                onPressed: () => _importCsv(
-                  fileType: MotionCsvFileType.assigner,
-                  expectedFileName: 'to_assign.csv',
-                  confirmationMessage:
-                      'This will replace your current assigned subcategory list, active/archive values, and streak settings.',
-                ),
+                    'Restore a complete Motion backup from your device or Google Drive.',
+                onPressed: _showRestoreBackupOptions,
               ),
               const SizedBox(height: 12),
               Text(
@@ -642,7 +664,6 @@ class _DataTransferPageState extends State<DataTransferPage> {
             _BusyTransferOverlay(
               title: _busyTitle,
               detail: _busyDetail,
-              progress: _busyProgress,
             ),
         ],
       ),

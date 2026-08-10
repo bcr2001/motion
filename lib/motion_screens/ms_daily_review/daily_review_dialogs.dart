@@ -381,18 +381,21 @@ class _DailyTimeBlockDialogState extends State<_DailyTimeBlockDialog> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            _isEditing
-                                ? Icons.check_rounded
-                                : Icons.add_rounded,
-                            size: 18,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(_isEditing ? 'Save Changes' : 'Add Time'),
-                        ],
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              _isEditing
+                                  ? Icons.check_rounded
+                                  : Icons.add_rounded,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(_isEditing ? 'Save Changes' : 'Add Time'),
+                          ],
+                        ),
                       ),
                     ),
                   ),

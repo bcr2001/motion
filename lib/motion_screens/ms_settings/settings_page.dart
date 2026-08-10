@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_pvd.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
+import 'package:motion/motion_reusable/motion_ui/motion_date_picker_dialog.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
@@ -9,87 +10,56 @@ import 'package:provider/provider.dart';
 import '../../motion_core/motion_providers/shared_pvd/share.dart';
 import '../ms_routes/about_page.dart';
 import '../ms_reuse/screens_reusable.dart';
-import 'package:date_picker_plus/date_picker_plus.dart';
 import 'data_transfer_page.dart';
 
 // settings page
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
-  // date picker widget
-  Widget _pickDateOfBirth() {
+  Future<void> _showSetDateOfBirthDialog(BuildContext context) async {
+    final userUid = context.read<UserUidProvider>().userUid;
+    if (userUid == null || userUid.trim().isEmpty) {
+      snackBarMessage(
+        context,
+        errorMessage: 'Your account is still loading.',
+        requiresColor: true,
+      );
+      return;
+    }
+
     final dateOfBirthStorage = DateOfBirthStorage();
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final firstDate = DateTime(today.year - 120, 1, 1);
+    final storedDate = await dateOfBirthStorage.getDateOfBirth(userUid);
+    if (!context.mounted) return;
 
-    return Consumer<UserUidProvider>(
-      builder: (context, user, child) {
-        // user uid
-        final userUID = user.userUid;
-
-        return SizedBox(
-          width: 400,
-          height: 350,
-          child: DatePicker(
-            padding: EdgeInsets.zero,
-            minDate: DateTime(1970, 1, 1),
-            maxDate: DateTime(2100, 12, 31),
-            daysOfTheWeekTextStyle: AppTextStyle.subSectionTextStyle(
-                fontsize: 11, color: Colors.blueGrey),
-            selectedCellTextStyle:
-                AppTextStyle.accountedAndUnaccountedGallaryStyle(fontsize: 15),
-            enabledCellsTextStyle: AppTextStyle.subSectionTextStyle(
-                fontsize: 15, fontweight: FontWeight.normal),
-            leadingDateTextStyle:
-                AppTextStyle.accountedAndUnaccountedGallaryStyle(),
-            onDateSelected: (value) async {
-              debugLog("Date Of Birth: $value");
-
-              await dateOfBirthStorage.saveDateOfBirth(userUID!, value);
-            },
-          ),
-        );
-      },
+    final storedDay = storedDate == null
+        ? null
+        : DateTime(storedDate.year, storedDate.month, storedDate.day);
+    final fallbackDate = DateTime(today.year - 25, today.month, today.day);
+    final initialDate = storedDay != null &&
+            !storedDay.isBefore(firstDate) &&
+            !storedDay.isAfter(today)
+        ? storedDay
+        : fallbackDate;
+    final selectedDate = await showMotionDatePickerDialog(
+      context: context,
+      initialDate: initialDate,
+      firstDate: firstDate,
+      lastDate: today,
+      title: AppString.setDateOfBirthTitle,
+      confirmLabel: 'Save Date',
     );
-  }
+    if (selectedDate == null) return;
 
-  // button to pop the alert dialog
-  Widget _okayPopAlert(context) {
-    return GestureDetector(
-      onTap: () => Navigator.of(context).pop(),
-      child: Padding(
-        padding: const EdgeInsets.only(right: 20.0),
-        child: Text(
-          AppString.okTitle,
-          style: AppTextStyle.mainCategoryTotalTitle(fontsize: 15),
-        ),
-      ),
+    await dateOfBirthStorage.saveDateOfBirth(userUid, selectedDate);
+    if (!context.mounted) return;
+    snackBarMessage(
+      context,
+      errorMessage: 'Date of birth saved',
+      requiresColor: false,
     );
-  }
-
-  // alert dialog that shows up when the user
-  // clicks the Set Date of Birth option
-  void _showSetDateOfBorthAlert(context) {
-    // show the dob alert dialog
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialogConst(
-              screenHeight: null,
-              screenWidth: null,
-              heightFactor: 0.45,
-              alertDialogTitle: AppString.setDateOfBirthTitle,
-              alertDialogContent: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // date of birth widget
-                  _pickDateOfBirth(),
-
-                  // button to confirm date of birth
-                  Align(
-                      alignment: Alignment.bottomRight,
-                      child: _okayPopAlert(context))
-                ],
-              ));
-        });
   }
 
   @override
@@ -113,7 +83,7 @@ class SettingsPage extends StatelessWidget {
             settingsDesciption: AppString.setDateOfBirthDescription,
             leadingIcon: Icons.cake_outlined,
             iconColor: AppColor.selfDevelopmentPieChartColor,
-            onTap: () => _showSetDateOfBorthAlert(context),
+            onTap: () => _showSetDateOfBirthDialog(context),
           ),
 
           SettingsOptions(

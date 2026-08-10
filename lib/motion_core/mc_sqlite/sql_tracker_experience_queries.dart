@@ -206,6 +206,103 @@ extension TrackerExperienceQueries on TrackerDatabaseHelper {
     return 0;
   }
 
+  Future<int> getYearExperiencePointsBeforeDate({
+    required String currentUser,
+    required String year,
+    required String beforeDate,
+  }) async {
+    try {
+      final db = await database;
+      final yearRange = SqlDateRange.year(year);
+      final result = await db.rawQuery('''
+        SELECT (${TrackerDatabaseHelper._totalXpExpression}) AS totalXp
+        FROM ${MotionDbTables.experiencePoints}
+        WHERE ${MotionDbColumns.currentLoggedInUser} = ?
+          AND ${MotionDbColumns.date} BETWEEN ? AND ?
+          AND ${MotionDbColumns.date} < ?
+      ''', [currentUser, ...yearRange.args, beforeDate]);
+
+      final totalXp = result.isEmpty ? null : result.first['totalXp'];
+      return totalXp is int ? totalXp : (totalXp as num?)?.round() ?? 0;
+    } catch (e, stackTrace) {
+      logDatabaseError(
+        'TrackerDatabaseHelper.getYearExperiencePointsBeforeDate',
+        e,
+        stackTrace,
+      );
+    }
+
+    return 0;
+  }
+
+  Future<int> getYearExperiencePointDaysBeforeDate({
+    required String currentUser,
+    required String year,
+    required String beforeDate,
+  }) async {
+    try {
+      final db = await database;
+      final yearRange = SqlDateRange.year(year);
+      final result = await db.rawQuery('''
+        SELECT COUNT(DISTINCT ${MotionDbColumns.date}) AS trackedDays
+        FROM ${MotionDbTables.experiencePoints}
+        WHERE ${MotionDbColumns.currentLoggedInUser} = ?
+          AND ${MotionDbColumns.date} BETWEEN ? AND ?
+          AND ${MotionDbColumns.date} < ?
+      ''', [currentUser, ...yearRange.args, beforeDate]);
+
+      final trackedDays = result.isEmpty ? null : result.first['trackedDays'];
+      return trackedDays is int
+          ? trackedDays
+          : int.tryParse(trackedDays?.toString() ?? '') ?? 0;
+    } catch (e, stackTrace) {
+      logDatabaseError(
+        'TrackerDatabaseHelper.getYearExperiencePointDaysBeforeDate',
+        e,
+        stackTrace,
+      );
+    }
+
+    return 0;
+  }
+
+  Future<double> averageDailyExperiencePoints({
+    required String currentUser,
+    required String firstDate,
+    required String lastDate,
+  }) async {
+    try {
+      final db = await database;
+      final result = await db.rawQuery('''
+        SELECT CASE
+          WHEN firstTrackedDate IS NULL THEN 0.0
+          ELSE totalXp /
+            (julianday(?) - julianday(firstTrackedDate) + 1)
+        END AS averageXp
+        FROM (
+          SELECT
+            CAST((${TrackerDatabaseHelper._totalXpExpression}) AS REAL)
+              AS totalXp,
+            MIN(${MotionDbColumns.date}) AS firstTrackedDate
+          FROM ${MotionDbTables.experiencePoints}
+          WHERE ${MotionDbColumns.currentLoggedInUser} = ?
+            AND ${MotionDbColumns.date} BETWEEN ? AND ?
+        )
+      ''', [lastDate, currentUser, firstDate, lastDate]);
+
+      final averageXp = result.isEmpty ? null : result.first['averageXp'];
+      return (averageXp as num?)?.toDouble() ?? 0.0;
+    } catch (e, stackTrace) {
+      logDatabaseError(
+        'TrackerDatabaseHelper.averageDailyExperiencePoints',
+        e,
+        stackTrace,
+      );
+    }
+
+    return 0.0;
+  }
+
   // Gets the efficiency score for the selected date
   // Gets the total experience points for the selected date
   Future<int> dailyExperiencePoints(
@@ -264,7 +361,8 @@ extension TrackerExperienceQueries on TrackerDatabaseHelper {
 
     for (final row in result) {
       final categoryName = row[MotionDbColumns.mainCategoryName]?.toString();
-      final totalMinutes = TrackerDatabaseHelper._readDouble(row['totalTimeSpent']).floor();
+      final totalMinutes =
+          TrackerDatabaseHelper._readDouble(row['totalTimeSpent']).floor();
       totalTrackedMinutes += totalMinutes;
 
       if (categoryName == null) continue;
@@ -381,10 +479,8 @@ extension TrackerExperienceQueries on TrackerDatabaseHelper {
       breakdown['Tracking Bonus'] = totalTracked;
       return breakdown;
     } catch (e, stackTrace) {
-      logDatabaseError(
-          "TrackerDatabaseHelper.dailyMainCategoryTimeBreakdown",
-          e,
-          stackTrace);
+      logDatabaseError("TrackerDatabaseHelper.dailyMainCategoryTimeBreakdown",
+          e, stackTrace);
     }
 
     return const {
@@ -511,4 +607,20 @@ extension TrackerExperienceQueries on TrackerDatabaseHelper {
     return result.map((row) => ExperiencePoints.fromMap(row)).toList();
   }
 
+  Future<List<ExperiencePoints>> getExperiencePointHistory({
+    required String currentUser,
+    required String firstDate,
+    required String lastDate,
+  }) async {
+    final db = await database;
+    final result = await db.query(
+      MotionDbTables.experiencePoints,
+      where: '${MotionDbColumns.currentLoggedInUser} = ? '
+          'AND ${MotionDbColumns.date} BETWEEN ? AND ?',
+      whereArgs: [currentUser, firstDate, lastDate],
+      orderBy: '${MotionDbColumns.date} ASC',
+    );
+
+    return result.map(ExperiencePoints.fromMap).toList();
+  }
 }

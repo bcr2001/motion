@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:motion/motion_core/mc_firebase/firebase_services.dart';
 import 'package:motion/motion_core/mc_firebase/google_services.dart';
+import 'package:motion/motion_core/motion_providers/ai_pvd/daily_forecast_pvd.dart';
+import 'package:motion/motion_core/motion_providers/date_pvd/current_date_pvd.dart';
+import 'package:motion/motion_core/motion_providers/date_pvd/current_year_pvd.dart';
+import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
+import 'package:motion/motion_core/motion_providers/sql_pvd/experience_pvd.dart';
 import 'package:motion/motion_reusable/general_reuseable.dart';
+import 'package:motion/motion_screens/ms_ai/ai_forecast_page.dart';
 import 'package:motion/motion_screens/ms_awards/awards_page.dart';
 import 'package:motion/motion_screens/ms_settings/settings_page.dart';
 import 'package:motion/motion_screens/ms_tips/tips_page.dart';
 import 'package:motion/motion_themes/mth_app/app_strings.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
+import 'package:provider/provider.dart';
 
 import '../motion_screens/ms_report/report.dart';
 import '../motion_themes/mth_app/app_images.dart';
@@ -21,20 +28,132 @@ class MotionActionButtons extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
+        const _AiForecastAction(),
+
         // report gif
-        GestureDetector(
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (BuildContext context) =>
-                          const MonthlyReportPage()));
-            },
-            child: AppImages.animatedBarChart),
+        Tooltip(
+          message: 'Monthly Report',
+          child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (BuildContext context) =>
+                            const MonthlyReportPage()));
+              },
+              child: AppImages.animatedBarChart),
+        ),
 
         // popup menu button
         const MainRoutePopUpMenu()
       ],
+    );
+  }
+}
+
+class _AiForecastAction extends StatefulWidget {
+  const _AiForecastAction();
+
+  @override
+  State<_AiForecastAction> createState() => _AiForecastActionState();
+}
+
+class _AiForecastActionState extends State<_AiForecastAction> {
+  String? _scheduledRequestKey;
+
+  void _scheduleRefresh({
+    required String currentUser,
+    required String currentDate,
+    required String currentYear,
+    required int revision,
+  }) {
+    final requestKey = '$currentUser|$currentDate|$currentYear|$revision';
+    if (_scheduledRequestKey == requestKey) return;
+    _scheduledRequestKey = requestKey;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<DailyForecastProvider>().refresh(
+            currentUser: currentUser,
+            currentDate: currentDate,
+            currentYear: currentYear,
+            experienceRevision: revision,
+          );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final currentUser = context.watch<UserUidProvider>().userUid;
+    final currentDate = context.watch<CurrentDateProvider>().currentDate;
+    final currentYear = context.watch<CurrentYearProvider>().currentYear;
+    final revision = context.watch<ExperiencePointTableProvider>().refreshKey;
+    final forecastProvider = context.watch<DailyForecastProvider>();
+    if (currentUser != null) {
+      _scheduleRefresh(
+        currentUser: currentUser,
+        currentDate: currentDate,
+        currentYear: currentYear,
+        revision: revision,
+      );
+    }
+    final showUnread = currentUser != null &&
+        forecastProvider.isUnreadFor(
+          currentUser: currentUser,
+          currentDate: currentDate,
+        );
+    final foregroundColor = Theme.of(context).appBarTheme.foregroundColor ??
+        Theme.of(context).iconTheme.color;
+
+    return Padding(
+      padding: const EdgeInsets.only(right: 15),
+      child: Tooltip(
+        message: 'AI Forecast',
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            TextButton(
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AiForecastPage()),
+              ),
+              style: TextButton.styleFrom(
+                foregroundColor: foregroundColor,
+                minimumSize: const Size(44, 42),
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Text(
+                'AI',
+                style: AppTextStyle.subSectionTextStyle(
+                  fontsize: 15,
+                  fontweight: FontWeight.w900,
+                  color: foregroundColor,
+                ),
+              ),
+            ),
+            if (showUnread)
+              Positioned(
+                top: 2,
+                right: 1,
+                child: Semantics(
+                  label: 'New AI forecast available',
+                  child: Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: Colors.redAccent,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }

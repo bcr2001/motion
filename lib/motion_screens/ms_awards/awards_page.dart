@@ -100,6 +100,7 @@ class AwardsPage extends StatelessWidget {
   }) {
     final featuredAward = currentAward ?? nextAward ?? MotionAwards.all.last;
     final progress = MotionAwards.lifetimeProgressToNext(trackedHours);
+    final progressPercent = progress * 100;
     final remaining =
         nextAward == null ? 0.0 : nextAward.requiredHours - trackedHours;
     final earnedDate =
@@ -177,6 +178,34 @@ class AwardsPage extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 15),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  nextAward == null
+                      ? 'Award journey complete'
+                      : 'Progress to ${nextAward.name}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyle.subSectionTextStyle(
+                    fontsize: 10.5,
+                    fontweight: FontWeight.w700,
+                    color: Colors.blueGrey,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                '${progressPercent.toStringAsFixed(1)}%',
+                style: AppTextStyle.subSectionTextStyle(
+                  fontsize: 11,
+                  fontweight: FontWeight.w900,
+                  color: AppColor.blueMainColor,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 7),
           MotionProgressBar(value: progress),
           const SizedBox(height: 8),
           Row(

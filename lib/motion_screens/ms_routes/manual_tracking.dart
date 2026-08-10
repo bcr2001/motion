@@ -49,6 +49,7 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
   final List<Subcategories> _pastEntriesAdded = [];
   String? _loadedPastEntriesKey;
   bool _hasChangedTrackedTime = false;
+  bool _targetReachedDialogScheduled = false;
 
   // Text editing controllers for hours, minutes, and seconds input fields
   TextEditingController hourController = TextEditingController();
@@ -1295,16 +1296,26 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
   }
 
   Future<void> _startActivityTimer(ActivityTimerProvider timer) async {
+    final choice = await showDialog<_ActivityTimerStartChoice>(
+      context: context,
+      builder: (dialogContext) => _StartActivityTimerDialog(
+        subcategoryName: widget.subcategoryName,
+      ),
+    );
+    if (choice == null || !mounted) return;
+
     try {
       await timer.start(
         mainCategoryName: widget.mainCategoryName,
         subcategoryName: widget.subcategoryName,
+        targetSeconds: choice.targetSeconds,
       );
       if (mounted && timer.notificationPermissionGranted == false) {
         snackBarMessage(
           context,
-          errorMessage:
-              'Timer started. Allow Motion notifications to see it outside the app.',
+          errorMessage: choice.targetSeconds == null
+              ? 'Timer started. Allow Motion notifications to see it outside the app.'
+              : 'Timed session started, but notifications are required for the background alarm.',
           requiresColor: false,
         );
       }
@@ -1324,6 +1335,45 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
         requiresColor: true,
       );
     }
+  }
+
+  void _scheduleTargetReachedDialog({
+    required ActivityTimerProvider timer,
+    required bool isCurrentActivity,
+  }) {
+    if (!isCurrentActivity ||
+        !timer.hasPendingTargetReachedEvent ||
+        _targetReachedDialogScheduled) {
+      return;
+    }
+
+    _targetReachedDialogScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final reachedSession = timer.consumeTargetReachedEvent();
+      if (reachedSession == null) {
+        _targetReachedDialogScheduled = false;
+        return;
+      }
+
+      final shouldFinish = await showDialog<bool>(
+            context: context,
+            barrierDismissible: false,
+            builder: (dialogContext) => _TargetReachedDialog(
+              session: reachedSession,
+              elapsedSeconds: timer.elapsedSeconds,
+              onDismissAlert: timer.dismissTargetAlert,
+            ),
+          ) ??
+          false;
+      _targetReachedDialogScheduled = false;
+      if (!mounted || !shouldFinish) return;
+
+      final activeSession = timer.session;
+      if (activeSession?.startedAtEpochMs == reachedSession.startedAtEpochMs) {
+        await _finishActivityTimer(timer);
+      }
+    });
   }
 
   void _openRunningTimer(ActivityTimerProvider timer) {
@@ -1462,6 +1512,10 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
                     );
                     final hasOtherTimer =
                         timer.hasActiveTimer && !isCurrentActivity;
+                    _scheduleTargetReachedDialog(
+                      timer: timer,
+                      isCurrentActivity: isCurrentActivity,
+                    );
                     return Column(
                       children: [
                         _TrackingMethodSelector(

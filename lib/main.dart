@@ -6,6 +6,7 @@ import 'package:motion/motion_core/motion_providers/date_pvd/current_month_provi
 import 'package:motion/motion_core/motion_providers/date_pvd/current_year_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/first_and_last_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/seven_days_pvd.dart';
+import 'package:motion/motion_core/motion_providers/ai_pvd/daily_forecast_pvd.dart';
 import 'package:motion/motion_core/motion_providers/cloud_backup_pvd/auto_drive_backup_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/experience_pvd.dart';
@@ -73,6 +74,9 @@ void main() async {
     revisions: trackingDataRevisions,
     databaseHelper: trackerDatabase,
   );
+  final dailyForecastProvider = DailyForecastProvider(
+    xpProvider: experiencePointTableProvider,
+  );
   final activityTimerProvider = ActivityTimerProvider(
     userUidProvider: userUidProvider,
     subcategoryProvider: trackSubcategoryDatabaseProvider,
@@ -82,6 +86,7 @@ void main() async {
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider.value(value: experiencePointTableProvider),
+      ChangeNotifierProvider.value(value: dailyForecastProvider),
       ChangeNotifierProvider(
           create: (context) => FirstAndLastWithSevenDaysDiff()),
       ChangeNotifierProvider.value(value: themeModeProviderN1),

@@ -2,7 +2,7 @@ import 'package:motion/motion_core/mc_sqlite/database_constants.dart';
 import 'package:sqflite/sqflite.dart';
 
 class TrackerDatabaseSchema {
-  static const int version = 16;
+  static const int version = 17;
   static const String _legacyTimeRecordedColumn = 'timeRecorded';
 
   static const String mainCategoryTable = MotionDbTables.mainCategory;
@@ -109,7 +109,9 @@ class TrackerDatabaseSchema {
         ${MotionDbColumns.completedTimerSegments} TEXT NOT NULL DEFAULT '[]',
         ${MotionDbColumns.timerStatus} TEXT NOT NULL,
         ${MotionDbColumns.timerUpdatedAtEpochMs} INTEGER NOT NULL,
-        ${MotionDbColumns.nextTimerReminderAtSeconds} INTEGER NOT NULL DEFAULT 7200
+        ${MotionDbColumns.nextTimerReminderAtSeconds} INTEGER NOT NULL DEFAULT 7200,
+        ${MotionDbColumns.timerTargetSeconds} INTEGER,
+        ${MotionDbColumns.timerTargetAlertTriggered} INTEGER NOT NULL DEFAULT 0
       )
     ''');
   }
@@ -167,6 +169,19 @@ class TrackerDatabaseSchema {
     if (addedAccountabilityBonusColumn) {
       await _backfillExperiencePoints(db);
     }
+
+    await _addColumnIfMissing(
+      db,
+      activeTimerSessionTable,
+      MotionDbColumns.timerTargetSeconds,
+      'INTEGER',
+    );
+    await _addColumnIfMissing(
+      db,
+      activeTimerSessionTable,
+      MotionDbColumns.timerTargetAlertTriggered,
+      'INTEGER NOT NULL DEFAULT 0',
+    );
   }
 
   static Future<bool> _addColumnIfMissing(

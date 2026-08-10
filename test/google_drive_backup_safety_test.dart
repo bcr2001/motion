@@ -82,6 +82,31 @@ void main() {
       expect(session.authenticatedClientCalls, 0);
     });
 
+    test('rejects Drive restore from a mismatched account before download',
+        () async {
+      final session = _FakeDriveAccountSession(
+        silentEmail: 'different@example.com',
+      );
+      final service = GoogleDriveBackupService(accountSession: session);
+
+      await expectLater(
+        service.downloadBackupFiles(
+          expectedEmail: 'motion@example.com',
+          allowInteractiveSignIn: false,
+        ),
+        throwsA(
+          isA<StateError>().having(
+            (error) => error.message,
+            'message',
+            contains('same email as your Motion account'),
+          ),
+        ),
+      );
+
+      expect(session.authenticatedClientCalls, 0);
+      expect(session.interactiveSignInCalls, 0);
+    });
+
     test('does not inherit automatic backup settings across Motion users',
         () async {
       final today = MotionDateUtils.todayIso();

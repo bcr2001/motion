@@ -1,5 +1,500 @@
 part of 'manual_tracking.dart';
 
+enum _ActivityTimerStartMode { openEnded, timed }
+
+class _ActivityTimerStartChoice {
+  final int? targetSeconds;
+
+  const _ActivityTimerStartChoice({this.targetSeconds});
+}
+
+class _StartActivityTimerDialog extends StatefulWidget {
+  final String subcategoryName;
+
+  const _StartActivityTimerDialog({required this.subcategoryName});
+
+  @override
+  State<_StartActivityTimerDialog> createState() =>
+      _StartActivityTimerDialogState();
+}
+
+class _StartActivityTimerDialogState extends State<_StartActivityTimerDialog> {
+  final _formKey = GlobalKey<FormState>();
+  final _hoursController = TextEditingController();
+  final _minutesController = TextEditingController();
+  final _secondsController = TextEditingController();
+  _ActivityTimerStartMode _mode = _ActivityTimerStartMode.openEnded;
+  String? _targetError;
+
+  @override
+  void dispose() {
+    _hoursController.dispose();
+    _minutesController.dispose();
+    _secondsController.dispose();
+    super.dispose();
+  }
+
+  int _valueOf(TextEditingController controller) {
+    return int.tryParse(controller.text.trim()) ?? 0;
+  }
+
+  void _selectPreset(int seconds) {
+    setState(() {
+      _hoursController.text = '${seconds ~/ 3600}';
+      _minutesController.text = '${(seconds % 3600) ~/ 60}';
+      _secondsController.clear();
+      _targetError = null;
+    });
+  }
+
+  void _start() {
+    if (_mode == _ActivityTimerStartMode.openEnded) {
+      Navigator.of(context).pop(const _ActivityTimerStartChoice());
+      return;
+    }
+
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    final targetSeconds = _valueOf(_hoursController) * 3600 +
+        _valueOf(_minutesController) * 60 +
+        _valueOf(_secondsController);
+    if (targetSeconds <= 0) {
+      setState(() => _targetError = 'Enter a target greater than zero.');
+      return;
+    }
+    if (targetSeconds > ActivityTimerProvider.maximumTargetSeconds) {
+      setState(() => _targetError = 'The maximum timer target is 24 hours.');
+      return;
+    }
+
+    Navigator.of(context).pop(
+      _ActivityTimerStartChoice(targetSeconds: targetSeconds),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = isDarkMode
+        ? AppColor.darkModeContentWidget
+        : AppColor.lightModeContentWidget;
+    final secondaryText = isDarkMode ? Colors.white60 : Colors.blueGrey;
+    final borderColor =
+        isDarkMode ? Colors.white.withValues(alpha: 0.12) : Colors.black12;
+    final isTimed = _mode == _ActivityTimerStartMode.timed;
+
+    return Dialog(
+      backgroundColor: surfaceColor,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: BorderSide(color: borderColor),
+      ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 440),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      height: 42,
+                      width: 42,
+                      decoration: BoxDecoration(
+                        color: AppColor.blueMainColor.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(13),
+                      ),
+                      child: const Icon(
+                        Icons.timer_outlined,
+                        color: AppColor.blueMainColor,
+                        size: 22,
+                      ),
+                    ),
+                    const SizedBox(width: 11),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Start Timer',
+                            style: AppTextStyle.subSectionTextStyle(
+                              fontsize: 17,
+                              fontweight: FontWeight.w900,
+                            ),
+                          ),
+                          Text(
+                            widget.subcategoryName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTextStyle.subSectionTextStyle(
+                              fontsize: 10.5,
+                              fontweight: FontWeight.normal,
+                              color: secondaryText,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _modeButton(
+                        label: 'Open-ended',
+                        icon: Icons.all_inclusive_rounded,
+                        mode: _ActivityTimerStartMode.openEnded,
+                        borderColor: borderColor,
+                        secondaryText: secondaryText,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _modeButton(
+                        label: 'Timed session',
+                        icon: Icons.alarm_rounded,
+                        mode: _ActivityTimerStartMode.timed,
+                        borderColor: borderColor,
+                        secondaryText: secondaryText,
+                      ),
+                    ),
+                  ],
+                ),
+                if (isTimed) ...[
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      _TimerDurationField(
+                        label: 'Hours',
+                        controller: _hoursController,
+                        maximum: 24,
+                        emptyIsZero: true,
+                        showPlaceholder: true,
+                      ),
+                      const SizedBox(width: 8),
+                      _TimerDurationField(
+                        label: 'Minutes',
+                        controller: _minutesController,
+                        maximum: 59,
+                        emptyIsZero: true,
+                        showPlaceholder: true,
+                      ),
+                      const SizedBox(width: 8),
+                      _TimerDurationField(
+                        label: 'Seconds',
+                        controller: _secondsController,
+                        maximum: 59,
+                        emptyIsZero: true,
+                        showPlaceholder: true,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 7,
+                    runSpacing: 7,
+                    children: [
+                      _presetChip('25 min', 25 * 60),
+                      _presetChip('45 min', 45 * 60),
+                      _presetChip('1 hour', 60 * 60),
+                      _presetChip('2 hours', 2 * 60 * 60),
+                    ],
+                  ),
+                  if (_targetError != null) ...[
+                    const SizedBox(height: 9),
+                    Text(
+                      _targetError!,
+                      style: AppTextStyle.subSectionTextStyle(
+                        fontsize: 10.5,
+                        fontweight: FontWeight.w700,
+                        color: Colors.redAccent,
+                      ),
+                    ),
+                  ],
+                ],
+                const SizedBox(height: 18),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: secondaryText,
+                          minimumSize: const Size(0, 44),
+                          side: BorderSide(color: borderColor),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text('Cancel'),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: _start,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColor.blueMainColor,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          minimumSize: const Size(0, 44),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        icon: const Icon(Icons.play_arrow_rounded, size: 18),
+                        label: const Text('Start'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _modeButton({
+    required String label,
+    required IconData icon,
+    required _ActivityTimerStartMode mode,
+    required Color borderColor,
+    required Color secondaryText,
+  }) {
+    final selected = _mode == mode;
+    return OutlinedButton.icon(
+      onPressed: () => setState(() {
+        _mode = mode;
+        _targetError = null;
+      }),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: selected ? AppColor.blueMainColor : secondaryText,
+        backgroundColor: selected
+            ? AppColor.blueMainColor.withValues(alpha: 0.10)
+            : Colors.transparent,
+        side: BorderSide(
+          color: selected
+              ? AppColor.blueMainColor.withValues(alpha: 0.65)
+              : borderColor,
+        ),
+        minimumSize: const Size(0, 44),
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(11)),
+      ),
+      icon: Icon(icon, size: 17),
+      label: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(label),
+      ),
+    );
+  }
+
+  Widget _presetChip(String label, int seconds) {
+    return ActionChip(
+      label: Text(label),
+      onPressed: () => _selectPreset(seconds),
+      visualDensity: VisualDensity.compact,
+      side: BorderSide(
+        color: AppColor.blueMainColor.withValues(alpha: 0.28),
+      ),
+      backgroundColor: AppColor.blueMainColor.withValues(alpha: 0.07),
+      labelStyle: AppTextStyle.subSectionTextStyle(
+        fontsize: 10.5,
+        fontweight: FontWeight.w700,
+        color: AppColor.blueMainColor,
+      ),
+    );
+  }
+}
+
+class _TargetReachedDialog extends StatelessWidget {
+  final ActivityTimerSession session;
+  final int elapsedSeconds;
+  final Future<void> Function() onDismissAlert;
+
+  const _TargetReachedDialog({
+    required this.session,
+    required this.elapsedSeconds,
+    required this.onDismissAlert,
+  });
+
+  Future<void> _close(
+    BuildContext context, {
+    required bool shouldFinish,
+  }) async {
+    await onDismissAlert();
+    if (context.mounted) Navigator.of(context).pop(shouldFinish);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = isDarkMode
+        ? AppColor.darkModeContentWidget
+        : AppColor.lightModeContentWidget;
+    final secondaryText = isDarkMode ? Colors.white60 : Colors.blueGrey;
+    final borderColor =
+        isDarkMode ? Colors.white.withValues(alpha: 0.12) : Colors.black12;
+    final target = session.targetSeconds ?? 0;
+
+    return Dialog(
+      backgroundColor: surfaceColor,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 22, vertical: 24),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: BorderSide(color: borderColor),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              height: 54,
+              width: 54,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: Colors.green.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.alarm_on_rounded,
+                color: Colors.green,
+                size: 28,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Session Target Reached',
+              textAlign: TextAlign.center,
+              style: AppTextStyle.subSectionTextStyle(
+                fontsize: 18,
+                fontweight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              session.subcategoryName,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyle.subSectionTextStyle(
+                fontsize: 11,
+                fontweight: FontWeight.normal,
+                color: secondaryText,
+              ),
+            ),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Expanded(
+                  child: _TargetMetric(
+                    label: 'Target',
+                    value: formatActivityTimerDuration(target),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _TargetMetric(
+                    label: 'Tracked',
+                    value: formatActivityTimerDuration(elapsedSeconds),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => _close(context, shouldFinish: false),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: secondaryText,
+                      minimumSize: const Size(0, 44),
+                      side: BorderSide(color: borderColor),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text('Keep Tracking'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => _close(context, shouldFinish: true),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColor.blueMainColor,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      minimumSize: const Size(0, 44),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text('Review & Finish'),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TargetMetric extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _TargetMetric({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColor.blueMainColor.withValues(alpha: 0.07),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        children: [
+          Text(
+            label,
+            style: AppTextStyle.subSectionTextStyle(
+              fontsize: 9.5,
+              fontweight: FontWeight.normal,
+              color: isDarkMode ? Colors.white60 : Colors.blueGrey,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            style: AppTextStyle.subSectionTextStyle(
+              fontsize: 13,
+              fontweight: FontWeight.w900,
+              color: AppColor.blueMainColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _DiscardActivityTimerDialog extends StatelessWidget {
   final ActivityTimerSession session;
   final int elapsedSeconds;
@@ -395,11 +890,15 @@ class _TimerDurationField extends StatelessWidget {
   final String label;
   final TextEditingController controller;
   final int maximum;
+  final bool emptyIsZero;
+  final bool showPlaceholder;
 
   const _TimerDurationField({
     required this.label,
     required this.controller,
     required this.maximum,
+    this.emptyIsZero = false,
+    this.showPlaceholder = false,
   });
 
   @override
@@ -452,10 +951,13 @@ class _TimerDurationField extends StatelessWidget {
             borderSide: const BorderSide(color: Colors.redAccent, width: 1.4),
           ),
           counterText: '',
+          hintText: showPlaceholder ? '00' : null,
         ),
         maxLength: maximum > 99 ? 3 : 2,
         validator: (value) {
-          final parsed = int.tryParse(value?.trim() ?? '');
+          final input = value?.trim() ?? '';
+          if (emptyIsZero && input.isEmpty) return null;
+          final parsed = int.tryParse(input);
           if (parsed == null || parsed < 0 || parsed > maximum) {
             return 'Invalid';
           }
@@ -706,8 +1208,30 @@ class _ActivityTimerPanel extends StatelessWidget {
     BuildContext context,
     ActivityTimerSession session,
   ) {
-    final warning = timer.needsReview || timer.isReminderDue;
-    final accent = warning ? Colors.orange : AppColor.blueMainColor;
+    final targetReached = timer.hasReachedTarget;
+    final warning =
+        !targetReached && (timer.needsReview || timer.isReminderDue);
+    final accent = targetReached
+        ? Colors.green
+        : warning
+            ? Colors.orange
+            : AppColor.blueMainColor;
+    final target = session.targetSeconds ?? 0;
+    final isTimed = target > 0;
+    final primaryDuration = isTimed
+        ? targetReached
+            ? '+${formatActivityTimerDuration(timer.overtimeSeconds)}'
+            : formatActivityTimerDuration(timer.remainingTargetSeconds ?? 0)
+        : formatActivityTimerDuration(timer.elapsedSeconds);
+    final statusLabel = targetReached
+        ? 'Target Reached'
+        : isTimed
+            ? timer.isRunning
+                ? 'Timed Session'
+                : 'Timed Session Paused'
+            : timer.isRunning
+                ? 'Tracking Now'
+                : 'Timer Paused';
     return Column(
       children: [
         Row(
@@ -719,7 +1243,7 @@ class _ActivityTimerPanel extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                timer.isRunning ? 'Tracking Now' : 'Timer Paused',
+                statusLabel,
                 style: AppTextStyle.subSectionTextStyle(
                   fontsize: 13,
                   fontweight: FontWeight.w900,
@@ -737,13 +1261,36 @@ class _ActivityTimerPanel extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Text(
-          formatActivityTimerDuration(timer.elapsedSeconds),
+          primaryDuration,
           style: AppTextStyle.subSectionTextStyle(
             fontsize: 34,
             fontweight: FontWeight.w900,
             color: accent,
           ),
         ),
+        if (isTimed) ...[
+          const SizedBox(height: 5),
+          Text(
+            'Elapsed ${formatActivityTimerDuration(timer.elapsedSeconds)}  |  '
+            'Target ${formatActivityTimerDuration(target)}',
+            textAlign: TextAlign.center,
+            style: AppTextStyle.subSectionTextStyle(
+              fontsize: 10.5,
+              fontweight: FontWeight.w700,
+              color: accent,
+            ),
+          ),
+          const SizedBox(height: 9),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              minHeight: 6,
+              value: (timer.elapsedSeconds / target).clamp(0.0, 1.0).toDouble(),
+              color: accent,
+              backgroundColor: accent.withValues(alpha: 0.15),
+            ),
+          ),
+        ],
         if (warning) ...[
           const SizedBox(height: 7),
           Text(

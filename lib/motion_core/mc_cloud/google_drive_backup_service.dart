@@ -19,6 +19,18 @@ class GoogleDriveBackupResult {
   final int fileCount;
 }
 
+class GoogleDriveBackupDownloadResult {
+  const GoogleDriveBackupDownloadResult({
+    required this.email,
+    required this.folderName,
+    required this.files,
+  });
+
+  final String email;
+  final String folderName;
+  final List<MotionCsvBackupFile> files;
+}
+
 abstract interface class GoogleDriveAccountSession {
   Future<String?> signInSilently();
 
@@ -65,6 +77,12 @@ class GoogleDriveBackupService {
   static const String backupFolderName = 'Motion Backups';
 
   final GoogleDriveAccountSession _accountSession;
+
+  static const List<String> _backupFileNames = [
+    'main_category.csv',
+    'subcategory.csv',
+    'to_assign.csv',
+  ];
 
   Future<GoogleDriveBackupResult> uploadBackupFiles({
     required List<MotionCsvBackupFile> files,
@@ -157,6 +175,146 @@ class GoogleDriveBackupService {
       }
       rethrow;
     }
+  }
+
+  Future<GoogleDriveBackupDownloadResult> downloadBackupFiles({
+    required String expectedEmail,
+    bool allowInteractiveSignIn = true,
+  }) async {
+    final normalizedExpectedEmail = expectedEmail.trim().toLowerCase();
+    if (normalizedExpectedEmail.isEmpty) {
+      throw StateError(
+        'Motion could not verify the email for the signed-in account.',
+      );
+    }
+
+    try {
+      var driveEmail = await _accountSession.signInSilently();
+      if (driveEmail == null && allowInteractiveSignIn) {
+        driveEmail = await _accountSession.signIn();
+      }
+      if (driveEmail == null) {
+        throw StateError(
+          allowInteractiveSignIn
+              ? 'Google Drive restore was cancelled.'
+              : 'Google Drive is not connected.',
+        );
+      }
+
+      if (driveEmail.trim().toLowerCase() != normalizedExpectedEmail &&
+          allowInteractiveSignIn) {
+        await _accountSession.signOut();
+        driveEmail = await _accountSession.signIn();
+      }
+
+      if (driveEmail == null ||
+          driveEmail.trim().toLowerCase() != normalizedExpectedEmail) {
+        if (allowInteractiveSignIn) {
+          await _accountSession.signOut();
+        }
+        throw StateError(
+          'Google Drive must use the same email as your Motion account '
+          '($expectedEmail). No backup was restored.',
+        );
+      }
+
+      final client = await _accountSession.authenticatedClient();
+      if (client == null) {
+        throw StateError(
+          'Motion could not connect to Google Drive. Please try signing in again.',
+        );
+      }
+
+      try {
+        final driveApi = drive.DriveApi(client);
+        final folderId = await _findBackupFolder(driveApi);
+        final files = <MotionCsvBackupFile>[];
+        for (final fileName in _backupFileNames) {
+          files.add(
+            await _downloadBackupFile(
+              driveApi: driveApi,
+              folderId: folderId,
+              fileName: fileName,
+            ),
+          );
+        }
+        return GoogleDriveBackupDownloadResult(
+          email: driveEmail.trim(),
+          folderName: backupFolderName,
+          files: files,
+        );
+      } finally {
+        client.close();
+      }
+    } on SocketException {
+      throw StateError(
+        'No internet connection. Connect to the internet and try restoring again.',
+      );
+    } on http.ClientException catch (error) {
+      if (_isNetworkClientError(error)) {
+        throw StateError(
+          'No internet connection. Connect to the internet and try restoring again.',
+        );
+      }
+      rethrow;
+    }
+  }
+
+  Future<String> _findBackupFolder(drive.DriveApi driveApi) async {
+    final folders = await driveApi.files.list(
+      q: "mimeType = 'application/vnd.google-apps.folder' "
+          "and name = '${_escapeQueryValue(backupFolderName)}' "
+          'and trashed = false',
+      spaces: 'drive',
+      $fields: 'files(id, name)',
+      pageSize: 1,
+    );
+    final folderId = _firstFileId(folders.files);
+    if (folderId == null) {
+      throw StateError(
+        'No Motion Backups folder was found in this Google Drive account.',
+      );
+    }
+    return folderId;
+  }
+
+  Future<MotionCsvBackupFile> _downloadBackupFile({
+    required drive.DriveApi driveApi,
+    required String folderId,
+    required String fileName,
+  }) async {
+    final matchingFiles = await driveApi.files.list(
+      q: "name = '${_escapeQueryValue(fileName)}' "
+          "and '$folderId' in parents "
+          'and trashed = false',
+      spaces: 'drive',
+      $fields: 'files(id, name)',
+      pageSize: 1,
+    );
+    final fileId = _firstFileId(matchingFiles.files);
+    if (fileId == null) {
+      throw StateError(
+        'The Google Drive backup is incomplete. $fileName is missing.',
+      );
+    }
+
+    final response = await driveApi.files.get(
+      fileId,
+      downloadOptions: drive.DownloadOptions.fullMedia,
+    );
+    if (response is! drive.Media) {
+      throw StateError(
+          'Motion could not download $fileName from Google Drive.');
+    }
+
+    final bytes = <int>[];
+    await for (final chunk in response.stream) {
+      bytes.addAll(chunk);
+    }
+    return MotionCsvBackupFile(
+      fileName: fileName,
+      content: utf8.decode(bytes),
+    );
   }
 
   Future<String> _findOrCreateBackupFolder(drive.DriveApi driveApi) async {

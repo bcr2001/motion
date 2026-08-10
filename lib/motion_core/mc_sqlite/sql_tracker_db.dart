@@ -1052,7 +1052,7 @@ class TrackerDatabaseHelper {
   /// A streak is a run of consecutive calendar days where the user logged at
   /// least one subcategory with timeSpent greater than zero. The streak is
   /// counted backward from the latest tracked day in the database, which keeps
-  /// delayed CSV imports from making the streak appear as zero.
+  /// late-added historical entries from making the streak appear as zero.
   Future<int> getUserStreak({required String currentUser}) async {
     final db = await database;
 

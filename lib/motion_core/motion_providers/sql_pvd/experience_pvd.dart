@@ -166,6 +166,54 @@ class ExperiencePointTableProvider extends ChangeNotifier {
     );
   }
 
+  Future<int> retrieveYearExperiencePointsBeforeDate({
+    required String currentUser,
+    required String year,
+    required String beforeDate,
+  }) async {
+    return await trackDbInstance.getYearExperiencePointsBeforeDate(
+      currentUser: requireCurrentUser(currentUser),
+      year: year,
+      beforeDate: beforeDate,
+    );
+  }
+
+  Future<int> retrieveYearExperiencePointDaysBeforeDate({
+    required String currentUser,
+    required String year,
+    required String beforeDate,
+  }) async {
+    return await trackDbInstance.getYearExperiencePointDaysBeforeDate(
+      currentUser: requireCurrentUser(currentUser),
+      year: year,
+      beforeDate: beforeDate,
+    );
+  }
+
+  Future<double> retrieveAverageDailyExperiencePoints({
+    required String currentUser,
+    required String firstDate,
+    required String lastDate,
+  }) async {
+    return await trackDbInstance.averageDailyExperiencePoints(
+      currentUser: requireCurrentUser(currentUser),
+      firstDate: firstDate,
+      lastDate: lastDate,
+    );
+  }
+
+  Future<List<ExperiencePoints>> retrieveExperiencePointHistory({
+    required String currentUser,
+    required String firstDate,
+    required String lastDate,
+  }) async {
+    return trackDbInstance.getExperiencePointHistory(
+      currentUser: requireCurrentUser(currentUser),
+      firstDate: firstDate,
+      lastDate: lastDate,
+    );
+  }
+
   @override
   void dispose() {
     _revisions.removeListener(_handleRevisionChange);

@@ -3,12 +3,19 @@ import 'package:flutter/services.dart';
 import 'package:motion/motion_core/mc_sql_table/activity_timer_session.dart';
 
 abstract class ActivityTimerNotificationBridge {
-  Future<bool> requestPermission();
+  Future<bool> requestPermission({required bool requiresExactAlarm});
 
   Future<void> sync({
     required ActivityTimerSession session,
     required int elapsedSeconds,
   });
+
+  Future<void> targetReached({
+    required ActivityTimerSession session,
+    required int elapsedSeconds,
+  });
+
+  Future<void> dismissTargetAlert();
 
   Future<void> stop();
 }
@@ -24,9 +31,13 @@ class PlatformActivityTimerNotificationBridge
   }
 
   @override
-  Future<bool> requestPermission() async {
+  Future<bool> requestPermission({required bool requiresExactAlarm}) async {
     if (!_isSupported) return true;
-    return await _channel.invokeMethod<bool>('requestPermission') ?? false;
+    return await _channel.invokeMethod<bool>(
+          'requestPermission',
+          {'requiresExactAlarm': requiresExactAlarm},
+        ) ??
+        false;
   }
 
   @override
@@ -35,12 +46,43 @@ class PlatformActivityTimerNotificationBridge
     required int elapsedSeconds,
   }) async {
     if (!_isSupported) return;
-    await _channel.invokeMethod<void>('sync', {
+    await _channel.invokeMethod<void>(
+      'sync',
+      _arguments(session: session, elapsedSeconds: elapsedSeconds),
+    );
+  }
+
+  @override
+  Future<void> targetReached({
+    required ActivityTimerSession session,
+    required int elapsedSeconds,
+  }) async {
+    if (!_isSupported) return;
+    await _channel.invokeMethod<void>(
+      'targetReached',
+      _arguments(session: session, elapsedSeconds: elapsedSeconds),
+    );
+  }
+
+  @override
+  Future<void> dismissTargetAlert() async {
+    if (!_isSupported) return;
+    await _channel.invokeMethod<void>('dismissTargetAlert');
+  }
+
+  Map<String, Object?> _arguments({
+    required ActivityTimerSession session,
+    required int elapsedSeconds,
+  }) {
+    return {
       'mainCategoryName': session.mainCategoryName,
       'subcategoryName': session.subcategoryName,
       'elapsedSeconds': elapsedSeconds,
       'isRunning': session.isRunning,
-    });
+      'timerStartedAtEpochMs': session.startedAtEpochMs,
+      'targetSeconds': session.targetSeconds,
+      'targetAlertTriggered': session.targetAlertTriggered,
+    };
   }
 
   @override

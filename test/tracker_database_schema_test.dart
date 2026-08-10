@@ -3,8 +3,8 @@ import 'package:motion/motion_core/mc_sqlite/tracker_database_schema.dart';
 
 void main() {
   group('TrackerDatabaseSchema', () {
-    test('uses version 16 after adding tracked-time limits', () {
-      expect(TrackerDatabaseSchema.version, 16);
+    test('uses version 17 after adding timed activity sessions', () {
+      expect(TrackerDatabaseSchema.version, 17);
     });
 
     test('defines the active timer session table', () {

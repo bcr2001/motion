@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:motion/motion_core/mc_sql_table/activity_timer_session.dart';
 import 'package:motion/motion_core/mc_sql_table/sub_table.dart';
@@ -33,6 +36,8 @@ void main() {
         status: ActivityTimerStatus.running,
         updatedAtEpochMs: DateTime(2026, 7, 19, 10).millisecondsSinceEpoch,
         nextReminderAtSeconds: 7200,
+        targetSeconds: 2 * 60 * 60,
+        targetAlertTriggered: true,
       );
 
       final restored = ActivityTimerSession.fromMap(session.toMap());
@@ -40,6 +45,8 @@ void main() {
       expect(restored.currentLoggedInUser, 'user-1');
       expect(restored.subcategoryName, 'Chess');
       expect(restored.isRunning, isTrue);
+      expect(restored.targetSeconds, 2 * 60 * 60);
+      expect(restored.targetAlertTriggered, isTrue);
       expect(restored.completedSegments, hasLength(1));
       expect(
         restored.elapsedSecondsAt(DateTime(2026, 7, 19, 10, 15)),
@@ -69,6 +76,29 @@ void main() {
         session.elapsedSecondsAt(DateTime(2026, 7, 20, 12)),
         25 * 60,
       );
+    });
+
+    test('calculates remaining target time and overtime', () {
+      final start = DateTime(2026, 7, 19, 9);
+      final session = ActivityTimerSession(
+        currentLoggedInUser: 'user-1',
+        mainCategoryName: 'Skills',
+        subcategoryName: 'Chess',
+        startedAtEpochMs: start.millisecondsSinceEpoch,
+        currentSegmentStartedAtEpochMs: start.millisecondsSinceEpoch,
+        completedSegments: const [],
+        status: ActivityTimerStatus.running,
+        updatedAtEpochMs: start.millisecondsSinceEpoch,
+        nextReminderAtSeconds: 7200,
+        targetSeconds: 60 * 60,
+      );
+
+      expect(session.remainingSecondsAt(start.add(const Duration(minutes: 20))),
+          40 * 60);
+      expect(
+          session.targetReachedAt(start.add(const Duration(hours: 1))), isTrue);
+      expect(session.overtimeSecondsAt(start.add(const Duration(minutes: 75))),
+          15 * 60);
     });
   });
 
@@ -168,6 +198,7 @@ void main() {
           mainCategoryName: MotionCategories.skills,
           subcategoryName: 'Chess',
         );
+        expect(notificationBridge.lastPermissionRequiredExactAlarm, isFalse);
 
         var timerRows = await database.query(
           MotionDbTables.activeTimerSession,
@@ -311,6 +342,116 @@ void main() {
       );
     });
 
+    test('timed sessions pause, alert once, persist, and continue overtime',
+        () async {
+      await timer.start(
+        mainCategoryName: MotionCategories.skills,
+        subcategoryName: 'Chess',
+        targetSeconds: 60 * 60,
+      );
+      expect(notificationBridge.lastPermissionRequiredExactAlarm, isTrue);
+
+      var timerRows = await database.query(MotionDbTables.activeTimerSession);
+      expect(
+        timerRows.single[MotionDbColumns.timerTargetSeconds],
+        60 * 60,
+      );
+      expect(
+        timerRows.single[MotionDbColumns.timerTargetAlertTriggered],
+        0,
+      );
+
+      now = DateTime(2026, 7, 19, 9, 20);
+      await timer.pause();
+      now = DateTime(2026, 7, 19, 12);
+      expect(timer.remainingTargetSeconds, 40 * 60);
+
+      await timer.resume();
+      now = DateTime(2026, 7, 19, 12, 40);
+      timer.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      await _flushAsyncWork();
+
+      expect(timer.hasReachedTarget, isTrue);
+      expect(timer.hasPendingTargetReachedEvent, isTrue);
+      expect(timer.consumeTargetReachedEvent()?.subcategoryName, 'Chess');
+      expect(timer.hasPendingTargetReachedEvent, isFalse);
+      expect(
+        notificationBridge.events.where((event) => event.type == 'target'),
+        hasLength(1),
+      );
+
+      timerRows = await database.query(MotionDbTables.activeTimerSession);
+      expect(
+        timerRows.single[MotionDbColumns.timerTargetAlertTriggered],
+        1,
+      );
+
+      now = DateTime(2026, 7, 19, 12, 45);
+      timer.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      await _flushAsyncWork();
+      expect(timer.overtimeSeconds, 5 * 60);
+      expect(
+        notificationBridge.events.where((event) => event.type == 'target'),
+        hasLength(1),
+      );
+
+      final result = await timer.finish();
+      expect(result.totalSeconds, 65 * 60);
+      expect(result.entries.single.timeSpent, 65.0);
+    });
+
+    test('rejects timer targets longer than 24 hours', () async {
+      await expectLater(
+        timer.start(
+          mainCategoryName: MotionCategories.skills,
+          subcategoryName: 'Chess',
+          targetSeconds: ActivityTimerProvider.maximumTargetSeconds + 1,
+        ),
+        throwsA(isA<StateError>()),
+      );
+      expect(timer.hasActiveTimer, isFalse);
+    });
+
+    test('dismisses the native target alert on user acknowledgement', () async {
+      await timer.dismissTargetAlert();
+
+      expect(
+        notificationBridge.events.where((event) => event.type == 'dismiss'),
+        hasLength(1),
+      );
+    });
+
+    test('a delayed target alert cannot restore a finished timer', () async {
+      final alertGate = Completer<void>();
+      notificationBridge.targetAlertGate = alertGate;
+      await timer.start(
+        mainCategoryName: MotionCategories.skills,
+        subcategoryName: 'Chess',
+        targetSeconds: 60,
+      );
+
+      now = DateTime(2026, 7, 19, 9, 1);
+      timer.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      await _flushAsyncWork();
+      expect(
+        notificationBridge.events.where((event) => event.type == 'target'),
+        hasLength(1),
+      );
+
+      await timer.finish();
+      expect(
+        await database.query(MotionDbTables.activeTimerSession),
+        isEmpty,
+      );
+
+      alertGate.complete();
+      await _flushAsyncWork();
+      expect(
+        await database.query(MotionDbTables.activeTimerSession),
+        isEmpty,
+      );
+    });
+
     test('failed daily-limit validation keeps the timer available', () async {
       await databaseHelper.insertSubcategory(Subcategories(
         date: '2026-07-19',
@@ -348,12 +489,20 @@ class _FakeActivityTimerNotificationBridge
   final List<_NotificationEvent> events = [];
   bool throwOnRequestPermission = false;
   bool throwOnSync = false;
+  bool? lastPermissionRequiredExactAlarm;
+  Completer<void>? targetAlertGate;
 
   @override
-  Future<bool> requestPermission() async {
+  Future<bool> requestPermission({required bool requiresExactAlarm}) async {
     if (throwOnRequestPermission) throw StateError('Permission unavailable');
+    lastPermissionRequiredExactAlarm = requiresExactAlarm;
     events.add(const _NotificationEvent.permission());
     return true;
+  }
+
+  @override
+  Future<void> dismissTargetAlert() async {
+    events.add(const _NotificationEvent.dismiss());
   }
 
   @override
@@ -367,6 +516,19 @@ class _FakeActivityTimerNotificationBridge
       elapsedSeconds: elapsedSeconds,
       isRunning: session.isRunning,
     ));
+  }
+
+  @override
+  Future<void> targetReached({
+    required ActivityTimerSession session,
+    required int elapsedSeconds,
+  }) async {
+    events.add(_NotificationEvent.target(
+      subcategoryName: session.subcategoryName,
+      elapsedSeconds: elapsedSeconds,
+      isRunning: session.isRunning,
+    ));
+    await targetAlertGate?.future;
   }
 
   @override
@@ -399,6 +561,18 @@ class _NotificationEvent {
         elapsedSeconds = null,
         isRunning = null;
 
+  const _NotificationEvent.target({
+    required this.subcategoryName,
+    required this.elapsedSeconds,
+    required this.isRunning,
+  }) : type = 'target';
+
+  const _NotificationEvent.dismiss()
+      : type = 'dismiss',
+        subcategoryName = null,
+        elapsedSeconds = null,
+        isRunning = null;
+
   @override
   bool operator ==(Object other) {
     return other is _NotificationEvent &&
@@ -415,4 +589,9 @@ class _NotificationEvent {
         elapsedSeconds,
         isRunning,
       );
+}
+
+Future<void> _flushAsyncWork() async {
+  await Future<void>.delayed(Duration.zero);
+  await Future<void>.delayed(Duration.zero);
 }

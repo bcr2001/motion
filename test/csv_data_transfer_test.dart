@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:motion/motion_core/mc_csv/csv_data_transfer.dart';
 import 'package:motion/motion_core/mc_sqlite/database_constants.dart';
-import 'package:motion/motion_core/mc_sqlite/tracking_time_policy.dart';
 import 'package:sqflite/sqflite.dart';
 
 void main() {
@@ -29,12 +28,6 @@ void main() {
       }
     });
 
-    File writeCsv(String fileName, String csv) {
-      final file = File('${tempDir.path}${Platform.pathSeparator}$fileName');
-      file.writeAsStringSync(csv.trim().replaceAll('\n', '\r\n'));
-      return file;
-    }
-
     test('refuses export when there is no data to export', () async {
       expect(
         () => transfer.exportAllToDirectory(
@@ -45,188 +38,12 @@ void main() {
       );
     });
 
-    test('previews subcategory csv before import', () async {
-      final file = writeCsv('subcategory.csv', '''
-date,mainCategoryName,subcategoryName,timeSpent,currentLoggedInUser
-1/1/2026,Skills,Chess,60,old-user
-bad-date,Skills,Invalid,10,old-user
-1/3/2026,,Missing Main,10,old-user
-''');
-
-      final preview = await transfer.previewCsv(
-        fileType: MotionCsvFileType.subcategory,
-        filePath: file.path,
-      );
-
-      expect(preview.fileName, 'subcategory.csv');
-      expect(preview.totalRows, 3);
-      expect(preview.validRows, 1);
-      expect(preview.skippedRows, 2);
-      expect(preview.firstDate, '2026-01-01');
-      expect(preview.lastDate, '2026-01-01');
-    });
-
-    test('imports subcategories for the current user and reports progress',
-        () async {
-      trackerDb.tables[MotionDbTables.subcategory] = [
-        {
-          MotionDbColumns.date: '2025-12-31',
-          MotionDbColumns.mainCategoryName: MotionCategories.skills,
-          MotionDbColumns.subcategoryName: 'Old',
-          MotionDbColumns.timeSpent: 10.0,
-          MotionDbColumns.currentLoggedInUser: 'user-1',
-        },
-      ];
-      trackerDb.tables[MotionDbTables.mainCategory] = [
-        {
-          MotionDbColumns.date: '2025-12-31',
-          MotionDbColumns.currentLoggedInUser: 'user-1',
-        },
-      ];
-      trackerDb.tables[MotionDbTables.experiencePoints] = [
-        {
-          MotionDbColumns.date: '2025-12-31',
-          MotionDbColumns.currentLoggedInUser: 'user-1',
-        },
-      ];
-      final file = writeCsv('subcategory.csv', '''
-date,mainCategoryName,subcategoryName,timeSpent,currentLoggedInUser
-1/1/2026,Skills,Chess,60,old-user
-1/1/2026,Sleep,Sleep,480,old-user
-not-a-date,Skills,Bad Row,10,old-user
-''');
-      final progress = <MotionCsvImportProgress>[];
-
-      final result = await transfer.importCsv(
-        fileType: MotionCsvFileType.subcategory,
-        filePath: file.path,
-        currentUser: 'user-1',
-        onProgress: progress.add,
-      );
-
-      expect(result.importedRows, 2);
-      expect(result.skippedRows, 1);
-      expect(result.rebuiltDailyRows, 1);
-      expect(progress.first.processedRows, 0);
-      expect(progress.last.processedRows, 3);
-
-      final subcategoryRows = trackerDb.tables[MotionDbTables.subcategory]!;
-      expect(subcategoryRows, hasLength(2));
-      expect(
-        subcategoryRows.map((row) => row[MotionDbColumns.currentLoggedInUser]),
-        everyElement('user-1'),
-      );
-      expect(
-        subcategoryRows.map((row) => row[MotionDbColumns.subcategoryName]),
-        containsAll(['Chess', 'Sleep']),
-      );
-      expect(
-        trackerDb.tables[MotionDbTables.mainCategory],
-        contains(
-          containsPair(MotionDbColumns.date, '2026-01-01'),
-        ),
-      );
-      expect(
-        trackerDb.tables[MotionDbTables.experiencePoints],
-        contains(
-          containsPair(MotionDbColumns.date, '2026-01-01'),
-        ),
-      );
-      expect(trackerDb.executedSql, isNotEmpty);
-    });
-
-    test('rejects imports exceeding 24 hours before replacing existing data',
-        () async {
-      trackerDb.tables[MotionDbTables.subcategory] = [
-        {
-          MotionDbColumns.date: '2025-12-31',
-          MotionDbColumns.mainCategoryName: MotionCategories.skills,
-          MotionDbColumns.subcategoryName: 'Existing',
-          MotionDbColumns.timeSpent: 30.0,
-          MotionDbColumns.currentLoggedInUser: 'user-1',
-        },
-      ];
-      final file = writeCsv('subcategory.csv', '''
-date,mainCategoryName,subcategoryName,timeSpent,currentLoggedInUser
-1/1/2026,Skills,Chess,1000,old-user
-1/1/2026,Sleep,Sleep,500,old-user
-''');
-
-      await expectLater(
-        transfer.importCsv(
-          fileType: MotionCsvFileType.subcategory,
-          filePath: file.path,
-          currentUser: 'user-1',
-        ),
-        throwsA(isA<DailyTimeLimitExceeded>()),
-      );
-
-      final rows = trackerDb.tables[MotionDbTables.subcategory]!;
-      expect(rows, hasLength(1));
-      expect(rows.single[MotionDbColumns.subcategoryName], 'Existing');
-    });
-
-    test('imports assigner csv with streak settings', () async {
-      final file = writeCsv('to_assign.csv', '''
-currentLoggedInUser,subcategoryName,mainCategoryName,isActive,isArchive,dateCreated,isStreakActive,streakType,streakTargetMinutes,streakStartDate
-old-user,Chess,Skills,1,0,1/1/2026,1,targetTime,60,1/1/2026
-old-user,,Skills,1,0,1/2/2026,0,,0,
-''');
-
-      final result = await transfer.importCsv(
-        fileType: MotionCsvFileType.assigner,
-        filePath: file.path,
+    test('builds database-derived CSV backup files', () async {
+      _seedExportableData(
+        trackerDb: trackerDb,
+        assignerDb: assignerDb,
         currentUser: 'user-1',
       );
-
-      expect(result.importedRows, 1);
-      expect(result.skippedRows, 1);
-      final rows = assignerDb.tables[MotionDbTables.assigner]!;
-      expect(rows, hasLength(1));
-      expect(rows.single[MotionDbColumns.currentLoggedInUser], 'user-1');
-      expect(rows.single[MotionDbColumns.subcategoryName], 'Chess');
-      expect(rows.single[MotionDbColumns.isStreakActive], 1);
-      expect(rows.single[MotionDbColumns.streakType], 'targetTime');
-      expect(rows.single[MotionDbColumns.streakTargetMinutes], 60.0);
-      expect(rows.single[MotionDbColumns.streakStartDate], '2026-01-01');
-    });
-
-    test('builds database-derived csv backup files', () async {
-      trackerDb.tables[MotionDbTables.mainCategory] = [
-        {
-          MotionDbColumns.date: '2026-01-01',
-          MotionDbColumns.education: 60.0,
-          MotionDbColumns.work: 0.0,
-          MotionDbColumns.skills: 45.0,
-          MotionDbColumns.entertainment: 20.0,
-          MotionDbColumns.selfDevelopment: 10.0,
-          MotionDbColumns.sleep: 480.0,
-          MotionDbColumns.currentLoggedInUser: 'user-1',
-        },
-      ];
-      trackerDb.tables[MotionDbTables.subcategory] = [
-        {
-          MotionDbColumns.date: '2026-01-01',
-          MotionDbColumns.mainCategoryName: MotionCategories.skills,
-          MotionDbColumns.subcategoryName: 'Chess',
-          MotionDbColumns.timeSpent: 45.0,
-          MotionDbColumns.currentLoggedInUser: 'user-1',
-        },
-      ];
-      assignerDb.tables[MotionDbTables.assigner] = [
-        {
-          MotionDbColumns.currentLoggedInUser: 'user-1',
-          MotionDbColumns.subcategoryName: 'Chess',
-          MotionDbColumns.mainCategoryName: MotionCategories.skills,
-          MotionDbColumns.isActive: 1,
-          MotionDbColumns.isArchive: 0,
-          MotionDbColumns.dateCreated: '2026-01-01',
-          MotionDbColumns.isStreakActive: 1,
-          MotionDbColumns.streakType: 'trackedToday',
-          MotionDbColumns.streakTargetMinutes: 0.0,
-          MotionDbColumns.streakStartDate: '2026-01-01',
-        },
-      ];
 
       final files = await transfer.backupFiles(currentUser: 'user-1');
 
@@ -238,12 +55,124 @@ old-user,,Skills,1,0,1/2/2026,0,,0,
       expect(files[1].content, contains('Skills,Chess,45.0,user-1'));
       expect(files[2].content, contains('Chess,Skills,1,0'));
     });
+
+    test('exports all database-derived CSV files to a selected directory',
+        () async {
+      _seedExportableData(
+        trackerDb: trackerDb,
+        assignerDb: assignerDb,
+        currentUser: 'user-1',
+      );
+
+      final location = await transfer.exportAllToDirectory(
+        currentUser: 'user-1',
+        directoryPath: tempDir.path,
+      );
+
+      expect(location, tempDir.path);
+      expect(
+        File('${tempDir.path}${Platform.pathSeparator}main_category.csv')
+            .existsSync(),
+        isTrue,
+      );
+      expect(
+        File('${tempDir.path}${Platform.pathSeparator}subcategory.csv')
+            .existsSync(),
+        isTrue,
+      );
+      expect(
+        File('${tempDir.path}${Platform.pathSeparator}to_assign.csv')
+            .existsSync(),
+        isTrue,
+      );
+    });
+
+    test('deletes local data only for the selected Motion user', () async {
+      for (final table in [
+        MotionDbTables.subcategory,
+        MotionDbTables.mainCategory,
+        MotionDbTables.experiencePoints,
+        MotionDbTables.activeTimerSession,
+      ]) {
+        trackerDb.tables[table] = [
+          {MotionDbColumns.currentLoggedInUser: 'user-1'},
+          {MotionDbColumns.currentLoggedInUser: 'user-2'},
+        ];
+      }
+      assignerDb.tables[MotionDbTables.assigner] = [
+        {MotionDbColumns.currentLoggedInUser: 'user-1'},
+        {MotionDbColumns.currentLoggedInUser: 'user-2'},
+      ];
+
+      final summary = await transfer.deleteAllDataForUser(
+        currentUser: 'user-1',
+      );
+
+      expect(summary.subcategoryRows, 1);
+      expect(summary.mainCategoryRows, 1);
+      expect(summary.experiencePointRows, 1);
+      expect(summary.assignerRows, 1);
+      expect(summary.activeTimerRows, 1);
+      expect(summary.totalRows, 5);
+      for (final rows in trackerDb.tables.values) {
+        expect(
+          rows.map((row) => row[MotionDbColumns.currentLoggedInUser]),
+          everyElement('user-2'),
+        );
+      }
+      expect(
+        assignerDb.tables[MotionDbTables.assigner]!
+            .single[MotionDbColumns.currentLoggedInUser],
+        'user-2',
+      );
+    });
   });
+}
+
+void _seedExportableData({
+  required _FakeMotionDatabase trackerDb,
+  required _FakeMotionDatabase assignerDb,
+  required String currentUser,
+}) {
+  trackerDb.tables[MotionDbTables.mainCategory] = [
+    {
+      MotionDbColumns.date: '2026-01-01',
+      MotionDbColumns.education: 60.0,
+      MotionDbColumns.work: 0.0,
+      MotionDbColumns.skills: 45.0,
+      MotionDbColumns.entertainment: 20.0,
+      MotionDbColumns.selfDevelopment: 10.0,
+      MotionDbColumns.sleep: 480.0,
+      MotionDbColumns.currentLoggedInUser: currentUser,
+    },
+  ];
+  trackerDb.tables[MotionDbTables.subcategory] = [
+    {
+      MotionDbColumns.date: '2026-01-01',
+      MotionDbColumns.mainCategoryName: MotionCategories.skills,
+      MotionDbColumns.subcategoryName: 'Chess',
+      MotionDbColumns.timeSpent: 45.0,
+      MotionDbColumns.currentLoggedInUser: currentUser,
+    },
+  ];
+  assignerDb.tables[MotionDbTables.assigner] = [
+    {
+      MotionDbColumns.currentLoggedInUser: currentUser,
+      MotionDbColumns.subcategoryName: 'Chess',
+      MotionDbColumns.mainCategoryName: MotionCategories.skills,
+      MotionDbColumns.isActive: 1,
+      MotionDbColumns.isArchive: 0,
+      MotionDbColumns.dateCreated: '2026-01-01',
+      MotionDbColumns.isStreakActive: 1,
+      MotionDbColumns.streakType: 'trackedToday',
+      MotionDbColumns.streakTargetMinutes: 0.0,
+      MotionDbColumns.streakStartDate: '2026-01-01',
+    },
+  ];
 }
 
 class _FakeMotionDatabase implements Database, Transaction {
   final tables = <String, List<Map<String, Object?>>>{};
-  final executedSql = <String>[];
 
   @override
   Future<T> transaction<T>(
@@ -270,30 +199,6 @@ class _FakeMotionDatabase implements Database, Transaction {
       (row) => row[MotionDbColumns.currentLoggedInUser] == whereArgs.first,
     );
     return before - rows.length;
-  }
-
-  @override
-  Future<int> insert(
-    String table,
-    Map<String, Object?> values, {
-    String? nullColumnHack,
-    ConflictAlgorithm? conflictAlgorithm,
-  }) async {
-    final rows = tables.putIfAbsent(table, () => []);
-    if (conflictAlgorithm == ConflictAlgorithm.ignore &&
-        (table == MotionDbTables.mainCategory ||
-            table == MotionDbTables.experiencePoints)) {
-      final exists = rows.any(
-        (row) =>
-            row[MotionDbColumns.date] == values[MotionDbColumns.date] &&
-            row[MotionDbColumns.currentLoggedInUser] ==
-                values[MotionDbColumns.currentLoggedInUser],
-      );
-      if (exists) return 0;
-    }
-
-    rows.add(Map<String, Object?>.from(values));
-    return rows.length;
   }
 
   @override
@@ -337,11 +242,6 @@ class _FakeMotionDatabase implements Database, Transaction {
     return [
       {'COUNT(*)': rows.length}
     ];
-  }
-
-  @override
-  Future<void> execute(String sql, [List<Object?>? arguments]) async {
-    executedSql.add(sql);
   }
 
   List<Map<String, Object?>> _rowsForUser(

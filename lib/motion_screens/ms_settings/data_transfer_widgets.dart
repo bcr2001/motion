@@ -1,20 +1,25 @@
 part of 'data_transfer_page.dart';
 
-enum _BackupExportOption { device, googleDrive, cancel }
+enum _BackupLocationOption { device, googleDrive, cancel }
 
-class _ExportBackupOptionsDialog extends StatelessWidget {
-  const _ExportBackupOptionsDialog({
+enum _BackupLocationMode { export, restore }
+
+class _BackupLocationOptionsDialog extends StatelessWidget {
+  const _BackupLocationOptionsDialog({
+    required this.mode,
     required this.onDevice,
     required this.onGoogleDrive,
     required this.onCancel,
   });
 
+  final _BackupLocationMode mode;
   final VoidCallback onDevice;
   final VoidCallback onGoogleDrive;
   final VoidCallback onCancel;
 
   @override
   Widget build(BuildContext context) {
+    final isRestore = mode == _BackupLocationMode.restore;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final surfaceColor = isDarkMode
         ? AppColor.darkModeContentWidget
@@ -47,8 +52,8 @@ class _ExportBackupOptionsDialog extends StatelessWidget {
                       color: AppColor.blueMainColor.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(13),
                     ),
-                    child: const Icon(
-                      Icons.backup_rounded,
+                    child: Icon(
+                      isRestore ? Icons.restore_rounded : Icons.backup_rounded,
                       color: AppColor.blueMainColor,
                       size: 22,
                     ),
@@ -56,7 +61,7 @@ class _ExportBackupOptionsDialog extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'Export Backup',
+                      isRestore ? 'Restore Motion Backup' : 'Export Backup',
                       style: AppTextStyle.subSectionTextStyle(
                         fontsize: 17,
                         fontweight: FontWeight.w900,
@@ -67,7 +72,9 @@ class _ExportBackupOptionsDialog extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Choose where Motion should save your database backup files.',
+                isRestore
+                    ? 'Choose where Motion should load your complete backup from.'
+                    : 'Choose where Motion should save your database backup files.',
                 style: AppTextStyle.subSectionTextStyle(
                   fontsize: 12.5,
                   fontweight: FontWeight.normal,
@@ -76,17 +83,27 @@ class _ExportBackupOptionsDialog extends StatelessWidget {
               ),
               const SizedBox(height: 14),
               _BackupOptionTile(
-                icon: Icons.phone_android_rounded,
-                title: 'Save to Device',
-                subtitle: 'Creates CSV files in your Downloads folder.',
+                icon: isRestore
+                    ? Icons.folder_open_rounded
+                    : Icons.phone_android_rounded,
+                title: isRestore ? 'Choose From Device' : 'Save to Device',
+                subtitle: isRestore
+                    ? 'Select all three files from one Motion backup.'
+                    : 'Creates CSV files in your Downloads folder.',
                 borderColor: borderColor,
                 onTap: onDevice,
               ),
               const SizedBox(height: 10),
               _BackupOptionTile(
-                icon: Icons.cloud_upload_rounded,
-                title: 'Save to Google Drive',
-                subtitle: 'Updates the files in your Motion Backups folder.',
+                icon: isRestore
+                    ? Icons.cloud_download_rounded
+                    : Icons.cloud_upload_rounded,
+                title: isRestore
+                    ? 'Restore From Google Drive'
+                    : 'Save to Google Drive',
+                subtitle: isRestore
+                    ? 'Loads the latest files in your Motion Backups folder.'
+                    : 'Updates the files in your Motion Backups folder.',
                 borderColor: borderColor,
                 onTap: onGoogleDrive,
               ),
@@ -194,12 +211,10 @@ class _BusyTransferOverlay extends StatelessWidget {
   const _BusyTransferOverlay({
     required this.title,
     required this.detail,
-    required this.progress,
   });
 
   final String title;
   final String detail;
-  final double? progress;
 
   @override
   Widget build(BuildContext context) {
@@ -257,7 +272,6 @@ class _BusyTransferOverlay extends StatelessWidget {
               borderRadius: BorderRadius.circular(999),
               child: LinearProgressIndicator(
                 minHeight: 8,
-                value: progress,
                 backgroundColor: AppColor.blueMainColor.withValues(alpha: 0.16),
                 color: AppColor.blueMainColor,
               ),
@@ -545,7 +559,7 @@ class _AutoDriveBackupCard extends StatelessWidget {
                 Switch.adaptive(
                   value: backup.isEnabled,
                   onChanged: onChanged,
-                  activeColor: AppColor.blueMainColor,
+                  activeThumbColor: AppColor.blueMainColor,
                 ),
               ],
             ),

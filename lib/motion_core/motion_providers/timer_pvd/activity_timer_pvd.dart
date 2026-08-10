@@ -48,6 +48,7 @@ class ActivityTimerProvider extends ChangeNotifier with WidgetsBindingObserver {
   static const int standardReminderSeconds = 2 * 60 * 60;
   static const int sleepReminderSeconds = 10 * 60 * 60;
   static const int reviewRequiredSeconds = 18 * 60 * 60;
+  static const int maximumTargetSeconds = 24 * 60 * 60;
 
   final UserUidProvider _userUidProvider;
   final SubcategoryTrackerDatabaseProvider _subcategoryProvider;
@@ -62,6 +63,8 @@ class ActivityTimerProvider extends ChangeNotifier with WidgetsBindingObserver {
   String? _loadedUser;
   int _restoreGeneration = 0;
   bool? _notificationPermissionGranted;
+  bool _isMarkingTargetReached = false;
+  bool _hasPendingTargetReachedEvent = false;
 
   ActivityTimerSession? get session => _session;
   bool get hasActiveTimer => _session != null;
@@ -72,6 +75,12 @@ class ActivityTimerProvider extends ChangeNotifier with WidgetsBindingObserver {
   bool? get notificationPermissionGranted => _notificationPermissionGranted;
 
   int get elapsedSeconds => _session?.elapsedSecondsAt(_clock()) ?? 0;
+  int? get targetSeconds => _session?.targetSeconds;
+  bool get isTimedSession => _session?.isTimed ?? false;
+  bool get hasReachedTarget => _session?.targetReachedAt(_clock()) ?? false;
+  bool get hasPendingTargetReachedEvent => _hasPendingTargetReachedEvent;
+  int? get remainingTargetSeconds => _session?.remainingSecondsAt(_clock());
+  int get overtimeSeconds => _session?.overtimeSecondsAt(_clock()) ?? 0;
 
   bool get needsReview => elapsedSeconds >= reviewRequiredSeconds;
 
@@ -99,8 +108,13 @@ class ActivityTimerProvider extends ChangeNotifier with WidgetsBindingObserver {
   Future<void> start({
     required String mainCategoryName,
     required String subcategoryName,
+    int? targetSeconds,
   }) async {
     if (_isBusy) return;
+    if (targetSeconds != null &&
+        (targetSeconds <= 0 || targetSeconds > maximumTargetSeconds)) {
+      throw StateError('Timer targets must be between 1 second and 24 hours.');
+    }
     await _runBusy(() async {
       final currentUser = _userUidProvider.userUid;
       if (currentUser == null || currentUser.trim().isEmpty) {
@@ -115,7 +129,9 @@ class ActivityTimerProvider extends ChangeNotifier with WidgetsBindingObserver {
         throw ActivityTimerAlreadyRunning(existingSession);
       }
 
-      _notificationPermissionGranted = await _requestNotificationPermission();
+      _notificationPermissionGranted = await _requestNotificationPermission(
+        requiresExactAlarm: targetSeconds != null,
+      );
 
       final now = _clock();
       final reminderSeconds = mainCategoryName == MotionCategories.sleep
@@ -131,6 +147,7 @@ class ActivityTimerProvider extends ChangeNotifier with WidgetsBindingObserver {
         status: ActivityTimerStatus.running,
         updatedAtEpochMs: now.millisecondsSinceEpoch,
         nextReminderAtSeconds: reminderSeconds,
+        targetSeconds: targetSeconds,
       );
 
       await _databaseHelper.saveActiveTimerSession(nextSession);
@@ -160,6 +177,7 @@ class ActivityTimerProvider extends ChangeNotifier with WidgetsBindingObserver {
       _stopTicker();
       await _syncSystemNotification(pausedSession);
     });
+    _checkTargetReached();
   }
 
   Future<void> resume() async {
@@ -175,13 +193,30 @@ class ActivityTimerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
     await _runBusy(() async {
       if (_notificationPermissionGranted != true) {
-        _notificationPermissionGranted = await _requestNotificationPermission();
+        _notificationPermissionGranted = await _requestNotificationPermission(
+          requiresExactAlarm: activeSession.isTimed,
+        );
       }
       await _databaseHelper.saveActiveTimerSession(resumedSession);
       _session = resumedSession;
       _startTicker();
       await _syncSystemNotification(resumedSession);
     });
+    _checkTargetReached();
+  }
+
+  ActivityTimerSession? consumeTargetReachedEvent() {
+    if (!_hasPendingTargetReachedEvent) return null;
+    _hasPendingTargetReachedEvent = false;
+    return _session;
+  }
+
+  Future<void> dismissTargetAlert() async {
+    try {
+      await _notificationBridge.dismissTargetAlert();
+    } catch (error) {
+      debugPrint('Activity timer target alert dismissal failed: $error');
+    }
   }
 
   Future<void> acknowledgeReminder() async {
@@ -314,12 +349,17 @@ class ActivityTimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     } else {
       await _syncSystemNotification(restoredSession);
     }
+    _checkTargetReached();
     notifyListeners();
   }
 
-  Future<bool> _requestNotificationPermission() async {
+  Future<bool> _requestNotificationPermission({
+    required bool requiresExactAlarm,
+  }) async {
     try {
-      return await _notificationBridge.requestPermission();
+      return await _notificationBridge.requestPermission(
+        requiresExactAlarm: requiresExactAlarm,
+      );
     } catch (error) {
       debugPrint('Activity timer notification permission failed: $error');
       return false;
@@ -350,7 +390,7 @@ class ActivityTimerProvider extends ChangeNotifier with WidgetsBindingObserver {
   void _startTicker() {
     _ticker?.cancel();
     _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
-      notifyListeners();
+      if (!_checkTargetReached()) notifyListeners();
     });
   }
 
@@ -361,14 +401,68 @@ class ActivityTimerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   void _clearSession() {
     _session = null;
+    _hasPendingTargetReachedEvent = false;
+    _isMarkingTargetReached = false;
     _stopTicker();
+  }
+
+  bool _checkTargetReached() {
+    final activeSession = _session;
+    if (activeSession == null ||
+        activeSession.targetAlertTriggered ||
+        _isMarkingTargetReached ||
+        !activeSession.targetReachedAt(_clock())) {
+      return false;
+    }
+
+    final elapsed = activeSession.elapsedSecondsAt(_clock());
+    final updatedSession = activeSession.copyWith(
+      targetAlertTriggered: true,
+      updatedAtEpochMs: _clock().millisecondsSinceEpoch,
+    );
+    _session = updatedSession;
+    _hasPendingTargetReachedEvent = true;
+    _isMarkingTargetReached = true;
+    notifyListeners();
+    unawaited(_persistTargetReached(
+      originalSession: activeSession,
+      updatedSession: updatedSession,
+      elapsedSeconds: elapsed,
+    ));
+    return true;
+  }
+
+  Future<void> _persistTargetReached({
+    required ActivityTimerSession originalSession,
+    required ActivityTimerSession updatedSession,
+    required int elapsedSeconds,
+  }) async {
+    try {
+      await _notificationBridge.targetReached(
+        session: originalSession,
+        elapsedSeconds: elapsedSeconds,
+      );
+    } catch (error) {
+      debugPrint('Activity timer target alert failed: $error');
+    }
+
+    try {
+      await _databaseHelper.markActivityTimerTargetAlertTriggered(
+        currentUser: updatedSession.currentLoggedInUser,
+        timerStartedAtEpochMs: updatedSession.startedAtEpochMs,
+      );
+    } catch (error) {
+      debugPrint('Activity timer target state save failed: $error');
+    } finally {
+      _isMarkingTargetReached = false;
+    }
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       if (_session?.isRunning ?? false) _startTicker();
-      notifyListeners();
+      if (!_checkTargetReached()) notifyListeners();
     } else if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.inactive) {
       _stopTicker();

@@ -43,6 +43,8 @@ class ActivityTimerSession {
   final ActivityTimerStatus status;
   final int updatedAtEpochMs;
   final int nextReminderAtSeconds;
+  final int? targetSeconds;
+  final bool targetAlertTriggered;
 
   const ActivityTimerSession({
     required this.currentLoggedInUser,
@@ -54,9 +56,12 @@ class ActivityTimerSession {
     required this.status,
     required this.updatedAtEpochMs,
     required this.nextReminderAtSeconds,
+    this.targetSeconds,
+    this.targetAlertTriggered = false,
   });
 
   bool get isRunning => status == ActivityTimerStatus.running;
+  bool get isTimed => targetSeconds != null && targetSeconds! > 0;
 
   int elapsedMillisecondsAt(DateTime now) {
     var total = completedSegments.fold<int>(
@@ -72,6 +77,24 @@ class ActivityTimerSession {
   }
 
   int elapsedSecondsAt(DateTime now) => elapsedMillisecondsAt(now) ~/ 1000;
+
+  int? remainingSecondsAt(DateTime now) {
+    final target = targetSeconds;
+    if (target == null || target <= 0) return null;
+    return (target - elapsedSecondsAt(now)).clamp(0, target).toInt();
+  }
+
+  int overtimeSecondsAt(DateTime now) {
+    final target = targetSeconds;
+    if (target == null || target <= 0) return 0;
+    final overtime = elapsedSecondsAt(now) - target;
+    return overtime < 0 ? 0 : overtime;
+  }
+
+  bool targetReachedAt(DateTime now) {
+    final target = targetSeconds;
+    return target != null && target > 0 && elapsedSecondsAt(now) >= target;
+  }
 
   List<ActivityTimerSegment> segmentsEndingAt(DateTime now) {
     final segments = List<ActivityTimerSegment>.from(completedSegments);
@@ -93,6 +116,8 @@ class ActivityTimerSession {
     ActivityTimerStatus? status,
     int? updatedAtEpochMs,
     int? nextReminderAtSeconds,
+    Object? targetSeconds = _notProvided,
+    bool? targetAlertTriggered,
   }) {
     return ActivityTimerSession(
       currentLoggedInUser: currentLoggedInUser,
@@ -108,6 +133,10 @@ class ActivityTimerSession {
       updatedAtEpochMs: updatedAtEpochMs ?? this.updatedAtEpochMs,
       nextReminderAtSeconds:
           nextReminderAtSeconds ?? this.nextReminderAtSeconds,
+      targetSeconds: identical(targetSeconds, _notProvided)
+          ? this.targetSeconds
+          : targetSeconds as int?,
+      targetAlertTriggered: targetAlertTriggered ?? this.targetAlertTriggered,
     );
   }
 
@@ -124,6 +153,8 @@ class ActivityTimerSession {
       MotionDbColumns.timerStatus: status.name,
       MotionDbColumns.timerUpdatedAtEpochMs: updatedAtEpochMs,
       MotionDbColumns.nextTimerReminderAtSeconds: nextReminderAtSeconds,
+      MotionDbColumns.timerTargetSeconds: targetSeconds,
+      MotionDbColumns.timerTargetAlertTriggered: targetAlertTriggered ? 1 : 0,
     };
   }
 
@@ -160,6 +191,11 @@ class ActivityTimerSession {
       updatedAtEpochMs: _readInt(map[MotionDbColumns.timerUpdatedAtEpochMs]),
       nextReminderAtSeconds:
           _readInt(map[MotionDbColumns.nextTimerReminderAtSeconds]),
+      targetSeconds: _readNullablePositiveInt(
+        map[MotionDbColumns.timerTargetSeconds],
+      ),
+      targetAlertTriggered:
+          _readInt(map[MotionDbColumns.timerTargetAlertTriggered]) == 1,
     );
   }
 }
@@ -167,4 +203,10 @@ class ActivityTimerSession {
 int _readInt(Object? value) {
   if (value is num) return value.round();
   return int.tryParse(value?.toString() ?? '') ?? 0;
+}
+
+int? _readNullablePositiveInt(Object? value) {
+  if (value == null) return null;
+  final parsed = _readInt(value);
+  return parsed > 0 ? parsed : null;
 }

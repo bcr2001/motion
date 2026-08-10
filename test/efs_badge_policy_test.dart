@@ -83,5 +83,64 @@ void main() {
         MotionXpPolicy.maxDailyXp,
       );
     });
+
+    test('keeps the daily badge pace stable within the same badge band', () {
+      final firstCalculation = EfsBadgePolicy.nextBadgeProgress(
+        currentScore: 30,
+        currentYearXp: 690,
+        trackedDays: 20,
+        recentAverageDailyXp: 75,
+        today: DateTime(2026, 12, 22),
+      );
+      final afterEarningXpToday = EfsBadgePolicy.nextBadgeProgress(
+        currentScore: 35,
+        currentYearXp: 690,
+        trackedDays: 20,
+        recentAverageDailyXp: 75,
+        today: DateTime(2026, 12, 22),
+      );
+
+      expect(firstCalculation.daysRemaining, 10);
+      expect(firstCalculation.averageDailyXp, 69);
+      expect(afterEarningXpToday.averageDailyXp, 69);
+      expect(
+        firstCalculation.paceDifficulty,
+        BadgePaceDifficulty.comfortable,
+      );
+    });
+
+    test('does not expose an impossible pace as a daily target', () {
+      final progress = EfsBadgePolicy.nextBadgeProgress(
+        currentScore: 60,
+        currentYearXp: 6900,
+        trackedDays: 100,
+        recentAverageDailyXp: 70,
+        today: DateTime(2026, 12, 31),
+      );
+
+      expect(progress.averageDailyXp, greaterThan(MotionXpPolicy.maxDailyXp));
+      expect(progress.isAttainableThisYear, isFalse);
+      expect(
+        progress.paceDifficulty,
+        BadgePaceDifficulty.notAttainable,
+      );
+      expect(EfsBadgePolicy.actionableDailyTarget(progress), 0);
+    });
+
+    test('uses a sustainable maintenance target for the top badge', () {
+      final progress = EfsBadgePolicy.nextBadgeProgress(
+        currentScore: 84,
+        currentYearXp: 5000,
+        trackedDays: 60,
+        recentAverageDailyXp: 90,
+        today: DateTime(2026, 8, 10),
+      );
+
+      expect(progress.isTopBadge, isTrue);
+      expect(progress.targetScore, 80);
+      expect(progress.averageDailyXp, 92);
+      expect(progress.paceDifficulty, BadgePaceDifficulty.maintenance);
+      expect(EfsBadgePolicy.actionableDailyTarget(progress), 92);
+    });
   });
 }

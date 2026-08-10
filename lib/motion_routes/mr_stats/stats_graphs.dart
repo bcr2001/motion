@@ -246,6 +246,7 @@ class GroupedPieChartAccountedUnaccounted extends StatelessWidget {
   }
 
   BarTooltipItem? distributionTooltipItem(
+    BuildContext context,
     BarChartGroupData group,
     int groupIndex,
     BarChartRodData rod,
@@ -258,7 +259,9 @@ class GroupedPieChartAccountedUnaccounted extends StatelessWidget {
       AppTextStyle.subSectionTextStyle(
         fontsize: 7,
         fontweight: FontWeight.w800,
-        color: Colors.white,
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Colors.white
+            : Colors.black87,
       ),
     );
   }
@@ -406,7 +409,19 @@ class GroupedPieChartAccountedUnaccounted extends StatelessWidget {
                                 tooltipRoundedRadius: 0,
                                 maxContentWidth: 24,
                                 getTooltipColor: (group) => Colors.transparent,
-                                getTooltipItem: distributionTooltipItem,
+                                getTooltipItem: (
+                                  group,
+                                  groupIndex,
+                                  rod,
+                                  rodIndex,
+                                ) =>
+                                    distributionTooltipItem(
+                                  context,
+                                  group,
+                                  groupIndex,
+                                  rod,
+                                  rodIndex,
+                                ),
                                 fitInsideHorizontally: true,
                               ),
                             ),

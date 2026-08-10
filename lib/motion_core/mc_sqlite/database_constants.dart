@@ -39,6 +39,8 @@ class MotionDbColumns {
   static const String timerStatus = 'timerStatus';
   static const String timerUpdatedAtEpochMs = 'timerUpdatedAtEpochMs';
   static const String nextTimerReminderAtSeconds = 'nextTimerReminderAtSeconds';
+  static const String timerTargetSeconds = 'timerTargetSeconds';
+  static const String timerTargetAlertTriggered = 'timerTargetAlertTriggered';
 }
 
 class MotionCategories {

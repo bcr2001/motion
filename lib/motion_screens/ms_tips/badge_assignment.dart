@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:motion/motion_core/mc_sqlite/xp_policy.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_year_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/experience_pvd.dart';
+import 'package:motion/motion_core/motion_rewards/daily_xp_target_status.dart';
 import 'package:motion/motion_core/motion_rewards/efs_badge_policy.dart';
+import 'package:motion/motion_core/motion_utils/motion_date_utils.dart';
 import 'package:provider/provider.dart';
 import '../../motion_themes/mth_app/app_images.dart';
 import '../../motion_themes/mth_app/app_strings.dart';
@@ -22,21 +25,29 @@ class BadgeAssignment extends StatelessWidget {
       currentUser: currentUser,
       currentYear: currentYear,
     );
-    final totalXp = await xpProvider.retrieveTotalXP(
+    return loadNextBadgeProgress(
+      xpProvider: xpProvider,
       currentUser: currentUser,
-      isEntire: false,
-      year: currentYear,
-    );
-    final trackedDays = await xpProvider.retrieveYearExperiencePointDays(
-      currentUser: currentUser,
-      year: currentYear,
-    );
-
-    return EfsBadgePolicy.nextBadgeProgress(
+      currentYear: currentYear,
+      currentDate: MotionDateUtils.todayIso(),
       currentScore: score,
-      currentYearXp: totalXp,
-      trackedDays: trackedDays,
     );
+  }
+
+  Color _paceColor(BadgePaceDifficulty difficulty) {
+    return switch (difficulty) {
+      BadgePaceDifficulty.comfortable => AppColor.accountedColor,
+      BadgePaceDifficulty.challenging => Colors.orange,
+      BadgePaceDifficulty.veryDifficult => Colors.deepOrange,
+      BadgePaceDifficulty.notAttainable => Colors.redAccent,
+      BadgePaceDifficulty.maintenance => AppColor.accountedColor,
+    };
+  }
+
+  String _recentPaceLabel(double averageXp) {
+    return averageXp <= 0
+        ? 'No baseline'
+        : '${averageXp.toStringAsFixed(1)} XP/day';
   }
 
   Widget _badgeIcon(EfsBadgeLevel level) {
@@ -157,6 +168,7 @@ class BadgeAssignment extends StatelessWidget {
           final nextBadge = progress.nextBadge;
           final progressPercent = (progress.progress * 100).round();
           final averageXp = progress.averageDailyXp.ceil();
+          final paceColor = _paceColor(progress.paceDifficulty);
 
           return Card(
             elevation: 0,
@@ -245,14 +257,41 @@ class BadgeAssignment extends StatelessWidget {
                       const SizedBox(width: 8),
                       _guidanceMetric(
                         label: 'Target EFS',
-                        value: progress.isTopBadge
-                            ? '100.00'
-                            : progress.targetScore.toStringAsFixed(2),
+                        value: progress.targetScore.toStringAsFixed(2),
                         isDarkMode: isDarkMode,
                       ),
                     ],
                   ),
-                  if (!progress.isTopBadge) ...[
+                  if (progress.isTopBadge) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        _guidanceMetric(
+                          label: 'Maintenance Pace',
+                          value:
+                              '${EfsBadgePolicy.topBadgeMaintenanceXp} XP/day',
+                          isDarkMode: isDarkMode,
+                        ),
+                        const SizedBox(width: 8),
+                        _guidanceMetric(
+                          label: 'Recent Pace',
+                          value: _recentPaceLabel(
+                            progress.recentAverageDailyXp,
+                          ),
+                          isDarkMode: isDarkMode,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Maintain this pace to remain within Time Wizard territory.',
+                      style: AppTextStyle.subSectionTextStyle(
+                        fontsize: 12,
+                        fontweight: FontWeight.normal,
+                        color: Colors.blueGrey,
+                      ),
+                    ),
+                  ] else ...[
                     const SizedBox(height: 8),
                     Row(
                       children: [
@@ -270,10 +309,62 @@ class BadgeAssignment extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        _guidanceMetric(
+                          label: 'Recent Pace',
+                          value: _recentPaceLabel(
+                            progress.recentAverageDailyXp,
+                          ),
+                          isDarkMode: isDarkMode,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 9,
+                            ),
+                            decoration: BoxDecoration(
+                              color: paceColor.withValues(alpha: 0.10),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: paceColor.withValues(alpha: 0.20),
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Difficulty',
+                                  style: AppTextStyle.subSectionTextStyle(
+                                    fontsize: 11,
+                                    fontweight: FontWeight.normal,
+                                    color: Colors.blueGrey,
+                                  ),
+                                ),
+                                const SizedBox(height: 3),
+                                Text(
+                                  progress.paceDifficulty.label,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTextStyle.subSectionTextStyle(
+                                    fontsize: 13,
+                                    fontweight: FontWeight.w700,
+                                    color: paceColor,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
                     Text(
                       progress.isAttainableThisYear
                           ? 'Maintain this average for ${progress.daysRemaining} days to reach the next badge this year.'
-                          : 'This badge is above the remaining daily XP pace for this year.',
+                          : 'The required pace exceeds the ${MotionXpPolicy.maxDailyXp} XP daily maximum, so this badge is not attainable this year.',
                       style: AppTextStyle.subSectionTextStyle(
                         fontsize: 12,
                         fontweight: FontWeight.normal,

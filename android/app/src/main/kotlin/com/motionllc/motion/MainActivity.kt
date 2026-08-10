@@ -2,9 +2,14 @@ package com.motionllc.motion
 
 import android.content.ContentValues
 import android.Manifest
+import android.app.AlarmManager
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Environment
+import android.provider.Settings
 import android.provider.MediaStore
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -17,7 +22,9 @@ class MainActivity : FlutterActivity() {
     private val homeWidgetChannel = "motion/home_widget"
     private val timerNotificationChannel = "motion/activity_timer_notification"
     private val notificationPermissionRequestCode = 4102
-    private var pendingNotificationPermissionResult: MethodChannel.Result? = null
+    private var pendingTimerPermissionResult: MethodChannel.Result? = null
+    private var pendingRequiresExactAlarm = false
+    private var waitingForExactAlarmPermission = false
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -69,8 +76,12 @@ class MainActivity : FlutterActivity() {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, timerNotificationChannel)
             .setMethodCallHandler { call, result ->
                 when (call.method) {
-                    "requestPermission" -> requestNotificationPermission(result)
-                    "sync" -> {
+                    "requestPermission" -> requestTimerPermissions(
+                        result = result,
+                        requiresExactAlarm =
+                            call.argument<Boolean>("requiresExactAlarm") == true,
+                    )
+                    "sync", "targetReached" -> {
                         val mainCategoryName = call.argument<String>("mainCategoryName")
                         val subcategoryName = call.argument<String>("subcategoryName")
                         if (mainCategoryName.isNullOrBlank() || subcategoryName.isNullOrBlank()) {
@@ -88,11 +99,22 @@ class MainActivity : FlutterActivity() {
                                 subcategoryName = subcategoryName,
                                 elapsedSeconds = call.argument<Int>("elapsedSeconds") ?: 0,
                                 isRunning = call.argument<Boolean>("isRunning") ?: false,
+                                timerStartedAtEpochMs =
+                                    call.argument<Number>("timerStartedAtEpochMs")
+                                        ?.toLong() ?: 0L,
+                                targetSeconds = call.argument<Int>("targetSeconds") ?: 0,
+                                targetAlertTriggered =
+                                    call.argument<Boolean>("targetAlertTriggered") ?: false,
+                                forceTargetAlert = call.method == "targetReached",
                             )
                             result.success(null)
                         } catch (error: Exception) {
                             result.error("timer_notification_failed", error.message, null)
                         }
+                    }
+                    "dismissTargetAlert" -> {
+                        MotionTimerService.dismissTargetAlert(applicationContext)
+                        result.success(null)
                     }
                     "stop" -> {
                         MotionTimerService.stop(applicationContext)
@@ -103,15 +125,11 @@ class MainActivity : FlutterActivity() {
             }
     }
 
-    private fun requestNotificationPermission(result: MethodChannel.Result) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-            checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) ==
-            PackageManager.PERMISSION_GRANTED
-        ) {
-            result.success(true)
-            return
-        }
-        if (pendingNotificationPermissionResult != null) {
+    private fun requestTimerPermissions(
+        result: MethodChannel.Result,
+        requiresExactAlarm: Boolean,
+    ) {
+        if (pendingTimerPermissionResult != null) {
             result.error(
                 "permission_request_active",
                 "A notification permission request is already active.",
@@ -119,11 +137,57 @@ class MainActivity : FlutterActivity() {
             )
             return
         }
-        pendingNotificationPermissionResult = result
-        requestPermissions(
-            arrayOf(Manifest.permission.POST_NOTIFICATIONS),
-            notificationPermissionRequestCode,
+        pendingTimerPermissionResult = result
+        pendingRequiresExactAlarm = requiresExactAlarm
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            requestPermissions(
+                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                notificationPermissionRequestCode,
+            )
+            return
+        }
+        continueTimerPermissionRequest()
+    }
+
+    private fun continueTimerPermissionRequest() {
+        val result = pendingTimerPermissionResult ?: return
+        if (!pendingRequiresExactAlarm || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            finishTimerPermissionRequest(true)
+            return
+        }
+
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        if (alarmManager.canScheduleExactAlarms()) {
+            finishTimerPermissionRequest(true)
+            return
+        }
+
+        val permissionIntent = Intent(
+            Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
+            Uri.parse("package:$packageName"),
         )
+        if (permissionIntent.resolveActivity(packageManager) == null) {
+            result.success(false)
+            clearTimerPermissionRequest()
+            return
+        }
+        waitingForExactAlarmPermission = true
+        startActivity(permissionIntent)
+    }
+
+    private fun finishTimerPermissionRequest(granted: Boolean) {
+        pendingTimerPermissionResult?.success(granted)
+        clearTimerPermissionRequest()
+    }
+
+    private fun clearTimerPermissionRequest() {
+        pendingTimerPermissionResult = null
+        pendingRequiresExactAlarm = false
+        waitingForExactAlarmPermission = false
     }
 
     override fun onRequestPermissionsResult(
@@ -135,8 +199,20 @@ class MainActivity : FlutterActivity() {
         if (requestCode != notificationPermissionRequestCode) return
         val granted = grantResults.isNotEmpty() &&
             grantResults[0] == PackageManager.PERMISSION_GRANTED
-        pendingNotificationPermissionResult?.success(granted)
-        pendingNotificationPermissionResult = null
+        if (granted) {
+            continueTimerPermissionRequest()
+        } else {
+            finishTimerPermissionRequest(false)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (!waitingForExactAlarmPermission || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            return
+        }
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        finishTimerPermissionRequest(alarmManager.canScheduleExactAlarms())
     }
 
     private fun saveCsvToDownloads(fileName: String, content: String): String {

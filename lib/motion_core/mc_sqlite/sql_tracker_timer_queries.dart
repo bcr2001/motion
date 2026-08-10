@@ -39,6 +39,28 @@ extension TrackerTimerQueries on TrackerDatabaseHelper {
     }
   }
 
+  Future<void> markActivityTimerTargetAlertTriggered({
+    required String currentUser,
+    required int timerStartedAtEpochMs,
+  }) async {
+    try {
+      final db = await database;
+      await db.update(
+        MotionDbTables.activeTimerSession,
+        {MotionDbColumns.timerTargetAlertTriggered: 1},
+        where: '${MotionDbColumns.currentLoggedInUser} = ? AND '
+            '${MotionDbColumns.timerStartedAtEpochMs} = ?',
+        whereArgs: [currentUser, timerStartedAtEpochMs],
+      );
+    } catch (error, stackTrace) {
+      logDatabaseError(
+        'TrackerDatabaseHelper.markActivityTimerTargetAlertTriggered',
+        error,
+        stackTrace,
+      );
+    }
+  }
+
   Future<void> deleteActiveTimerSession({required String currentUser}) async {
     try {
       final db = await database;

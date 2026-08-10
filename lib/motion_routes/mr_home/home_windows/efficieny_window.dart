@@ -914,20 +914,48 @@ class CurrentYearEFSDisplay extends StatelessWidget {
                 final progress = dialogData.progress;
                 final nextBadge = progress.nextBadge;
 
-                if (progress.isTopBadge || nextBadge == null) {
+                if (!progress.isTopBadge &&
+                    (!progress.isAttainableThisYear || nextBadge == null)) {
                   return _xpTargetDialogShell(
                     context: dialogContext,
-                    child: Text(
-                      'Top Badge Earned',
-                      style: AppTextStyle.subSectionTextStyle(
-                        fontsize: 14,
-                        fontweight: FontWeight.w700,
+                    child: Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.redAccent.withValues(alpha: 0.09),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: Colors.redAccent.withValues(alpha: 0.20),
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Not Attainable This Year',
+                            style: AppTextStyle.subSectionTextStyle(
+                              fontsize: 15,
+                              fontweight: FontWeight.w800,
+                              color: Colors.redAccent,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            '${progress.averageDailyXp.ceil()} XP/day would be required, but the daily maximum is ${MotionXpPolicy.maxDailyXp} XP.',
+                            style: AppTextStyle.subSectionTextStyle(
+                              fontsize: 12,
+                              fontweight: FontWeight.normal,
+                              color: Colors.blueGrey,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   );
                 }
 
-                final dailyTarget = progress.averageDailyXp.ceil();
+                final dailyTarget =
+                    EfsBadgePolicy.actionableDailyTarget(progress);
                 final targetRows = EfsBadgePolicy.dailyXpTargets(dailyTarget);
                 final earnedToday = dialogData.earnedXpByCategory.values.fold(
                   0,
@@ -954,7 +982,9 @@ class CurrentYearEFSDisplay extends StatelessWidget {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
-                                    'Next Badge',
+                                    progress.isTopBadge
+                                        ? 'Maintenance Target'
+                                        : 'Next Badge',
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: AppTextStyle.subSectionTextStyle(
@@ -964,7 +994,9 @@ class CurrentYearEFSDisplay extends StatelessWidget {
                                     ),
                                   ),
                                   Text(
-                                    nextBadge.name,
+                                    progress.isTopBadge
+                                        ? progress.currentBadge.name
+                                        : nextBadge!.name,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: AppTextStyle.subSectionTextStyle(
@@ -992,18 +1024,6 @@ class CurrentYearEFSDisplay extends StatelessWidget {
                         earnedToday: earnedToday,
                         dailyTarget: dailyTarget,
                       ),
-                      if (!progress.isAttainableThisYear) ...[
-                        const SizedBox(height: 8),
-                        Text(
-                          'Daily Max: ${MotionXpPolicy.maxDailyXp} XP',
-                          textAlign: TextAlign.right,
-                          style: AppTextStyle.subSectionTextStyle(
-                            fontsize: 12,
-                            fontweight: FontWeight.normal,
-                            color: Colors.orange,
-                          ),
-                        ),
-                      ],
                       const SizedBox(height: 14),
                       ...targetRows.map(
                         (target) => _xpTargetRow(
@@ -1211,8 +1231,10 @@ class CurrentYearEFSDisplay extends StatelessWidget {
             final nextBadgeName = progress.nextBadge?.name ?? 'Top Badge';
             final progressPercent = (progress.progress * 100).round();
             final paceText = progress.isTopBadge
-                ? 'Top Badge Earned'
-                : '${progress.averageDailyXp.ceil()} XP/day';
+                ? 'Maintain ${EfsBadgePolicy.topBadgeMaintenanceXp} XP/day'
+                : progress.isAttainableThisYear
+                    ? '${progress.averageDailyXp.ceil()} XP/day'
+                    : 'Not attainable';
 
             return Padding(
               padding: const EdgeInsets.only(top: 14.0),
@@ -1239,7 +1261,7 @@ class CurrentYearEFSDisplay extends StatelessWidget {
                       const SizedBox(width: 8),
                       Text(
                         progress.isTopBadge
-                            ? '100%'
+                            ? paceText
                             : '$progressPercent% | $paceText',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,

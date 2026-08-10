@@ -9,6 +9,24 @@ enum EfsBadgeLevel {
   timeWizard,
 }
 
+enum BadgePaceDifficulty {
+  comfortable,
+  challenging,
+  veryDifficult,
+  notAttainable,
+  maintenance,
+}
+
+extension BadgePaceDifficultyLabel on BadgePaceDifficulty {
+  String get label => switch (this) {
+        BadgePaceDifficulty.comfortable => 'Comfortable',
+        BadgePaceDifficulty.challenging => 'Challenging',
+        BadgePaceDifficulty.veryDifficult => 'Very Difficult',
+        BadgePaceDifficulty.notAttainable => 'Not Attainable',
+        BadgePaceDifficulty.maintenance => 'Maintenance',
+      };
+}
+
 class EfsBadge {
   final EfsBadgeLevel level;
   final String name;
@@ -32,6 +50,8 @@ class EfsBadge {
 }
 
 class EfsBadgePolicy {
+  static const int topBadgeMaintenanceXp = 92;
+
   static const badges = [
     EfsBadge(
       level: EfsBadgeLevel.timeNovice,
@@ -100,6 +120,7 @@ class EfsBadgePolicy {
     required double currentScore,
     required int currentYearXp,
     required int trackedDays,
+    double recentAverageDailyXp = 0,
     DateTime? today,
   }) {
     final normalizedScore = currentScore.clamp(0, 100).toDouble();
@@ -110,6 +131,7 @@ class EfsBadgePolicy {
       return NextBadgeProgress.topBadge(
         currentBadge: currentBadge,
         currentScore: normalizedScore,
+        recentAverageDailyXp: recentAverageDailyXp,
       );
     }
 
@@ -131,6 +153,10 @@ class EfsBadgePolicy {
         .ceil();
     final xpGap = (targetYearXp - currentYearXp).clamp(0, 1 << 31).toInt();
     final averageDailyXp = daysRemaining == 0 ? 0.0 : xpGap / daysRemaining;
+    final paceDifficulty = _paceDifficulty(
+      requiredAverageDailyXp: averageDailyXp,
+      recentAverageDailyXp: recentAverageDailyXp,
+    );
 
     return NextBadgeProgress(
       currentBadge: currentBadge,
@@ -141,9 +167,17 @@ class EfsBadgePolicy {
       xpGap: xpGap,
       daysRemaining: daysRemaining,
       averageDailyXp: averageDailyXp,
+      recentAverageDailyXp: recentAverageDailyXp,
+      paceDifficulty: paceDifficulty,
       isTopBadge: false,
-      isAttainableThisYear: averageDailyXp <= MotionXpPolicy.maxDailyXp,
+      isAttainableThisYear: paceDifficulty != BadgePaceDifficulty.notAttainable,
     );
+  }
+
+  static int actionableDailyTarget(NextBadgeProgress progress) {
+    if (progress.isTopBadge) return topBadgeMaintenanceXp;
+    if (!progress.isAttainableThisYear) return 0;
+    return progress.averageDailyXp.ceil();
   }
 
   static List<BadgeXpTarget> dailyXpTargets(int targetXp) {
@@ -202,6 +236,29 @@ class EfsBadgePolicy {
     if (today.isAfter(endOfYear)) return 0;
     return endOfYear.difference(today).inDays + 1;
   }
+
+  static BadgePaceDifficulty _paceDifficulty({
+    required double requiredAverageDailyXp,
+    required double recentAverageDailyXp,
+  }) {
+    if (requiredAverageDailyXp > MotionXpPolicy.maxDailyXp) {
+      return BadgePaceDifficulty.notAttainable;
+    }
+    if (recentAverageDailyXp > 0 &&
+        requiredAverageDailyXp <= recentAverageDailyXp) {
+      return BadgePaceDifficulty.comfortable;
+    }
+
+    final moderateIncrease = recentAverageDailyXp <= 0
+        ? 70.0
+        : recentAverageDailyXp +
+            (recentAverageDailyXp * 0.25).clamp(10.0, 20.0);
+    if (requiredAverageDailyXp <= moderateIncrease &&
+        requiredAverageDailyXp < MotionXpPolicy.maxDailyXp * 0.8) {
+      return BadgePaceDifficulty.challenging;
+    }
+    return BadgePaceDifficulty.veryDifficult;
+  }
 }
 
 class BadgeXpTarget {
@@ -239,6 +296,8 @@ class NextBadgeProgress {
   final int xpGap;
   final int daysRemaining;
   final double averageDailyXp;
+  final double recentAverageDailyXp;
+  final BadgePaceDifficulty paceDifficulty;
   final bool isTopBadge;
   final bool isAttainableThisYear;
 
@@ -251,6 +310,8 @@ class NextBadgeProgress {
     required this.xpGap,
     required this.daysRemaining,
     required this.averageDailyXp,
+    required this.recentAverageDailyXp,
+    required this.paceDifficulty,
     required this.isTopBadge,
     required this.isAttainableThisYear,
   });
@@ -258,16 +319,19 @@ class NextBadgeProgress {
   factory NextBadgeProgress.topBadge({
     required EfsBadge currentBadge,
     required double currentScore,
+    double recentAverageDailyXp = 0,
   }) {
     return NextBadgeProgress(
       currentBadge: currentBadge,
       nextBadge: null,
       currentScore: currentScore,
-      targetScore: currentBadge.maximumScore,
+      targetScore: currentBadge.minimumScore,
       progress: 1.0,
       xpGap: 0,
       daysRemaining: 0,
-      averageDailyXp: 0,
+      averageDailyXp: EfsBadgePolicy.topBadgeMaintenanceXp.toDouble(),
+      recentAverageDailyXp: recentAverageDailyXp,
+      paceDifficulty: BadgePaceDifficulty.maintenance,
       isTopBadge: true,
       isAttainableThisYear: true,
     );

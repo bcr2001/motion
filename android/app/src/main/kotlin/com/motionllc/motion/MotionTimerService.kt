@@ -1,5 +1,6 @@
 package com.motionllc.motion
 
+import android.app.AlarmManager
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -9,22 +10,33 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.graphics.Color
+import android.media.AudioAttributes
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.os.SystemClock
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import android.view.View
 import android.widget.RemoteViews
 import kotlin.math.max
 
 class MotionTimerService : Service() {
+    private val handler = Handler(Looper.getMainLooper())
+    private var targetRunnable: Runnable? = null
+
     override fun onCreate() {
         super.onCreate()
-        createNotificationChannel()
+        createNotificationChannels()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == actionStop) {
+            cancelTargetScheduling()
             clearSavedState(this)
+            dismissTargetAlert(this)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 stopForeground(STOP_FOREGROUND_REMOVE)
             } else {
@@ -35,16 +47,43 @@ class MotionTimerService : Service() {
             return START_NOT_STICKY
         }
 
-        val state = when (intent?.action) {
+        val savedState = readSavedState(this)
+        val incomingState = when (intent?.action) {
             actionSync -> stateFromIntent(intent)
-            else -> readSavedState(this)
+            actionTargetAlarm -> savedState
+            else -> savedState
         }
-        if (state == null) {
+        if (incomingState == null) {
             stopSelf()
             return START_NOT_STICKY
         }
 
+        val state = mergeNativeAlertState(savedState, incomingState)
+        if (savedState?.timerStartedAtEpochMs != state.timerStartedAtEpochMs) {
+            dismissTargetAlert(this)
+        }
         saveState(this, state)
+        startAsForeground(state)
+
+        if (intent?.action == actionTargetAlarm ||
+            intent?.getBooleanExtra(extraForceTargetAlert, false) == true
+        ) {
+            triggerTargetAlert(state)
+        } else {
+            scheduleTargetAlert(state)
+        }
+        return START_STICKY
+    }
+
+    override fun onDestroy() {
+        targetRunnable?.let(handler::removeCallbacks)
+        targetRunnable = null
+        super.onDestroy()
+    }
+
+    override fun onBind(intent: Intent?): IBinder? = null
+
+    private fun startAsForeground(state: TimerNotificationState) {
         val notification = buildNotification(state)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             startForeground(
@@ -59,33 +98,23 @@ class MotionTimerService : Service() {
         } else {
             startForeground(notificationId, notification)
         }
-        return START_STICKY
     }
-
-    override fun onBind(intent: Intent?): IBinder? = null
 
     private fun buildNotification(state: TimerNotificationState): Notification {
         val elapsedSeconds = state.currentElapsedSeconds()
-        val launchIntent = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-        }
-        val launchPendingIntent = PendingIntent.getActivity(
-            this,
-            0,
-            launchIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-        )
-
-        val statusText = if (state.isRunning) {
-            "Tracking now"
-        } else {
-            "Timer paused"
+        val launchPendingIntent = launchPendingIntent()
+        val statusText = when {
+            !state.isRunning -> "Timer paused"
+            state.hasReachedTarget(elapsedSeconds) -> "Target reached - tracking overtime"
+            state.targetSeconds > 0 ->
+                "${formatDuration(state.targetSeconds - elapsedSeconds)} remaining"
+            else -> "Tracking now"
         }
         val compactView = buildTimerView(state, elapsedSeconds)
         val expandedView = buildTimerView(state, elapsedSeconds)
 
         val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            Notification.Builder(this, channelId)
+            Notification.Builder(this, timerChannelId)
         } else {
             @Suppress("DEPRECATION")
             Notification.Builder(this)
@@ -121,30 +150,235 @@ class MotionTimerService : Service() {
     ): RemoteViews {
         return RemoteViews(packageName, R.layout.motion_timer_notification).apply {
             setTextViewText(R.id.timer_notification_subcategory, state.subcategoryName)
-            if (state.isRunning) {
+            val hasTarget = state.targetSeconds > 0
+            val targetReached = state.hasReachedTarget(elapsedSeconds)
+
+            if (state.isRunning && (!hasTarget || Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)) {
                 setViewVisibility(R.id.timer_notification_elapsed, View.VISIBLE)
                 setViewVisibility(R.id.timer_notification_paused_elapsed, View.GONE)
-                setChronometer(
-                    R.id.timer_notification_elapsed,
-                    SystemClock.elapsedRealtime() - elapsedSeconds * 1000L,
-                    null,
-                    true,
-                )
+                when {
+                    !hasTarget -> {
+                        setChronometer(
+                            R.id.timer_notification_elapsed,
+                            SystemClock.elapsedRealtime() - elapsedSeconds * 1000L,
+                            null,
+                            true,
+                        )
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            setChronometerCountDown(R.id.timer_notification_elapsed, false)
+                        }
+                    }
+                    !targetReached -> {
+                        val remainingSeconds = state.targetSeconds - elapsedSeconds
+                        setChronometer(
+                            R.id.timer_notification_elapsed,
+                            SystemClock.elapsedRealtime() + remainingSeconds * 1000L,
+                            null,
+                            true,
+                        )
+                        setChronometerCountDown(R.id.timer_notification_elapsed, true)
+                    }
+                    else -> {
+                        val overtimeSeconds = elapsedSeconds - state.targetSeconds
+                        setChronometer(
+                            R.id.timer_notification_elapsed,
+                            SystemClock.elapsedRealtime() - overtimeSeconds * 1000L,
+                            "+%s",
+                            true,
+                        )
+                        setChronometerCountDown(R.id.timer_notification_elapsed, false)
+                    }
+                }
             } else {
                 setViewVisibility(R.id.timer_notification_elapsed, View.GONE)
                 setViewVisibility(R.id.timer_notification_paused_elapsed, View.VISIBLE)
+                val displaySeconds = when {
+                    !hasTarget -> elapsedSeconds
+                    targetReached -> elapsedSeconds - state.targetSeconds
+                    else -> state.targetSeconds - elapsedSeconds
+                }
+                val prefix = if (hasTarget && targetReached) "+" else ""
                 setTextViewText(
                     R.id.timer_notification_paused_elapsed,
-                    formatDuration(elapsedSeconds),
+                    "$prefix${formatDuration(displaySeconds)}",
                 )
             }
         }
     }
 
-    private fun createNotificationChannel() {
+    private fun scheduleTargetAlert(state: TimerNotificationState) {
+        cancelTargetScheduling()
+        if (!state.isRunning || state.targetSeconds <= 0 || state.targetAlertTriggered) {
+            return
+        }
+
+        val remainingSeconds = state.targetSeconds - state.currentElapsedSeconds()
+        if (remainingSeconds <= 0) {
+            handler.post { triggerTargetAlert(state) }
+            return
+        }
+
+        val expectedTimerStart = state.timerStartedAtEpochMs
+        val runnable = Runnable {
+            val currentState = readSavedState(this)
+            if (currentState?.timerStartedAtEpochMs == expectedTimerStart) {
+                triggerTargetAlert(currentState)
+            }
+        }
+        targetRunnable = runnable
+        handler.postDelayed(runnable, remainingSeconds * 1000L)
+        scheduleSystemAlarm(
+            timerStartedAtEpochMs = expectedTimerStart,
+            triggerAtEpochMs = System.currentTimeMillis() + remainingSeconds * 1000L,
+        )
+    }
+
+    private fun triggerTargetAlert(candidate: TimerNotificationState) {
+        val currentState = readSavedState(this) ?: return
+        if (currentState.timerStartedAtEpochMs != candidate.timerStartedAtEpochMs ||
+            !currentState.isRunning ||
+            currentState.targetSeconds <= 0 ||
+            currentState.targetAlertTriggered
+        ) {
+            return
+        }
+
+        val elapsedSeconds = currentState.currentElapsedSeconds()
+        if (!currentState.hasReachedTarget(elapsedSeconds)) {
+            scheduleTargetAlert(currentState)
+            return
+        }
+
+        val alertedState = currentState.copy(targetAlertTriggered = true)
+        saveState(this, alertedState)
+        cancelTargetScheduling()
+        getSystemService(NotificationManager::class.java).apply {
+            notify(notificationId, buildNotification(alertedState))
+            notify(completionNotificationId, buildCompletionNotification(alertedState))
+        }
+        vibrateForCompletion()
+    }
+
+    private fun buildCompletionNotification(state: TimerNotificationState): Notification {
+        val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Notification.Builder(this, completionChannelId)
+        } else {
+            @Suppress("DEPRECATION")
+            Notification.Builder(this)
+                .setPriority(Notification.PRIORITY_HIGH)
+                .setVibrate(completionVibrationPattern)
+        }
+        return builder
+            .setSmallIcon(R.drawable.ic_motion_timer_notification)
+            .setContentTitle("Session target reached")
+            .setContentText("${state.subcategoryName} is now tracking overtime.")
+            .setContentIntent(launchPendingIntent())
+            .setCategory(Notification.CATEGORY_ALARM)
+            .setColor(Color.rgb(0, 176, 240))
+            .setAutoCancel(true)
+            .setOnlyAlertOnce(true)
+            .build()
+    }
+
+    private fun launchPendingIntent(): PendingIntent {
+        val launchIntent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+        }
+        return PendingIntent.getActivity(
+            this,
+            0,
+            launchIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+    }
+
+    private fun scheduleSystemAlarm(
+        timerStartedAtEpochMs: Long,
+        triggerAtEpochMs: Long,
+    ) {
+        val alarmManager = getSystemService(AlarmManager::class.java)
+        val pendingIntent = targetAlarmPendingIntent(this, timerStartedAtEpochMs)
+        try {
+            when {
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                    !alarmManager.canScheduleExactAlarms() -> {
+                    alarmManager.setAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP,
+                        triggerAtEpochMs,
+                        pendingIntent,
+                    )
+                }
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> {
+                    alarmManager.setExactAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP,
+                        triggerAtEpochMs,
+                        pendingIntent,
+                    )
+                }
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT -> {
+                    alarmManager.setExact(
+                        AlarmManager.RTC_WAKEUP,
+                        triggerAtEpochMs,
+                        pendingIntent,
+                    )
+                }
+                else -> {
+                    alarmManager.set(
+                        AlarmManager.RTC_WAKEUP,
+                        triggerAtEpochMs,
+                        pendingIntent,
+                    )
+                }
+            }
+        } catch (_: SecurityException) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmManager.setAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP,
+                    triggerAtEpochMs,
+                    pendingIntent,
+                )
+            } else {
+                alarmManager.set(
+                    AlarmManager.RTC_WAKEUP,
+                    triggerAtEpochMs,
+                    pendingIntent,
+                )
+            }
+        }
+    }
+
+    private fun vibrateForCompletion() {
+        val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            getSystemService(VibratorManager::class.java).defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        }
+        if (!vibrator.hasVibrator()) return
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val effect = VibrationEffect.createWaveform(completionVibrationPattern, -1)
+            val attributes = AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_ALARM)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build()
+            vibrator.vibrate(effect, attributes)
+        } else {
+            @Suppress("DEPRECATION")
+            vibrator.vibrate(completionVibrationPattern, -1)
+        }
+    }
+
+    private fun cancelTargetScheduling() {
+        targetRunnable?.let(handler::removeCallbacks)
+        targetRunnable = null
+        cancelScheduledAlarm(this)
+    }
+
+    private fun createNotificationChannels() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
-        val channel = NotificationChannel(
-            channelId,
+        val timerChannel = NotificationChannel(
+            timerChannelId,
             "Activity timer",
             NotificationManager.IMPORTANCE_LOW,
         ).apply {
@@ -153,33 +387,91 @@ class MotionTimerService : Service() {
             enableVibration(false)
             setShowBadge(false)
         }
-        getSystemService(NotificationManager::class.java)
-            .createNotificationChannel(channel)
+        val completionChannel = NotificationChannel(
+            completionChannelId,
+            "Timer complete",
+            NotificationManager.IMPORTANCE_HIGH,
+        ).apply {
+            description = "Alerts when a timed Motion session reaches its target"
+            setSound(null, null)
+            enableVibration(false)
+            setShowBadge(false)
+        }
+        getSystemService(NotificationManager::class.java).apply {
+            legacyCompletionChannelIds.forEach(::deleteNotificationChannel)
+            createNotificationChannels(listOf(timerChannel, completionChannel))
+        }
     }
 
     private fun stateFromIntent(intent: Intent): TimerNotificationState? {
         val mainCategoryName = intent.getStringExtra(extraMainCategory).orEmpty()
         val subcategoryName = intent.getStringExtra(extraSubcategory).orEmpty()
-        if (mainCategoryName.isBlank() || subcategoryName.isBlank()) return null
+        val timerStartedAtEpochMs = intent.getLongExtra(extraTimerStartedAtEpochMs, 0L)
+        if (mainCategoryName.isBlank() ||
+            subcategoryName.isBlank() ||
+            timerStartedAtEpochMs <= 0
+        ) {
+            return null
+        }
         return TimerNotificationState(
             mainCategoryName = mainCategoryName,
             subcategoryName = subcategoryName,
             elapsedSeconds = max(0, intent.getIntExtra(extraElapsedSeconds, 0)),
             isRunning = intent.getBooleanExtra(extraIsRunning, false),
             synchronizedAtEpochMs = System.currentTimeMillis(),
+            timerStartedAtEpochMs = timerStartedAtEpochMs,
+            targetSeconds = max(0, intent.getIntExtra(extraTargetSeconds, 0)),
+            targetAlertTriggered =
+                intent.getBooleanExtra(extraTargetAlertTriggered, false),
+        )
+    }
+
+    private fun mergeNativeAlertState(
+        savedState: TimerNotificationState?,
+        incomingState: TimerNotificationState,
+    ): TimerNotificationState {
+        if (savedState?.timerStartedAtEpochMs != incomingState.timerStartedAtEpochMs) {
+            return incomingState
+        }
+        return incomingState.copy(
+            targetAlertTriggered =
+                savedState.targetAlertTriggered || incomingState.targetAlertTriggered,
         )
     }
 
     companion object {
-        private const val channelId = "motion_activity_timer"
+        private const val timerChannelId = "motion_activity_timer"
+        private const val completionChannelId = "motion_timer_complete_v4"
+        private val legacyCompletionChannelIds = listOf(
+            "motion_timer_complete_v1",
+            "motion_timer_complete_v2",
+            "motion_timer_complete_v3",
+        )
+        private val completionVibrationPattern = longArrayOf(
+            0,
+            260,
+            140,
+            260,
+            140,
+            260,
+            140,
+            320,
+        )
         private const val notificationId = 4102
+        private const val completionNotificationId = 4103
+        private const val alarmRequestCode = 4104
         private const val preferencesName = "motion_activity_timer_notification"
         private const val actionSync = "com.motionllc.motion.timer.SYNC"
+        private const val actionTargetAlarm = "com.motionllc.motion.timer.TARGET_ALARM"
         private const val actionStop = "com.motionllc.motion.timer.STOP"
         private const val extraMainCategory = "main_category"
         private const val extraSubcategory = "subcategory"
         private const val extraElapsedSeconds = "elapsed_seconds"
         private const val extraIsRunning = "is_running"
+        private const val extraTimerStartedAtEpochMs = "timer_started_at_epoch_ms"
+        private const val extraTargetSeconds = "target_seconds"
+        private const val extraTargetAlertTriggered = "target_alert_triggered"
+        private const val extraForceTargetAlert = "force_target_alert"
         private const val keyActive = "active"
         private const val keySynchronizedAt = "synchronized_at"
 
@@ -189,6 +481,10 @@ class MotionTimerService : Service() {
             subcategoryName: String,
             elapsedSeconds: Int,
             isRunning: Boolean,
+            timerStartedAtEpochMs: Long,
+            targetSeconds: Int,
+            targetAlertTriggered: Boolean,
+            forceTargetAlert: Boolean,
         ) {
             val intent = Intent(context, MotionTimerService::class.java).apply {
                 action = actionSync
@@ -196,6 +492,22 @@ class MotionTimerService : Service() {
                 putExtra(extraSubcategory, subcategoryName)
                 putExtra(extraElapsedSeconds, max(0, elapsedSeconds))
                 putExtra(extraIsRunning, isRunning)
+                putExtra(extraTimerStartedAtEpochMs, timerStartedAtEpochMs)
+                putExtra(extraTargetSeconds, max(0, targetSeconds))
+                putExtra(extraTargetAlertTriggered, targetAlertTriggered)
+                putExtra(extraForceTargetAlert, forceTargetAlert)
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(intent)
+            } else {
+                context.startService(intent)
+            }
+        }
+
+        fun handleScheduledTarget(context: Context, timerStartedAtEpochMs: Long) {
+            val intent = Intent(context, MotionTimerService::class.java).apply {
+                action = actionTargetAlarm
+                putExtra(extraTimerStartedAtEpochMs, timerStartedAtEpochMs)
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 context.startForegroundService(intent)
@@ -205,8 +517,23 @@ class MotionTimerService : Service() {
         }
 
         fun stop(context: Context) {
+            cancelScheduledAlarm(context)
             clearSavedState(context)
+            dismissTargetAlert(context)
             context.stopService(Intent(context, MotionTimerService::class.java))
+        }
+
+        fun dismissTargetAlert(context: Context) {
+            context.getSystemService(NotificationManager::class.java)
+                .cancel(completionNotificationId)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                context.getSystemService(VibratorManager::class.java)
+                    .defaultVibrator
+                    .cancel()
+            } else {
+                @Suppress("DEPRECATION")
+                (context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator).cancel()
+            }
         }
 
         private fun saveState(context: Context, state: TimerNotificationState) {
@@ -217,6 +544,9 @@ class MotionTimerService : Service() {
                 .putString(extraSubcategory, state.subcategoryName)
                 .putInt(extraElapsedSeconds, state.elapsedSeconds)
                 .putBoolean(extraIsRunning, state.isRunning)
+                .putLong(extraTimerStartedAtEpochMs, state.timerStartedAtEpochMs)
+                .putInt(extraTargetSeconds, state.targetSeconds)
+                .putBoolean(extraTargetAlertTriggered, state.targetAlertTriggered)
                 .putLong(keySynchronizedAt, state.synchronizedAtEpochMs)
                 .apply()
         }
@@ -229,7 +559,13 @@ class MotionTimerService : Service() {
             if (!preferences.getBoolean(keyActive, false)) return null
             val mainCategoryName = preferences.getString(extraMainCategory, "").orEmpty()
             val subcategoryName = preferences.getString(extraSubcategory, "").orEmpty()
-            if (mainCategoryName.isBlank() || subcategoryName.isBlank()) return null
+            val timerStartedAtEpochMs = preferences.getLong(extraTimerStartedAtEpochMs, 0L)
+            if (mainCategoryName.isBlank() ||
+                subcategoryName.isBlank() ||
+                timerStartedAtEpochMs <= 0
+            ) {
+                return null
+            }
             return TimerNotificationState(
                 mainCategoryName = mainCategoryName,
                 subcategoryName = subcategoryName,
@@ -239,6 +575,10 @@ class MotionTimerService : Service() {
                     keySynchronizedAt,
                     System.currentTimeMillis(),
                 ),
+                timerStartedAtEpochMs = timerStartedAtEpochMs,
+                targetSeconds = preferences.getInt(extraTargetSeconds, 0),
+                targetAlertTriggered =
+                    preferences.getBoolean(extraTargetAlertTriggered, false),
             )
         }
 
@@ -249,10 +589,32 @@ class MotionTimerService : Service() {
                 .apply()
         }
 
+        private fun targetAlarmPendingIntent(
+            context: Context,
+            timerStartedAtEpochMs: Long,
+        ): PendingIntent {
+            val intent = Intent(context, MotionTimerAlarmReceiver::class.java).apply {
+                action = actionTargetAlarm
+                putExtra(extraTimerStartedAtEpochMs, timerStartedAtEpochMs)
+            }
+            return PendingIntent.getBroadcast(
+                context,
+                alarmRequestCode,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
+        }
+
+        private fun cancelScheduledAlarm(context: Context) {
+            val alarmManager = context.getSystemService(AlarmManager::class.java)
+            alarmManager.cancel(targetAlarmPendingIntent(context, 0L))
+        }
+
         private fun formatDuration(totalSeconds: Long): String {
-            val hours = totalSeconds / 3600
-            val minutes = (totalSeconds % 3600) / 60
-            val seconds = totalSeconds % 60
+            val safeSeconds = max(0L, totalSeconds)
+            val hours = safeSeconds / 3600
+            val minutes = (safeSeconds % 3600) / 60
+            val seconds = safeSeconds % 60
             return "%02d:%02d:%02d".format(hours, minutes, seconds)
         }
     }
@@ -264,6 +626,9 @@ private data class TimerNotificationState(
     val elapsedSeconds: Int,
     val isRunning: Boolean,
     val synchronizedAtEpochMs: Long,
+    val timerStartedAtEpochMs: Long,
+    val targetSeconds: Int,
+    val targetAlertTriggered: Boolean,
 ) {
     fun currentElapsedSeconds(): Long {
         if (!isRunning) return elapsedSeconds.toLong()
@@ -272,5 +637,9 @@ private data class TimerNotificationState(
             (System.currentTimeMillis() - synchronizedAtEpochMs) / 1000L,
         )
         return elapsedSeconds + additionalSeconds
+    }
+
+    fun hasReachedTarget(currentElapsedSeconds: Long): Boolean {
+        return targetSeconds > 0 && currentElapsedSeconds >= targetSeconds
     }
 }
