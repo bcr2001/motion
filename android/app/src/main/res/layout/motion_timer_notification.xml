@@ -17,17 +17,38 @@
         android:gravity="center_vertical"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/timer_notification_subcategory"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:fontFamily="sans-serif-medium"
-            android:includeFontPadding="false"
-            android:maxLines="1"
-            android:text="Activity"
-            android:textColor="@color/motion_widget_primary_text"
-            android:textSize="13sp" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/timer_notification_subcategory"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:fontFamily="sans-serif-medium"
+                android:includeFontPadding="false"
+                android:maxLines="1"
+                android:text="Activity"
+                android:textColor="@color/motion_widget_primary_text"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/timer_notification_expected_end"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="sans-serif-medium"
+                android:includeFontPadding="false"
+                android:maxLines="1"
+                android:text="Ends 12:20 PM"
+                android:textColor="@color/motion_timer_accent"
+                android:textSize="11sp"
+                android:visibility="gone" />
+        </LinearLayout>
 
         <Chronometer
             android:id="@+id/timer_notification_elapsed"

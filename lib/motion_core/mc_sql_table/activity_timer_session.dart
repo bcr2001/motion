@@ -84,6 +84,12 @@ class ActivityTimerSession {
     return (target - elapsedSecondsAt(now)).clamp(0, target).toInt();
   }
 
+  DateTime? expectedEndAt(DateTime now) {
+    final remainingSeconds = remainingSecondsAt(now);
+    if (remainingSeconds == null || remainingSeconds <= 0) return null;
+    return now.add(Duration(seconds: remainingSeconds));
+  }
+
   int overtimeSecondsAt(DateTime now) {
     final target = targetSeconds;
     if (target == null || target <= 0) return 0;

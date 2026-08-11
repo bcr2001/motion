@@ -21,11 +21,13 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import android.view.View
 import android.widget.RemoteViews
+import java.util.Date
 import kotlin.math.max
 
 class MotionTimerService : Service() {
     private val handler = Handler(Looper.getMainLooper())
     private var targetRunnable: Runnable? = null
+    private var pausedProjectionRunnable: Runnable? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -35,6 +37,7 @@ class MotionTimerService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == actionStop) {
             cancelTargetScheduling()
+            cancelPausedProjectionRefresh()
             clearSavedState(this)
             dismissTargetAlert(this)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -64,6 +67,7 @@ class MotionTimerService : Service() {
         }
         saveState(this, state)
         startAsForeground(state)
+        schedulePausedProjectionRefresh(state)
 
         if (intent?.action == actionTargetAlarm ||
             intent?.getBooleanExtra(extraForceTargetAlert, false) == true
@@ -78,6 +82,7 @@ class MotionTimerService : Service() {
     override fun onDestroy() {
         targetRunnable?.let(handler::removeCallbacks)
         targetRunnable = null
+        cancelPausedProjectionRefresh()
         super.onDestroy()
     }
 
@@ -104,11 +109,8 @@ class MotionTimerService : Service() {
         val elapsedSeconds = state.currentElapsedSeconds()
         val launchPendingIntent = launchPendingIntent()
         val statusText = when {
-            !state.isRunning -> "Timer paused"
-            state.hasReachedTarget(elapsedSeconds) -> "Target reached - tracking overtime"
-            state.targetSeconds > 0 ->
-                "${formatDuration(state.targetSeconds - elapsedSeconds)} remaining"
-            else -> "Tracking now"
+            !state.isRunning -> "Paused at ${formatDuration(elapsedSeconds)}"
+            else -> "Elapsed ${formatDuration(elapsedSeconds)}"
         }
         val compactView = buildTimerView(state, elapsedSeconds)
         val expandedView = buildTimerView(state, elapsedSeconds)
@@ -152,55 +154,41 @@ class MotionTimerService : Service() {
             setTextViewText(R.id.timer_notification_subcategory, state.subcategoryName)
             val hasTarget = state.targetSeconds > 0
             val targetReached = state.hasReachedTarget(elapsedSeconds)
+            val remainingSeconds = state.targetSeconds - elapsedSeconds
 
-            if (state.isRunning && (!hasTarget || Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)) {
+            if (hasTarget && !targetReached && remainingSeconds > 0) {
+                val expectedEndEpochMs =
+                    System.currentTimeMillis() + remainingSeconds * 1000L
+                val expectedEnd = android.text.format.DateFormat
+                    .getTimeFormat(this@MotionTimerService)
+                    .format(Date(expectedEndEpochMs))
+                setTextViewText(
+                    R.id.timer_notification_expected_end,
+                    "Ends $expectedEnd",
+                )
+                setViewVisibility(R.id.timer_notification_expected_end, View.VISIBLE)
+            } else {
+                setViewVisibility(R.id.timer_notification_expected_end, View.GONE)
+            }
+
+            if (state.isRunning) {
                 setViewVisibility(R.id.timer_notification_elapsed, View.VISIBLE)
                 setViewVisibility(R.id.timer_notification_paused_elapsed, View.GONE)
-                when {
-                    !hasTarget -> {
-                        setChronometer(
-                            R.id.timer_notification_elapsed,
-                            SystemClock.elapsedRealtime() - elapsedSeconds * 1000L,
-                            null,
-                            true,
-                        )
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                            setChronometerCountDown(R.id.timer_notification_elapsed, false)
-                        }
-                    }
-                    !targetReached -> {
-                        val remainingSeconds = state.targetSeconds - elapsedSeconds
-                        setChronometer(
-                            R.id.timer_notification_elapsed,
-                            SystemClock.elapsedRealtime() + remainingSeconds * 1000L,
-                            null,
-                            true,
-                        )
-                        setChronometerCountDown(R.id.timer_notification_elapsed, true)
-                    }
-                    else -> {
-                        val overtimeSeconds = elapsedSeconds - state.targetSeconds
-                        setChronometer(
-                            R.id.timer_notification_elapsed,
-                            SystemClock.elapsedRealtime() - overtimeSeconds * 1000L,
-                            "+%s",
-                            true,
-                        )
-                        setChronometerCountDown(R.id.timer_notification_elapsed, false)
-                    }
+                setChronometer(
+                    R.id.timer_notification_elapsed,
+                    SystemClock.elapsedRealtime() - elapsedSeconds * 1000L,
+                    null,
+                    true,
+                )
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    setChronometerCountDown(R.id.timer_notification_elapsed, false)
                 }
             } else {
                 setViewVisibility(R.id.timer_notification_elapsed, View.GONE)
                 setViewVisibility(R.id.timer_notification_paused_elapsed, View.VISIBLE)
-                val displaySeconds = when {
-                    !hasTarget -> elapsedSeconds
-                    targetReached -> elapsedSeconds - state.targetSeconds
-                    else -> state.targetSeconds - elapsedSeconds
-                }
-                val prefix = if (hasTarget && targetReached) "+" else ""
                 setTextViewText(
                     R.id.timer_notification_paused_elapsed,
-                    "$prefix${formatDuration(displaySeconds)}",
+                    formatDuration(elapsedSeconds),
                 )
             }
         }
@@ -231,6 +219,46 @@ class MotionTimerService : Service() {
             timerStartedAtEpochMs = expectedTimerStart,
             triggerAtEpochMs = System.currentTimeMillis() + remainingSeconds * 1000L,
         )
+    }
+
+    private fun schedulePausedProjectionRefresh(state: TimerNotificationState) {
+        cancelPausedProjectionRefresh()
+        val elapsedSeconds = state.currentElapsedSeconds()
+        if (state.isRunning ||
+            state.targetSeconds <= 0 ||
+            state.hasReachedTarget(elapsedSeconds)
+        ) {
+            return
+        }
+
+        val expectedTimerStart = state.timerStartedAtEpochMs
+        val runnable = object : Runnable {
+            override fun run() {
+                val currentState = readSavedState(this@MotionTimerService) ?: return
+                val currentElapsed = currentState.currentElapsedSeconds()
+                if (currentState.timerStartedAtEpochMs != expectedTimerStart ||
+                    currentState.isRunning ||
+                    currentState.targetSeconds <= 0 ||
+                    currentState.hasReachedTarget(currentElapsed)
+                ) {
+                    pausedProjectionRunnable = null
+                    return
+                }
+
+                getSystemService(NotificationManager::class.java).notify(
+                    notificationId,
+                    buildNotification(currentState),
+                )
+                handler.postDelayed(this, pausedProjectionRefreshMs)
+            }
+        }
+        pausedProjectionRunnable = runnable
+        handler.postDelayed(runnable, pausedProjectionRefreshMs)
+    }
+
+    private fun cancelPausedProjectionRefresh() {
+        pausedProjectionRunnable?.let(handler::removeCallbacks)
+        pausedProjectionRunnable = null
     }
 
     private fun triggerTargetAlert(candidate: TimerNotificationState) {
@@ -460,6 +488,7 @@ class MotionTimerService : Service() {
         private const val notificationId = 4102
         private const val completionNotificationId = 4103
         private const val alarmRequestCode = 4104
+        private const val pausedProjectionRefreshMs = 60_000L
         private const val preferencesName = "motion_activity_timer_notification"
         private const val actionSync = "com.motionllc.motion.timer.SYNC"
         private const val actionTargetAlarm = "com.motionllc.motion.timer.TARGET_ALARM"

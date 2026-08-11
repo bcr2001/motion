@@ -16,7 +16,7 @@ class ActivityTimerCompactBar extends StatelessWidget {
         final session = timer.session;
         if (session == null) return const SizedBox.shrink();
 
-        final warning = timer.needsReview || timer.isReminderDue;
+        final warning = timer.needsReview;
         final accent = warning ? Colors.orange : AppColor.blueMainColor;
         final isDarkMode = Theme.of(context).brightness == Brightness.dark;
         final background = isDarkMode

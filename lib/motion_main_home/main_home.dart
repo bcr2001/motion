@@ -23,99 +23,12 @@ class MainMotionHome extends StatefulWidget {
 class _MotionHome extends State<MainMotionHome> {
   // current page index
   int currentIndex = 0;
-  ActivityTimerProvider? _timerProvider;
-  bool _reminderDialogVisible = false;
 
   // main app routes in the app
   List motionAppRoutes = const [
     MotionHomeRoute(),
     MotionStatesRoute(),
   ];
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final nextProvider = context.read<ActivityTimerProvider>();
-    if (identical(_timerProvider, nextProvider)) return;
-    _timerProvider?.removeListener(_handleTimerChanged);
-    _timerProvider = nextProvider;
-    nextProvider.addListener(_handleTimerChanged);
-  }
-
-  @override
-  void dispose() {
-    _timerProvider?.removeListener(_handleTimerChanged);
-    super.dispose();
-  }
-
-  void _handleTimerChanged() {
-    final timer = _timerProvider;
-    if (timer == null ||
-        !timer.isReminderDue ||
-        _reminderDialogVisible ||
-        !mounted) {
-      return;
-    }
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted ||
-          _reminderDialogVisible ||
-          !(ModalRoute.of(context)?.isCurrent ?? false)) {
-        return;
-      }
-      _showLongRunningTimerPrompt(timer);
-    });
-  }
-
-  Future<void> _showLongRunningTimerPrompt(
-    ActivityTimerProvider timer,
-  ) async {
-    final session = timer.session;
-    if (session == null) return;
-    _reminderDialogVisible = true;
-    final action = await showDialog<String>(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Timer Still Running?'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '${session.subcategoryName} has been running for '
-              '${formatActivityTimerDuration(timer.elapsedSeconds)}.',
-            ),
-            const SizedBox(height: 8),
-            const Text('Continue, pause it, or review the recorded time.'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, 'pause'),
-            child: const Text('Pause'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, 'continue'),
-            child: const Text('Continue'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(dialogContext, 'review'),
-            child: const Text('Review Timer'),
-          ),
-        ],
-      ),
-    );
-    _reminderDialogVisible = false;
-    if (!mounted) return;
-
-    if (action == 'pause') {
-      await timer.pause();
-    } else if (action == 'continue') {
-      await timer.acknowledgeReminder();
-    } else if (action == 'review') {
-      _openActiveTimer();
-    }
-  }
 
   void _openActiveTimer() {
     final session = context.read<ActivityTimerProvider>().session;

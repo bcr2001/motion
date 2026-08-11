@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:motion/motion_core/mc_sql_table/activity_timer_session.dart';
 import 'package:motion/motion_core/mc_sql_table/sub_table.dart';
-import 'package:motion/motion_core/mc_sqlite/database_constants.dart';
 import 'package:motion/motion_core/mc_sqlite/sql_tracker_db.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
@@ -45,8 +44,6 @@ class ActivityTimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     _userUidProvider.addListener(_handleUserChanged);
   }
 
-  static const int standardReminderSeconds = 2 * 60 * 60;
-  static const int sleepReminderSeconds = 10 * 60 * 60;
   static const int reviewRequiredSeconds = 18 * 60 * 60;
   static const int maximumTargetSeconds = 24 * 60 * 60;
 
@@ -80,16 +77,10 @@ class ActivityTimerProvider extends ChangeNotifier with WidgetsBindingObserver {
   bool get hasReachedTarget => _session?.targetReachedAt(_clock()) ?? false;
   bool get hasPendingTargetReachedEvent => _hasPendingTargetReachedEvent;
   int? get remainingTargetSeconds => _session?.remainingSecondsAt(_clock());
+  DateTime? get expectedTargetEndAt => _session?.expectedEndAt(_clock());
   int get overtimeSeconds => _session?.overtimeSecondsAt(_clock()) ?? 0;
 
   bool get needsReview => elapsedSeconds >= reviewRequiredSeconds;
-
-  bool get isReminderDue {
-    final activeSession = _session;
-    return activeSession != null &&
-        activeSession.isRunning &&
-        elapsedSeconds >= activeSession.nextReminderAtSeconds;
-  }
 
   bool isActiveFor({
     required String mainCategoryName,
@@ -134,9 +125,6 @@ class ActivityTimerProvider extends ChangeNotifier with WidgetsBindingObserver {
       );
 
       final now = _clock();
-      final reminderSeconds = mainCategoryName == MotionCategories.sleep
-          ? sleepReminderSeconds
-          : standardReminderSeconds;
       final nextSession = ActivityTimerSession(
         currentLoggedInUser: currentUser,
         mainCategoryName: mainCategoryName,
@@ -146,7 +134,7 @@ class ActivityTimerProvider extends ChangeNotifier with WidgetsBindingObserver {
         completedSegments: const [],
         status: ActivityTimerStatus.running,
         updatedAtEpochMs: now.millisecondsSinceEpoch,
-        nextReminderAtSeconds: reminderSeconds,
+        nextReminderAtSeconds: 0,
         targetSeconds: targetSeconds,
       );
 
@@ -174,7 +162,11 @@ class ActivityTimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     await _runBusy(() async {
       await _databaseHelper.saveActiveTimerSession(pausedSession);
       _session = pausedSession;
-      _stopTicker();
+      if (_shouldTick(pausedSession)) {
+        _startTicker();
+      } else {
+        _stopTicker();
+      }
       await _syncSystemNotification(pausedSession);
     });
     _checkTargetReached();
@@ -217,21 +209,6 @@ class ActivityTimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     } catch (error) {
       debugPrint('Activity timer target alert dismissal failed: $error');
     }
-  }
-
-  Future<void> acknowledgeReminder() async {
-    final activeSession = _session;
-    if (activeSession == null) return;
-    final interval = activeSession.mainCategoryName == MotionCategories.sleep
-        ? sleepReminderSeconds
-        : standardReminderSeconds;
-    final updatedSession = activeSession.copyWith(
-      nextReminderAtSeconds: elapsedSeconds + interval,
-      updatedAtEpochMs: _clock().millisecondsSinceEpoch,
-    );
-    await _databaseHelper.saveActiveTimerSession(updatedSession);
-    _session = updatedSession;
-    notifyListeners();
   }
 
   Future<void> discard() async {
@@ -339,7 +316,7 @@ class ActivityTimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     }
     _loadedUser = currentUser;
     _session = restoredSession;
-    if (restoredSession?.isRunning ?? false) {
+    if (_shouldTick(restoredSession)) {
       _startTicker();
     } else {
       _stopTicker();
@@ -392,6 +369,12 @@ class ActivityTimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
       if (!_checkTargetReached()) notifyListeners();
     });
+  }
+
+  bool _shouldTick(ActivityTimerSession? session) {
+    if (session == null) return false;
+    if (session.isRunning) return true;
+    return session.isTimed && !session.targetReachedAt(_clock());
   }
 
   void _stopTicker() {
@@ -461,7 +444,7 @@ class ActivityTimerProvider extends ChangeNotifier with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      if (_session?.isRunning ?? false) _startTicker();
+      if (_shouldTick(_session)) _startTicker();
       if (!_checkTargetReached()) notifyListeners();
     } else if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.inactive) {

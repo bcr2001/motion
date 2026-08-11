@@ -100,6 +100,48 @@ void main() {
       expect(session.overtimeSecondsAt(start.add(const Duration(minutes: 75))),
           15 * 60);
     });
+
+    test('projects the finish time around paused duration', () {
+      final start = DateTime(2026, 8, 11, 12);
+      final runningSession = ActivityTimerSession(
+        currentLoggedInUser: 'user-1',
+        mainCategoryName: 'Education',
+        subcategoryName: 'Studied/Revised',
+        startedAtEpochMs: start.millisecondsSinceEpoch,
+        currentSegmentStartedAtEpochMs: start.millisecondsSinceEpoch,
+        completedSegments: const [],
+        status: ActivityTimerStatus.running,
+        updatedAtEpochMs: start.millisecondsSinceEpoch,
+        nextReminderAtSeconds: 7200,
+        targetSeconds: 20 * 60,
+      );
+
+      expect(
+        runningSession.expectedEndAt(
+          start.add(const Duration(minutes: 5)),
+        ),
+        DateTime(2026, 8, 11, 12, 20),
+      );
+
+      final pausedSession = runningSession.copyWith(
+        currentSegmentStartedAtEpochMs: null,
+        completedSegments: [
+          ActivityTimerSegment(
+            startedAtEpochMs: start.millisecondsSinceEpoch,
+            endedAtEpochMs:
+                start.add(const Duration(minutes: 5)).millisecondsSinceEpoch,
+          ),
+        ],
+        status: ActivityTimerStatus.paused,
+      );
+
+      expect(
+        pausedSession.expectedEndAt(
+          start.add(const Duration(minutes: 10)),
+        ),
+        DateTime(2026, 8, 11, 12, 25),
+      );
+    });
   });
 
   group('activity timer calculations', () {

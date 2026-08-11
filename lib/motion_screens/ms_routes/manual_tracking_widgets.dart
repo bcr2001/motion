@@ -199,10 +199,10 @@ class _StartActivityTimerDialogState extends State<_StartActivityTimerDialog> {
                     spacing: 7,
                     runSpacing: 7,
                     children: [
-                      _presetChip('25 min', 25 * 60),
-                      _presetChip('45 min', 45 * 60),
-                      _presetChip('1 hour', 60 * 60),
-                      _presetChip('2 hours', 2 * 60 * 60),
+                      _presetChip('30 mins', 30 * 60),
+                      _presetChip('40 mins', 40 * 60),
+                      _presetChip('1 hr 30 mins', 90 * 60),
+                      _presetChip('2 hrs', 2 * 60 * 60),
                     ],
                   ),
                   if (_targetError != null) ...[
@@ -1137,7 +1137,7 @@ class _ActivityTimerPanel extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.fromLTRB(10, 0, 10, 8),
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.fromLTRB(16, 15, 16, 15),
       decoration: BoxDecoration(
         color: panelColor,
         borderRadius: BorderRadius.circular(16),
@@ -1209,8 +1209,7 @@ class _ActivityTimerPanel extends StatelessWidget {
     ActivityTimerSession session,
   ) {
     final targetReached = timer.hasReachedTarget;
-    final warning =
-        !targetReached && (timer.needsReview || timer.isReminderDue);
+    final warning = !targetReached && timer.needsReview;
     final accent = targetReached
         ? Colors.green
         : warning
@@ -1218,11 +1217,15 @@ class _ActivityTimerPanel extends StatelessWidget {
             : AppColor.blueMainColor;
     final target = session.targetSeconds ?? 0;
     final isTimed = target > 0;
-    final primaryDuration = isTimed
-        ? targetReached
-            ? '+${formatActivityTimerDuration(timer.overtimeSeconds)}'
-            : formatActivityTimerDuration(timer.remainingTargetSeconds ?? 0)
-        : formatActivityTimerDuration(timer.elapsedSeconds);
+    final elapsedDuration = formatActivityTimerDuration(timer.elapsedSeconds);
+    final expectedEndAt = timer.expectedTargetEndAt;
+    final expectedEndLabel = expectedEndAt == null
+        ? null
+        : DateFormat('h:mm a').format(expectedEndAt);
+    final secondaryTimerLabel = targetReached ? 'Overtime' : 'Remaining';
+    final secondaryTimerDuration = targetReached
+        ? formatActivityTimerDuration(timer.overtimeSeconds)
+        : formatActivityTimerDuration(timer.remainingTargetSeconds ?? 0);
     final statusLabel = targetReached
         ? 'Target Reached'
         : isTimed
@@ -1242,13 +1245,29 @@ class _ActivityTimerPanel extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: Text(
-                statusLabel,
-                style: AppTextStyle.subSectionTextStyle(
-                  fontsize: 13,
-                  fontweight: FontWeight.w900,
-                  color: accent,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    statusLabel,
+                    style: AppTextStyle.subSectionTextStyle(
+                      fontsize: 13,
+                      fontweight: FontWeight.w900,
+                      color: accent,
+                    ),
+                  ),
+                  if (isTimed && expectedEndLabel != null) ...[
+                    const SizedBox(height: 1),
+                    Text(
+                      'Expected finish $expectedEndLabel',
+                      style: AppTextStyle.subSectionTextStyle(
+                        fontsize: 10,
+                        fontweight: FontWeight.w600,
+                        color: accent.withValues(alpha: 0.82),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
             if (timer.isBusy)
@@ -1259,9 +1278,18 @@ class _ActivityTimerPanel extends StatelessWidget {
               ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         Text(
-          primaryDuration,
+          'Elapsed Time',
+          style: AppTextStyle.subSectionTextStyle(
+            fontsize: 10.5,
+            fontweight: FontWeight.w700,
+            color: accent.withValues(alpha: 0.82),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          elapsedDuration,
           style: AppTextStyle.subSectionTextStyle(
             fontsize: 34,
             fontweight: FontWeight.w900,
@@ -1269,9 +1297,9 @@ class _ActivityTimerPanel extends StatelessWidget {
           ),
         ),
         if (isTimed) ...[
-          const SizedBox(height: 5),
+          const SizedBox(height: 10),
           Text(
-            'Elapsed ${formatActivityTimerDuration(timer.elapsedSeconds)}  |  '
+            '$secondaryTimerLabel $secondaryTimerDuration  |  '
             'Target ${formatActivityTimerDuration(target)}',
             textAlign: TextAlign.center,
             style: AppTextStyle.subSectionTextStyle(
@@ -1280,7 +1308,7 @@ class _ActivityTimerPanel extends StatelessWidget {
               color: accent,
             ),
           ),
-          const SizedBox(height: 9),
+          const SizedBox(height: 12),
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
@@ -1294,9 +1322,7 @@ class _ActivityTimerPanel extends StatelessWidget {
         if (warning) ...[
           const SizedBox(height: 7),
           Text(
-            timer.needsReview
-                ? 'Long session - review the duration before saving'
-                : 'Still tracking? Review or continue this timer',
+            'Long session - review the duration before saving',
             textAlign: TextAlign.center,
             style: AppTextStyle.subSectionTextStyle(
               fontsize: 10.5,
@@ -1305,7 +1331,7 @@ class _ActivityTimerPanel extends StatelessWidget {
             ),
           ),
         ],
-        const SizedBox(height: 13),
+        const SizedBox(height: 16),
         Row(
           children: [
             Expanded(
