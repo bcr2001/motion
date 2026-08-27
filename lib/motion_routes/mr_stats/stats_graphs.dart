@@ -107,8 +107,7 @@ class YearPieChartDistributionAccountedUnaccounted extends StatelessWidget {
 
   // pie chart legend
   Widget _pieChartLegend() {
-    return Container(
-      margin: const EdgeInsets.only(left: 35),
+    return SizedBox(
       height: 100,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -145,7 +144,11 @@ class YearPieChartDistributionAccountedUnaccounted extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(left: 10, top: 10.0, bottom: 35.0),
-      child: Row(
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 16,
+        runSpacing: 12,
         children: [
           PieChartBuilder(sections: [
             // accounted proportions

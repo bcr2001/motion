@@ -11,6 +11,17 @@ void main() {
       expect(YearProgress.daysInYear(2024), 366);
     });
 
+    test('formats tracked days using the selected year length', () {
+      expect(
+        YearProgress.formatTrackedDays(trackedDays: 366, year: 2024),
+        '366/366',
+      );
+      expect(
+        YearProgress.formatTrackedDays(trackedDays: 365, year: 2026),
+        '365/365',
+      );
+    });
+
     test('calculates percent with the actual length of the year', () {
       expect(
         YearProgress.percentComplete(elapsedDays: 183, year: 2024),

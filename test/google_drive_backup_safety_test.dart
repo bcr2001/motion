@@ -139,7 +139,7 @@ void main() {
       expect(backupProvider.isEnabled, isTrue);
       expect(backupProvider.message, 'User A backup is current.');
 
-      userProvider.setUserUid('user-b');
+      await userProvider.setUserUid('user-b');
       await _flushAsyncWork();
       expect(backupProvider.isEnabled, isFalse);
       expect(
@@ -152,7 +152,7 @@ void main() {
       expect(prefs.getBool('autoDriveBackupEnabled.user-a'), isTrue);
       expect(prefs.getBool('autoDriveBackupEnabled.user-b'), isNull);
 
-      userProvider.setUserUid('user-a');
+      await userProvider.setUserUid('user-a');
       await _flushAsyncWork();
       expect(backupProvider.isEnabled, isTrue);
       expect(backupProvider.message, 'User A backup is current.');
@@ -182,7 +182,7 @@ void main() {
       await backupProvider.setEnabled(true);
       await driveService.started.future;
 
-      userProvider.setUserUid('user-b');
+      await userProvider.setUserUid('user-b');
       await _flushAsyncWork();
       expect(backupProvider.isEnabled, isFalse);
 

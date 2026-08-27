@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:motion/motion_core/mc_firebase/auth_session_source.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // A class responsible for managing the user's UID and saving it to SharedPreferences.
@@ -9,12 +9,18 @@ class UserUidProvider extends ChangeNotifier {
   UserUidProvider({
     String? initialUserUid,
     bool isInitialized = false,
+    AuthSessionSource? authSessionSource,
   })  : _userUid = initialUserUid,
-        _isInitialized = isInitialized;
+        _isInitialized = isInitialized,
+        _authSessionSource = authSessionSource;
 
   SharedPreferences? _pref;
-  StreamSubscription<User?>? _authSubscription;
+  StreamSubscription<String?>? _authSubscription;
   bool _isInitialized;
+  AuthSessionSource? _authSessionSource;
+
+  AuthSessionSource get _sessionSource =>
+      _authSessionSource ??= FirebaseAuthSessionSource();
 
   static const String uidKey = "uidKeys";
 
@@ -24,10 +30,14 @@ class UserUidProvider extends ChangeNotifier {
 
     try {
       _pref ??= await SharedPreferences.getInstance();
-      await _loadSavedUid();
-      await _syncFirebaseUser(FirebaseAuth.instance.currentUser);
-      _authSubscription ??=
-          FirebaseAuth.instance.authStateChanges().listen(_syncFirebaseUser);
+      final sessionSource = _sessionSource;
+      var authenticatedUid = sessionSource.currentUid;
+      authenticatedUid ??= await sessionSource.recoverPreviousSession();
+      authenticatedUid ??= sessionSource.currentUid;
+      await _syncAuthenticatedUid(authenticatedUid);
+      _authSubscription ??= sessionSource.uidChanges.listen(
+        (uid) => unawaited(_syncAuthenticatedUid(uid)),
+      );
     } finally {
       _isInitialized = true;
       notifyListeners();
@@ -40,31 +50,21 @@ class UserUidProvider extends ChangeNotifier {
   bool get isInitialized => _isInitialized;
 
   // Set the user's UID, save it to SharedPreferences, and notify listeners.
-  void setUserUid(String uid) {
-    if (_userUid == uid) return;
+  Future<void> setUserUid(String uid) async {
+    final normalizedUid = uid.trim();
+    if (normalizedUid.isEmpty) return;
 
-    _userUid = uid;
-
-    _pref?.setString(uidKey, uid);
-
-    notifyListeners();
+    final changed = _userUid != normalizedUid;
+    _userUid = normalizedUid;
+    await _pref?.setString(uidKey, normalizedUid);
+    if (changed) notifyListeners();
   }
 
   Future<void> clearUserUid() async {
-    if (_userUid == null) return;
-
+    final changed = _userUid != null;
     _userUid = null;
     await _pref?.remove(uidKey);
-    notifyListeners();
-  }
-
-  // Load the saved UID from SharedPreferences.
-  Future<void> _loadSavedUid() async {
-    final savedUid = _pref?.getString(uidKey);
-    if (savedUid != null) {
-      _userUid = savedUid;
-      notifyListeners();
-    }
+    if (changed) notifyListeners();
   }
 
   // Check if user UID is saved in SharedPreferences
@@ -73,13 +73,13 @@ class UserUidProvider extends ChangeNotifier {
     return savedUid != null;
   }
 
-  Future<void> _syncFirebaseUser(User? user) async {
-    if (user == null) {
+  Future<void> _syncAuthenticatedUid(String? uid) async {
+    if (uid == null || uid.trim().isEmpty) {
       await clearUserUid();
       return;
     }
 
-    setUserUid(user.uid);
+    await setUserUid(uid);
   }
 
   @override

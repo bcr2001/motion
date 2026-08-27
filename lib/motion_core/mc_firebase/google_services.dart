@@ -2,11 +2,21 @@ import 'package:flutter/material.dart';
 import "package:google_sign_in/google_sign_in.dart";
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:motion/main.dart';
+import 'package:motion/motion_core/mc_firebase/auth_session_source.dart';
 import '../../motion_reusable/general_reuseable.dart';
 import '../../motion_themes/mth_app/app_strings.dart';
 
 class GoogleAuthService {
-  static final GoogleSignIn _googleSignIn = GoogleSignIn();
+  static final GoogleSignIn _googleSignIn = motionGoogleSignIn;
+
+  @visibleForTesting
+  static Future<GoogleSignInAccount?> selectGoogleAccount({
+    Future<void> Function()? clearCachedSelection,
+    Future<GoogleSignInAccount?> Function()? showAccountChooser,
+  }) async {
+    await (clearCachedSelection ?? _googleSignIn.signOut)();
+    return (showAccountChooser ?? _googleSignIn.signIn)();
+  }
 
   // Sign in with Google and handle user authentication
   static Future<UserCredential?> signInWithGoogle(BuildContext context) async {
@@ -14,8 +24,9 @@ class GoogleAuthService {
     circularIndicator(context);
 
     try {
-      // Initiate the interactive sign-in process with Google
-      final GoogleSignInAccount? gUser = await _googleSignIn.signIn();
+      // A button press is an explicit account choice. Clear any transferred or
+      // cached selection first so Google presents its account chooser.
+      final GoogleSignInAccount? gUser = await selectGoogleAccount();
 
       // Check if the user canceled the Google sign-in
       if (gUser == null) {
