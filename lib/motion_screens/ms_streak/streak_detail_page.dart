@@ -732,7 +732,10 @@ class _StreakHistorySectionState extends State<StreakHistorySection> {
       0,
       (maxValue, point) => math.max(maxValue, point.bestStreak),
     );
-    final maxY = math.max(5, maxStreak + 2).toDouble();
+    // Persistent tooltip labels sit above each bar. Leave enough vertical
+    // headroom for the tallest label instead of letting the chart clip it.
+    final labelHeadroom = math.max(4, (maxStreak * 0.2).ceil());
+    final maxY = math.max(5, maxStreak + labelHeadroom).toDouble();
     final chartWidth = math.max(320.0, history.length * 44.0);
 
     if (_shouldScrollToLatest) {

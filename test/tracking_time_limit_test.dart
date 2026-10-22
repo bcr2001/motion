@@ -98,5 +98,33 @@ void main() {
       );
       expect(await database.query(MotionDbTables.subcategory), hasLength(1));
     });
+
+    test('returns the latest positive entry date for one subcategory',
+        () async {
+      Future<void> insert(String date, double minutes,
+          {String category = MotionCategories.skills,
+          String subcategory = 'Chess'}) async {
+        await databaseHelper.insertSubcategory(Subcategories(
+          date: date,
+          mainCategoryName: category,
+          subcategoryName: subcategory,
+          timeSpent: minutes,
+          currentLoggedInUser: 'user-1',
+        ));
+      }
+
+      await insert('2026-06-02', 30);
+      await insert('2026-06-18', 0);
+      await insert('2026-06-12', 45);
+      await insert('2026-06-20', 60, subcategory: 'Reading');
+
+      final latest = await databaseHelper.getLastTrackedDateForSubcategory(
+        currentUser: 'user-1',
+        mainCategoryName: MotionCategories.skills,
+        subcategoryName: 'Chess',
+      );
+
+      expect(latest, '2026-06-12');
+    });
   });
 }

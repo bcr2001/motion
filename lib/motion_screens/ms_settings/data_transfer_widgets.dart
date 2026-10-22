@@ -451,8 +451,8 @@ class _SummaryPill extends StatelessWidget {
   }
 }
 
-class _AutoDriveBackupCard extends StatelessWidget {
-  const _AutoDriveBackupCard({
+class BackupHealthCard extends StatelessWidget {
+  const BackupHealthCard({
     required this.backup,
     required this.onChanged,
     required this.onRunNow,
@@ -463,35 +463,43 @@ class _AutoDriveBackupCard extends StatelessWidget {
   final VoidCallback? onRunNow;
 
   Color _statusColor() {
-    switch (backup.status) {
-      case AutoDriveBackupStatus.success:
+    switch (backup.health.level) {
+      case AutoDriveBackupHealthLevel.healthy:
         return AppColor.accountedColor;
-      case AutoDriveBackupStatus.pendingOffline:
+      case AutoDriveBackupHealthLevel.stale:
+      case AutoDriveBackupHealthLevel.pendingOffline:
         return AppColor.workPieChartColor;
-      case AutoDriveBackupStatus.blocked:
+      case AutoDriveBackupHealthLevel.critical:
+      case AutoDriveBackupHealthLevel.blocked:
         return Colors.redAccent;
-      case AutoDriveBackupStatus.running:
+      case AutoDriveBackupHealthLevel.running:
         return AppColor.blueMainColor;
-      case AutoDriveBackupStatus.noData:
-      case AutoDriveBackupStatus.idle:
+      case AutoDriveBackupHealthLevel.disabled:
+      case AutoDriveBackupHealthLevel.noData:
+      case AutoDriveBackupHealthLevel.neverBackedUp:
         return Colors.blueGrey;
     }
   }
 
   IconData _statusIcon() {
-    switch (backup.status) {
-      case AutoDriveBackupStatus.success:
+    switch (backup.health.level) {
+      case AutoDriveBackupHealthLevel.healthy:
         return Icons.check_circle_rounded;
-      case AutoDriveBackupStatus.pendingOffline:
-        return Icons.cloud_off_rounded;
-      case AutoDriveBackupStatus.blocked:
-        return Icons.error_rounded;
-      case AutoDriveBackupStatus.running:
-        return Icons.sync_rounded;
-      case AutoDriveBackupStatus.noData:
-        return Icons.info_rounded;
-      case AutoDriveBackupStatus.idle:
+      case AutoDriveBackupHealthLevel.stale:
         return Icons.schedule_rounded;
+      case AutoDriveBackupHealthLevel.pendingOffline:
+        return Icons.cloud_off_rounded;
+      case AutoDriveBackupHealthLevel.critical:
+      case AutoDriveBackupHealthLevel.blocked:
+        return Icons.error_rounded;
+      case AutoDriveBackupHealthLevel.running:
+        return Icons.sync_rounded;
+      case AutoDriveBackupHealthLevel.noData:
+        return Icons.info_rounded;
+      case AutoDriveBackupHealthLevel.disabled:
+        return Icons.cloud_off_outlined;
+      case AutoDriveBackupHealthLevel.neverBackedUp:
+        return Icons.cloud_upload_outlined;
     }
   }
 
@@ -507,6 +515,14 @@ class _AutoDriveBackupCard extends StatelessWidget {
         '${parsed.day.toString().padLeft(2, '0')} at $hour:$minute $period';
   }
 
+  String _formatFileSize(int? bytes) {
+    if (bytes == null || bytes <= 0) return 'Not available yet';
+    if (bytes < 1024) return '$bytes B';
+    final kilobytes = bytes / 1024;
+    if (kilobytes < 1024) return '${kilobytes.toStringAsFixed(1)} KB';
+    return '${(kilobytes / 1024).toStringAsFixed(2)} MB';
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
@@ -514,6 +530,7 @@ class _AutoDriveBackupCard extends StatelessWidget {
         isDarkMode ? Colors.white.withValues(alpha: 0.08) : Colors.black12;
     final detailColor = isDarkMode ? Colors.white70 : Colors.blueGrey;
     final statusColor = _statusColor();
+    final health = backup.health;
 
     return Card(
       child: Padding(
@@ -542,7 +559,7 @@ class _AutoDriveBackupCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Automatic Google Drive Backup',
+                        'Backup Health',
                         style: AppTextStyle.subSectionTextStyle(
                           fontsize: 15,
                           fontweight: FontWeight.w900,
@@ -550,7 +567,7 @@ class _AutoDriveBackupCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Runs once per day after 8 PM, or the next time Motion is opened.',
+                        'Automatic Google Drive protection for your Motion data.',
                         style: AppTextStyle.manualHintTextStyle(fontsize: 12),
                       ),
                     ],
@@ -581,7 +598,7 @@ class _AutoDriveBackupCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          backup.message,
+                          health.title,
                           style: AppTextStyle.subSectionTextStyle(
                             fontsize: 12.5,
                             fontweight: FontWeight.w800,
@@ -590,8 +607,7 @@ class _AutoDriveBackupCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 5),
                         Text(
-                          'Last successful backup: '
-                          '${_formatTimestamp(backup.lastSuccessAt)}',
+                          health.detail,
                           style: AppTextStyle.subSectionTextStyle(
                             fontsize: 11.5,
                             fontweight: FontWeight.normal,
@@ -604,6 +620,46 @@ class _AutoDriveBackupCard extends StatelessWidget {
                 ],
               ),
             ),
+            const SizedBox(height: 12),
+            _BackupHealthDetail(
+              icon: Icons.account_circle_outlined,
+              label: 'Connected Drive account',
+              value: backup.driveAccountEmail ?? 'Not verified yet',
+            ),
+            const SizedBox(height: 8),
+            _BackupHealthDetail(
+              icon: Icons.cloud_done_outlined,
+              label: 'Last successful backup',
+              value: _formatTimestamp(backup.lastSuccessAt),
+            ),
+            const SizedBox(height: 8),
+            _BackupHealthDetail(
+              icon: Icons.data_usage_rounded,
+              label: 'Backup size',
+              value: _formatFileSize(backup.lastBackupSizeBytes),
+            ),
+            const SizedBox(height: 8),
+            _BackupHealthDetail(
+              icon: backup.status == AutoDriveBackupStatus.pendingOffline
+                  ? Icons.cloud_off_rounded
+                  : Icons.cloud_queue_rounded,
+              label: 'Pending backup',
+              value: backup.status == AutoDriveBackupStatus.pendingOffline
+                  ? 'Waiting for internet'
+                  : 'None',
+              valueColor: backup.status == AutoDriveBackupStatus.pendingOffline
+                  ? AppColor.workPieChartColor
+                  : null,
+            ),
+            if (backup.consecutiveFailures > 0) ...[
+              const SizedBox(height: 8),
+              _BackupHealthDetail(
+                icon: Icons.error_outline_rounded,
+                label: 'Consecutive failures',
+                value: '${backup.consecutiveFailures}',
+                valueColor: Colors.redAccent,
+              ),
+            ],
             if (backup.isEnabled) ...[
               const SizedBox(height: 10),
               Align(
@@ -633,6 +689,57 @@ class _AutoDriveBackupCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _BackupHealthDetail extends StatelessWidget {
+  const _BackupHealthDetail({
+    required this.icon,
+    required this.label,
+    required this.value,
+    this.valueColor,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+  final Color? valueColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final secondary = isDarkMode ? Colors.white60 : Colors.blueGrey;
+
+    return Row(
+      children: [
+        Icon(icon, size: 17, color: secondary),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            label,
+            style: AppTextStyle.subSectionTextStyle(
+              fontsize: 11.5,
+              fontweight: FontWeight.normal,
+              color: secondary,
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Flexible(
+          child: Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.end,
+            style: AppTextStyle.subSectionTextStyle(
+              fontsize: 11.5,
+              fontweight: FontWeight.w800,
+              color: valueColor,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -686,6 +686,7 @@ class _DurationField extends StatelessWidget {
             child: TextField(
               controller: controller,
               onChanged: onChanged,
+              cursorColor: AppColor.blueMainColor,
               keyboardType: TextInputType.number,
               textAlign: TextAlign.center,
               maxLength: 2,

@@ -884,6 +884,33 @@ class TrackerDatabaseHelper {
     }
   }
 
+  Future<String?> getLastTrackedDateForSubcategory({
+    required String currentUser,
+    required String mainCategoryName,
+    required String subcategoryName,
+  }) async {
+    try {
+      final db = await database;
+      final rows = await db.rawQuery('''
+        SELECT MAX(${MotionDbColumns.date}) AS ${MotionDbColumns.date}
+        FROM ${MotionDbTables.subcategory}
+        WHERE ${MotionDbColumns.currentLoggedInUser} = ?
+          AND ${MotionDbColumns.mainCategoryName} = ?
+          AND ${MotionDbColumns.subcategoryName} = ?
+          AND ${MotionDbColumns.timeSpent} > 0
+      ''', [currentUser, mainCategoryName, subcategoryName]);
+
+      final value = rows.firstOrNull?[MotionDbColumns.date]?.toString();
+      return value == null || value.isEmpty ? null : value;
+    } catch (error, stackTrace) {
+      logDatabaseError(
+        'TrackerDatabaseHelper.getLastTrackedDateForSubcategory',
+        error,
+        stackTrace,
+      );
+    }
+  }
+
   Future<List<Subcategories>> getSubcategoryEntriesForDate({
     required String date,
     required String currentUser,

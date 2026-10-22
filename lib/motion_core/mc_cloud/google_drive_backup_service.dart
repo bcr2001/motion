@@ -12,11 +12,13 @@ class GoogleDriveBackupResult {
     required this.email,
     required this.folderName,
     required this.fileCount,
+    this.totalBytes = 0,
   });
 
   final String email;
   final String folderName;
   final int fileCount;
+  final int totalBytes;
 }
 
 class GoogleDriveBackupDownloadResult {
@@ -139,6 +141,10 @@ class GoogleDriveBackupService {
       try {
         final driveApi = drive.DriveApi(client);
         final folderId = await _findOrCreateBackupFolder(driveApi);
+        final totalBytes = files.fold<int>(
+          0,
+          (total, file) => total + utf8.encode(file.content).length,
+        );
 
         for (final file in files) {
           await _createOrReplaceFile(
@@ -152,6 +158,7 @@ class GoogleDriveBackupService {
           email: driveEmail.trim(),
           folderName: backupFolderName,
           fileCount: files.length,
+          totalBytes: totalBytes,
         );
       } finally {
         client.close();

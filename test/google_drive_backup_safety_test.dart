@@ -201,6 +201,86 @@ void main() {
       expect(prefs.getString('autoDriveBackupLastStatus.user-b'), isNull);
       expect(prefs.getString('autoDriveBackupLastMessage.user-b'), isNull);
     });
+
+    test('reports a stale backup after several days without success', () async {
+      final now = DateTime(2026, 10, 15, 12);
+      SharedPreferences.setMockInitialValues({
+        'autoDriveBackupEnabled.user-a': true,
+        'autoDriveBackupLastSuccessDate.user-a': '2026-10-15',
+        'autoDriveBackupLastSuccessAt.user-a':
+            DateTime(2026, 10, 10, 20).toIso8601String(),
+        'autoDriveBackupLastStatus.user-a': 'success',
+        'autoDriveBackupLastMessage.user-a': 'Backup complete.',
+      });
+      final userProvider = UserUidProvider(
+        initialUserUid: 'user-a',
+        isInitialized: true,
+      );
+      final backupProvider = AutoDriveBackupProvider(
+        userUidProvider: userProvider,
+        driveBackupService: GoogleDriveBackupService(
+          accountSession: _FakeDriveAccountSession(),
+        ),
+        motionEmailForUser: (_) => 'user-a@example.com',
+        now: () => now,
+      );
+      addTearDown(() {
+        backupProvider.dispose();
+        userProvider.dispose();
+      });
+
+      await backupProvider.initialize();
+      await _flushAsyncWork();
+
+      expect(backupProvider.health.level, AutoDriveBackupHealthLevel.stale);
+      expect(backupProvider.health.daysSinceSuccess, 5);
+      expect(backupProvider.health.detail, contains('5 days'));
+    });
+
+    test('records verified account and backup size per Motion user', () async {
+      SharedPreferences.setMockInitialValues({
+        'autoDriveBackupConsecutiveFailures.user-a': 2,
+        'autoDriveBackupLastFailureAt.user-a': '2026-10-14T20:00:00.000',
+      });
+      final userProvider = UserUidProvider(
+        initialUserUid: 'user-a',
+        isInitialized: true,
+      );
+      final backupProvider = AutoDriveBackupProvider(
+        userUidProvider: userProvider,
+        driveBackupService: GoogleDriveBackupService(
+          accountSession: _FakeDriveAccountSession(),
+        ),
+        motionEmailForUser: (_) => 'user-a@example.com',
+        now: () => DateTime(2026, 10, 15, 20, 30),
+      );
+      addTearDown(() {
+        backupProvider.dispose();
+        userProvider.dispose();
+      });
+
+      await backupProvider.initialize();
+      await backupProvider.recordSuccessfulBackup(
+        currentUser: 'user-a',
+        fileCount: 3,
+        driveAccountEmail: 'user-a@example.com',
+        totalBytes: 15360,
+      );
+
+      expect(backupProvider.driveAccountEmail, 'user-a@example.com');
+      expect(backupProvider.lastBackupSizeBytes, 15360);
+      expect(backupProvider.consecutiveFailures, 0);
+      expect(backupProvider.lastFailureAt, isNull);
+
+      final prefs = await SharedPreferences.getInstance();
+      expect(
+        prefs.getString('autoDriveBackupDriveAccountEmail.user-a'),
+        'user-a@example.com',
+      );
+      expect(prefs.getInt('autoDriveBackupLastSizeBytes.user-a'), 15360);
+      expect(prefs.getInt('autoDriveBackupConsecutiveFailures.user-a'), 0);
+      expect(prefs.getString('autoDriveBackupLastFailureAt.user-a'), isNull);
+    });
   });
 }
 

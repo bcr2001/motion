@@ -411,6 +411,8 @@ class _DataTransferPageState extends State<DataTransferPage> {
           await context.read<AutoDriveBackupProvider>().recordSuccessfulBackup(
                 currentUser: currentUser,
                 fileCount: result.fileCount,
+                driveAccountEmail: result.email,
+                totalBytes: result.totalBytes,
               );
         }
 
@@ -614,7 +616,7 @@ class _DataTransferPageState extends State<DataTransferPage> {
               const SizedBox(height: 12),
               Consumer<AutoDriveBackupProvider>(
                 builder: (context, backup, child) {
-                  return _AutoDriveBackupCard(
+                  return BackupHealthCard(
                     backup: backup,
                     onChanged:
                         _isBusy ? null : (value) => backup.setEnabled(value),

@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:motion/firebase_options.dart';
+import 'package:motion/motion_core/mc_migrations/temp_video_editing_to_youtube_migration.dart';
+import 'package:motion/motion_core/mc_sqlite/sql_assigner_db.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_month_provider_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/current_year_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/first_and_last_pvd.dart';
@@ -50,6 +52,10 @@ void main() async {
 
   // AssignerProvider
   final assignerProvider = AssignerMainProvider();
+  final videoEditingMigration = TempVideoEditingToYouTubeMigration(
+    trackerDatabase: trackerDatabase,
+    assignerDatabase: () => AssignerDatabaseHelper().database,
+  );
 
   // theme mode provider N1
   final themeModeProviderN1 = AppThemeModeProviderN1();
@@ -83,6 +89,28 @@ void main() async {
     databaseHelper: trackerDatabase,
   );
 
+  Future<void> runVideoEditingMigration() async {
+    try {
+      final result =
+          await videoEditingMigration.runIfNeeded(userUidProvider.userUid);
+      if (result == null || !result.changed) return;
+      trackingDataRevisions.markAllTrackingDataChanged();
+      await assignerProvider.getAllUserItems();
+    } catch (error, stackTrace) {
+      debugPrint('Video Editing migration failed: $error');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+  }
+
+  Future<void> initializeUserData() async {
+    await userUidProvider.initializeUidSharedPreferences();
+    await runVideoEditingMigration();
+    await assignerProvider.getAllUserItems();
+    userUidProvider.addListener(() {
+      unawaited(runVideoEditingMigration());
+    });
+  }
+
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider.value(value: experiencePointTableProvider),
@@ -114,15 +142,11 @@ void main() async {
       ),
       _initializeSafely(
         'User session',
-        userUidProvider.initializeUidSharedPreferences,
+        initializeUserData,
       ),
       _initializeSafely(
         'Automatic Drive backup',
         autoDriveBackupProvider.initialize,
-      ),
-      _initializeSafely(
-        'Assigned subcategories',
-        assignerProvider.getAllUserItems,
       ),
       _initializeSafely(
         'Activity timer',

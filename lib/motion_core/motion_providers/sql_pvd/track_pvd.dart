@@ -478,6 +478,18 @@ class SubcategoryTrackerDatabaseProvider extends ChangeNotifier {
     );
   }
 
+  Future<String?> retrieveLastTrackedDateForSubcategory({
+    required String currentUser,
+    required String mainCategoryName,
+    required String subcategoryName,
+  }) async {
+    return trackDbInstance.getLastTrackedDateForSubcategory(
+      currentUser: requireCurrentUser(currentUser),
+      mainCategoryName: mainCategoryName,
+      subcategoryName: subcategoryName,
+    );
+  }
+
   Future<List<Subcategories>> retrieveSubcategoryEntriesForDate({
     required String date,
     required String currentUser,

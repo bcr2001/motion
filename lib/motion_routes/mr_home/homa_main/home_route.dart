@@ -20,6 +20,7 @@ import '../home_reusable/back_home.dart';
 import '../home_reusable/front_home.dart';
 import '../home_windows/efficieny_window.dart';
 import '../home_windows/total_acc_unacc.dart';
+import 'home_content_sliver.dart';
 
 // home route
 class MotionHomeRoute extends StatelessWidget {
@@ -127,8 +128,8 @@ class MotionHomeRoute extends StatelessWidget {
           _buildAppBar(context),
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 10.0),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
+            sliver: HomeContentSliver(
+              children: [
                 // SECTION ONE: Life Completed
                 // Displays a life progress bar based on a user's birthdate.
                 const LifeCompleted(),
@@ -170,7 +171,7 @@ class MotionHomeRoute extends StatelessWidget {
                   },
                 ),
                 const SummaryWindow(),
-              ]),
+              ],
             ),
           )
         ],

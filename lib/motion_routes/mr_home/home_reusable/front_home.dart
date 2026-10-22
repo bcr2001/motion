@@ -1037,6 +1037,12 @@ class _SubcategoryAndCurrentDayTotalsState
   String? _latestDailyTotalsKey;
   Map<String, double> _latestDailyTotals = {};
 
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   Future<Map<String, double>> _dailyTotalsFor({
     required SubcategoryTrackerDatabaseProvider sub,
     required String currentDate,
