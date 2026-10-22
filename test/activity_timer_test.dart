@@ -142,6 +142,43 @@ void main() {
         DateTime(2026, 8, 11, 12, 25),
       );
     });
+
+    test('round-trips persisted Pomodoro phase state', () {
+      final start = DateTime(2026, 8, 11, 12);
+      final session = ActivityTimerSession(
+        currentLoggedInUser: 'user-1',
+        mainCategoryName: MotionCategories.education,
+        subcategoryName: 'Studied/Revised',
+        startedAtEpochMs: start.millisecondsSinceEpoch,
+        currentSegmentStartedAtEpochMs: start.millisecondsSinceEpoch,
+        completedSegments: const [],
+        status: ActivityTimerStatus.running,
+        updatedAtEpochMs: start.millisecondsSinceEpoch,
+        nextReminderAtSeconds: 0,
+        mode: ActivityTimerMode.pomodoro,
+        pomodoroPhase: PomodoroPhase.focus,
+        pomodoroFocusSeconds: 25 * 60,
+        pomodoroShortBreakSeconds: 5 * 60,
+        pomodoroLongBreakSeconds: 15 * 60,
+        pomodoroTotalRounds: 4,
+        pomodoroCurrentRound: 2,
+        pomodoroPhaseStartedAtEpochMs: start.millisecondsSinceEpoch,
+        pomodoroPhaseElapsedSeconds: 30,
+      );
+
+      final restored = ActivityTimerSession.fromMap(session.toMap());
+
+      expect(restored.isPomodoro, isTrue);
+      expect(restored.pomodoroPhase, PomodoroPhase.focus);
+      expect(restored.pomodoroCurrentRound, 2);
+      expect(restored.activeTargetSeconds, 25 * 60);
+      expect(
+        restored.phaseElapsedSecondsAt(
+          start.add(const Duration(minutes: 1)),
+        ),
+        90,
+      );
+    });
   });
 
   group('activity timer calculations', () {
@@ -442,6 +479,95 @@ void main() {
       expect(result.entries.single.timeSpent, 65.0);
     });
 
+    test('Pomodoro saves focus rounds and excludes every break', () async {
+      await timer.start(
+        mainCategoryName: MotionCategories.education,
+        subcategoryName: 'Studied/Revised',
+        pomodoro: const PomodoroConfiguration(
+          focusSeconds: 25 * 60,
+          shortBreakSeconds: 5 * 60,
+          longBreakSeconds: 15 * 60,
+          totalRounds: 2,
+        ),
+      );
+
+      expect(timer.isPomodoroSession, isTrue);
+      expect(timer.pomodoroPhase, PomodoroPhase.focus);
+      expect(notificationBridge.lastPermissionRequiredExactAlarm, isTrue);
+
+      now = DateTime(2026, 7, 19, 9, 25);
+      timer.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      await _flushAsyncWork();
+      expect(timer.pomodoroPhase, PomodoroPhase.shortBreak);
+      expect(timer.elapsedSeconds, 25 * 60);
+      expect(timer.phaseElapsedSeconds, 0);
+      expect(timer.hasPendingPomodoroPhaseEvent, isTrue);
+      expect(
+        timer.consumePomodoroPhaseEvent()?.completedPhase,
+        PomodoroPhase.focus,
+      );
+
+      now = DateTime(2026, 7, 19, 9, 27);
+      await timer.pause();
+      expect(timer.elapsedSeconds, 25 * 60);
+      expect(timer.phaseElapsedSeconds, 2 * 60);
+      now = DateTime(2026, 7, 19, 10);
+      expect(timer.elapsedSeconds, 25 * 60);
+      expect(timer.phaseElapsedSeconds, 2 * 60);
+
+      await timer.resume();
+      now = DateTime(2026, 7, 19, 10, 3);
+      timer.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      await _flushAsyncWork();
+      expect(timer.pomodoroPhase, PomodoroPhase.readyForFocus);
+      expect(timer.pomodoroCurrentRound, 2);
+      expect(timer.elapsedSeconds, 25 * 60);
+
+      await timer.startNextPomodoroFocus();
+      expect(timer.pomodoroPhase, PomodoroPhase.focus);
+      now = DateTime(2026, 7, 19, 10, 28);
+      timer.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      await _flushAsyncWork();
+      expect(timer.pomodoroPhase, PomodoroPhase.longBreak);
+      expect(timer.elapsedSeconds, 50 * 60);
+
+      now = DateTime(2026, 7, 19, 10, 43);
+      timer.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      await _flushAsyncWork();
+      expect(timer.pomodoroPhase, PomodoroPhase.complete);
+      expect(timer.isRunning, isFalse);
+
+      final result = await timer.finish();
+      expect(result.totalSeconds, 50 * 60);
+      expect(result.entries, hasLength(1));
+      expect(result.entries.single.timeSpent, 50.0);
+
+      final rows = await database.query(MotionDbTables.subcategory);
+      expect(rows, hasLength(1));
+      expect(rows.single[MotionDbColumns.timeSpent], 50.0);
+      expect(
+        notificationBridge.events.where((event) => event.type == 'target'),
+        hasLength(4),
+      );
+    });
+
+    test('rejects Pomodoro plans exceeding 24 tracked hours', () async {
+      await expectLater(
+        timer.start(
+          mainCategoryName: MotionCategories.skills,
+          subcategoryName: 'Chess',
+          pomodoro: const PomodoroConfiguration(
+            focusSeconds: 3 * 60 * 60,
+            shortBreakSeconds: 5 * 60,
+            longBreakSeconds: 15 * 60,
+            totalRounds: 9,
+          ),
+        ),
+        throwsA(isA<StateError>()),
+      );
+      expect(timer.hasActiveTimer, isFalse);
+    });
+
     test('rejects timer targets longer than 24 hours', () async {
       await expectLater(
         timer.start(
@@ -636,4 +762,5 @@ class _NotificationEvent {
 Future<void> _flushAsyncWork() async {
   await Future<void>.delayed(Duration.zero);
   await Future<void>.delayed(Duration.zero);
+  await Future<void>.delayed(const Duration(milliseconds: 10));
 }

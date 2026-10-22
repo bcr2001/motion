@@ -41,6 +41,17 @@ class MotionDbColumns {
   static const String nextTimerReminderAtSeconds = 'nextTimerReminderAtSeconds';
   static const String timerTargetSeconds = 'timerTargetSeconds';
   static const String timerTargetAlertTriggered = 'timerTargetAlertTriggered';
+  static const String timerMode = 'timerMode';
+  static const String pomodoroPhase = 'pomodoroPhase';
+  static const String pomodoroFocusSeconds = 'pomodoroFocusSeconds';
+  static const String pomodoroShortBreakSeconds = 'pomodoroShortBreakSeconds';
+  static const String pomodoroLongBreakSeconds = 'pomodoroLongBreakSeconds';
+  static const String pomodoroTotalRounds = 'pomodoroTotalRounds';
+  static const String pomodoroCurrentRound = 'pomodoroCurrentRound';
+  static const String pomodoroPhaseStartedAtEpochMs =
+      'pomodoroPhaseStartedAtEpochMs';
+  static const String pomodoroPhaseElapsedSeconds =
+      'pomodoroPhaseElapsedSeconds';
 }
 
 class MotionCategories {

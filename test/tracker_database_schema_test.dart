@@ -3,8 +3,8 @@ import 'package:motion/motion_core/mc_sqlite/tracker_database_schema.dart';
 
 void main() {
   group('TrackerDatabaseSchema', () {
-    test('uses version 17 after adding timed activity sessions', () {
-      expect(TrackerDatabaseSchema.version, 17);
+    test('uses version 18 after adding persisted Pomodoro sessions', () {
+      expect(TrackerDatabaseSchema.version, 18);
     });
 
     test('defines the active timer session table', () {

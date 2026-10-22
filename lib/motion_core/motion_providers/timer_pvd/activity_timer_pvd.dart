@@ -27,6 +27,18 @@ class ActivityTimerFinishResult {
   });
 }
 
+class PomodoroPhaseEvent {
+  final PomodoroPhase completedPhase;
+  final PomodoroPhase nextPhase;
+  final int completedRound;
+
+  const PomodoroPhaseEvent({
+    required this.completedPhase,
+    required this.nextPhase,
+    required this.completedRound,
+  });
+}
+
 class ActivityTimerProvider extends ChangeNotifier with WidgetsBindingObserver {
   ActivityTimerProvider({
     required UserUidProvider userUidProvider,
@@ -62,6 +74,8 @@ class ActivityTimerProvider extends ChangeNotifier with WidgetsBindingObserver {
   bool? _notificationPermissionGranted;
   bool _isMarkingTargetReached = false;
   bool _hasPendingTargetReachedEvent = false;
+  bool _isAdvancingPomodoro = false;
+  PomodoroPhaseEvent? _pendingPomodoroPhaseEvent;
 
   ActivityTimerSession? get session => _session;
   bool get hasActiveTimer => _session != null;
@@ -72,8 +86,14 @@ class ActivityTimerProvider extends ChangeNotifier with WidgetsBindingObserver {
   bool? get notificationPermissionGranted => _notificationPermissionGranted;
 
   int get elapsedSeconds => _session?.elapsedSecondsAt(_clock()) ?? 0;
-  int? get targetSeconds => _session?.targetSeconds;
+  int? get targetSeconds => _session?.activeTargetSeconds;
   bool get isTimedSession => _session?.isTimed ?? false;
+  bool get isPomodoroSession => _session?.isPomodoro ?? false;
+  PomodoroPhase? get pomodoroPhase => _session?.pomodoroPhase;
+  int get pomodoroCurrentRound => _session?.pomodoroCurrentRound ?? 0;
+  int get pomodoroTotalRounds => _session?.pomodoroTotalRounds ?? 0;
+  int get phaseElapsedSeconds => _session?.phaseElapsedSecondsAt(_clock()) ?? 0;
+  bool get hasPendingPomodoroPhaseEvent => _pendingPomodoroPhaseEvent != null;
   bool get hasReachedTarget => _session?.targetReachedAt(_clock()) ?? false;
   bool get hasPendingTargetReachedEvent => _hasPendingTargetReachedEvent;
   int? get remainingTargetSeconds => _session?.remainingSecondsAt(_clock());
@@ -100,11 +120,18 @@ class ActivityTimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     required String mainCategoryName,
     required String subcategoryName,
     int? targetSeconds,
+    PomodoroConfiguration? pomodoro,
   }) async {
     if (_isBusy) return;
+    if (targetSeconds != null && pomodoro != null) {
+      throw StateError('Choose either a timed session or Pomodoro.');
+    }
     if (targetSeconds != null &&
         (targetSeconds <= 0 || targetSeconds > maximumTargetSeconds)) {
       throw StateError('Timer targets must be between 1 second and 24 hours.');
+    }
+    if (pomodoro != null) {
+      _validatePomodoroConfiguration(pomodoro);
     }
     await _runBusy(() async {
       final currentUser = _userUidProvider.userUid;
@@ -121,7 +148,7 @@ class ActivityTimerProvider extends ChangeNotifier with WidgetsBindingObserver {
       }
 
       _notificationPermissionGranted = await _requestNotificationPermission(
-        requiresExactAlarm: targetSeconds != null,
+        requiresExactAlarm: targetSeconds != null || pomodoro != null,
       );
 
       final now = _clock();
@@ -136,6 +163,19 @@ class ActivityTimerProvider extends ChangeNotifier with WidgetsBindingObserver {
         updatedAtEpochMs: now.millisecondsSinceEpoch,
         nextReminderAtSeconds: 0,
         targetSeconds: targetSeconds,
+        mode: pomodoro != null
+            ? ActivityTimerMode.pomodoro
+            : targetSeconds != null
+                ? ActivityTimerMode.timed
+                : ActivityTimerMode.openEnded,
+        pomodoroPhase: pomodoro == null ? null : PomodoroPhase.focus,
+        pomodoroFocusSeconds: pomodoro?.focusSeconds ?? 0,
+        pomodoroShortBreakSeconds: pomodoro?.shortBreakSeconds ?? 0,
+        pomodoroLongBreakSeconds: pomodoro?.longBreakSeconds ?? 0,
+        pomodoroTotalRounds: pomodoro?.totalRounds ?? 0,
+        pomodoroCurrentRound: pomodoro == null ? 0 : 1,
+        pomodoroPhaseStartedAtEpochMs:
+            pomodoro == null ? null : now.millisecondsSinceEpoch,
       );
 
       await _databaseHelper.saveActiveTimerSession(nextSession);
@@ -147,6 +187,7 @@ class ActivityTimerProvider extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   Future<void> pause() async {
+    await _advancePomodoroPhasesIfNeeded();
     final activeSession = _session;
     if (_isBusy || activeSession == null || !activeSession.isRunning) return;
 
@@ -157,6 +198,12 @@ class ActivityTimerProvider extends ChangeNotifier with WidgetsBindingObserver {
       completedSegments: segments,
       status: ActivityTimerStatus.paused,
       updatedAtEpochMs: now.millisecondsSinceEpoch,
+      pomodoroPhaseStartedAtEpochMs: activeSession.isPomodoro
+          ? null
+          : activeSession.pomodoroPhaseStartedAtEpochMs,
+      pomodoroPhaseElapsedSeconds: activeSession.isPomodoro
+          ? activeSession.phaseElapsedSecondsAt(now)
+          : activeSession.pomodoroPhaseElapsedSeconds,
     );
 
     await _runBusy(() async {
@@ -174,19 +221,30 @@ class ActivityTimerProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   Future<void> resume() async {
     final activeSession = _session;
-    if (_isBusy || activeSession == null || activeSession.isRunning) return;
+    if (_isBusy ||
+        activeSession == null ||
+        activeSession.isRunning ||
+        activeSession.isWaitingForPomodoroFocus ||
+        activeSession.isPomodoroComplete) {
+      return;
+    }
 
     final now = _clock();
     final resumedSession = activeSession.copyWith(
-      currentSegmentStartedAtEpochMs: now.millisecondsSinceEpoch,
+      currentSegmentStartedAtEpochMs:
+          !activeSession.isPomodoro || activeSession.isPomodoroFocus
+              ? now.millisecondsSinceEpoch
+              : null,
       status: ActivityTimerStatus.running,
       updatedAtEpochMs: now.millisecondsSinceEpoch,
+      pomodoroPhaseStartedAtEpochMs:
+          activeSession.isPomodoro ? now.millisecondsSinceEpoch : null,
     );
 
     await _runBusy(() async {
       if (_notificationPermissionGranted != true) {
         _notificationPermissionGranted = await _requestNotificationPermission(
-          requiresExactAlarm: activeSession.isTimed,
+          requiresExactAlarm: activeSession.isTimed || activeSession.isPomodoro,
         );
       }
       await _databaseHelper.saveActiveTimerSession(resumedSession);
@@ -197,10 +255,43 @@ class ActivityTimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     _checkTargetReached();
   }
 
+  Future<void> startNextPomodoroFocus() async {
+    final activeSession = _session;
+    if (_isBusy ||
+        activeSession == null ||
+        !activeSession.isWaitingForPomodoroFocus) {
+      return;
+    }
+
+    final now = _clock();
+    final focusedSession = activeSession.copyWith(
+      pomodoroPhase: PomodoroPhase.focus,
+      pomodoroPhaseStartedAtEpochMs: now.millisecondsSinceEpoch,
+      pomodoroPhaseElapsedSeconds: 0,
+      currentSegmentStartedAtEpochMs: now.millisecondsSinceEpoch,
+      status: ActivityTimerStatus.running,
+      updatedAtEpochMs: now.millisecondsSinceEpoch,
+      targetAlertTriggered: false,
+    );
+
+    await _runBusy(() async {
+      await _databaseHelper.saveActiveTimerSession(focusedSession);
+      _session = focusedSession;
+      _startTicker();
+      await _syncSystemNotification(focusedSession);
+    });
+  }
+
   ActivityTimerSession? consumeTargetReachedEvent() {
     if (!_hasPendingTargetReachedEvent) return null;
     _hasPendingTargetReachedEvent = false;
     return _session;
+  }
+
+  PomodoroPhaseEvent? consumePomodoroPhaseEvent() {
+    final event = _pendingPomodoroPhaseEvent;
+    _pendingPomodoroPhaseEvent = null;
+    return event;
   }
 
   Future<void> dismissTargetAlert() async {
@@ -224,6 +315,7 @@ class ActivityTimerProvider extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   Future<ActivityTimerFinishResult> finish({int? correctedSeconds}) async {
+    await _advancePomodoroPhasesIfNeeded();
     final activeSession = _session;
     if (activeSession == null) {
       throw StateError('There is no active timer to finish.');
@@ -235,6 +327,11 @@ class ActivityTimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     final now = _clock();
     final exactSegments = activeSession.segmentsEndingAt(now);
     final exactSeconds = activeSession.elapsedSecondsAt(now);
+    if (activeSession.isPomodoro &&
+        correctedSeconds != null &&
+        correctedSeconds != exactSeconds) {
+      throw StateError('Pomodoro focus time cannot include break time.');
+    }
     final totalSeconds = correctedSeconds ?? exactSeconds;
     if (totalSeconds <= 0) {
       throw StateError('The timer duration must be greater than zero.');
@@ -316,15 +413,17 @@ class ActivityTimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     }
     _loadedUser = currentUser;
     _session = restoredSession;
-    if (_shouldTick(restoredSession)) {
+    await _advancePomodoroPhasesIfNeeded(emitEvent: false);
+    final currentSession = _session;
+    if (_shouldTick(currentSession)) {
       _startTicker();
     } else {
       _stopTicker();
     }
-    if (restoredSession == null) {
+    if (currentSession == null) {
       await _stopSystemNotification();
     } else {
-      await _syncSystemNotification(restoredSession);
+      await _syncSystemNotification(currentSession);
     }
     _checkTargetReached();
     notifyListeners();
@@ -349,7 +448,7 @@ class ActivityTimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     try {
       await _notificationBridge.sync(
         session: activeSession,
-        elapsedSeconds: activeSession.elapsedSecondsAt(_clock()),
+        elapsedSeconds: activeSession.phaseElapsedSecondsAt(_clock()),
       );
     } catch (error) {
       debugPrint('Activity timer notification update failed: $error');
@@ -367,7 +466,13 @@ class ActivityTimerProvider extends ChangeNotifier with WidgetsBindingObserver {
   void _startTicker() {
     _ticker?.cancel();
     _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (!_checkTargetReached()) notifyListeners();
+      final activeSession = _session;
+      if (activeSession?.isPomodoro == true) {
+        unawaited(_advancePomodoroPhasesIfNeeded());
+        notifyListeners();
+      } else if (!_checkTargetReached()) {
+        notifyListeners();
+      }
     });
   }
 
@@ -385,13 +490,16 @@ class ActivityTimerProvider extends ChangeNotifier with WidgetsBindingObserver {
   void _clearSession() {
     _session = null;
     _hasPendingTargetReachedEvent = false;
+    _pendingPomodoroPhaseEvent = null;
     _isMarkingTargetReached = false;
+    _isAdvancingPomodoro = false;
     _stopTicker();
   }
 
   bool _checkTargetReached() {
     final activeSession = _session;
     if (activeSession == null ||
+        activeSession.isPomodoro ||
         activeSession.targetAlertTriggered ||
         _isMarkingTargetReached ||
         !activeSession.targetReachedAt(_clock())) {
@@ -441,15 +549,146 @@ class ActivityTimerProvider extends ChangeNotifier with WidgetsBindingObserver {
     }
   }
 
+  void _validatePomodoroConfiguration(PomodoroConfiguration configuration) {
+    if (configuration.focusSeconds <= 0 ||
+        configuration.shortBreakSeconds <= 0 ||
+        configuration.longBreakSeconds <= 0 ||
+        configuration.totalRounds <= 0) {
+      throw StateError(
+          'Pomodoro durations and rounds must be greater than zero.');
+    }
+    if (configuration.focusSeconds > maximumTargetSeconds ||
+        configuration.shortBreakSeconds > maximumTargetSeconds ||
+        configuration.longBreakSeconds > maximumTargetSeconds ||
+        configuration.totalFocusSeconds > maximumTargetSeconds) {
+      throw StateError(
+        'A Pomodoro plan cannot contain more than 24 tracked hours.',
+      );
+    }
+  }
+
+  Future<void> _advancePomodoroPhasesIfNeeded({
+    bool emitEvent = true,
+  }) async {
+    if (_isAdvancingPomodoro) return;
+    var activeSession = _session;
+    if (activeSession == null ||
+        !activeSession.isPomodoro ||
+        !activeSession.isRunning ||
+        !activeSession.targetReachedAt(_clock())) {
+      return;
+    }
+
+    _isAdvancingPomodoro = true;
+    PomodoroPhaseEvent? latestEvent;
+    try {
+      while (activeSession != null &&
+          activeSession.isPomodoro &&
+          activeSession.isRunning &&
+          activeSession.targetReachedAt(_clock())) {
+        final completedPhase = activeSession.pomodoroPhase;
+        if (completedPhase != PomodoroPhase.focus &&
+            completedPhase != PomodoroPhase.shortBreak &&
+            completedPhase != PomodoroPhase.longBreak) {
+          break;
+        }
+
+        final targetSeconds = activeSession.activeTargetSeconds ?? 0;
+        final completedAtEpochMs = activeSession.phaseTargetEndEpochMs() ??
+            _clock().millisecondsSinceEpoch;
+        late ActivityTimerSession nextSession;
+
+        if (completedPhase == PomodoroPhase.focus) {
+          final focusSegments =
+              List<ActivityTimerSegment>.from(activeSession.completedSegments);
+          final currentStart = activeSession.currentSegmentStartedAtEpochMs;
+          if (currentStart != null && completedAtEpochMs > currentStart) {
+            focusSegments.add(ActivityTimerSegment(
+              startedAtEpochMs: currentStart,
+              endedAtEpochMs: completedAtEpochMs,
+            ));
+          }
+          final nextPhase = activeSession.pomodoroCurrentRound >=
+                  activeSession.pomodoroTotalRounds
+              ? PomodoroPhase.longBreak
+              : PomodoroPhase.shortBreak;
+          nextSession = activeSession.copyWith(
+            currentSegmentStartedAtEpochMs: null,
+            completedSegments: focusSegments,
+            pomodoroPhase: nextPhase,
+            pomodoroPhaseStartedAtEpochMs: completedAtEpochMs,
+            pomodoroPhaseElapsedSeconds: 0,
+            status: ActivityTimerStatus.running,
+            targetAlertTriggered: false,
+            updatedAtEpochMs: _clock().millisecondsSinceEpoch,
+          );
+        } else {
+          final isFinalBreak = completedPhase == PomodoroPhase.longBreak;
+          final nextPhase = isFinalBreak
+              ? PomodoroPhase.complete
+              : PomodoroPhase.readyForFocus;
+          nextSession = activeSession.copyWith(
+            currentSegmentStartedAtEpochMs: null,
+            pomodoroPhase: nextPhase,
+            pomodoroCurrentRound: isFinalBreak
+                ? activeSession.pomodoroCurrentRound
+                : activeSession.pomodoroCurrentRound + 1,
+            pomodoroPhaseStartedAtEpochMs: null,
+            pomodoroPhaseElapsedSeconds: 0,
+            status: ActivityTimerStatus.paused,
+            targetAlertTriggered: false,
+            updatedAtEpochMs: _clock().millisecondsSinceEpoch,
+          );
+        }
+
+        try {
+          await _notificationBridge.targetReached(
+            session: activeSession,
+            elapsedSeconds: targetSeconds,
+          );
+        } catch (error) {
+          debugPrint('Pomodoro phase alert failed: $error');
+        }
+
+        await _databaseHelper.saveActiveTimerSession(nextSession);
+        _session = nextSession;
+        await _syncSystemNotification(nextSession);
+        latestEvent = PomodoroPhaseEvent(
+          completedPhase: completedPhase!,
+          nextPhase: nextSession.pomodoroPhase!,
+          completedRound: activeSession.pomodoroCurrentRound,
+        );
+        activeSession = nextSession;
+      }
+
+      if (emitEvent && latestEvent != null) {
+        _pendingPomodoroPhaseEvent = latestEvent;
+      }
+      if (_shouldTick(_session)) {
+        _startTicker();
+      } else {
+        _stopTicker();
+      }
+      notifyListeners();
+    } finally {
+      _isAdvancingPomodoro = false;
+    }
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      if (_shouldTick(_session)) _startTicker();
-      if (!_checkTargetReached()) notifyListeners();
+      unawaited(_resumeTimerFromBackground());
     } else if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.inactive) {
       _stopTicker();
     }
+  }
+
+  Future<void> _resumeTimerFromBackground() async {
+    await _advancePomodoroPhasesIfNeeded();
+    if (_shouldTick(_session)) _startTicker();
+    if (!_checkTargetReached()) notifyListeners();
   }
 
   @override

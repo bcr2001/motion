@@ -80,8 +80,16 @@ class PlatformActivityTimerNotificationBridge
       'elapsedSeconds': elapsedSeconds,
       'isRunning': session.isRunning,
       'timerStartedAtEpochMs': session.startedAtEpochMs,
-      'targetSeconds': session.targetSeconds,
+      'targetSeconds': session.activeTargetSeconds,
       'targetAlertTriggered': session.targetAlertTriggered,
+      'timerMode': session.effectiveMode.name,
+      'pomodoroPhase': session.pomodoroPhase?.name,
+      'pomodoroFocusSeconds': session.pomodoroFocusSeconds,
+      'pomodoroShortBreakSeconds': session.pomodoroShortBreakSeconds,
+      'pomodoroLongBreakSeconds': session.pomodoroLongBreakSeconds,
+      'pomodoroTotalRounds': session.pomodoroTotalRounds,
+      'pomodoroCurrentRound': session.pomodoroCurrentRound,
+      'pomodoroPhaseStartedAtEpochMs': session.pomodoroPhaseStartedAtEpochMs,
     };
   }
 

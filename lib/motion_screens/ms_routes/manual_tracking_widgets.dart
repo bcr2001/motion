@@ -1,11 +1,15 @@
 part of 'manual_tracking.dart';
 
-enum _ActivityTimerStartMode { openEnded, timed }
+enum _ActivityTimerStartMode { openEnded, timed, pomodoro }
 
 class _ActivityTimerStartChoice {
   final int? targetSeconds;
+  final PomodoroConfiguration? pomodoro;
 
-  const _ActivityTimerStartChoice({this.targetSeconds});
+  const _ActivityTimerStartChoice({
+    this.targetSeconds,
+    this.pomodoro,
+  });
 }
 
 class _StartActivityTimerDialog extends StatefulWidget {
@@ -23,6 +27,10 @@ class _StartActivityTimerDialogState extends State<_StartActivityTimerDialog> {
   final _hoursController = TextEditingController();
   final _minutesController = TextEditingController();
   final _secondsController = TextEditingController();
+  final _focusMinutesController = TextEditingController(text: '25');
+  final _breakMinutesController = TextEditingController(text: '5');
+  final _roundsController = TextEditingController(text: '4');
+  final _longBreakMinutesController = TextEditingController(text: '15');
   _ActivityTimerStartMode _mode = _ActivityTimerStartMode.openEnded;
   String? _targetError;
 
@@ -31,6 +39,10 @@ class _StartActivityTimerDialogState extends State<_StartActivityTimerDialog> {
     _hoursController.dispose();
     _minutesController.dispose();
     _secondsController.dispose();
+    _focusMinutesController.dispose();
+    _breakMinutesController.dispose();
+    _roundsController.dispose();
+    _longBreakMinutesController.dispose();
     super.dispose();
   }
 
@@ -47,6 +59,21 @@ class _StartActivityTimerDialogState extends State<_StartActivityTimerDialog> {
     });
   }
 
+  void _selectPomodoroPreset({
+    required int focusMinutes,
+    required int breakMinutes,
+    required int longBreakMinutes,
+    int rounds = 4,
+  }) {
+    setState(() {
+      _focusMinutesController.text = '$focusMinutes';
+      _breakMinutesController.text = '$breakMinutes';
+      _roundsController.text = '$rounds';
+      _longBreakMinutesController.text = '$longBreakMinutes';
+      _targetError = null;
+    });
+  }
+
   void _start() {
     if (_mode == _ActivityTimerStartMode.openEnded) {
       Navigator.of(context).pop(const _ActivityTimerStartChoice());
@@ -54,6 +81,35 @@ class _StartActivityTimerDialogState extends State<_StartActivityTimerDialog> {
     }
 
     if (!(_formKey.currentState?.validate() ?? false)) return;
+    if (_mode == _ActivityTimerStartMode.pomodoro) {
+      final configuration = PomodoroConfiguration(
+        focusSeconds: _valueOf(_focusMinutesController) * 60,
+        shortBreakSeconds: _valueOf(_breakMinutesController) * 60,
+        longBreakSeconds: _valueOf(_longBreakMinutesController) * 60,
+        totalRounds: _valueOf(_roundsController),
+      );
+      if (configuration.focusSeconds <= 0 ||
+          configuration.shortBreakSeconds <= 0 ||
+          configuration.longBreakSeconds <= 0 ||
+          configuration.totalRounds <= 0) {
+        setState(() {
+          _targetError = 'Enter a value greater than zero for every field.';
+        });
+        return;
+      }
+      if (configuration.totalFocusSeconds >
+          ActivityTimerProvider.maximumTargetSeconds) {
+        setState(() {
+          _targetError = 'Total focus time cannot exceed 24 hours.';
+        });
+        return;
+      }
+      Navigator.of(context).pop(
+        _ActivityTimerStartChoice(pomodoro: configuration),
+      );
+      return;
+    }
+
     final targetSeconds = _valueOf(_hoursController) * 3600 +
         _valueOf(_minutesController) * 60 +
         _valueOf(_secondsController);
@@ -81,6 +137,7 @@ class _StartActivityTimerDialogState extends State<_StartActivityTimerDialog> {
     final borderColor =
         isDarkMode ? Colors.white.withValues(alpha: 0.12) : Colors.black12;
     final isTimed = _mode == _ActivityTimerStartMode.timed;
+    final isPomodoro = _mode == _ActivityTimerStartMode.pomodoro;
 
     return Dialog(
       backgroundColor: surfaceColor,
@@ -163,6 +220,16 @@ class _StartActivityTimerDialogState extends State<_StartActivityTimerDialog> {
                         secondaryText: secondaryText,
                       ),
                     ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _modeButton(
+                        label: 'Pomodoro',
+                        icon: Icons.local_cafe_outlined,
+                        mode: _ActivityTimerStartMode.pomodoro,
+                        borderColor: borderColor,
+                        secondaryText: secondaryText,
+                      ),
+                    ),
                   ],
                 ),
                 if (isTimed) ...[
@@ -204,6 +271,79 @@ class _StartActivityTimerDialogState extends State<_StartActivityTimerDialog> {
                       _presetChip('1 hr 30 mins', 90 * 60),
                       _presetChip('2 hrs', 2 * 60 * 60),
                     ],
+                  ),
+                  if (_targetError != null) ...[
+                    const SizedBox(height: 9),
+                    Text(
+                      _targetError!,
+                      style: AppTextStyle.subSectionTextStyle(
+                        fontsize: 10.5,
+                        fontweight: FontWeight.w700,
+                        color: Colors.redAccent,
+                      ),
+                    ),
+                  ],
+                ],
+                if (isPomodoro) ...[
+                  const SizedBox(height: 14),
+                  Wrap(
+                    spacing: 7,
+                    runSpacing: 7,
+                    children: [
+                      _pomodoroPresetChip(
+                        'Classic 25/5',
+                        focusMinutes: 25,
+                        breakMinutes: 5,
+                        longBreakMinutes: 15,
+                      ),
+                      _pomodoroPresetChip(
+                        'Deep Work 50/10',
+                        focusMinutes: 50,
+                        breakMinutes: 10,
+                        longBreakMinutes: 20,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 13),
+                  Row(
+                    children: [
+                      _TimerDurationField(
+                        label: 'Focus min',
+                        controller: _focusMinutesController,
+                        maximum: 180,
+                      ),
+                      const SizedBox(width: 8),
+                      _TimerDurationField(
+                        label: 'Break min',
+                        controller: _breakMinutesController,
+                        maximum: 60,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 9),
+                  Row(
+                    children: [
+                      _TimerDurationField(
+                        label: 'Rounds',
+                        controller: _roundsController,
+                        maximum: 12,
+                      ),
+                      const SizedBox(width: 8),
+                      _TimerDurationField(
+                        label: 'Long break',
+                        controller: _longBreakMinutesController,
+                        maximum: 120,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 9),
+                  Text(
+                    'Breaks begin automatically. The next focus round starts only when you are ready.',
+                    style: AppTextStyle.subSectionTextStyle(
+                      fontsize: 10,
+                      fontweight: FontWeight.normal,
+                      color: secondaryText,
+                    ),
                   ),
                   if (_targetError != null) ...[
                     const SizedBox(height: 9),
@@ -300,6 +440,32 @@ class _StartActivityTimerDialogState extends State<_StartActivityTimerDialog> {
     return ActionChip(
       label: Text(label),
       onPressed: () => _selectPreset(seconds),
+      visualDensity: VisualDensity.compact,
+      side: BorderSide(
+        color: AppColor.blueMainColor.withValues(alpha: 0.28),
+      ),
+      backgroundColor: AppColor.blueMainColor.withValues(alpha: 0.07),
+      labelStyle: AppTextStyle.subSectionTextStyle(
+        fontsize: 10.5,
+        fontweight: FontWeight.w700,
+        color: AppColor.blueMainColor,
+      ),
+    );
+  }
+
+  Widget _pomodoroPresetChip(
+    String label, {
+    required int focusMinutes,
+    required int breakMinutes,
+    required int longBreakMinutes,
+  }) {
+    return ActionChip(
+      label: Text(label),
+      onPressed: () => _selectPomodoroPreset(
+        focusMinutes: focusMinutes,
+        breakMinutes: breakMinutes,
+        longBreakMinutes: longBreakMinutes,
+      ),
       visualDensity: VisualDensity.compact,
       side: BorderSide(
         color: AppColor.blueMainColor.withValues(alpha: 0.28),
@@ -490,6 +656,268 @@ class _TargetMetric extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+enum _PomodoroDialogAction { dismiss, startFocus, finish }
+
+class _PomodoroPhaseDialog extends StatelessWidget {
+  final PomodoroPhaseEvent event;
+  final ActivityTimerSession session;
+
+  const _PomodoroPhaseDialog({
+    required this.event,
+    required this.session,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = isDarkMode
+        ? AppColor.darkModeContentWidget
+        : AppColor.lightModeContentWidget;
+    final secondaryText = isDarkMode ? Colors.white60 : Colors.blueGrey;
+    final borderColor =
+        isDarkMode ? Colors.white.withValues(alpha: 0.12) : Colors.black12;
+    final focusCompleted = event.completedPhase == PomodoroPhase.focus;
+    final sessionCompleted = event.nextPhase == PomodoroPhase.complete;
+    final title = sessionCompleted
+        ? 'Pomodoro Complete'
+        : focusCompleted
+            ? 'Focus Complete'
+            : 'Break Complete';
+    final message = sessionCompleted
+        ? '${session.pomodoroTotalRounds} focus rounds completed.'
+        : focusCompleted
+            ? event.nextPhase == PomodoroPhase.longBreak
+                ? 'Your long break has started.'
+                : 'Your break has started automatically.'
+            : 'Round ${session.pomodoroCurrentRound} is ready when you are.';
+    final accent = focusCompleted ? Colors.green : AppColor.blueMainColor;
+
+    return Dialog(
+      backgroundColor: surfaceColor,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 22, vertical: 24),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: BorderSide(color: borderColor),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(18, 18, 18, 15),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              height: 54,
+              width: 54,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: accent.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                sessionCompleted
+                    ? Icons.check_circle_outline_rounded
+                    : focusCompleted
+                        ? Icons.local_cafe_outlined
+                        : Icons.play_circle_outline_rounded,
+                color: accent,
+                size: 29,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: AppTextStyle.subSectionTextStyle(
+                fontsize: 18,
+                fontweight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(height: 5),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: AppTextStyle.subSectionTextStyle(
+                fontsize: 11,
+                fontweight: FontWeight.normal,
+                color: secondaryText,
+              ),
+            ),
+            const SizedBox(height: 15),
+            _TargetMetric(
+              label: 'Focused Time',
+              value: formatActivityTimerDuration(
+                session.elapsedSecondsAt(DateTime.now()),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.of(context).pop(
+                      sessionCompleted
+                          ? _PomodoroDialogAction.dismiss
+                          : _PomodoroDialogAction.finish,
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: secondaryText,
+                      minimumSize: const Size(0, 44),
+                      side: BorderSide(color: borderColor),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(sessionCompleted ? 'Later' : 'End Session'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(
+                      sessionCompleted
+                          ? _PomodoroDialogAction.finish
+                          : focusCompleted
+                              ? _PomodoroDialogAction.dismiss
+                              : _PomodoroDialogAction.startFocus,
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColor.blueMainColor,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(0, 44),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      sessionCompleted
+                          ? 'Review & Save'
+                          : focusCompleted
+                              ? 'Continue Break'
+                              : 'Start Focus',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FinishPomodoroSessionDialog extends StatelessWidget {
+  final ActivityTimerSession session;
+  final int focusedSeconds;
+
+  const _FinishPomodoroSessionDialog({
+    required this.session,
+    required this.focusedSeconds,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = isDarkMode
+        ? AppColor.darkModeContentWidget
+        : AppColor.lightModeContentWidget;
+    final secondaryText = isDarkMode ? Colors.white60 : Colors.blueGrey;
+    final borderColor =
+        isDarkMode ? Colors.white.withValues(alpha: 0.12) : Colors.black12;
+
+    return Dialog(
+      backgroundColor: surfaceColor,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 22, vertical: 24),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: BorderSide(color: borderColor),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(18, 18, 18, 15),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Finish Pomodoro?',
+              textAlign: TextAlign.center,
+              style: AppTextStyle.subSectionTextStyle(
+                fontsize: 18,
+                fontweight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(height: 5),
+            Text(
+              session.subcategoryName,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyle.subSectionTextStyle(
+                fontsize: 11,
+                fontweight: FontWeight.normal,
+                color: secondaryText,
+              ),
+            ),
+            const SizedBox(height: 15),
+            _TargetMetric(
+              label: 'Focused Time to Save',
+              value: formatActivityTimerDuration(focusedSeconds),
+            ),
+            const SizedBox(height: 9),
+            Text(
+              'Breaks are excluded from the saved time.',
+              textAlign: TextAlign.center,
+              style: AppTextStyle.subSectionTextStyle(
+                fontsize: 10.5,
+                fontweight: FontWeight.w600,
+                color: secondaryText,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: secondaryText,
+                      minimumSize: const Size(0, 44),
+                      side: BorderSide(color: borderColor),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text('Keep Running'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: focusedSeconds <= 0
+                        ? null
+                        : () => Navigator.of(context).pop(true),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColor.blueMainColor,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(0, 44),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text('Save Focus'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -971,12 +1399,14 @@ class _TimerDurationField extends StatelessWidget {
 class _TrackingMethodSelector extends StatelessWidget {
   final ActivityTimerProvider timer;
   final bool isCurrentActivity;
+  final String lastTrackedLabel;
   final VoidCallback? onTimer;
   final VoidCallback onManual;
 
   const _TrackingMethodSelector({
     required this.timer,
     required this.isCurrentActivity,
+    required this.lastTrackedLabel,
     required this.onTimer,
     required this.onManual,
   });
@@ -994,31 +1424,63 @@ class _TrackingMethodSelector extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(10, 10, 10, 8),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: _TrackingMethodTile(
-              icon: session == null
-                  ? Icons.play_arrow_rounded
-                  : isCurrentActivity && !timer.isRunning
-                      ? Icons.pause_rounded
-                      : Icons.timer_outlined,
-              title: 'Timer',
-              subtitle: timerLabel,
-              accent: AppColor.blueMainColor,
-              onTap: timer.isBusy ? null : onTimer,
-              isSelected: isCurrentActivity,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(2, 0, 2, 8),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.history_rounded,
+                  size: 15,
+                  color: AppColor.blueMainColor,
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    lastTrackedLabel,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyle.subSectionTextStyle(
+                      fontsize: 10.5,
+                      fontweight: FontWeight.w700,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white60
+                          : Colors.blueGrey,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: _TrackingMethodTile(
-              icon: Icons.edit_calendar_outlined,
-              title: 'Add Manually',
-              subtitle: 'Enter a time block',
-              accent: Colors.teal,
-              onTap: onManual,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: _TrackingMethodTile(
+                  icon: session == null
+                      ? Icons.play_arrow_rounded
+                      : isCurrentActivity && !timer.isRunning
+                          ? Icons.pause_rounded
+                          : Icons.timer_outlined,
+                  title: 'Timer',
+                  subtitle: timerLabel,
+                  accent: AppColor.blueMainColor,
+                  onTap: timer.isBusy ? null : onTimer,
+                  isSelected: isCurrentActivity,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _TrackingMethodTile(
+                  icon: Icons.edit_calendar_outlined,
+                  title: 'Add Manually',
+                  subtitle: 'Enter a time block',
+                  accent: Colors.teal,
+                  onTap: onManual,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -1111,6 +1573,7 @@ class _ActivityTimerPanel extends StatelessWidget {
   final VoidCallback onResume;
   final VoidCallback onFinish;
   final VoidCallback onDiscard;
+  final VoidCallback onStartNextFocus;
   final VoidCallback onOpenRunningTimer;
 
   const _ActivityTimerPanel({
@@ -1120,6 +1583,7 @@ class _ActivityTimerPanel extends StatelessWidget {
     required this.onResume,
     required this.onFinish,
     required this.onDiscard,
+    required this.onStartNextFocus,
     required this.onOpenRunningTimer,
   });
 
@@ -1208,16 +1672,32 @@ class _ActivityTimerPanel extends StatelessWidget {
     BuildContext context,
     ActivityTimerSession session,
   ) {
+    final isPomodoro = session.isPomodoro;
+    final isWaitingForFocus = session.isWaitingForPomodoroFocus;
+    final isPomodoroComplete = session.isPomodoroComplete;
+    final isBreak = session.isPomodoroBreak;
     final targetReached = timer.hasReachedTarget;
     final warning = !targetReached && timer.needsReview;
-    final accent = targetReached
+    final accent = isPomodoroComplete
         ? Colors.green
-        : warning
+        : isWaitingForFocus
             ? Colors.orange
-            : AppColor.blueMainColor;
-    final target = session.targetSeconds ?? 0;
-    final isTimed = target > 0;
-    final elapsedDuration = formatActivityTimerDuration(timer.elapsedSeconds);
+            : isBreak
+                ? Colors.teal
+                : targetReached
+                    ? Colors.green
+                    : warning
+                        ? Colors.orange
+                        : AppColor.blueMainColor;
+    final target = session.activeTargetSeconds ?? 0;
+    final hasPhaseTarget = target > 0;
+    final displayedSeconds =
+        isPomodoro && (isWaitingForFocus || isPomodoroComplete)
+            ? timer.elapsedSeconds
+            : isPomodoro
+                ? timer.phaseElapsedSeconds
+                : timer.elapsedSeconds;
+    final elapsedDuration = formatActivityTimerDuration(displayedSeconds);
     final expectedEndAt = timer.expectedTargetEndAt;
     final expectedEndLabel = expectedEndAt == null
         ? null
@@ -1226,15 +1706,27 @@ class _ActivityTimerPanel extends StatelessWidget {
     final secondaryTimerDuration = targetReached
         ? formatActivityTimerDuration(timer.overtimeSeconds)
         : formatActivityTimerDuration(timer.remainingTargetSeconds ?? 0);
-    final statusLabel = targetReached
-        ? 'Target Reached'
-        : isTimed
-            ? timer.isRunning
-                ? 'Timed Session'
-                : 'Timed Session Paused'
-            : timer.isRunning
-                ? 'Tracking Now'
-                : 'Timer Paused';
+    final statusLabel = isPomodoro
+        ? switch (session.pomodoroPhase) {
+            PomodoroPhase.focus =>
+              timer.isRunning ? 'Pomodoro Focus' : 'Focus Paused',
+            PomodoroPhase.shortBreak =>
+              timer.isRunning ? 'Short Break' : 'Break Paused',
+            PomodoroPhase.longBreak =>
+              timer.isRunning ? 'Long Break' : 'Long Break Paused',
+            PomodoroPhase.readyForFocus => 'Ready for Focus',
+            PomodoroPhase.complete => 'Pomodoro Complete',
+            null => 'Pomodoro',
+          }
+        : targetReached
+            ? 'Target Reached'
+            : hasPhaseTarget
+                ? timer.isRunning
+                    ? 'Timed Session'
+                    : 'Timed Session Paused'
+                : timer.isRunning
+                    ? 'Tracking Now'
+                    : 'Timer Paused';
     return Column(
       children: [
         Row(
@@ -1256,7 +1748,7 @@ class _ActivityTimerPanel extends StatelessWidget {
                       color: accent,
                     ),
                   ),
-                  if (isTimed && expectedEndLabel != null) ...[
+                  if (hasPhaseTarget && expectedEndLabel != null) ...[
                     const SizedBox(height: 1),
                     Text(
                       'Expected finish $expectedEndLabel',
@@ -1280,7 +1772,13 @@ class _ActivityTimerPanel extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         Text(
-          'Elapsed Time',
+          isPomodoro
+              ? isBreak
+                  ? 'Break Elapsed'
+                  : isWaitingForFocus || isPomodoroComplete
+                      ? 'Focused Time'
+                      : 'Focus Elapsed'
+              : 'Elapsed Time',
           style: AppTextStyle.subSectionTextStyle(
             fontsize: 10.5,
             fontweight: FontWeight.w700,
@@ -1296,7 +1794,21 @@ class _ActivityTimerPanel extends StatelessWidget {
             color: accent,
           ),
         ),
-        if (isTimed) ...[
+        if (isPomodoro) ...[
+          const SizedBox(height: 8),
+          Text(
+            'Round ${session.pomodoroCurrentRound} of '
+            '${session.pomodoroTotalRounds}  |  '
+            'Focused ${formatActivityTimerDuration(timer.elapsedSeconds)}',
+            textAlign: TextAlign.center,
+            style: AppTextStyle.subSectionTextStyle(
+              fontsize: 10.5,
+              fontweight: FontWeight.w700,
+              color: accent,
+            ),
+          ),
+        ],
+        if (hasPhaseTarget) ...[
           const SizedBox(height: 10),
           Text(
             '$secondaryTimerLabel $secondaryTimerDuration  |  '
@@ -1313,7 +1825,9 @@ class _ActivityTimerPanel extends StatelessWidget {
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
               minHeight: 6,
-              value: (timer.elapsedSeconds / target).clamp(0.0, 1.0).toDouble(),
+              value: (timer.phaseElapsedSeconds / target)
+                  .clamp(0.0, 1.0)
+                  .toDouble(),
               color: accent,
               backgroundColor: accent.withValues(alpha: 0.15),
             ),
@@ -1338,9 +1852,13 @@ class _ActivityTimerPanel extends StatelessWidget {
               child: OutlinedButton.icon(
                 onPressed: timer.isBusy
                     ? null
-                    : timer.isRunning
-                        ? onPause
-                        : onResume,
+                    : isWaitingForFocus
+                        ? onStartNextFocus
+                        : isPomodoroComplete
+                            ? onFinish
+                            : timer.isRunning
+                                ? onPause
+                                : onResume,
                 style: OutlinedButton.styleFrom(
                   foregroundColor: accent,
                   side: BorderSide(color: accent.withValues(alpha: 0.55)),
@@ -1349,40 +1867,52 @@ class _ActivityTimerPanel extends StatelessWidget {
                   ),
                 ),
                 icon: Icon(
-                  timer.isRunning
-                      ? Icons.pause_rounded
-                      : Icons.play_arrow_rounded,
+                  isPomodoroComplete
+                      ? Icons.check_rounded
+                      : timer.isRunning && !isWaitingForFocus
+                          ? Icons.pause_rounded
+                          : Icons.play_arrow_rounded,
                   size: 18,
                 ),
-                label: Text(timer.isRunning ? 'Pause' : 'Resume'),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: ElevatedButton.icon(
-                onPressed: timer.isBusy ? null : onFinish,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColor.blueMainColor,
-                  foregroundColor: Colors.white,
-                  disabledBackgroundColor:
-                      AppColor.blueMainColor.withValues(alpha: 0.35),
-                  disabledForegroundColor: Colors.white70,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(11),
-                  ),
+                label: Text(
+                  isWaitingForFocus
+                      ? 'Start Focus'
+                      : isPomodoroComplete
+                          ? 'Review & Save'
+                          : timer.isRunning
+                              ? 'Pause'
+                              : 'Resume',
                 ),
-                icon: const Icon(Icons.stop_rounded, size: 18),
-                label: const Text('Finish'),
               ),
             ),
+            if (!isPomodoroComplete) ...[
+              const SizedBox(width: 10),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: timer.isBusy ? null : onFinish,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColor.blueMainColor,
+                    foregroundColor: Colors.white,
+                    disabledBackgroundColor:
+                        AppColor.blueMainColor.withValues(alpha: 0.35),
+                    disabledForegroundColor: Colors.white70,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(11),
+                    ),
+                  ),
+                  icon: const Icon(Icons.stop_rounded, size: 18),
+                  label: Text(isPomodoro ? 'End Session' : 'Finish'),
+                ),
+              ),
+            ],
           ],
         ),
         const SizedBox(height: 7),
         TextButton.icon(
           onPressed: timer.isBusy ? null : onDiscard,
           icon: const Icon(Icons.delete_outline_rounded, size: 17),
-          label: const Text('Discard Timer'),
+          label: Text(isPomodoro ? 'Discard Pomodoro' : 'Discard Timer'),
           style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
         ),
       ],

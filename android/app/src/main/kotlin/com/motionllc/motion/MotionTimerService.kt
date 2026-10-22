@@ -11,6 +11,7 @@ import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.graphics.Color
 import android.media.AudioAttributes
+import android.media.MediaPlayer
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
@@ -83,6 +84,7 @@ class MotionTimerService : Service() {
         targetRunnable?.let(handler::removeCallbacks)
         targetRunnable = null
         cancelPausedProjectionRefresh()
+        stopCompletionSound()
         super.onDestroy()
     }
 
@@ -108,9 +110,12 @@ class MotionTimerService : Service() {
     private fun buildNotification(state: TimerNotificationState): Notification {
         val elapsedSeconds = state.currentElapsedSeconds()
         val launchPendingIntent = launchPendingIntent()
+        val phasePrefix = state.phaseLabel()?.let { "$it · " }.orEmpty()
         val statusText = when {
-            !state.isRunning -> "Paused at ${formatDuration(elapsedSeconds)}"
-            else -> "Elapsed ${formatDuration(elapsedSeconds)}"
+            !state.isRunning && state.isPomodoroReady -> "Ready for the next focus round"
+            !state.isRunning && state.isPomodoroComplete -> "All focus rounds completed"
+            !state.isRunning -> "${phasePrefix}Paused at ${formatDuration(elapsedSeconds)}"
+            else -> "${phasePrefix}Elapsed ${formatDuration(elapsedSeconds)}"
         }
         val compactView = buildTimerView(state, elapsedSeconds)
         val expandedView = buildTimerView(state, elapsedSeconds)
@@ -151,7 +156,15 @@ class MotionTimerService : Service() {
         elapsedSeconds: Long,
     ): RemoteViews {
         return RemoteViews(packageName, R.layout.motion_timer_notification).apply {
-            setTextViewText(R.id.timer_notification_subcategory, state.subcategoryName)
+            val phaseLabel = state.phaseLabel()
+            setTextViewText(
+                R.id.timer_notification_subcategory,
+                if (phaseLabel == null) {
+                    state.subcategoryName
+                } else {
+                    "${state.subcategoryName} · $phaseLabel"
+                },
+            )
             val hasTarget = state.targetSeconds > 0
             val targetReached = state.hasReachedTarget(elapsedSeconds)
             val remainingSeconds = state.targetSeconds - elapsedSeconds
@@ -164,7 +177,7 @@ class MotionTimerService : Service() {
                     .format(Date(expectedEndEpochMs))
                 setTextViewText(
                     R.id.timer_notification_expected_end,
-                    "Ends $expectedEnd",
+                    if (state.isPomodoro) "$phaseLabel ends $expectedEnd" else "Ends $expectedEnd",
                 )
                 setViewVisibility(R.id.timer_notification_expected_end, View.VISIBLE)
             } else {
@@ -277,14 +290,33 @@ class MotionTimerService : Service() {
             return
         }
 
-        val alertedState = currentState.copy(targetAlertTriggered = true)
-        saveState(this, alertedState)
+        val completedAtEpochMs = currentState.expectedTargetEndEpochMs()
+        val alertedState = currentState.copy(
+            targetAlertTriggered = true,
+            lastCompletedPomodoroPhaseStartedAtEpochMs =
+                if (currentState.isPomodoro) {
+                    currentState.pomodoroPhaseStartedAtEpochMs
+                } else {
+                    currentState.lastCompletedPomodoroPhaseStartedAtEpochMs
+                },
+        )
+        val nextState = if (currentState.isPomodoro) {
+            currentState.nextPomodoroState(completedAtEpochMs)
+        } else {
+            alertedState
+        }
+        saveState(this, nextState)
         cancelTargetScheduling()
         getSystemService(NotificationManager::class.java).apply {
-            notify(notificationId, buildNotification(alertedState))
+            notify(notificationId, buildNotification(nextState))
             notify(completionNotificationId, buildCompletionNotification(alertedState))
         }
         vibrateForCompletion()
+        if (currentState.shouldPlaySessionCompletionSound) {
+            playCompletionSound(this)
+        }
+        schedulePausedProjectionRefresh(nextState)
+        scheduleTargetAlert(nextState)
     }
 
     private fun buildCompletionNotification(state: TimerNotificationState): Notification {
@@ -296,10 +328,22 @@ class MotionTimerService : Service() {
                 .setPriority(Notification.PRIORITY_HIGH)
                 .setVibrate(completionVibrationPattern)
         }
+        val title = when (state.pomodoroPhase) {
+            pomodoroFocusPhase -> "Focus complete"
+            pomodoroShortBreakPhase -> "Break complete"
+            pomodoroLongBreakPhase -> "Pomodoro complete"
+            else -> "Session target reached"
+        }
+        val detail = when (state.pomodoroPhase) {
+            pomodoroFocusPhase -> "${state.subcategoryName} break has started."
+            pomodoroShortBreakPhase -> "${state.subcategoryName} is ready for the next focus round."
+            pomodoroLongBreakPhase -> "${state.subcategoryName} focus rounds are complete."
+            else -> "${state.subcategoryName} is now tracking overtime."
+        }
         return builder
             .setSmallIcon(R.drawable.ic_motion_timer_notification)
-            .setContentTitle("Session target reached")
-            .setContentText("${state.subcategoryName} is now tracking overtime.")
+            .setContentTitle(title)
+            .setContentText(detail)
             .setContentIntent(launchPendingIntent())
             .setCategory(Notification.CATEGORY_ALARM)
             .setColor(Color.rgb(0, 176, 240))
@@ -451,6 +495,21 @@ class MotionTimerService : Service() {
             targetSeconds = max(0, intent.getIntExtra(extraTargetSeconds, 0)),
             targetAlertTriggered =
                 intent.getBooleanExtra(extraTargetAlertTriggered, false),
+            timerMode = intent.getStringExtra(extraTimerMode).orEmpty(),
+            pomodoroPhase = intent.getStringExtra(extraPomodoroPhase).orEmpty(),
+            pomodoroFocusSeconds =
+                max(0, intent.getIntExtra(extraPomodoroFocusSeconds, 0)),
+            pomodoroShortBreakSeconds =
+                max(0, intent.getIntExtra(extraPomodoroShortBreakSeconds, 0)),
+            pomodoroLongBreakSeconds =
+                max(0, intent.getIntExtra(extraPomodoroLongBreakSeconds, 0)),
+            pomodoroTotalRounds =
+                max(0, intent.getIntExtra(extraPomodoroTotalRounds, 0)),
+            pomodoroCurrentRound =
+                max(0, intent.getIntExtra(extraPomodoroCurrentRound, 0)),
+            pomodoroPhaseStartedAtEpochMs =
+                intent.getLongExtra(extraPomodoroPhaseStartedAtEpochMs, 0L),
+            lastCompletedPomodoroPhaseStartedAtEpochMs = 0L,
         )
     }
 
@@ -461,9 +520,25 @@ class MotionTimerService : Service() {
         if (savedState?.timerStartedAtEpochMs != incomingState.timerStartedAtEpochMs) {
             return incomingState
         }
+        if (incomingState.isPomodoro) {
+            if (savedState.lastCompletedPomodoroPhaseStartedAtEpochMs > 0L &&
+                incomingState.pomodoroPhaseStartedAtEpochMs > 0L &&
+                savedState.lastCompletedPomodoroPhaseStartedAtEpochMs >=
+                incomingState.pomodoroPhaseStartedAtEpochMs
+            ) {
+                return savedState
+            }
+            if (savedState.pomodoroPhaseStartedAtEpochMs !=
+                incomingState.pomodoroPhaseStartedAtEpochMs
+            ) {
+                return incomingState
+            }
+        }
         return incomingState.copy(
             targetAlertTriggered =
                 savedState.targetAlertTriggered || incomingState.targetAlertTriggered,
+            lastCompletedPomodoroPhaseStartedAtEpochMs =
+                savedState.lastCompletedPomodoroPhaseStartedAtEpochMs,
         )
     }
 
@@ -485,6 +560,8 @@ class MotionTimerService : Service() {
             140,
             320,
         )
+        @Volatile
+        private var completionPlayer: MediaPlayer? = null
         private const val notificationId = 4102
         private const val completionNotificationId = 4103
         private const val alarmRequestCode = 4104
@@ -500,9 +577,27 @@ class MotionTimerService : Service() {
         private const val extraTimerStartedAtEpochMs = "timer_started_at_epoch_ms"
         private const val extraTargetSeconds = "target_seconds"
         private const val extraTargetAlertTriggered = "target_alert_triggered"
+        private const val extraTimerMode = "timer_mode"
+        private const val extraPomodoroPhase = "pomodoro_phase"
+        private const val extraPomodoroFocusSeconds = "pomodoro_focus_seconds"
+        private const val extraPomodoroShortBreakSeconds =
+            "pomodoro_short_break_seconds"
+        private const val extraPomodoroLongBreakSeconds = "pomodoro_long_break_seconds"
+        private const val extraPomodoroTotalRounds = "pomodoro_total_rounds"
+        private const val extraPomodoroCurrentRound = "pomodoro_current_round"
+        private const val extraPomodoroPhaseStartedAtEpochMs =
+            "pomodoro_phase_started_at_epoch_ms"
+        private const val keyLastCompletedPomodoroPhaseStartedAtEpochMs =
+            "last_completed_pomodoro_phase_started_at_epoch_ms"
         private const val extraForceTargetAlert = "force_target_alert"
         private const val keyActive = "active"
         private const val keySynchronizedAt = "synchronized_at"
+        private const val pomodoroMode = "pomodoro"
+        private const val pomodoroFocusPhase = "focus"
+        private const val pomodoroShortBreakPhase = "shortBreak"
+        private const val pomodoroLongBreakPhase = "longBreak"
+        private const val pomodoroReadyPhase = "readyForFocus"
+        private const val pomodoroCompletePhase = "complete"
 
         fun sync(
             context: Context,
@@ -513,6 +608,14 @@ class MotionTimerService : Service() {
             timerStartedAtEpochMs: Long,
             targetSeconds: Int,
             targetAlertTriggered: Boolean,
+            timerMode: String,
+            pomodoroPhase: String,
+            pomodoroFocusSeconds: Int,
+            pomodoroShortBreakSeconds: Int,
+            pomodoroLongBreakSeconds: Int,
+            pomodoroTotalRounds: Int,
+            pomodoroCurrentRound: Int,
+            pomodoroPhaseStartedAtEpochMs: Long,
             forceTargetAlert: Boolean,
         ) {
             val intent = Intent(context, MotionTimerService::class.java).apply {
@@ -524,6 +627,20 @@ class MotionTimerService : Service() {
                 putExtra(extraTimerStartedAtEpochMs, timerStartedAtEpochMs)
                 putExtra(extraTargetSeconds, max(0, targetSeconds))
                 putExtra(extraTargetAlertTriggered, targetAlertTriggered)
+                putExtra(extraTimerMode, timerMode)
+                putExtra(extraPomodoroPhase, pomodoroPhase)
+                putExtra(extraPomodoroFocusSeconds, max(0, pomodoroFocusSeconds))
+                putExtra(
+                    extraPomodoroShortBreakSeconds,
+                    max(0, pomodoroShortBreakSeconds),
+                )
+                putExtra(extraPomodoroLongBreakSeconds, max(0, pomodoroLongBreakSeconds))
+                putExtra(extraPomodoroTotalRounds, max(0, pomodoroTotalRounds))
+                putExtra(extraPomodoroCurrentRound, max(0, pomodoroCurrentRound))
+                putExtra(
+                    extraPomodoroPhaseStartedAtEpochMs,
+                    pomodoroPhaseStartedAtEpochMs,
+                )
                 putExtra(extraForceTargetAlert, forceTargetAlert)
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -555,6 +672,7 @@ class MotionTimerService : Service() {
         fun dismissTargetAlert(context: Context) {
             context.getSystemService(NotificationManager::class.java)
                 .cancel(completionNotificationId)
+            stopCompletionSound()
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 context.getSystemService(VibratorManager::class.java)
                     .defaultVibrator
@@ -563,6 +681,56 @@ class MotionTimerService : Service() {
                 @Suppress("DEPRECATION")
                 (context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator).cancel()
             }
+        }
+
+        @Synchronized
+        private fun playCompletionSound(context: Context) {
+            stopCompletionSound()
+            var player: MediaPlayer? = null
+            try {
+                context.resources.openRawResourceFd(R.raw.japan_eas_alarm).use { audio ->
+                    player = MediaPlayer().apply {
+                        setAudioAttributes(
+                            AudioAttributes.Builder()
+                                .setUsage(AudioAttributes.USAGE_ALARM)
+                                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                                .build(),
+                        )
+                        setDataSource(
+                            audio.fileDescriptor,
+                            audio.startOffset,
+                            audio.length,
+                        )
+                        isLooping = false
+                        setOnCompletionListener(::releaseCompletionPlayer)
+                        prepare()
+                    }
+                }
+                completionPlayer = player
+                player?.start()
+            } catch (_: Exception) {
+                player?.release()
+                if (completionPlayer === player) completionPlayer = null
+            }
+        }
+
+        @Synchronized
+        private fun stopCompletionSound() {
+            val player = completionPlayer ?: return
+            completionPlayer = null
+            try {
+                if (player.isPlaying) player.stop()
+            } catch (_: IllegalStateException) {
+                // The player may already have completed between the state check and stop.
+            } finally {
+                player.release()
+            }
+        }
+
+        @Synchronized
+        private fun releaseCompletionPlayer(player: MediaPlayer) {
+            if (completionPlayer === player) completionPlayer = null
+            player.release()
         }
 
         private fun saveState(context: Context, state: TimerNotificationState) {
@@ -576,6 +744,24 @@ class MotionTimerService : Service() {
                 .putLong(extraTimerStartedAtEpochMs, state.timerStartedAtEpochMs)
                 .putInt(extraTargetSeconds, state.targetSeconds)
                 .putBoolean(extraTargetAlertTriggered, state.targetAlertTriggered)
+                .putString(extraTimerMode, state.timerMode)
+                .putString(extraPomodoroPhase, state.pomodoroPhase)
+                .putInt(extraPomodoroFocusSeconds, state.pomodoroFocusSeconds)
+                .putInt(
+                    extraPomodoroShortBreakSeconds,
+                    state.pomodoroShortBreakSeconds,
+                )
+                .putInt(extraPomodoroLongBreakSeconds, state.pomodoroLongBreakSeconds)
+                .putInt(extraPomodoroTotalRounds, state.pomodoroTotalRounds)
+                .putInt(extraPomodoroCurrentRound, state.pomodoroCurrentRound)
+                .putLong(
+                    extraPomodoroPhaseStartedAtEpochMs,
+                    state.pomodoroPhaseStartedAtEpochMs,
+                )
+                .putLong(
+                    keyLastCompletedPomodoroPhaseStartedAtEpochMs,
+                    state.lastCompletedPomodoroPhaseStartedAtEpochMs,
+                )
                 .putLong(keySynchronizedAt, state.synchronizedAtEpochMs)
                 .apply()
         }
@@ -608,6 +794,25 @@ class MotionTimerService : Service() {
                 targetSeconds = preferences.getInt(extraTargetSeconds, 0),
                 targetAlertTriggered =
                     preferences.getBoolean(extraTargetAlertTriggered, false),
+                timerMode = preferences.getString(extraTimerMode, "").orEmpty(),
+                pomodoroPhase =
+                    preferences.getString(extraPomodoroPhase, "").orEmpty(),
+                pomodoroFocusSeconds =
+                    preferences.getInt(extraPomodoroFocusSeconds, 0),
+                pomodoroShortBreakSeconds =
+                    preferences.getInt(extraPomodoroShortBreakSeconds, 0),
+                pomodoroLongBreakSeconds =
+                    preferences.getInt(extraPomodoroLongBreakSeconds, 0),
+                pomodoroTotalRounds =
+                    preferences.getInt(extraPomodoroTotalRounds, 0),
+                pomodoroCurrentRound =
+                    preferences.getInt(extraPomodoroCurrentRound, 0),
+                pomodoroPhaseStartedAtEpochMs =
+                    preferences.getLong(extraPomodoroPhaseStartedAtEpochMs, 0L),
+                lastCompletedPomodoroPhaseStartedAtEpochMs = preferences.getLong(
+                    keyLastCompletedPomodoroPhaseStartedAtEpochMs,
+                    0L,
+                ),
             )
         }
 
@@ -658,7 +863,28 @@ private data class TimerNotificationState(
     val timerStartedAtEpochMs: Long,
     val targetSeconds: Int,
     val targetAlertTriggered: Boolean,
+    val timerMode: String,
+    val pomodoroPhase: String,
+    val pomodoroFocusSeconds: Int,
+    val pomodoroShortBreakSeconds: Int,
+    val pomodoroLongBreakSeconds: Int,
+    val pomodoroTotalRounds: Int,
+    val pomodoroCurrentRound: Int,
+    val pomodoroPhaseStartedAtEpochMs: Long,
+    val lastCompletedPomodoroPhaseStartedAtEpochMs: Long,
 ) {
+    val isPomodoro: Boolean
+        get() = timerMode == "pomodoro"
+
+    val isPomodoroReady: Boolean
+        get() = isPomodoro && pomodoroPhase == "readyForFocus"
+
+    val isPomodoroComplete: Boolean
+        get() = isPomodoro && pomodoroPhase == "complete"
+
+    val shouldPlaySessionCompletionSound: Boolean
+        get() = !isPomodoro || pomodoroPhase == "longBreak"
+
     fun currentElapsedSeconds(): Long {
         if (!isRunning) return elapsedSeconds.toLong()
         val additionalSeconds = max(
@@ -670,5 +896,72 @@ private data class TimerNotificationState(
 
     fun hasReachedTarget(currentElapsedSeconds: Long): Boolean {
         return targetSeconds > 0 && currentElapsedSeconds >= targetSeconds
+    }
+
+    fun expectedTargetEndEpochMs(): Long {
+        val remainingSeconds = max(0L, targetSeconds - elapsedSeconds.toLong())
+        return synchronizedAtEpochMs + remainingSeconds * 1000L
+    }
+
+    fun phaseLabel(): String? {
+        if (!isPomodoro) return null
+        return when (pomodoroPhase) {
+            "focus" -> "Focus $pomodoroCurrentRound/$pomodoroTotalRounds"
+            "shortBreak" -> "Break"
+            "longBreak" -> "Long break"
+            "readyForFocus" -> "Ready"
+            "complete" -> "Complete"
+            else -> "Pomodoro"
+        }
+    }
+
+    fun nextPomodoroState(completedAtEpochMs: Long): TimerNotificationState {
+        val completedPhaseStart = pomodoroPhaseStartedAtEpochMs
+        return when (pomodoroPhase) {
+            "focus" -> {
+                val nextPhase = if (pomodoroCurrentRound >= pomodoroTotalRounds) {
+                    "longBreak"
+                } else {
+                    "shortBreak"
+                }
+                val nextTarget = if (nextPhase == "longBreak") {
+                    pomodoroLongBreakSeconds
+                } else {
+                    pomodoroShortBreakSeconds
+                }
+                copy(
+                    elapsedSeconds = 0,
+                    isRunning = true,
+                    synchronizedAtEpochMs = completedAtEpochMs,
+                    targetSeconds = nextTarget,
+                    targetAlertTriggered = false,
+                    pomodoroPhase = nextPhase,
+                    pomodoroPhaseStartedAtEpochMs = completedAtEpochMs,
+                    lastCompletedPomodoroPhaseStartedAtEpochMs = completedPhaseStart,
+                )
+            }
+            "shortBreak" -> copy(
+                elapsedSeconds = 0,
+                isRunning = false,
+                synchronizedAtEpochMs = completedAtEpochMs,
+                targetSeconds = 0,
+                targetAlertTriggered = false,
+                pomodoroPhase = "readyForFocus",
+                pomodoroCurrentRound = pomodoroCurrentRound + 1,
+                pomodoroPhaseStartedAtEpochMs = 0L,
+                lastCompletedPomodoroPhaseStartedAtEpochMs = completedPhaseStart,
+            )
+            "longBreak" -> copy(
+                elapsedSeconds = 0,
+                isRunning = false,
+                synchronizedAtEpochMs = completedAtEpochMs,
+                targetSeconds = 0,
+                targetAlertTriggered = false,
+                pomodoroPhase = "complete",
+                pomodoroPhaseStartedAtEpochMs = 0L,
+                lastCompletedPomodoroPhaseStartedAtEpochMs = completedPhaseStart,
+            )
+            else -> this
+        }
     }
 }

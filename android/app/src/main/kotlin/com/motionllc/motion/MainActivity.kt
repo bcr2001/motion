@@ -105,6 +105,22 @@ class MainActivity : FlutterActivity() {
                                 targetSeconds = call.argument<Int>("targetSeconds") ?: 0,
                                 targetAlertTriggered =
                                     call.argument<Boolean>("targetAlertTriggered") ?: false,
+                                timerMode = call.argument<String>("timerMode").orEmpty(),
+                                pomodoroPhase =
+                                    call.argument<String>("pomodoroPhase").orEmpty(),
+                                pomodoroFocusSeconds =
+                                    call.argument<Int>("pomodoroFocusSeconds") ?: 0,
+                                pomodoroShortBreakSeconds =
+                                    call.argument<Int>("pomodoroShortBreakSeconds") ?: 0,
+                                pomodoroLongBreakSeconds =
+                                    call.argument<Int>("pomodoroLongBreakSeconds") ?: 0,
+                                pomodoroTotalRounds =
+                                    call.argument<Int>("pomodoroTotalRounds") ?: 0,
+                                pomodoroCurrentRound =
+                                    call.argument<Int>("pomodoroCurrentRound") ?: 0,
+                                pomodoroPhaseStartedAtEpochMs =
+                                    call.argument<Number>("pomodoroPhaseStartedAtEpochMs")
+                                        ?.toLong() ?: 0L,
                                 forceTargetAlert = call.method == "targetReached",
                             )
                             result.success(null)

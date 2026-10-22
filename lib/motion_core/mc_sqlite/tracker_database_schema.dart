@@ -2,7 +2,7 @@ import 'package:motion/motion_core/mc_sqlite/database_constants.dart';
 import 'package:sqflite/sqflite.dart';
 
 class TrackerDatabaseSchema {
-  static const int version = 17;
+  static const int version = 18;
   static const String _legacyTimeRecordedColumn = 'timeRecorded';
 
   static const String mainCategoryTable = MotionDbTables.mainCategory;
@@ -111,7 +111,16 @@ class TrackerDatabaseSchema {
         ${MotionDbColumns.timerUpdatedAtEpochMs} INTEGER NOT NULL,
         ${MotionDbColumns.nextTimerReminderAtSeconds} INTEGER NOT NULL DEFAULT 7200,
         ${MotionDbColumns.timerTargetSeconds} INTEGER,
-        ${MotionDbColumns.timerTargetAlertTriggered} INTEGER NOT NULL DEFAULT 0
+        ${MotionDbColumns.timerTargetAlertTriggered} INTEGER NOT NULL DEFAULT 0,
+        ${MotionDbColumns.timerMode} TEXT NOT NULL DEFAULT 'openEnded',
+        ${MotionDbColumns.pomodoroPhase} TEXT,
+        ${MotionDbColumns.pomodoroFocusSeconds} INTEGER NOT NULL DEFAULT 0,
+        ${MotionDbColumns.pomodoroShortBreakSeconds} INTEGER NOT NULL DEFAULT 0,
+        ${MotionDbColumns.pomodoroLongBreakSeconds} INTEGER NOT NULL DEFAULT 0,
+        ${MotionDbColumns.pomodoroTotalRounds} INTEGER NOT NULL DEFAULT 0,
+        ${MotionDbColumns.pomodoroCurrentRound} INTEGER NOT NULL DEFAULT 0,
+        ${MotionDbColumns.pomodoroPhaseStartedAtEpochMs} INTEGER,
+        ${MotionDbColumns.pomodoroPhaseElapsedSeconds} INTEGER NOT NULL DEFAULT 0
       )
     ''');
   }
@@ -180,6 +189,60 @@ class TrackerDatabaseSchema {
       db,
       activeTimerSessionTable,
       MotionDbColumns.timerTargetAlertTriggered,
+      'INTEGER NOT NULL DEFAULT 0',
+    );
+    await _addColumnIfMissing(
+      db,
+      activeTimerSessionTable,
+      MotionDbColumns.timerMode,
+      "TEXT NOT NULL DEFAULT 'openEnded'",
+    );
+    await _addColumnIfMissing(
+      db,
+      activeTimerSessionTable,
+      MotionDbColumns.pomodoroPhase,
+      'TEXT',
+    );
+    await _addColumnIfMissing(
+      db,
+      activeTimerSessionTable,
+      MotionDbColumns.pomodoroFocusSeconds,
+      'INTEGER NOT NULL DEFAULT 0',
+    );
+    await _addColumnIfMissing(
+      db,
+      activeTimerSessionTable,
+      MotionDbColumns.pomodoroShortBreakSeconds,
+      'INTEGER NOT NULL DEFAULT 0',
+    );
+    await _addColumnIfMissing(
+      db,
+      activeTimerSessionTable,
+      MotionDbColumns.pomodoroLongBreakSeconds,
+      'INTEGER NOT NULL DEFAULT 0',
+    );
+    await _addColumnIfMissing(
+      db,
+      activeTimerSessionTable,
+      MotionDbColumns.pomodoroTotalRounds,
+      'INTEGER NOT NULL DEFAULT 0',
+    );
+    await _addColumnIfMissing(
+      db,
+      activeTimerSessionTable,
+      MotionDbColumns.pomodoroCurrentRound,
+      'INTEGER NOT NULL DEFAULT 0',
+    );
+    await _addColumnIfMissing(
+      db,
+      activeTimerSessionTable,
+      MotionDbColumns.pomodoroPhaseStartedAtEpochMs,
+      'INTEGER',
+    );
+    await _addColumnIfMissing(
+      db,
+      activeTimerSessionTable,
+      MotionDbColumns.pomodoroPhaseElapsedSeconds,
       'INTEGER NOT NULL DEFAULT 0',
     );
   }

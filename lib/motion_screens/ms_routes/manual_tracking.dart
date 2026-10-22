@@ -1309,13 +1309,16 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
         mainCategoryName: widget.mainCategoryName,
         subcategoryName: widget.subcategoryName,
         targetSeconds: choice.targetSeconds,
+        pomodoro: choice.pomodoro,
       );
       if (mounted && timer.notificationPermissionGranted == false) {
         snackBarMessage(
           context,
-          errorMessage: choice.targetSeconds == null
-              ? 'Timer started. Allow Motion notifications to see it outside the app.'
-              : 'Timed session started, but notifications are required for the background alarm.',
+          errorMessage: choice.pomodoro != null
+              ? 'Pomodoro started, but notifications are required for background phase alerts.'
+              : choice.targetSeconds == null
+                  ? 'Timer started. Allow Motion notifications to see it outside the app.'
+                  : 'Timed session started, but notifications are required for the background alarm.',
           requiresColor: false,
         );
       }
@@ -1341,8 +1344,11 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
     required ActivityTimerProvider timer,
     required bool isCurrentActivity,
   }) {
+    final hasPendingEvent = timer.isPomodoroSession
+        ? timer.hasPendingPomodoroPhaseEvent
+        : timer.hasPendingTargetReachedEvent;
     if (!isCurrentActivity ||
-        !timer.hasPendingTargetReachedEvent ||
+        !hasPendingEvent ||
         _targetReachedDialogScheduled) {
       return;
     }
@@ -1350,6 +1356,32 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
     _targetReachedDialogScheduled = true;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
+      if (timer.isPomodoroSession) {
+        final event = timer.consumePomodoroPhaseEvent();
+        final activeSession = timer.session;
+        if (event == null || activeSession == null) {
+          _targetReachedDialogScheduled = false;
+          return;
+        }
+        final action = await showDialog<_PomodoroDialogAction>(
+          context: context,
+          barrierDismissible: false,
+          builder: (dialogContext) => _PomodoroPhaseDialog(
+            event: event,
+            session: activeSession,
+          ),
+        );
+        await timer.dismissTargetAlert();
+        _targetReachedDialogScheduled = false;
+        if (!mounted) return;
+        if (action == _PomodoroDialogAction.startFocus) {
+          await timer.startNextPomodoroFocus();
+        } else if (action == _PomodoroDialogAction.finish) {
+          await _finishActivityTimer(timer);
+        }
+        return;
+      }
+
       final reachedSession = timer.consumeTargetReachedEvent();
       if (reachedSession == null) {
         _targetReachedDialogScheduled = false;
@@ -1423,14 +1455,27 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
     if (!mounted) return;
 
     final initialSeconds = timer.elapsedSeconds;
-    final selectedSeconds = await showDialog<int>(
-      context: context,
-      builder: (dialogContext) => _FinishActivityTimerDialog(
-        session: session,
-        initialSeconds: initialSeconds,
-        needsReview: timer.needsReview,
-      ),
-    );
+    final int? selectedSeconds;
+    if (session.isPomodoro) {
+      final confirmed = await showDialog<bool>(
+            context: context,
+            builder: (dialogContext) => _FinishPomodoroSessionDialog(
+              session: session,
+              focusedSeconds: initialSeconds,
+            ),
+          ) ??
+          false;
+      selectedSeconds = confirmed ? initialSeconds : null;
+    } else {
+      selectedSeconds = await showDialog<int>(
+        context: context,
+        builder: (dialogContext) => _FinishActivityTimerDialog(
+          session: session,
+          initialSeconds: initialSeconds,
+          needsReview: timer.needsReview,
+        ),
+      );
+    }
 
     if (selectedSeconds == null) {
       if (wasRunning) await timer.resume();
@@ -1501,43 +1546,77 @@ class _ManualTimeRecordingRouteState extends State<ManualTimeRecordingRoute> {
               currentUser: currentUser,
               currentDate: date.currentDate,
             );
+            final subcategoryRefreshKey = subs.refreshKeyForSubcategory(
+              currentUser: currentUser,
+              mainCategoryName: widget.mainCategoryName,
+              subcategoryName: widget.subcategoryName,
+            );
 
             return Column(
               children: [
-                Consumer<ActivityTimerProvider>(
-                  builder: (context, timer, child) {
-                    final isCurrentActivity = timer.isActiveFor(
-                      mainCategoryName: widget.mainCategoryName,
-                      subcategoryName: widget.subcategoryName,
+                CachedFutureBuilder<String?>(
+                  cacheKey:
+                      'last-tracked-$currentUser-${widget.mainCategoryName}-'
+                      '${widget.subcategoryName}-$subcategoryRefreshKey',
+                  futureFactory: () =>
+                      subs.retrieveLastTrackedDateForSubcategory(
+                    currentUser: currentUser,
+                    mainCategoryName: widget.mainCategoryName,
+                    subcategoryName: widget.subcategoryName,
+                  ),
+                  builder: (context, lastTrackedSnapshot) {
+                    final lastTrackedDate = MotionDateUtils.parseStoredDate(
+                      lastTrackedSnapshot.data,
                     );
-                    final hasOtherTimer =
-                        timer.hasActiveTimer && !isCurrentActivity;
-                    _scheduleTargetReachedDialog(
-                      timer: timer,
-                      isCurrentActivity: isCurrentActivity,
-                    );
-                    return Column(
-                      children: [
-                        _TrackingMethodSelector(
+                    final lastTrackedLabel = lastTrackedSnapshot.hasError
+                        ? 'Last tracked date unavailable'
+                        : lastTrackedSnapshot.connectionState ==
+                                    ConnectionState.waiting &&
+                                !lastTrackedSnapshot.hasData
+                            ? 'Checking last tracked date...'
+                            : lastTrackedDate == null
+                                ? 'No time tracked yet'
+                                : 'Last tracked ${MotionDateUtils.formatDisplayDate(lastTrackedDate)}';
+
+                    return Consumer<ActivityTimerProvider>(
+                      builder: (context, timer, child) {
+                        final isCurrentActivity = timer.isActiveFor(
+                          mainCategoryName: widget.mainCategoryName,
+                          subcategoryName: widget.subcategoryName,
+                        );
+                        final hasOtherTimer =
+                            timer.hasActiveTimer && !isCurrentActivity;
+                        _scheduleTargetReachedDialog(
                           timer: timer,
                           isCurrentActivity: isCurrentActivity,
-                          onTimer: timer.hasActiveTimer
-                              ? hasOtherTimer
-                                  ? () => _openRunningTimer(timer)
-                                  : null
-                              : () => _startActivityTimer(timer),
-                          onManual: () => _showTimeAlertDialog(context),
-                        ),
-                        _ActivityTimerPanel(
-                          timer: timer,
-                          isCurrentActivity: isCurrentActivity,
-                          onPause: timer.pause,
-                          onResume: timer.resume,
-                          onFinish: () => _finishActivityTimer(timer),
-                          onDiscard: () => _discardActivityTimer(timer),
-                          onOpenRunningTimer: () => _openRunningTimer(timer),
-                        ),
-                      ],
+                        );
+                        return Column(
+                          children: [
+                            _TrackingMethodSelector(
+                              timer: timer,
+                              isCurrentActivity: isCurrentActivity,
+                              lastTrackedLabel: lastTrackedLabel,
+                              onTimer: timer.hasActiveTimer
+                                  ? hasOtherTimer
+                                      ? () => _openRunningTimer(timer)
+                                      : null
+                                  : () => _startActivityTimer(timer),
+                              onManual: () => _showTimeAlertDialog(context),
+                            ),
+                            _ActivityTimerPanel(
+                              timer: timer,
+                              isCurrentActivity: isCurrentActivity,
+                              onPause: timer.pause,
+                              onResume: timer.resume,
+                              onFinish: () => _finishActivityTimer(timer),
+                              onDiscard: () => _discardActivityTimer(timer),
+                              onStartNextFocus: timer.startNextPomodoroFocus,
+                              onOpenRunningTimer: () =>
+                                  _openRunningTimer(timer),
+                            ),
+                          ],
+                        );
+                      },
                     );
                   },
                 ),
