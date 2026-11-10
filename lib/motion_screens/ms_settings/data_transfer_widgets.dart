@@ -88,7 +88,7 @@ class _BackupLocationOptionsDialog extends StatelessWidget {
                     : Icons.phone_android_rounded,
                 title: isRestore ? 'Choose From Device' : 'Save to Device',
                 subtitle: isRestore
-                    ? 'Select all three files from one Motion backup.'
+                    ? 'Select all files from one Motion backup.'
                     : 'Creates CSV files in your Downloads folder.',
                 borderColor: borderColor,
                 onTap: onDevice,
@@ -397,6 +397,16 @@ class _DataSummaryCard extends StatelessWidget {
                   value: summary.assignerRows,
                   borderColor: borderColor,
                 ),
+                _SummaryPill(
+                  label: 'Goals',
+                  value: summary.goalRows,
+                  borderColor: borderColor,
+                ),
+                _SummaryPill(
+                  label: 'Goal check-ins',
+                  value: summary.goalCheckInRows,
+                  borderColor: borderColor,
+                ),
               ],
             ),
           ],
@@ -453,6 +463,7 @@ class _SummaryPill extends StatelessWidget {
 
 class BackupHealthCard extends StatelessWidget {
   const BackupHealthCard({
+    super.key,
     required this.backup,
     required this.onChanged,
     required this.onRunNow,

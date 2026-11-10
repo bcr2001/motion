@@ -8,9 +8,9 @@ import 'package:motion/motion_core/motion_providers/date_pvd/current_month_provi
 import 'package:motion/motion_core/motion_providers/date_pvd/current_year_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/first_and_last_pvd.dart';
 import 'package:motion/motion_core/motion_providers/date_pvd/seven_days_pvd.dart';
-import 'package:motion/motion_core/motion_providers/ai_pvd/daily_forecast_pvd.dart';
 import 'package:motion/motion_core/motion_providers/cloud_backup_pvd/auto_drive_backup_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
+import 'package:motion/motion_core/motion_providers/goal_pvd/goal_tracker_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/experience_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_core/motion_providers/theme_pvd/theme_mode_pvd.dart';
@@ -80,12 +80,13 @@ void main() async {
     revisions: trackingDataRevisions,
     databaseHelper: trackerDatabase,
   );
-  final dailyForecastProvider = DailyForecastProvider(
-    xpProvider: experiencePointTableProvider,
-  );
   final activityTimerProvider = ActivityTimerProvider(
     userUidProvider: userUidProvider,
     subcategoryProvider: trackSubcategoryDatabaseProvider,
+    databaseHelper: trackerDatabase,
+  );
+  final goalTrackerProvider = GoalTrackerProvider(
+    userUidProvider: userUidProvider,
     databaseHelper: trackerDatabase,
   );
 
@@ -114,7 +115,6 @@ void main() async {
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider.value(value: experiencePointTableProvider),
-      ChangeNotifierProvider.value(value: dailyForecastProvider),
       ChangeNotifierProvider(
           create: (context) => FirstAndLastWithSevenDaysDiff()),
       ChangeNotifierProvider.value(value: themeModeProviderN1),
@@ -125,6 +125,7 @@ void main() async {
       ChangeNotifierProvider.value(value: assignerProvider),
       ChangeNotifierProvider.value(value: userUidProvider),
       ChangeNotifierProvider.value(value: autoDriveBackupProvider),
+      ChangeNotifierProvider.value(value: goalTrackerProvider),
       ChangeNotifierProvider(create: (context) => activityTimerProvider),
       ChangeNotifierProvider(create: (context) => DropDownTrackProvider()),
       ChangeNotifierProvider(create: (context) => CurrentDateProvider()),
@@ -151,6 +152,10 @@ void main() async {
       _initializeSafely(
         'Activity timer',
         activityTimerProvider.initialize,
+      ),
+      _initializeSafely(
+        'Goal tracker',
+        goalTrackerProvider.initialize,
       ),
     ]),
   );

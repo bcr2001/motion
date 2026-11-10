@@ -3,8 +3,8 @@ import 'package:motion/motion_core/mc_sqlite/tracker_database_schema.dart';
 
 void main() {
   group('TrackerDatabaseSchema', () {
-    test('uses version 18 after adding persisted Pomodoro sessions', () {
-      expect(TrackerDatabaseSchema.version, 18);
+    test('uses version 19 after adding persistent goal tracking', () {
+      expect(TrackerDatabaseSchema.version, 19);
     });
 
     test('defines the active timer session table', () {
@@ -43,6 +43,9 @@ void main() {
           'idx_subcategory_user_date',
           'idx_subcategory_user_date_main_category',
           'idx_subcategory_user_date_subcategory',
+          'idx_goals_user_status_start_date',
+          'idx_goal_check_ins_goal_date',
+          'idx_goal_check_ins_user_date',
         ]),
       );
     });

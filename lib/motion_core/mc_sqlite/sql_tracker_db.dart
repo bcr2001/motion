@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:motion/motion_core/mc_sql_table/experience_table.dart';
+import 'package:motion/motion_core/mc_sql_table/goal.dart';
 import 'package:motion/motion_core/mc_sql_table/activity_timer_session.dart';
 import 'package:motion/motion_core/mc_sql_table/main_table.dart';
 import 'package:motion/motion_core/mc_sql_table/streak_status.dart';
@@ -19,6 +20,7 @@ part 'sql_tracker_award_queries.dart';
 part 'sql_tracker_experience_queries.dart';
 part 'sql_tracker_report_queries.dart';
 part 'sql_tracker_timer_queries.dart';
+part 'sql_tracker_goal_queries.dart';
 
 // tracker database that store two tables
 // subcategory table and main category table

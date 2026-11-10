@@ -49,11 +49,18 @@ void main() {
 
       expect(
         files.map((file) => file.fileName),
-        ['main_category.csv', 'subcategory.csv', 'to_assign.csv'],
+        [
+          'main_category.csv',
+          'subcategory.csv',
+          'to_assign.csv',
+          'goals.csv',
+          'goal_check_ins.csv',
+        ],
       );
       expect(files[0].content, contains('education,work,skills'));
       expect(files[1].content, contains('Skills,Chess,45.0,user-1'));
       expect(files[2].content, contains('Chess,Skills,1,0'));
+      expect(files[3].content, startsWith('id,currentLoggedInUser,goalName'));
     });
 
     test('exports all database-derived CSV files to a selected directory',
@@ -85,6 +92,15 @@ void main() {
             .existsSync(),
         isTrue,
       );
+      expect(
+        File('${tempDir.path}${Platform.pathSeparator}goals.csv').existsSync(),
+        isTrue,
+      );
+      expect(
+        File('${tempDir.path}${Platform.pathSeparator}goal_check_ins.csv')
+            .existsSync(),
+        isTrue,
+      );
     });
 
     test('deletes local data only for the selected Motion user', () async {
@@ -93,6 +109,8 @@ void main() {
         MotionDbTables.mainCategory,
         MotionDbTables.experiencePoints,
         MotionDbTables.activeTimerSession,
+        MotionDbTables.goals,
+        MotionDbTables.goalCheckIns,
       ]) {
         trackerDb.tables[table] = [
           {MotionDbColumns.currentLoggedInUser: 'user-1'},
@@ -113,7 +131,9 @@ void main() {
       expect(summary.experiencePointRows, 1);
       expect(summary.assignerRows, 1);
       expect(summary.activeTimerRows, 1);
-      expect(summary.totalRows, 5);
+      expect(summary.goalRows, 1);
+      expect(summary.goalCheckInRows, 1);
+      expect(summary.totalRows, 7);
       for (final rows in trackerDb.tables.values) {
         expect(
           rows.map((row) => row[MotionDbColumns.currentLoggedInUser]),
@@ -198,6 +218,11 @@ class _FakeMotionDatabase implements Database, Transaction {
     rows.removeWhere(
       (row) => row[MotionDbColumns.currentLoggedInUser] == whereArgs.first,
     );
+    if (table == MotionDbTables.goals) {
+      tables[MotionDbTables.goalCheckIns]?.removeWhere(
+        (row) => row[MotionDbColumns.currentLoggedInUser] == whereArgs.first,
+      );
+    }
     return before - rows.length;
   }
 
@@ -262,6 +287,12 @@ class _FakeMotionDatabase implements Database, Transaction {
   }
 
   String _tableFromSql(String sql) {
+    if (sql.contains(MotionDbTables.goalCheckIns)) {
+      return MotionDbTables.goalCheckIns;
+    }
+    if (sql.contains(MotionDbTables.goals)) {
+      return MotionDbTables.goals;
+    }
     if (sql.contains(MotionDbTables.activeTimerSession)) {
       return MotionDbTables.activeTimerSession;
     }

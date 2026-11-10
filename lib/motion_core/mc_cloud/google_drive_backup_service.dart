@@ -80,10 +80,14 @@ class GoogleDriveBackupService {
 
   final GoogleDriveAccountSession _accountSession;
 
-  static const List<String> _backupFileNames = [
+  static const List<String> _requiredBackupFileNames = [
     'main_category.csv',
     'subcategory.csv',
     'to_assign.csv',
+  ];
+  static const List<String> _optionalGoalBackupFileNames = [
+    'goals.csv',
+    'goal_check_ins.csv',
   ];
 
   Future<GoogleDriveBackupResult> uploadBackupFiles({
@@ -236,7 +240,7 @@ class GoogleDriveBackupService {
         final driveApi = drive.DriveApi(client);
         final folderId = await _findBackupFolder(driveApi);
         final files = <MotionCsvBackupFile>[];
-        for (final fileName in _backupFileNames) {
+        for (final fileName in _requiredBackupFileNames) {
           files.add(
             await _downloadBackupFile(
               driveApi: driveApi,
@@ -244,6 +248,14 @@ class GoogleDriveBackupService {
               fileName: fileName,
             ),
           );
+        }
+        for (final fileName in _optionalGoalBackupFileNames) {
+          final file = await _downloadBackupFileIfPresent(
+            driveApi: driveApi,
+            folderId: folderId,
+            fileName: fileName,
+          );
+          if (file != null) files.add(file);
         }
         return GoogleDriveBackupDownloadResult(
           email: driveEmail.trim(),
@@ -314,6 +326,39 @@ class GoogleDriveBackupService {
           'Motion could not download $fileName from Google Drive.');
     }
 
+    final bytes = <int>[];
+    await for (final chunk in response.stream) {
+      bytes.addAll(chunk);
+    }
+    return MotionCsvBackupFile(
+      fileName: fileName,
+      content: utf8.decode(bytes),
+    );
+  }
+
+  Future<MotionCsvBackupFile?> _downloadBackupFileIfPresent({
+    required drive.DriveApi driveApi,
+    required String folderId,
+    required String fileName,
+  }) async {
+    final matchingFiles = await driveApi.files.list(
+      q: "name = '${_escapeQueryValue(fileName)}' "
+          "and '$folderId' in parents "
+          'and trashed = false',
+      spaces: 'drive',
+      $fields: 'files(id, name)',
+      pageSize: 1,
+    );
+    final fileId = _firstFileId(matchingFiles.files);
+    if (fileId == null) return null;
+    final response = await driveApi.files.get(
+      fileId,
+      downloadOptions: drive.DownloadOptions.fullMedia,
+    );
+    if (response is! drive.Media) {
+      throw StateError(
+          'Motion could not download $fileName from Google Drive.');
+    }
     final bytes = <int>[];
     await for (final chunk in response.stream) {
       bytes.addAll(chunk);

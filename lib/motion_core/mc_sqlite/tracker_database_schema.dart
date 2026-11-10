@@ -2,7 +2,7 @@ import 'package:motion/motion_core/mc_sqlite/database_constants.dart';
 import 'package:sqflite/sqflite.dart';
 
 class TrackerDatabaseSchema {
-  static const int version = 18;
+  static const int version = 19;
   static const String _legacyTimeRecordedColumn = 'timeRecorded';
 
   static const String mainCategoryTable = MotionDbTables.mainCategory;
@@ -10,12 +10,17 @@ class TrackerDatabaseSchema {
   static const String experiencePointsTable = MotionDbTables.experiencePoints;
   static const String activeTimerSessionTable =
       MotionDbTables.activeTimerSession;
+  static const String goalsTable = MotionDbTables.goals;
+  static const String goalCheckInsTable = MotionDbTables.goalCheckIns;
   static const List<String> indexNames = [
     'idx_main_category_user_date',
     'idx_experience_points_user_date',
     'idx_subcategory_user_date',
     'idx_subcategory_user_date_main_category',
     'idx_subcategory_user_date_subcategory',
+    'idx_goals_user_status_start_date',
+    'idx_goal_check_ins_goal_date',
+    'idx_goal_check_ins_user_date',
   ];
   static const List<String> triggerNames = [
     'validate_subcategory_time_insert',
@@ -121,6 +126,34 @@ class TrackerDatabaseSchema {
         ${MotionDbColumns.pomodoroCurrentRound} INTEGER NOT NULL DEFAULT 0,
         ${MotionDbColumns.pomodoroPhaseStartedAtEpochMs} INTEGER,
         ${MotionDbColumns.pomodoroPhaseElapsedSeconds} INTEGER NOT NULL DEFAULT 0
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS $goalsTable(
+        ${MotionDbColumns.id} INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+        ${MotionDbColumns.currentLoggedInUser} TEXT NOT NULL,
+        ${MotionDbColumns.goalName} TEXT NOT NULL,
+        ${MotionDbColumns.goalDescription} TEXT NOT NULL DEFAULT '',
+        ${MotionDbColumns.goalStartDate} TEXT NOT NULL,
+        ${MotionDbColumns.goalCompletionDate} TEXT,
+        ${MotionDbColumns.goalStatus} TEXT NOT NULL DEFAULT 'active',
+        ${MotionDbColumns.goalCreatedAtEpochMs} INTEGER NOT NULL,
+        ${MotionDbColumns.goalUpdatedAtEpochMs} INTEGER NOT NULL,
+        CHECK (${MotionDbColumns.goalStatus} IN ('active', 'achieved')),
+        CHECK (${MotionDbColumns.goalCompletionDate} IS NULL OR
+          ${MotionDbColumns.goalCompletionDate} >= ${MotionDbColumns.goalStartDate})
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS $goalCheckInsTable(
+        ${MotionDbColumns.goalId} INTEGER NOT NULL,
+        ${MotionDbColumns.currentLoggedInUser} TEXT NOT NULL,
+        ${MotionDbColumns.date} TEXT NOT NULL,
+        PRIMARY KEY (${MotionDbColumns.goalId}, ${MotionDbColumns.date}),
+        FOREIGN KEY (${MotionDbColumns.goalId})
+          REFERENCES $goalsTable(${MotionDbColumns.id}) ON DELETE CASCADE
       )
     ''');
   }
@@ -305,6 +338,31 @@ class TrackerDatabaseSchema {
         ${MotionDbColumns.currentLoggedInUser},
         ${MotionDbColumns.date},
         ${MotionDbColumns.subcategoryName}
+      )
+    ''');
+
+    await db.execute('''
+      CREATE INDEX IF NOT EXISTS idx_goals_user_status_start_date
+      ON $goalsTable(
+        ${MotionDbColumns.currentLoggedInUser},
+        ${MotionDbColumns.goalStatus},
+        ${MotionDbColumns.goalStartDate}
+      )
+    ''');
+
+    await db.execute('''
+      CREATE INDEX IF NOT EXISTS idx_goal_check_ins_goal_date
+      ON $goalCheckInsTable(
+        ${MotionDbColumns.goalId},
+        ${MotionDbColumns.date}
+      )
+    ''');
+
+    await db.execute('''
+      CREATE INDEX IF NOT EXISTS idx_goal_check_ins_user_date
+      ON $goalCheckInsTable(
+        ${MotionDbColumns.currentLoggedInUser},
+        ${MotionDbColumns.date}
       )
     ''');
   }

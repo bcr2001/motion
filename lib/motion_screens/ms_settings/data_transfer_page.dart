@@ -9,6 +9,7 @@ import 'package:motion/motion_core/mc_csv/csv_data_transfer.dart';
 import 'package:motion/motion_core/mc_csv/motion_backup_restore.dart';
 import 'package:motion/motion_core/motion_providers/cloud_backup_pvd/auto_drive_backup_pvd.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
+import 'package:motion/motion_core/motion_providers/goal_pvd/goal_tracker_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/assigner_pvd.dart';
 import 'package:motion/motion_core/motion_providers/sql_pvd/track_pvd.dart';
 import 'package:motion/motion_core/motion_providers/timer_pvd/activity_timer_pvd.dart';
@@ -315,6 +316,10 @@ class _DataTransferPageState extends State<DataTransferPage> {
         : preview.firstTrackedDate == preview.lastTrackedDate
             ? preview.firstTrackedDate!
             : '${preview.firstTrackedDate} - ${preview.lastTrackedDate}';
+    final goalPreview = backup.includesGoalData
+        ? 'Goals: ${preview.goalRows}\n'
+            'Goal check-ins: ${preview.goalCheckInRows}\n\n'
+        : 'Goals: Existing goal data will be preserved\n\n';
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
@@ -326,6 +331,7 @@ class _DataTransferPageState extends State<DataTransferPage> {
               'Tracked dates: $dateRange\n'
               'Tracking rows: ${preview.trackingRows}\n'
               'Assigned subcategories: ${preview.assignedRows}\n\n'
+              '$goalPreview'
               'This replaces the local Motion data for this account. '
               'Your current data will be backed up to Downloads first.',
           primaryLabel: 'Restore Backup',
@@ -368,13 +374,21 @@ class _DataTransferPageState extends State<DataTransferPage> {
         context
             .read<SubcategoryTrackerDatabaseProvider>()
             .refreshAllTrackingData();
-        await context.read<AssignerMainProvider>().getAllUserItems();
+        final assignerProvider = context.read<AssignerMainProvider>();
+        final goalProvider = context.read<GoalTrackerProvider>();
+        await assignerProvider.getAllUserItems();
+        await goalProvider.refresh();
         _refreshDataSummary();
 
+        final goalResult = backup.includesGoalData
+            ? '${result.goalRows} goal, and '
+                '${result.goalCheckInRows} goal check-in row(s) restored.'
+            : 'Existing goal data was preserved.';
         return '${result.trackingRows} tracking, '
             '${result.dailyTotalRows} daily total, '
             '${result.experiencePointRows} XP, and '
-            '${result.assignedRows} assigned row(s) restored.\n'
+            '${result.assignedRows} assigned row(s) restored. '
+            '$goalResult\n'
             '$safetyBackupMessage';
       },
       busyTitle: 'Restoring Motion Backup',
@@ -433,7 +447,7 @@ class _DataTransferPageState extends State<DataTransferPage> {
           iconColor: Colors.redAccent,
           title: 'Delete All Data?',
           message:
-              'This removes your local tracking history, main category totals, XP records, assigned subcategories, and streak settings for this account. Motion will create an automatic backup first when data exists. This does not delete your Firebase account.',
+              'This removes your local tracking history, main category totals, XP records, assigned subcategories, streak settings, and goals for this account. Motion will create an automatic backup first when data exists. This does not delete your Firebase account.',
           primaryLabel: 'Continue',
           secondaryLabel: 'Cancel',
           onPrimary: () => Navigator.of(dialogContext).pop(true),
@@ -545,7 +559,10 @@ class _DataTransferPageState extends State<DataTransferPage> {
         context
             .read<SubcategoryTrackerDatabaseProvider>()
             .refreshAllTrackingData();
-        await context.read<AssignerMainProvider>().getAllUserItems();
+        final assignerProvider = context.read<AssignerMainProvider>();
+        final goalProvider = context.read<GoalTrackerProvider>();
+        await assignerProvider.getAllUserItems();
+        await goalProvider.refresh();
         _refreshDataSummary();
 
         return '${summary.totalRows} row(s): '
@@ -553,7 +570,9 @@ class _DataTransferPageState extends State<DataTransferPage> {
             '${summary.mainCategoryRows} main category, '
             '${summary.experiencePointRows} XP, '
             '${summary.assignerRows} assigned, '
-            '${summary.activeTimerRows} timer.\n$backupMessage';
+            '${summary.activeTimerRows} timer, '
+            '${summary.goalRows} goals, and '
+            '${summary.goalCheckInRows} goal check-ins.\n$backupMessage';
       },
       busyTitle: 'Deleting Data',
       busyDetail: 'Removing your local Motion records...',

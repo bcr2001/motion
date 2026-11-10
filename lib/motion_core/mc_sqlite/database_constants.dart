@@ -4,6 +4,8 @@ class MotionDbTables {
   static const String experiencePoints = 'experience_points';
   static const String assigner = 'to_assign';
   static const String activeTimerSession = 'active_timer_session';
+  static const String goals = 'goals';
+  static const String goalCheckIns = 'goal_check_ins';
 }
 
 class MotionDbColumns {
@@ -52,6 +54,14 @@ class MotionDbColumns {
       'pomodoroPhaseStartedAtEpochMs';
   static const String pomodoroPhaseElapsedSeconds =
       'pomodoroPhaseElapsedSeconds';
+  static const String goalId = 'goalId';
+  static const String goalName = 'goalName';
+  static const String goalDescription = 'goalDescription';
+  static const String goalStartDate = 'goalStartDate';
+  static const String goalCompletionDate = 'goalCompletionDate';
+  static const String goalStatus = 'goalStatus';
+  static const String goalCreatedAtEpochMs = 'goalCreatedAtEpochMs';
+  static const String goalUpdatedAtEpochMs = 'goalUpdatedAtEpochMs';
 }
 
 class MotionCategories {

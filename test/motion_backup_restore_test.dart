@@ -74,6 +74,8 @@ void main() {
       expect(result.dailyTotalRows, 1);
       expect(result.experiencePointRows, 1);
       expect(result.assignedRows, 2);
+      expect(result.goalRows, 1);
+      expect(result.goalCheckInRows, 1);
 
       final trackingRows = await trackerDb.query(
         MotionDbTables.subcategory,
@@ -133,6 +135,24 @@ void main() {
         await _rowCount(assignerDb, MotionDbTables.assigner, 'user-2'),
         1,
       );
+      final restoredGoals = await trackerDb.query(
+        MotionDbTables.goals,
+        where: '${MotionDbColumns.currentLoggedInUser} = ?',
+        whereArgs: ['user-1'],
+      );
+      expect(restoredGoals, hasLength(1));
+      expect(restoredGoals.single[MotionDbColumns.goalName], 'Get a Job');
+      final restoredGoalId = restoredGoals.single[MotionDbColumns.id];
+      final restoredCheckIns = await trackerDb.query(
+        MotionDbTables.goalCheckIns,
+        where: '${MotionDbColumns.currentLoggedInUser} = ?',
+        whereArgs: ['user-1'],
+      );
+      expect(restoredCheckIns, hasLength(1));
+      expect(
+        restoredCheckIns.single[MotionDbColumns.goalId],
+        restoredGoalId,
+      );
     });
 
     test('rejects an invalid numeric value before changing the database',
@@ -183,7 +203,7 @@ void main() {
           isA<StateError>().having(
             (error) => error.message,
             'message',
-            contains('exactly three files'),
+            contains('three files'),
           ),
         ),
       );
@@ -340,6 +360,22 @@ Future<void> _seedBackupData(
     MotionDbColumns.streakTargetMinutes: 30.0,
     MotionDbColumns.streakStartDate: '6/4/2026',
   });
+
+  final goalId = await trackerDb.insert(MotionDbTables.goals, {
+    MotionDbColumns.currentLoggedInUser: user,
+    MotionDbColumns.goalName: 'Get a Job',
+    MotionDbColumns.goalDescription: 'Find the right opportunity',
+    MotionDbColumns.goalStartDate: '2026-07-01',
+    MotionDbColumns.goalCompletionDate: null,
+    MotionDbColumns.goalStatus: 'active',
+    MotionDbColumns.goalCreatedAtEpochMs: 1,
+    MotionDbColumns.goalUpdatedAtEpochMs: 1,
+  });
+  await trackerDb.insert(MotionDbTables.goalCheckIns, {
+    MotionDbColumns.goalId: goalId,
+    MotionDbColumns.currentLoggedInUser: user,
+    MotionDbColumns.date: '2026-07-02',
+  });
 }
 
 Future<void> _seedOtherUserData(Database trackerDb, Database assignerDb) async {
@@ -370,6 +406,16 @@ Future<void> _seedOtherUserData(Database trackerDb, Database assignerDb) async {
     MotionDbColumns.streakTargetMinutes: 0.0,
     MotionDbColumns.streakStartDate: '',
   });
+  await trackerDb.insert(MotionDbTables.goals, {
+    MotionDbColumns.currentLoggedInUser: 'user-2',
+    MotionDbColumns.goalName: 'Other Goal',
+    MotionDbColumns.goalDescription: '',
+    MotionDbColumns.goalStartDate: '2026-08-02',
+    MotionDbColumns.goalCompletionDate: null,
+    MotionDbColumns.goalStatus: 'active',
+    MotionDbColumns.goalCreatedAtEpochMs: 2,
+    MotionDbColumns.goalUpdatedAtEpochMs: 2,
+  });
 }
 
 Future<void> _replaceWithTemporaryData(
@@ -378,6 +424,11 @@ Future<void> _replaceWithTemporaryData(
   required String user,
 }) async {
   await trackerDb.transaction((txn) async {
+    await txn.delete(
+      MotionDbTables.goals,
+      where: '${MotionDbColumns.currentLoggedInUser} = ?',
+      whereArgs: [user],
+    );
     await txn.delete(
       MotionDbTables.subcategory,
       where: '${MotionDbColumns.currentLoggedInUser} = ?',
@@ -407,6 +458,16 @@ Future<void> _replaceWithTemporaryData(
       MotionDbColumns.subcategoryName: 'Temporary',
       MotionDbColumns.timeSpent: 10.0,
       MotionDbColumns.currentLoggedInUser: user,
+    });
+    await txn.insert(MotionDbTables.goals, {
+      MotionDbColumns.currentLoggedInUser: user,
+      MotionDbColumns.goalName: 'Temporary Goal',
+      MotionDbColumns.goalDescription: '',
+      MotionDbColumns.goalStartDate: '2026-08-03',
+      MotionDbColumns.goalCompletionDate: null,
+      MotionDbColumns.goalStatus: 'active',
+      MotionDbColumns.goalCreatedAtEpochMs: 3,
+      MotionDbColumns.goalUpdatedAtEpochMs: 3,
     });
   });
   await assignerDb.delete(
