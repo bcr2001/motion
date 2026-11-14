@@ -17,6 +17,7 @@ class UserUidProvider extends ChangeNotifier {
   SharedPreferences? _pref;
   StreamSubscription<String?>? _authSubscription;
   bool _isInitialized;
+  bool _isUsingOfflineFallback = false;
   AuthSessionSource? _authSessionSource;
 
   AuthSessionSource get _sessionSource =>
@@ -31,12 +32,30 @@ class UserUidProvider extends ChangeNotifier {
     try {
       _pref ??= await SharedPreferences.getInstance();
       final sessionSource = _sessionSource;
-      var authenticatedUid = sessionSource.currentUid;
-      authenticatedUid ??= await sessionSource.recoverPreviousSession();
-      authenticatedUid ??= sessionSource.currentUid;
-      await _syncAuthenticatedUid(authenticatedUid);
+      final savedUid = _pref?.getString(uidKey)?.trim();
+      final currentUid = sessionSource.currentUid;
+
+      if (currentUid != null && currentUid.trim().isNotEmpty) {
+        await setUserUid(currentUid);
+      } else {
+        final recovery = await sessionSource.recoverPreviousSession();
+        final recoveredUid = sessionSource.currentUid ?? recovery.uid;
+
+        if (recoveredUid != null && recoveredUid.trim().isNotEmpty) {
+          await setUserUid(recoveredUid);
+        } else if (recovery.status ==
+                AuthSessionRecoveryStatus.temporarilyUnavailable &&
+            savedUid != null &&
+            savedUid.isNotEmpty) {
+          await setUserUid(savedUid);
+          _isUsingOfflineFallback = true;
+        } else {
+          await clearUserUid();
+        }
+      }
+
       _authSubscription ??= sessionSource.uidChanges.listen(
-        (uid) => unawaited(_syncAuthenticatedUid(uid)),
+        (uid) => unawaited(_handleAuthenticationChange(uid)),
       );
     } finally {
       _isInitialized = true;
@@ -54,6 +73,7 @@ class UserUidProvider extends ChangeNotifier {
     final normalizedUid = uid.trim();
     if (normalizedUid.isEmpty) return;
 
+    _isUsingOfflineFallback = false;
     final changed = _userUid != normalizedUid;
     _userUid = normalizedUid;
     await _pref?.setString(uidKey, normalizedUid);
@@ -61,6 +81,7 @@ class UserUidProvider extends ChangeNotifier {
   }
 
   Future<void> clearUserUid() async {
+    _isUsingOfflineFallback = false;
     final changed = _userUid != null;
     _userUid = null;
     await _pref?.remove(uidKey);
@@ -80,6 +101,16 @@ class UserUidProvider extends ChangeNotifier {
     }
 
     await setUserUid(uid);
+  }
+
+  Future<void> _handleAuthenticationChange(String? uid) async {
+    if ((uid == null || uid.trim().isEmpty) &&
+        _isUsingOfflineFallback &&
+        _userUid != null) {
+      return;
+    }
+
+    await _syncAuthenticatedUid(uid);
   }
 
   @override

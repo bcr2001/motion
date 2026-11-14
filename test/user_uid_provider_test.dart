@@ -14,7 +14,9 @@ void main() {
 
   test('silently recovers a previous authenticated session on cold launch',
       () async {
-    final source = _FakeAuthSessionSource(recoveredUid: 'user-1');
+    final source = _FakeAuthSessionSource(
+      recoveryResult: const AuthSessionRecoveryResult.recovered('user-1'),
+    );
     final provider = UserUidProvider(authSessionSource: source);
 
     await provider.initializeUidSharedPreferences();
@@ -47,6 +49,32 @@ void main() {
     await source.dispose();
   });
 
+  test('keeps the last authenticated UID when offline recovery is unavailable',
+      () async {
+    SharedPreferences.setMockInitialValues({
+      UserUidProvider.uidKey: 'user-1',
+    });
+    final source = _FakeAuthSessionSource(
+      recoveryResult: const AuthSessionRecoveryResult.temporarilyUnavailable(),
+    );
+    final provider = UserUidProvider(authSessionSource: source);
+
+    await provider.initializeUidSharedPreferences();
+
+    expect(provider.userUid, 'user-1');
+    source.emit(null);
+    await _flushAsyncWork();
+    expect(provider.userUid, 'user-1');
+
+    await provider.clearUserUid();
+    expect(provider.userUid, isNull);
+    final preferences = await SharedPreferences.getInstance();
+    expect(preferences.containsKey(UserUidProvider.uidKey), isFalse);
+
+    provider.dispose();
+    await source.dispose();
+  });
+
   test('follows later authentication and sign-out events', () async {
     final source = _FakeAuthSessionSource(currentUid: 'user-1');
     final provider = UserUidProvider(authSessionSource: source);
@@ -71,11 +99,14 @@ Future<void> _flushAsyncWork() async {
 }
 
 class _FakeAuthSessionSource implements AuthSessionSource {
-  _FakeAuthSessionSource({this.currentUid, this.recoveredUid});
+  _FakeAuthSessionSource({
+    this.currentUid,
+    this.recoveryResult = const AuthSessionRecoveryResult.noSession(),
+  });
 
   final StreamController<String?> _controller =
       StreamController<String?>.broadcast();
-  final String? recoveredUid;
+  final AuthSessionRecoveryResult recoveryResult;
   int recoveryCalls = 0;
 
   @override
@@ -85,10 +116,10 @@ class _FakeAuthSessionSource implements AuthSessionSource {
   Stream<String?> get uidChanges => _controller.stream;
 
   @override
-  Future<String?> recoverPreviousSession() async {
+  Future<AuthSessionRecoveryResult> recoverPreviousSession() async {
     recoveryCalls += 1;
-    currentUid = recoveredUid;
-    return recoveredUid;
+    currentUid = recoveryResult.uid;
+    return recoveryResult;
   }
 
   void emit(String? uid) {

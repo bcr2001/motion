@@ -9,7 +9,30 @@ abstract interface class AuthSessionSource {
 
   Stream<String?> get uidChanges;
 
-  Future<String?> recoverPreviousSession();
+  Future<AuthSessionRecoveryResult> recoverPreviousSession();
+}
+
+enum AuthSessionRecoveryStatus {
+  recovered,
+  noSession,
+  temporarilyUnavailable,
+}
+
+@immutable
+class AuthSessionRecoveryResult {
+  const AuthSessionRecoveryResult._(this.status, this.uid);
+
+  const AuthSessionRecoveryResult.recovered(String uid)
+      : this._(AuthSessionRecoveryStatus.recovered, uid);
+
+  const AuthSessionRecoveryResult.noSession()
+      : this._(AuthSessionRecoveryStatus.noSession, null);
+
+  const AuthSessionRecoveryResult.temporarilyUnavailable()
+      : this._(AuthSessionRecoveryStatus.temporarilyUnavailable, null);
+
+  final AuthSessionRecoveryStatus status;
+  final String? uid;
 }
 
 class FirebaseAuthSessionSource implements AuthSessionSource {
@@ -30,17 +53,24 @@ class FirebaseAuthSessionSource implements AuthSessionSource {
       _firebaseAuth.authStateChanges().map((user) => user?.uid).distinct();
 
   @override
-  Future<String?> recoverPreviousSession() async {
+  Future<AuthSessionRecoveryResult> recoverPreviousSession() async {
     final existingUid = currentUid;
-    if (existingUid != null) return existingUid;
+    if (existingUid != null) {
+      return AuthSessionRecoveryResult.recovered(existingUid);
+    }
 
     try {
-      final googleUser = await _googleSignIn.signInSilently();
-      if (googleUser == null) return null;
+      // Do not suppress errors here. A network failure must remain distinct
+      // from a confirmed absence of a previously selected Google account.
+      final googleUser =
+          await _googleSignIn.signInSilently(suppressErrors: false);
+      if (googleUser == null) {
+        return const AuthSessionRecoveryResult.noSession();
+      }
 
       final googleAuth = await googleUser.authentication;
       if (googleAuth.accessToken == null && googleAuth.idToken == null) {
-        return null;
+        return const AuthSessionRecoveryResult.noSession();
       }
 
       final credential = GoogleAuthProvider.credential(
@@ -48,10 +78,29 @@ class FirebaseAuthSessionSource implements AuthSessionSource {
         idToken: googleAuth.idToken,
       );
       final result = await _firebaseAuth.signInWithCredential(credential);
-      return result.user?.uid;
+      final uid = result.user?.uid;
+      return uid == null
+          ? const AuthSessionRecoveryResult.noSession()
+          : AuthSessionRecoveryResult.recovered(uid);
+    } on FirebaseAuthException catch (error) {
+      debugPrint('Silent authentication recovery failed: $error');
+      if (_isTerminalAuthenticationError(error.code)) {
+        return const AuthSessionRecoveryResult.noSession();
+      }
+      return const AuthSessionRecoveryResult.temporarilyUnavailable();
     } catch (error) {
       debugPrint('Silent authentication recovery failed: $error');
-      return null;
+      return const AuthSessionRecoveryResult.temporarilyUnavailable();
     }
+  }
+
+  bool _isTerminalAuthenticationError(String code) {
+    return const {
+      'invalid-credential',
+      'invalid-user-token',
+      'user-disabled',
+      'user-not-found',
+      'user-token-expired',
+    }.contains(code);
   }
 }
