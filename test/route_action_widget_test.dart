@@ -19,7 +19,7 @@ void main() {
         expect(find.text('AI'), findsNothing);
         expect(find.byTooltip('AI Forecast'), findsNothing);
         expect(find.byTooltip('Monthly Report'), findsOneWidget);
-        expect(find.byTooltip('Goal Tracker'), findsOneWidget);
+        expect(find.byTooltip('Timelines'), findsOneWidget);
         expect(find.byTooltip('Menu'), findsOneWidget);
         expect(tester.takeException(), isNull);
       },

@@ -53,14 +53,20 @@ void main() {
           'main_category.csv',
           'subcategory.csv',
           'to_assign.csv',
+          'timeline_collections.csv',
           'goals.csv',
           'goal_check_ins.csv',
+          'goal_pause_periods.csv',
         ],
       );
       expect(files[0].content, contains('education,work,skills'));
       expect(files[1].content, contains('Skills,Chess,45.0,user-1'));
       expect(files[2].content, contains('Chess,Skills,1,0'));
-      expect(files[3].content, startsWith('id,currentLoggedInUser,goalName'));
+      expect(
+        files[3].content,
+        startsWith('id,currentLoggedInUser,collectionName'),
+      );
+      expect(files[4].content, contains('entryType,collectionId'));
     });
 
     test('exports all database-derived CSV files to a selected directory',
@@ -93,11 +99,22 @@ void main() {
         isTrue,
       );
       expect(
+        File(
+          '${tempDir.path}${Platform.pathSeparator}timeline_collections.csv',
+        ).existsSync(),
+        isTrue,
+      );
+      expect(
         File('${tempDir.path}${Platform.pathSeparator}goals.csv').existsSync(),
         isTrue,
       );
       expect(
         File('${tempDir.path}${Platform.pathSeparator}goal_check_ins.csv')
+            .existsSync(),
+        isTrue,
+      );
+      expect(
+        File('${tempDir.path}${Platform.pathSeparator}goal_pause_periods.csv')
             .existsSync(),
         isTrue,
       );
@@ -109,6 +126,7 @@ void main() {
         MotionDbTables.mainCategory,
         MotionDbTables.experiencePoints,
         MotionDbTables.activeTimerSession,
+        MotionDbTables.timelineCollections,
         MotionDbTables.goals,
         MotionDbTables.goalCheckIns,
       ]) {
@@ -131,9 +149,10 @@ void main() {
       expect(summary.experiencePointRows, 1);
       expect(summary.assignerRows, 1);
       expect(summary.activeTimerRows, 1);
+      expect(summary.timelineCollectionRows, 1);
       expect(summary.goalRows, 1);
       expect(summary.goalCheckInRows, 1);
-      expect(summary.totalRows, 7);
+      expect(summary.totalRows, 8);
       for (final rows in trackerDb.tables.values) {
         expect(
           rows.map((row) => row[MotionDbColumns.currentLoggedInUser]),
@@ -289,6 +308,9 @@ class _FakeMotionDatabase implements Database, Transaction {
   String _tableFromSql(String sql) {
     if (sql.contains(MotionDbTables.goalCheckIns)) {
       return MotionDbTables.goalCheckIns;
+    }
+    if (sql.contains(MotionDbTables.timelineCollections)) {
+      return MotionDbTables.timelineCollections;
     }
     if (sql.contains(MotionDbTables.goals)) {
       return MotionDbTables.goals;

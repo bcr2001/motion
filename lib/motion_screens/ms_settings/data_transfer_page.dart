@@ -317,9 +317,10 @@ class _DataTransferPageState extends State<DataTransferPage> {
             ? preview.firstTrackedDate!
             : '${preview.firstTrackedDate} - ${preview.lastTrackedDate}';
     final goalPreview = backup.includesGoalData
-        ? 'Goals: ${preview.goalRows}\n'
-            'Goal check-ins: ${preview.goalCheckInRows}\n\n'
-        : 'Goals: Existing goal data will be preserved\n\n';
+        ? 'Collections: ${preview.timelineCollectionRows}\n'
+            'Timelines and goals: ${preview.goalRows}\n'
+            'Goal effort days: ${preview.goalCheckInRows}\n\n'
+        : 'Timelines and collections: Existing data will be preserved\n\n';
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
@@ -381,9 +382,10 @@ class _DataTransferPageState extends State<DataTransferPage> {
         _refreshDataSummary();
 
         final goalResult = backup.includesGoalData
-            ? '${result.goalRows} goal, and '
-                '${result.goalCheckInRows} goal check-in row(s) restored.'
-            : 'Existing goal data was preserved.';
+            ? '${result.timelineCollectionRows} collection, '
+                '${result.goalRows} timeline or goal, and '
+                '${result.goalCheckInRows} goal effort row(s) restored.'
+            : 'Existing timeline and collection data was preserved.';
         return '${result.trackingRows} tracking, '
             '${result.dailyTotalRows} daily total, '
             '${result.experiencePointRows} XP, and '
@@ -447,7 +449,7 @@ class _DataTransferPageState extends State<DataTransferPage> {
           iconColor: Colors.redAccent,
           title: 'Delete All Data?',
           message:
-              'This removes your local tracking history, main category totals, XP records, assigned subcategories, streak settings, and goals for this account. Motion will create an automatic backup first when data exists. This does not delete your Firebase account.',
+              'This removes your local tracking history, main category totals, XP records, assigned subcategories, streak settings, and timelines for this account. Motion will create an automatic backup first when data exists. This does not delete your Firebase account.',
           primaryLabel: 'Continue',
           secondaryLabel: 'Cancel',
           onPrimary: () => Navigator.of(dialogContext).pop(true),
@@ -571,8 +573,9 @@ class _DataTransferPageState extends State<DataTransferPage> {
             '${summary.experiencePointRows} XP, '
             '${summary.assignerRows} assigned, '
             '${summary.activeTimerRows} timer, '
-            '${summary.goalRows} goals, and '
-            '${summary.goalCheckInRows} goal check-ins.\n$backupMessage';
+            '${summary.timelineCollectionRows} collections, '
+            '${summary.goalRows} timelines or goals, and '
+            '${summary.goalCheckInRows} goal effort days.\n$backupMessage';
       },
       busyTitle: 'Deleting Data',
       busyDetail: 'Removing your local Motion records...',

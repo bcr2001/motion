@@ -6,6 +6,8 @@ class MotionDbTables {
   static const String activeTimerSession = 'active_timer_session';
   static const String goals = 'goals';
   static const String goalCheckIns = 'goal_check_ins';
+  static const String goalPausePeriods = 'goal_pause_periods';
+  static const String timelineCollections = 'timeline_collections';
 }
 
 class MotionDbColumns {
@@ -59,9 +61,20 @@ class MotionDbColumns {
   static const String goalDescription = 'goalDescription';
   static const String goalStartDate = 'goalStartDate';
   static const String goalCompletionDate = 'goalCompletionDate';
+  static const String goalDeadlineDate = 'goalDeadlineDate';
   static const String goalStatus = 'goalStatus';
   static const String goalCreatedAtEpochMs = 'goalCreatedAtEpochMs';
   static const String goalUpdatedAtEpochMs = 'goalUpdatedAtEpochMs';
+  static const String goalPauseStartDate = 'pauseStartDate';
+  static const String goalPauseResumeDate = 'resumeDate';
+  static const String goalPauseReason = 'pauseReason';
+  static const String timelineEntryType = 'entryType';
+  static const String timelineCollectionId = 'collectionId';
+  static const String timelineCollectionName = 'collectionName';
+  static const String timelineCollectionCreatedAtEpochMs =
+      'collectionCreatedAtEpochMs';
+  static const String timelineCollectionUpdatedAtEpochMs =
+      'collectionUpdatedAtEpochMs';
 }
 
 class MotionCategories {

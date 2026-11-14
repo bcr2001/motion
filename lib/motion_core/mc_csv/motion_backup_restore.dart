@@ -14,6 +14,7 @@ class MotionBackupRestorePreview {
     required this.trackingRows,
     required this.dailyTotalRows,
     required this.assignedRows,
+    required this.timelineCollectionRows,
     required this.goalRows,
     required this.goalCheckInRows,
     required this.firstTrackedDate,
@@ -23,13 +24,19 @@ class MotionBackupRestorePreview {
   final int trackingRows;
   final int dailyTotalRows;
   final int assignedRows;
+  final int timelineCollectionRows;
   final int goalRows;
   final int goalCheckInRows;
   final String? firstTrackedDate;
   final String? lastTrackedDate;
 
   int get totalRows =>
-      trackingRows + dailyTotalRows + assignedRows + goalRows + goalCheckInRows;
+      trackingRows +
+      dailyTotalRows +
+      assignedRows +
+      timelineCollectionRows +
+      goalRows +
+      goalCheckInRows;
 }
 
 class MotionBackupRestoreResult {
@@ -38,6 +45,7 @@ class MotionBackupRestoreResult {
     required this.dailyTotalRows,
     required this.experiencePointRows,
     required this.assignedRows,
+    required this.timelineCollectionRows,
     required this.goalRows,
     required this.goalCheckInRows,
   });
@@ -46,6 +54,7 @@ class MotionBackupRestoreResult {
   final int dailyTotalRows;
   final int experiencePointRows;
   final int assignedRows;
+  final int timelineCollectionRows;
   final int goalRows;
   final int goalCheckInRows;
 }
@@ -57,22 +66,28 @@ class MotionValidatedBackup {
     required List<Map<String, Object?>> mainCategoryRows,
     required List<Map<String, Object?>> subcategoryRows,
     required List<Map<String, Object?>> assignerRows,
+    required List<Map<String, Object?>> timelineCollectionRows,
     required List<Map<String, Object?>> goalRows,
     required List<Map<String, Object?>> goalCheckInRows,
+    required List<Map<String, Object?>> goalPauseRows,
     required this.includesGoalData,
   })  : _mainCategoryRows = mainCategoryRows,
         _subcategoryRows = subcategoryRows,
         _assignerRows = assignerRows,
+        _timelineCollectionRows = timelineCollectionRows,
         _goalRows = goalRows,
-        _goalCheckInRows = goalCheckInRows;
+        _goalCheckInRows = goalCheckInRows,
+        _goalPauseRows = goalPauseRows;
 
   final String currentUser;
   final MotionBackupRestorePreview preview;
   final List<Map<String, Object?>> _mainCategoryRows;
   final List<Map<String, Object?>> _subcategoryRows;
   final List<Map<String, Object?>> _assignerRows;
+  final List<Map<String, Object?>> _timelineCollectionRows;
   final List<Map<String, Object?>> _goalRows;
   final List<Map<String, Object?>> _goalCheckInRows;
+  final List<Map<String, Object?>> _goalPauseRows;
   final bool includesGoalData;
 }
 
@@ -119,7 +134,7 @@ class MotionBackupRestoreService {
     MotionDbColumns.streakTargetMinutes,
     MotionDbColumns.streakStartDate,
   ];
-  static const List<String> _goalHeaders = [
+  static const List<String> _legacyGoalHeaders = [
     MotionDbColumns.id,
     MotionDbColumns.currentLoggedInUser,
     MotionDbColumns.goalName,
@@ -130,10 +145,52 @@ class MotionBackupRestoreService {
     MotionDbColumns.goalCreatedAtEpochMs,
     MotionDbColumns.goalUpdatedAtEpochMs,
   ];
+  static const List<String> _goalHeaders = [
+    MotionDbColumns.id,
+    MotionDbColumns.currentLoggedInUser,
+    MotionDbColumns.goalName,
+    MotionDbColumns.goalDescription,
+    MotionDbColumns.goalStartDate,
+    MotionDbColumns.goalCompletionDate,
+    MotionDbColumns.goalDeadlineDate,
+    MotionDbColumns.goalStatus,
+    MotionDbColumns.timelineEntryType,
+    MotionDbColumns.timelineCollectionId,
+    MotionDbColumns.goalCreatedAtEpochMs,
+    MotionDbColumns.goalUpdatedAtEpochMs,
+  ];
+  static const List<String> _typedGoalHeadersWithoutDeadline = [
+    MotionDbColumns.id,
+    MotionDbColumns.currentLoggedInUser,
+    MotionDbColumns.goalName,
+    MotionDbColumns.goalDescription,
+    MotionDbColumns.goalStartDate,
+    MotionDbColumns.goalCompletionDate,
+    MotionDbColumns.goalStatus,
+    MotionDbColumns.timelineEntryType,
+    MotionDbColumns.timelineCollectionId,
+    MotionDbColumns.goalCreatedAtEpochMs,
+    MotionDbColumns.goalUpdatedAtEpochMs,
+  ];
+  static const List<String> _timelineCollectionHeaders = [
+    MotionDbColumns.id,
+    MotionDbColumns.currentLoggedInUser,
+    MotionDbColumns.timelineCollectionName,
+    MotionDbColumns.timelineCollectionCreatedAtEpochMs,
+    MotionDbColumns.timelineCollectionUpdatedAtEpochMs,
+  ];
   static const List<String> _goalCheckInHeaders = [
     MotionDbColumns.goalId,
     MotionDbColumns.currentLoggedInUser,
     MotionDbColumns.date,
+  ];
+  static const List<String> _goalPauseHeaders = [
+    MotionDbColumns.id,
+    MotionDbColumns.goalId,
+    MotionDbColumns.currentLoggedInUser,
+    MotionDbColumns.goalPauseStartDate,
+    MotionDbColumns.goalPauseResumeDate,
+    MotionDbColumns.goalPauseReason,
   ];
   static const Set<String> _mainCategories = {
     MotionCategories.education,
@@ -169,16 +226,34 @@ class MotionBackupRestoreService {
       _assignerHeaders,
     );
     final includesGoalData = backupFiles.containsKey(_BackupFileKind.goals);
+    final timelineCollectionRows =
+        backupFiles.containsKey(_BackupFileKind.timelineCollections)
+            ? _parseRows(
+                backupFiles[_BackupFileKind.timelineCollections]!,
+                _timelineCollectionHeaders,
+              )
+            : const <Map<String, String>>[];
     final goalRows = includesGoalData
-        ? _parseRows(
+        ? _parseRowsAcceptingHeaders(
             backupFiles[_BackupFileKind.goals]!,
-            _goalHeaders,
+            const [
+              _goalHeaders,
+              _typedGoalHeadersWithoutDeadline,
+              _legacyGoalHeaders,
+            ],
           )
         : const <Map<String, String>>[];
     final goalCheckInRows = includesGoalData
         ? _parseRows(
             backupFiles[_BackupFileKind.goalCheckIns]!,
             _goalCheckInHeaders,
+          )
+        : const <Map<String, String>>[];
+    final goalPauseRows = includesGoalData &&
+            backupFiles.containsKey(_BackupFileKind.goalPausePeriods)
+        ? _parseRows(
+            backupFiles[_BackupFileKind.goalPausePeriods]!,
+            _goalPauseHeaders,
           )
         : const <Map<String, String>>[];
 
@@ -194,7 +269,20 @@ class MotionBackupRestoreService {
       assignerRows,
       currentUser,
     );
-    final validatedGoalRows = _validateGoalRows(goalRows, currentUser);
+    final validatedTimelineCollectionRows = _validateTimelineCollectionRows(
+      timelineCollectionRows,
+      currentUser,
+    );
+    final validatedGoalRows = _validateGoalRows(
+      goalRows,
+      currentUser,
+      validatedTimelineCollectionRows,
+    );
+    final validatedGoalPauseRows = _validateGoalPauseRows(
+      goalPauseRows,
+      currentUser,
+      validatedGoalRows,
+    );
     final validatedGoalCheckInRows = _validateGoalCheckInRows(
       goalCheckInRows,
       currentUser,
@@ -203,6 +291,7 @@ class MotionBackupRestoreService {
 
     if (validatedSubcategoryRows.isEmpty &&
         validatedAssignerRows.isEmpty &&
+        validatedTimelineCollectionRows.isEmpty &&
         validatedGoalRows.isEmpty) {
       throw StateError(
           'The selected Motion backup contains no restorable data.');
@@ -219,6 +308,7 @@ class MotionBackupRestoreService {
         trackingRows: validatedSubcategoryRows.length,
         dailyTotalRows: validatedMainRows.length,
         assignedRows: validatedAssignerRows.length,
+        timelineCollectionRows: validatedTimelineCollectionRows.length,
         goalRows: validatedGoalRows.length,
         goalCheckInRows: validatedGoalCheckInRows.length,
         firstTrackedDate: dates.isEmpty ? null : dates.first,
@@ -227,8 +317,10 @@ class MotionBackupRestoreService {
       mainCategoryRows: validatedMainRows,
       subcategoryRows: validatedSubcategoryRows,
       assignerRows: validatedAssignerRows,
+      timelineCollectionRows: validatedTimelineCollectionRows,
       goalRows: validatedGoalRows,
       goalCheckInRows: validatedGoalCheckInRows,
+      goalPauseRows: validatedGoalPauseRows,
       includesGoalData: includesGoalData,
     );
   }
@@ -266,11 +358,36 @@ class MotionBackupRestoreService {
             whereArgs: [currentUser],
           );
 
+          await txn.delete(
+            MotionDbTables.timelineCollections,
+            where: '${MotionDbColumns.currentLoggedInUser} = ?',
+            whereArgs: [currentUser],
+          );
+
+          final restoredCollectionIds = <int, int>{};
+          for (final originalRow in backup._timelineCollectionRows) {
+            final backupId = originalRow[MotionDbColumns.id]! as int;
+            final row = Map<String, Object?>.from(originalRow)
+              ..remove(MotionDbColumns.id);
+            final restoredId = await txn.insert(
+              MotionDbTables.timelineCollections,
+              row,
+              conflictAlgorithm: ConflictAlgorithm.abort,
+            );
+            restoredCollectionIds[backupId] = restoredId;
+          }
+
           final restoredGoalIds = <int, int>{};
           for (final originalRow in backup._goalRows) {
             final backupId = originalRow[MotionDbColumns.id]! as int;
             final row = Map<String, Object?>.from(originalRow)
               ..remove(MotionDbColumns.id);
+            final backupCollectionId =
+                row[MotionDbColumns.timelineCollectionId] as int?;
+            row[MotionDbColumns.timelineCollectionId] =
+                backupCollectionId == null
+                    ? null
+                    : restoredCollectionIds[backupCollectionId];
             final restoredId = await txn.insert(
               MotionDbTables.goals,
               row,
@@ -278,6 +395,19 @@ class MotionBackupRestoreService {
             );
             restoredGoalIds[backupId] = restoredId;
           }
+          final pauseBatch = txn.batch();
+          for (final originalRow in backup._goalPauseRows) {
+            final backupGoalId = originalRow[MotionDbColumns.goalId]! as int;
+            final row = Map<String, Object?>.from(originalRow)
+              ..remove(MotionDbColumns.id)
+              ..[MotionDbColumns.goalId] = restoredGoalIds[backupGoalId];
+            pauseBatch.insert(
+              MotionDbTables.goalPausePeriods,
+              row,
+              conflictAlgorithm: ConflictAlgorithm.abort,
+            );
+          }
+          await pauseBatch.commit(noResult: true);
           final checkInBatch = txn.batch();
           for (final originalRow in backup._goalCheckInRows) {
             final backupGoalId = originalRow[MotionDbColumns.goalId]! as int;
@@ -378,6 +508,7 @@ class MotionBackupRestoreService {
       dailyTotalRows: restoredDates.length,
       experiencePointRows: restoredDates.length,
       assignedRows: backup._assignerRows.length,
+      timelineCollectionRows: backup._timelineCollectionRows.length,
       goalRows: backup._goalRows.length,
       goalCheckInRows: backup._goalCheckInRows.length,
     );
@@ -386,10 +517,9 @@ class MotionBackupRestoreService {
   Map<_BackupFileKind, MotionCsvBackupFile> _classifyBackupFiles(
     List<MotionCsvBackupFile> files,
   ) {
-    if (files.length != 3 && files.length != _BackupFileKind.values.length) {
+    if (files.length < 3 || files.length > _BackupFileKind.values.length) {
       throw StateError(
-        'Select either the three files from a legacy Motion backup or all five '
-        'files from a current backup.',
+        'Select the complete set of files from one Motion backup.',
       );
     }
 
@@ -417,8 +547,24 @@ class MotionBackupRestoreService {
     final hasCheckIns = classified.containsKey(_BackupFileKind.goalCheckIns);
     if (hasGoals != hasCheckIns) {
       throw StateError(
-        'A current Motion backup must include both goals.csv and '
+        'A timeline backup must include both goals.csv and '
         'goal_check_ins.csv.',
+      );
+    }
+    final hasCollections =
+        classified.containsKey(_BackupFileKind.timelineCollections);
+    if (hasCollections && !hasGoals) {
+      throw StateError(
+        'timeline_collections.csv must be restored together with goals.csv '
+        'and goal_check_ins.csv.',
+      );
+    }
+    final hasPausePeriods =
+        classified.containsKey(_BackupFileKind.goalPausePeriods);
+    if (hasPausePeriods && !hasGoals) {
+      throw StateError(
+        'goal_pause_periods.csv must be restored together with goals.csv '
+        'and goal_check_ins.csv.',
       );
     }
     return classified;
@@ -433,8 +579,12 @@ class MotionBackupRestoreService {
         _BackupFileKind.subcategory,
       final value when value.endsWith('to_assign.csv') =>
         _BackupFileKind.assigner,
+      final value when value.endsWith('timeline_collections.csv') =>
+        _BackupFileKind.timelineCollections,
       final value when value.endsWith('goal_check_ins.csv') =>
         _BackupFileKind.goalCheckIns,
+      final value when value.endsWith('goal_pause_periods.csv') =>
+        _BackupFileKind.goalPausePeriods,
       final value when value.endsWith('goals.csv') => _BackupFileKind.goals,
       _ => null,
     };
@@ -455,11 +605,19 @@ class MotionBackupRestoreService {
         if (_listsEqual(headers, _assignerHeaders)) {
           return _BackupFileKind.assigner;
         }
-        if (_listsEqual(headers, _goalHeaders)) {
+        if (_listsEqual(headers, _timelineCollectionHeaders)) {
+          return _BackupFileKind.timelineCollections;
+        }
+        if (_listsEqual(headers, _goalHeaders) ||
+            _listsEqual(headers, _typedGoalHeadersWithoutDeadline) ||
+            _listsEqual(headers, _legacyGoalHeaders)) {
           return _BackupFileKind.goals;
         }
         if (_listsEqual(headers, _goalCheckInHeaders)) {
           return _BackupFileKind.goalCheckIns;
+        }
+        if (_listsEqual(headers, _goalPauseHeaders)) {
+          return _BackupFileKind.goalPausePeriods;
         }
       }
     } on FormatException {
@@ -514,6 +672,32 @@ class MotionBackupRestoreService {
       }
     }
     return dataRows;
+  }
+
+  List<Map<String, String>> _parseRowsAcceptingHeaders(
+    MotionCsvBackupFile file,
+    List<List<String>> acceptedHeaders,
+  ) {
+    late final List<List<dynamic>> csvRows;
+    try {
+      csvRows = const CsvToListConverter().convert(file.content);
+    } on FormatException catch (error) {
+      throw StateError('${file.fileName} is not valid CSV: ${error.message}');
+    }
+    if (csvRows.isEmpty) {
+      throw StateError('${file.fileName} is empty.');
+    }
+    final actualHeaders = csvRows.first
+        .map((value) => value.toString().trim().replaceFirst('\ufeff', ''))
+        .toList();
+    for (final headers in acceptedHeaders) {
+      if (_listsEqual(actualHeaders, headers)) {
+        return _parseRows(file, headers);
+      }
+    }
+    throw StateError(
+      '${file.fileName} does not have recognized Motion backup columns.',
+    );
   }
 
   List<Map<String, Object?>> _validateMainCategoryRows(
@@ -687,11 +871,77 @@ class MotionBackupRestoreService {
     }).toList(growable: false);
   }
 
-  List<Map<String, Object?>> _validateGoalRows(
+  List<Map<String, Object?>> _validateTimelineCollectionRows(
     List<Map<String, String>> rows,
     String currentUser,
   ) {
     final ids = <int>{};
+    final normalizedNames = <String>{};
+    return rows.indexed.map((entry) {
+      final rowNumber = entry.$1 + 2;
+      final row = entry.$2;
+      _validateUser(
+        row,
+        currentUser,
+        'timeline_collections.csv',
+        rowNumber,
+      );
+      final id = _positiveInt(
+        row[MotionDbColumns.id],
+        fileName: 'timeline_collections.csv',
+        rowNumber: rowNumber,
+        columnName: MotionDbColumns.id,
+      );
+      if (!ids.add(id)) {
+        throw StateError(
+          'timeline_collections.csv contains duplicate collection ID $id.',
+        );
+      }
+      final name = _requiredText(
+        row[MotionDbColumns.timelineCollectionName],
+        fileName: 'timeline_collections.csv',
+        rowNumber: rowNumber,
+        columnName: MotionDbColumns.timelineCollectionName,
+      );
+      if (name.length > 60) {
+        throw StateError(
+          'timeline_collections.csv, row $rowNumber, has a collection name '
+          'longer than 60 characters.',
+        );
+      }
+      if (!normalizedNames.add(name.toLowerCase())) {
+        throw StateError(
+          'timeline_collections.csv contains duplicate collection name "$name".',
+        );
+      }
+      return <String, Object?>{
+        MotionDbColumns.id: id,
+        MotionDbColumns.currentLoggedInUser: currentUser,
+        MotionDbColumns.timelineCollectionName: name,
+        MotionDbColumns.timelineCollectionCreatedAtEpochMs: _nonNegativeInt(
+          row[MotionDbColumns.timelineCollectionCreatedAtEpochMs],
+          fileName: 'timeline_collections.csv',
+          rowNumber: rowNumber,
+          columnName: MotionDbColumns.timelineCollectionCreatedAtEpochMs,
+        ),
+        MotionDbColumns.timelineCollectionUpdatedAtEpochMs: _nonNegativeInt(
+          row[MotionDbColumns.timelineCollectionUpdatedAtEpochMs],
+          fileName: 'timeline_collections.csv',
+          rowNumber: rowNumber,
+          columnName: MotionDbColumns.timelineCollectionUpdatedAtEpochMs,
+        ),
+      };
+    }).toList(growable: false);
+  }
+
+  List<Map<String, Object?>> _validateGoalRows(
+    List<Map<String, String>> rows,
+    String currentUser,
+    List<Map<String, Object?>> collections,
+  ) {
+    final ids = <int>{};
+    final collectionIds =
+        collections.map((row) => row[MotionDbColumns.id]! as int).toSet();
     return rows.indexed.map((entry) {
       final rowNumber = entry.$1 + 2;
       final row = entry.$2;
@@ -703,7 +953,7 @@ class MotionBackupRestoreService {
         columnName: MotionDbColumns.id,
       );
       if (!ids.add(id)) {
-        throw StateError('goals.csv contains duplicate goal ID $id.');
+        throw StateError('goals.csv contains duplicate timeline ID $id.');
       }
       final startDate = _strictDate(
         row[MotionDbColumns.goalStartDate],
@@ -717,6 +967,12 @@ class MotionBackupRestoreService {
         rowNumber: rowNumber,
         columnName: MotionDbColumns.goalCompletionDate,
       );
+      final deadlineDate = _optionalStrictDate(
+        row[MotionDbColumns.goalDeadlineDate],
+        fileName: 'goals.csv',
+        rowNumber: rowNumber,
+        columnName: MotionDbColumns.goalDeadlineDate,
+      );
       final status = _requiredText(
         row[MotionDbColumns.goalStatus],
         fileName: 'goals.csv',
@@ -725,7 +981,7 @@ class MotionBackupRestoreService {
       );
       if (status != 'active' && status != 'achieved') {
         throw StateError(
-          'goals.csv, row $rowNumber, has invalid goal status "$status".',
+          'goals.csv, row $rowNumber, has invalid timeline status "$status".',
         );
       }
       if ((status == 'achieved') != (completionDate != null)) {
@@ -736,6 +992,41 @@ class MotionBackupRestoreService {
       if (completionDate != null && completionDate.compareTo(startDate) < 0) {
         throw StateError(
           'goals.csv, row $rowNumber, completes before it starts.',
+        );
+      }
+      if (deadlineDate != null && deadlineDate.compareTo(startDate) < 0) {
+        throw StateError(
+          'goals.csv, row $rowNumber, has a deadline before it starts.',
+        );
+      }
+      final entryType =
+          row[MotionDbColumns.timelineEntryType]?.trim().isNotEmpty == true
+              ? row[MotionDbColumns.timelineEntryType]!.trim()
+              : 'timeline';
+      if (entryType != 'timeline' && entryType != 'goal') {
+        throw StateError(
+          'goals.csv, row $rowNumber, has invalid entry type "$entryType".',
+        );
+      }
+      if (entryType == 'timeline' && deadlineDate != null) {
+        throw StateError(
+          'goals.csv, row $rowNumber, gives a deadline to a timeline.',
+        );
+      }
+      final collectionText =
+          row[MotionDbColumns.timelineCollectionId]?.trim() ?? '';
+      final collectionId = collectionText.isEmpty
+          ? null
+          : _positiveInt(
+              collectionText,
+              fileName: 'goals.csv',
+              rowNumber: rowNumber,
+              columnName: MotionDbColumns.timelineCollectionId,
+            );
+      if (collectionId != null && !collectionIds.contains(collectionId)) {
+        throw StateError(
+          'goals.csv, row $rowNumber, references missing collection '
+          '$collectionId.',
         );
       }
       return <String, Object?>{
@@ -751,7 +1042,10 @@ class MotionBackupRestoreService {
             row[MotionDbColumns.goalDescription]?.trim() ?? '',
         MotionDbColumns.goalStartDate: startDate,
         MotionDbColumns.goalCompletionDate: completionDate,
+        MotionDbColumns.goalDeadlineDate: deadlineDate,
         MotionDbColumns.goalStatus: status,
+        MotionDbColumns.timelineEntryType: entryType,
+        MotionDbColumns.timelineCollectionId: collectionId,
         MotionDbColumns.goalCreatedAtEpochMs: _nonNegativeInt(
           row[MotionDbColumns.goalCreatedAtEpochMs],
           fileName: 'goals.csv',
@@ -766,6 +1060,126 @@ class MotionBackupRestoreService {
         ),
       };
     }).toList(growable: false);
+  }
+
+  List<Map<String, Object?>> _validateGoalPauseRows(
+    List<Map<String, String>> rows,
+    String currentUser,
+    List<Map<String, Object?>> goals,
+  ) {
+    final goalsById = {
+      for (final goal in goals) goal[MotionDbColumns.id]! as int: goal,
+    };
+    final ids = <int>{};
+    final validated = rows.indexed.map((entry) {
+      final rowNumber = entry.$1 + 2;
+      final row = entry.$2;
+      _validateUser(row, currentUser, 'goal_pause_periods.csv', rowNumber);
+      final id = _positiveInt(
+        row[MotionDbColumns.id],
+        fileName: 'goal_pause_periods.csv',
+        rowNumber: rowNumber,
+        columnName: MotionDbColumns.id,
+      );
+      if (!ids.add(id)) {
+        throw StateError(
+          'goal_pause_periods.csv contains duplicate pause ID $id.',
+        );
+      }
+      final goalId = _positiveInt(
+        row[MotionDbColumns.goalId],
+        fileName: 'goal_pause_periods.csv',
+        rowNumber: rowNumber,
+        columnName: MotionDbColumns.goalId,
+      );
+      final goal = goalsById[goalId];
+      if (goal == null) {
+        throw StateError(
+          'goal_pause_periods.csv, row $rowNumber, references missing goal $goalId.',
+        );
+      }
+      if (goal[MotionDbColumns.timelineEntryType] != 'goal') {
+        throw StateError(
+          'goal_pause_periods.csv, row $rowNumber, references a timeline instead of a goal.',
+        );
+      }
+      final startDate = _strictDate(
+        row[MotionDbColumns.goalPauseStartDate],
+        fileName: 'goal_pause_periods.csv',
+        rowNumber: rowNumber,
+        columnName: MotionDbColumns.goalPauseStartDate,
+      );
+      final resumeDate = _optionalStrictDate(
+        row[MotionDbColumns.goalPauseResumeDate],
+        fileName: 'goal_pause_periods.csv',
+        rowNumber: rowNumber,
+        columnName: MotionDbColumns.goalPauseResumeDate,
+      );
+      final goalStart = goal[MotionDbColumns.goalStartDate]! as String;
+      final completionDate =
+          goal[MotionDbColumns.goalCompletionDate] as String?;
+      if (startDate.compareTo(goalStart) < 0 ||
+          (completionDate != null && startDate.compareTo(completionDate) > 0)) {
+        throw StateError(
+          'goal_pause_periods.csv, row $rowNumber, starts outside the goal date range.',
+        );
+      }
+      if (resumeDate != null && resumeDate.compareTo(startDate) < 0) {
+        throw StateError(
+          'goal_pause_periods.csv, row $rowNumber, resumes before the pause begins.',
+        );
+      }
+      if (completionDate != null &&
+          (resumeDate == null || resumeDate.compareTo(completionDate) > 0)) {
+        throw StateError(
+          'goal_pause_periods.csv, row $rowNumber, is not closed within the completed goal.',
+        );
+      }
+      final reason = row[MotionDbColumns.goalPauseReason]?.trim() ?? '';
+      if (reason.length > 200) {
+        throw StateError(
+          'goal_pause_periods.csv, row $rowNumber, has a pause reason longer than 200 characters.',
+        );
+      }
+      return <String, Object?>{
+        MotionDbColumns.id: id,
+        MotionDbColumns.goalId: goalId,
+        MotionDbColumns.currentLoggedInUser: currentUser,
+        MotionDbColumns.goalPauseStartDate: startDate,
+        MotionDbColumns.goalPauseResumeDate: resumeDate,
+        MotionDbColumns.goalPauseReason: reason,
+      };
+    }).toList(growable: false);
+
+    final byGoal = <int, List<Map<String, Object?>>>{};
+    for (final row in validated) {
+      byGoal
+          .putIfAbsent(row[MotionDbColumns.goalId]! as int, () => [])
+          .add(row);
+    }
+    for (final entry in byGoal.entries) {
+      final periods = entry.value
+        ..sort((first, second) =>
+            (first[MotionDbColumns.goalPauseStartDate]! as String).compareTo(
+              second[MotionDbColumns.goalPauseStartDate]! as String,
+            ));
+      String? previousEnd;
+      for (final period in periods) {
+        final start = period[MotionDbColumns.goalPauseStartDate]! as String;
+        if (previousEnd == null && period != periods.first) {
+          throw StateError(
+            'goal_pause_periods.csv contains a pause after an open pause for goal ${entry.key}.',
+          );
+        }
+        if (previousEnd != null && start.compareTo(previousEnd) < 0) {
+          throw StateError(
+            'goal_pause_periods.csv contains overlapping pauses for goal ${entry.key}.',
+          );
+        }
+        previousEnd = period[MotionDbColumns.goalPauseResumeDate] as String?;
+      }
+    }
+    return validated;
   }
 
   List<Map<String, Object?>> _validateGoalCheckInRows(
@@ -790,7 +1204,7 @@ class MotionBackupRestoreService {
       final goal = goalsById[goalId];
       if (goal == null) {
         throw StateError(
-          'goal_check_ins.csv, row $rowNumber, references missing goal $goalId.',
+          'goal_check_ins.csv, row $rowNumber, references missing timeline $goalId.',
         );
       }
       final date = _strictDate(
@@ -802,7 +1216,7 @@ class MotionBackupRestoreService {
       final key = '$goalId|$date';
       if (!keys.add(key)) {
         throw StateError(
-          'goal_check_ins.csv contains duplicate check-in $date for goal $goalId.',
+          'goal_check_ins.csv contains duplicate check-in $date for timeline $goalId.',
         );
       }
       final startDate = goal[MotionDbColumns.goalStartDate]! as String;
@@ -811,7 +1225,7 @@ class MotionBackupRestoreService {
       if (date.compareTo(startDate) < 0 ||
           (completionDate != null && date.compareTo(completionDate) > 0)) {
         throw StateError(
-          'goal_check_ins.csv, row $rowNumber, is outside the goal date range.',
+          'goal_check_ins.csv, row $rowNumber, is outside the timeline date range.',
         );
       }
       return <String, Object?>{
@@ -1058,8 +1472,10 @@ enum _BackupFileKind {
   mainCategory('main_category.csv'),
   subcategory('subcategory.csv'),
   assigner('to_assign.csv'),
+  timelineCollections('timeline_collections.csv'),
   goals('goals.csv'),
-  goalCheckIns('goal_check_ins.csv');
+  goalCheckIns('goal_check_ins.csv'),
+  goalPausePeriods('goal_pause_periods.csv');
 
   const _BackupFileKind(this.label);
 

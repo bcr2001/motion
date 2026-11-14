@@ -398,12 +398,17 @@ class _DataSummaryCard extends StatelessWidget {
                   borderColor: borderColor,
                 ),
                 _SummaryPill(
-                  label: 'Goals',
+                  label: 'Collections',
+                  value: summary.timelineCollectionRows,
+                  borderColor: borderColor,
+                ),
+                _SummaryPill(
+                  label: 'Timelines',
                   value: summary.goalRows,
                   borderColor: borderColor,
                 ),
                 _SummaryPill(
-                  label: 'Goal check-ins',
+                  label: 'Goal effort days',
                   value: summary.goalCheckInRows,
                   borderColor: borderColor,
                 ),

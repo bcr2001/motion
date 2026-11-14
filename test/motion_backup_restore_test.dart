@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:csv/csv.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:motion/motion_core/mc_csv/csv_data_transfer.dart';
 import 'package:motion/motion_core/mc_csv/motion_backup_restore.dart';
@@ -74,6 +75,7 @@ void main() {
       expect(result.dailyTotalRows, 1);
       expect(result.experiencePointRows, 1);
       expect(result.assignedRows, 2);
+      expect(result.timelineCollectionRows, 1);
       expect(result.goalRows, 1);
       expect(result.goalCheckInRows, 1);
 
@@ -142,6 +144,23 @@ void main() {
       );
       expect(restoredGoals, hasLength(1));
       expect(restoredGoals.single[MotionDbColumns.goalName], 'Get a Job');
+      expect(
+        restoredGoals.single[MotionDbColumns.goalDeadlineDate],
+        '2026-09-01',
+      );
+      expect(restoredGoals.single[MotionDbColumns.timelineEntryType], 'goal');
+      expect(
+        restoredGoals.single[MotionDbColumns.timelineCollectionId],
+        isNotNull,
+      );
+      expect(
+        await _rowCount(
+          trackerDb,
+          MotionDbTables.timelineCollections,
+          'user-1',
+        ),
+        1,
+      );
       final restoredGoalId = restoredGoals.single[MotionDbColumns.id];
       final restoredCheckIns = await trackerDb.query(
         MotionDbTables.goalCheckIns,
@@ -153,6 +172,73 @@ void main() {
         restoredCheckIns.single[MotionDbColumns.goalId],
         restoredGoalId,
       );
+      final restoredPauses = await trackerDb.query(
+        MotionDbTables.goalPausePeriods,
+        where: '${MotionDbColumns.currentLoggedInUser} = ?',
+        whereArgs: ['user-1'],
+      );
+      expect(restoredPauses, hasLength(1));
+      expect(restoredPauses.single[MotionDbColumns.goalId], restoredGoalId);
+      expect(
+        restoredPauses.single[MotionDbColumns.goalPauseReason],
+        'Family emergency',
+      );
+    });
+
+    test('restores older five-file backups as uncategorized timelines',
+        () async {
+      await _seedBackupData(trackerDb, assignerDb, user: 'user-1');
+      final currentFiles = await transfer.backupFiles(currentUser: 'user-1');
+      final legacyFiles = _asLegacyFiveFileBackup(currentFiles);
+
+      final backup = restoreService.validateBackup(
+        files: legacyFiles,
+        currentUser: 'user-1',
+      );
+      final result = await restoreService.restoreBackup(
+        backup: backup,
+        currentUser: 'user-1',
+      );
+
+      expect(result.timelineCollectionRows, 0);
+      final restoredGoal = (await trackerDb.query(
+        MotionDbTables.goals,
+        where: '${MotionDbColumns.currentLoggedInUser} = ?',
+        whereArgs: ['user-1'],
+      ))
+          .single;
+      expect(restoredGoal[MotionDbColumns.timelineEntryType], 'timeline');
+      expect(restoredGoal[MotionDbColumns.timelineCollectionId], isNull);
+    });
+
+    test('restores a backup containing only an empty collection', () async {
+      await trackerDb.insert(MotionDbTables.timelineCollections, {
+        MotionDbColumns.currentLoggedInUser: 'user-1',
+        MotionDbColumns.timelineCollectionName: 'Calisthenics',
+        MotionDbColumns.timelineCollectionCreatedAtEpochMs: 1,
+        MotionDbColumns.timelineCollectionUpdatedAtEpochMs: 1,
+      });
+      final files = await transfer.backupFiles(currentUser: 'user-1');
+      final backup = restoreService.validateBackup(
+        files: files,
+        currentUser: 'user-1',
+      );
+      await trackerDb.delete(
+        MotionDbTables.timelineCollections,
+        where: '${MotionDbColumns.currentLoggedInUser} = ?',
+        whereArgs: ['user-1'],
+      );
+
+      final result = await restoreService.restoreBackup(
+        backup: backup,
+        currentUser: 'user-1',
+      );
+
+      expect(result.timelineCollectionRows, 1);
+      final restored =
+          await trackerDb.query(MotionDbTables.timelineCollections);
+      expect(restored.single[MotionDbColumns.timelineCollectionName],
+          'Calisthenics');
     });
 
     test('rejects an invalid numeric value before changing the database',
@@ -203,7 +289,7 @@ void main() {
           isA<StateError>().having(
             (error) => error.message,
             'message',
-            contains('three files'),
+            contains('complete set'),
           ),
         ),
       );
@@ -361,13 +447,25 @@ Future<void> _seedBackupData(
     MotionDbColumns.streakStartDate: '6/4/2026',
   });
 
+  final collectionId = await trackerDb.insert(
+    MotionDbTables.timelineCollections,
+    {
+      MotionDbColumns.currentLoggedInUser: user,
+      MotionDbColumns.timelineCollectionName: 'Career',
+      MotionDbColumns.timelineCollectionCreatedAtEpochMs: 1,
+      MotionDbColumns.timelineCollectionUpdatedAtEpochMs: 1,
+    },
+  );
   final goalId = await trackerDb.insert(MotionDbTables.goals, {
     MotionDbColumns.currentLoggedInUser: user,
     MotionDbColumns.goalName: 'Get a Job',
     MotionDbColumns.goalDescription: 'Find the right opportunity',
     MotionDbColumns.goalStartDate: '2026-07-01',
     MotionDbColumns.goalCompletionDate: null,
+    MotionDbColumns.goalDeadlineDate: '2026-09-01',
     MotionDbColumns.goalStatus: 'active',
+    MotionDbColumns.timelineEntryType: 'goal',
+    MotionDbColumns.timelineCollectionId: collectionId,
     MotionDbColumns.goalCreatedAtEpochMs: 1,
     MotionDbColumns.goalUpdatedAtEpochMs: 1,
   });
@@ -375,6 +473,13 @@ Future<void> _seedBackupData(
     MotionDbColumns.goalId: goalId,
     MotionDbColumns.currentLoggedInUser: user,
     MotionDbColumns.date: '2026-07-02',
+  });
+  await trackerDb.insert(MotionDbTables.goalPausePeriods, {
+    MotionDbColumns.goalId: goalId,
+    MotionDbColumns.currentLoggedInUser: user,
+    MotionDbColumns.goalPauseStartDate: '2026-07-03',
+    MotionDbColumns.goalPauseResumeDate: '2026-07-05',
+    MotionDbColumns.goalPauseReason: 'Family emergency',
   });
 }
 
@@ -426,6 +531,11 @@ Future<void> _replaceWithTemporaryData(
   await trackerDb.transaction((txn) async {
     await txn.delete(
       MotionDbTables.goals,
+      where: '${MotionDbColumns.currentLoggedInUser} = ?',
+      whereArgs: [user],
+    );
+    await txn.delete(
+      MotionDbTables.timelineCollections,
       where: '${MotionDbColumns.currentLoggedInUser} = ?',
       whereArgs: [user],
     );
@@ -487,6 +597,34 @@ Future<void> _replaceWithTemporaryData(
     MotionDbColumns.streakTargetMinutes: 0.0,
     MotionDbColumns.streakStartDate: '',
   });
+}
+
+List<MotionCsvBackupFile> _asLegacyFiveFileBackup(
+  List<MotionCsvBackupFile> files,
+) {
+  return files
+      .where(
+    (file) =>
+        file.fileName != 'timeline_collections.csv' &&
+        file.fileName != 'goal_pause_periods.csv',
+  )
+      .map((file) {
+    if (file.fileName != 'goals.csv') return file;
+    final rows = const CsvToListConverter().convert(file.content);
+    final legacyRows = rows
+        .map(
+          (row) => [
+            ...row.take(6),
+            row[7],
+            ...row.skip(10),
+          ],
+        )
+        .toList(growable: false);
+    return MotionCsvBackupFile(
+      fileName: file.fileName,
+      content: const ListToCsvConverter().convert(legacyRows),
+    );
+  }).toList(growable: false);
 }
 
 Future<int> _rowCount(Database db, String table, String user) async {

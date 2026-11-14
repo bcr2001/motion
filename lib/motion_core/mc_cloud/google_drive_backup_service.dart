@@ -85,9 +85,11 @@ class GoogleDriveBackupService {
     'subcategory.csv',
     'to_assign.csv',
   ];
-  static const List<String> _optionalGoalBackupFileNames = [
+  static const List<String> _optionalTimelineBackupFileNames = [
+    'timeline_collections.csv',
     'goals.csv',
     'goal_check_ins.csv',
+    'goal_pause_periods.csv',
   ];
 
   Future<GoogleDriveBackupResult> uploadBackupFiles({
@@ -249,7 +251,7 @@ class GoogleDriveBackupService {
             ),
           );
         }
-        for (final fileName in _optionalGoalBackupFileNames) {
+        for (final fileName in _optionalTimelineBackupFileNames) {
           final file = await _downloadBackupFileIfPresent(
             driveApi: driveApi,
             folderId: folderId,

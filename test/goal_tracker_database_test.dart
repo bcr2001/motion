@@ -52,6 +52,133 @@ void main() {
       expect(achieved.elapsedDaysAt(DateTime(2030, 1, 1)), 73);
     });
 
+    test('existing rows default to uncategorized timelines', () async {
+      await database.insert(MotionDbTables.goals, {
+        MotionDbColumns.currentLoggedInUser: 'user-1',
+        MotionDbColumns.goalName: 'Single since',
+        MotionDbColumns.goalDescription: '',
+        MotionDbColumns.goalStartDate: '2026-01-01',
+        MotionDbColumns.goalCompletionDate: null,
+        MotionDbColumns.goalStatus: 'active',
+        MotionDbColumns.goalCreatedAtEpochMs: 1,
+        MotionDbColumns.goalUpdatedAtEpochMs: 1,
+      });
+
+      final entry = (await helper.getGoals(currentUser: 'user-1')).single;
+
+      expect(entry.isTimeline, isTrue);
+      expect(entry.collectionId, isNull);
+    });
+
+    test('migrates version 19 entries without losing their history', () async {
+      final path =
+          '${tempDirectory.path}${Platform.pathSeparator}tracker_v19.db';
+      var legacyDb = await databaseFactoryFfi.openDatabase(
+        path,
+        options: OpenDatabaseOptions(
+          version: 19,
+          onConfigure: TrackerDatabaseSchema.configure,
+          onCreate: (db, _) async {
+            await db.execute('''
+              CREATE TABLE ${MotionDbTables.goals}(
+                ${MotionDbColumns.id} INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                ${MotionDbColumns.currentLoggedInUser} TEXT NOT NULL,
+                ${MotionDbColumns.goalName} TEXT NOT NULL,
+                ${MotionDbColumns.goalDescription} TEXT NOT NULL DEFAULT '',
+                ${MotionDbColumns.goalStartDate} TEXT NOT NULL,
+                ${MotionDbColumns.goalCompletionDate} TEXT,
+                ${MotionDbColumns.goalStatus} TEXT NOT NULL DEFAULT 'active',
+                ${MotionDbColumns.goalCreatedAtEpochMs} INTEGER NOT NULL,
+                ${MotionDbColumns.goalUpdatedAtEpochMs} INTEGER NOT NULL
+              )
+            ''');
+            await db.insert(MotionDbTables.goals, {
+              MotionDbColumns.currentLoggedInUser: 'user-1',
+              MotionDbColumns.goalName: 'First Job',
+              MotionDbColumns.goalDescription: '',
+              MotionDbColumns.goalStartDate: '2024-01-01',
+              MotionDbColumns.goalCompletionDate: null,
+              MotionDbColumns.goalStatus: 'active',
+              MotionDbColumns.goalCreatedAtEpochMs: 1,
+              MotionDbColumns.goalUpdatedAtEpochMs: 1,
+            });
+          },
+        ),
+      );
+      await legacyDb.close();
+
+      legacyDb = await databaseFactoryFfi.openDatabase(
+        path,
+        options: OpenDatabaseOptions(
+          version: TrackerDatabaseSchema.version,
+          onConfigure: TrackerDatabaseSchema.configure,
+          onUpgrade: TrackerDatabaseSchema.migrate,
+        ),
+      );
+      final migrated = (await legacyDb.query(MotionDbTables.goals)).single;
+
+      expect(migrated[MotionDbColumns.goalName], 'First Job');
+      expect(migrated[MotionDbColumns.timelineEntryType], 'timeline');
+      expect(migrated[MotionDbColumns.timelineCollectionId], isNull);
+      expect(
+        await legacyDb.query(MotionDbTables.timelineCollections),
+        isEmpty,
+      );
+      await legacyDb.close();
+    });
+
+    test('deleting a collection keeps its entries uncategorized', () async {
+      final collectionId = await helper.insertTimelineCollection(
+        _collection(user: 'user-1', name: 'Calisthenics'),
+      );
+      await helper.insertGoal(
+        _goal(user: 'user-1').copyWith(collectionId: collectionId),
+      );
+
+      await helper.deleteTimelineCollection(
+        collectionId: collectionId,
+        currentUser: 'user-1',
+      );
+
+      expect(
+        await helper.getTimelineCollections(currentUser: 'user-1'),
+        isEmpty,
+      );
+      expect(
+        (await helper.getGoals(currentUser: 'user-1')).single.collectionId,
+        isNull,
+      );
+    });
+
+    test('prevents a timeline from using another user collection', () async {
+      final collectionId = await helper.insertTimelineCollection(
+        _collection(user: 'user-2', name: 'Private'),
+      );
+
+      expect(
+        () => helper.insertGoal(
+          _goal(user: 'user-1').copyWith(collectionId: collectionId),
+        ),
+        throwsA(isA<StateError>()),
+      );
+    });
+
+    test('daily effort check-ins are only available for goals', () async {
+      await helper.insertGoal(
+        _goal(user: 'user-1', entryType: TimelineEntryType.timeline),
+      );
+      final timeline = (await helper.getGoals(currentUser: 'user-1')).single;
+
+      expect(
+        () => helper.toggleGoalCheckIn(
+          goal: timeline,
+          date: DateTime(2026, 1, 2),
+          today: DateTime(2026, 1, 2),
+        ),
+        throwsA(isA<StateError>()),
+      );
+    });
+
     test('isolates goals and check-ins by user', () async {
       final firstId = await helper.insertGoal(_goal(user: 'user-1'));
       await helper.insertGoal(_goal(user: 'user-2', name: 'Other'));
@@ -218,7 +345,10 @@ void main() {
           name: 'Get a Job',
           description: '',
           startDate: DateTime(2026, 1, 1),
+          deadlineDate: DateTime(2026, 1, 31),
+          entryType: TimelineEntryType.goal,
         );
+        expect(goal.deadlineDate, DateTime(2026, 1, 31));
         await provider.toggleCheckIn(goal, DateTime(2026, 1, 3));
         expect(provider.checkInsFor(goal.id!), hasLength(1));
 
@@ -234,6 +364,94 @@ void main() {
         userProvider.dispose();
       }
     });
+
+    test('provider creates a historical timeline as completed', () async {
+      final userProvider = UserUidProvider(
+        initialUserUid: 'user-1',
+        isInitialized: true,
+      );
+      final provider = GoalTrackerProvider(
+        userUidProvider: userProvider,
+        databaseHelper: helper,
+        now: () => DateTime(2026, 1, 10, 12),
+      );
+      try {
+        await provider.initialize();
+        final timeline = await provider.createGoal(
+          name: 'First Job',
+          description: '',
+          startDate: DateTime(2020, 1, 1),
+          completionDate: DateTime(2024, 6, 30),
+        );
+
+        expect(timeline.isAchieved, isTrue);
+        expect(timeline.completionDate, DateTime(2024, 6, 30));
+        expect(
+          provider.goalById(timeline.id!)!.completionDate,
+          DateTime(2024, 6, 30),
+        );
+      } finally {
+        provider.dispose();
+        userProvider.dispose();
+      }
+    });
+
+    test('pausing preserves active days and achievement closes the pause',
+        () async {
+      var now = DateTime(2026, 1, 10, 12);
+      final userProvider = UserUidProvider(
+        initialUserUid: 'user-1',
+        isInitialized: true,
+      );
+      final provider = GoalTrackerProvider(
+        userUidProvider: userProvider,
+        databaseHelper: helper,
+        now: () => now,
+      );
+      try {
+        await provider.initialize();
+        var goal = await provider.createGoal(
+          name: 'Build Strength',
+          description: '',
+          startDate: DateTime(2026, 1, 1),
+          deadlineDate: DateTime(2026, 3, 1),
+          entryType: TimelineEntryType.goal,
+        );
+        expect(provider.activeDaysFor(goal), 9);
+
+        await provider.pauseGoal(goal, reason: 'Injury');
+        goal = provider.goalById(goal.id!)!;
+        expect(provider.isPaused(goal), isTrue);
+
+        now = DateTime(2026, 2, 9, 12);
+        expect(provider.pausedDaysFor(goal), 30);
+        expect(provider.activeDaysFor(goal), 9);
+        expect(goal.deadlineDate, DateTime(2026, 3, 1));
+
+        await provider.resumePausedGoal(goal);
+        goal = provider.goalById(goal.id!)!;
+        expect(provider.isPaused(goal), isFalse);
+        expect(goal.deadlineDate, DateTime(2026, 3, 1));
+        now = DateTime(2026, 2, 10, 12);
+        expect(provider.activeDaysFor(goal), 10);
+
+        await provider.pauseGoal(goal, reason: 'Travel');
+        goal = provider.goalById(goal.id!)!;
+        now = DateTime(2026, 2, 15, 12);
+        await provider.markAchieved(goal);
+        goal = provider.goalById(goal.id!)!;
+
+        expect(goal.isAchieved, isTrue);
+        expect(provider.isPaused(goal), isFalse);
+        expect(
+            provider.pausePeriodsFor(goal.id!).where((p) => p.isOpen), isEmpty);
+        expect(provider.activeDaysFor(goal), 10);
+        expect(goal.elapsedDaysAt(provider.today), 45);
+      } finally {
+        provider.dispose();
+        userProvider.dispose();
+      }
+    });
   });
 }
 
@@ -241,11 +459,25 @@ MotionGoal _goal({
   required String user,
   String name = 'Get a Job',
   DateTime? start,
+  TimelineEntryType entryType = TimelineEntryType.goal,
 }) {
   return MotionGoal(
     currentLoggedInUser: user,
     name: name,
     startDate: start ?? DateTime(2026, 1, 1),
+    entryType: entryType,
+    createdAtEpochMs: 1,
+    updatedAtEpochMs: 1,
+  );
+}
+
+MotionTimelineCollection _collection({
+  required String user,
+  required String name,
+}) {
+  return MotionTimelineCollection(
+    currentLoggedInUser: user,
+    name: name,
     createdAtEpochMs: 1,
     updatedAtEpochMs: 1,
   );

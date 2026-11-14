@@ -2,7 +2,7 @@ import 'package:motion/motion_core/mc_sqlite/database_constants.dart';
 import 'package:sqflite/sqflite.dart';
 
 class TrackerDatabaseSchema {
-  static const int version = 19;
+  static const int version = 22;
   static const String _legacyTimeRecordedColumn = 'timeRecorded';
 
   static const String mainCategoryTable = MotionDbTables.mainCategory;
@@ -12,6 +12,9 @@ class TrackerDatabaseSchema {
       MotionDbTables.activeTimerSession;
   static const String goalsTable = MotionDbTables.goals;
   static const String goalCheckInsTable = MotionDbTables.goalCheckIns;
+  static const String goalPausePeriodsTable = MotionDbTables.goalPausePeriods;
+  static const String timelineCollectionsTable =
+      MotionDbTables.timelineCollections;
   static const List<String> indexNames = [
     'idx_main_category_user_date',
     'idx_experience_points_user_date',
@@ -21,6 +24,11 @@ class TrackerDatabaseSchema {
     'idx_goals_user_status_start_date',
     'idx_goal_check_ins_goal_date',
     'idx_goal_check_ins_user_date',
+    'idx_goal_pause_periods_goal_start',
+    'idx_goal_pause_periods_user_start',
+    'idx_goal_pause_periods_one_open',
+    'idx_timeline_collections_user_name',
+    'idx_goals_user_collection_status',
   ];
   static const List<String> triggerNames = [
     'validate_subcategory_time_insert',
@@ -130,6 +138,20 @@ class TrackerDatabaseSchema {
     ''');
 
     await db.execute('''
+      CREATE TABLE IF NOT EXISTS $timelineCollectionsTable(
+        ${MotionDbColumns.id} INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+        ${MotionDbColumns.currentLoggedInUser} TEXT NOT NULL,
+        ${MotionDbColumns.timelineCollectionName} TEXT COLLATE NOCASE NOT NULL,
+        ${MotionDbColumns.timelineCollectionCreatedAtEpochMs} INTEGER NOT NULL,
+        ${MotionDbColumns.timelineCollectionUpdatedAtEpochMs} INTEGER NOT NULL,
+        UNIQUE (
+          ${MotionDbColumns.currentLoggedInUser},
+          ${MotionDbColumns.timelineCollectionName}
+        )
+      )
+    ''');
+
+    await db.execute('''
       CREATE TABLE IF NOT EXISTS $goalsTable(
         ${MotionDbColumns.id} INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
         ${MotionDbColumns.currentLoggedInUser} TEXT NOT NULL,
@@ -137,12 +159,21 @@ class TrackerDatabaseSchema {
         ${MotionDbColumns.goalDescription} TEXT NOT NULL DEFAULT '',
         ${MotionDbColumns.goalStartDate} TEXT NOT NULL,
         ${MotionDbColumns.goalCompletionDate} TEXT,
+        ${MotionDbColumns.goalDeadlineDate} TEXT,
         ${MotionDbColumns.goalStatus} TEXT NOT NULL DEFAULT 'active',
+        ${MotionDbColumns.timelineEntryType} TEXT NOT NULL DEFAULT 'timeline',
+        ${MotionDbColumns.timelineCollectionId} INTEGER,
         ${MotionDbColumns.goalCreatedAtEpochMs} INTEGER NOT NULL,
         ${MotionDbColumns.goalUpdatedAtEpochMs} INTEGER NOT NULL,
         CHECK (${MotionDbColumns.goalStatus} IN ('active', 'achieved')),
+        CHECK (${MotionDbColumns.timelineEntryType} IN ('timeline', 'goal')),
         CHECK (${MotionDbColumns.goalCompletionDate} IS NULL OR
-          ${MotionDbColumns.goalCompletionDate} >= ${MotionDbColumns.goalStartDate})
+          ${MotionDbColumns.goalCompletionDate} >= ${MotionDbColumns.goalStartDate}),
+        CHECK (${MotionDbColumns.goalDeadlineDate} IS NULL OR
+          ${MotionDbColumns.goalDeadlineDate} >= ${MotionDbColumns.goalStartDate}),
+        FOREIGN KEY (${MotionDbColumns.timelineCollectionId})
+          REFERENCES $timelineCollectionsTable(${MotionDbColumns.id})
+          ON DELETE SET NULL
       )
     ''');
 
@@ -152,6 +183,21 @@ class TrackerDatabaseSchema {
         ${MotionDbColumns.currentLoggedInUser} TEXT NOT NULL,
         ${MotionDbColumns.date} TEXT NOT NULL,
         PRIMARY KEY (${MotionDbColumns.goalId}, ${MotionDbColumns.date}),
+        FOREIGN KEY (${MotionDbColumns.goalId})
+          REFERENCES $goalsTable(${MotionDbColumns.id}) ON DELETE CASCADE
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS $goalPausePeriodsTable(
+        ${MotionDbColumns.id} INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+        ${MotionDbColumns.goalId} INTEGER NOT NULL,
+        ${MotionDbColumns.currentLoggedInUser} TEXT NOT NULL,
+        ${MotionDbColumns.goalPauseStartDate} TEXT NOT NULL,
+        ${MotionDbColumns.goalPauseResumeDate} TEXT,
+        ${MotionDbColumns.goalPauseReason} TEXT NOT NULL DEFAULT '',
+        CHECK (${MotionDbColumns.goalPauseResumeDate} IS NULL OR
+          ${MotionDbColumns.goalPauseResumeDate} >= ${MotionDbColumns.goalPauseStartDate}),
         FOREIGN KEY (${MotionDbColumns.goalId})
           REFERENCES $goalsTable(${MotionDbColumns.id}) ON DELETE CASCADE
       )
@@ -223,6 +269,25 @@ class TrackerDatabaseSchema {
       activeTimerSessionTable,
       MotionDbColumns.timerTargetAlertTriggered,
       'INTEGER NOT NULL DEFAULT 0',
+    );
+
+    await _addColumnIfMissing(
+      db,
+      goalsTable,
+      MotionDbColumns.goalDeadlineDate,
+      'TEXT',
+    );
+    await _addColumnIfMissing(
+      db,
+      goalsTable,
+      MotionDbColumns.timelineEntryType,
+      "TEXT NOT NULL DEFAULT 'timeline' CHECK (${MotionDbColumns.timelineEntryType} IN ('timeline', 'goal'))",
+    );
+    await _addColumnIfMissing(
+      db,
+      goalsTable,
+      MotionDbColumns.timelineCollectionId,
+      'INTEGER REFERENCES $timelineCollectionsTable(${MotionDbColumns.id}) ON DELETE SET NULL',
     );
     await _addColumnIfMissing(
       db,
@@ -363,6 +428,45 @@ class TrackerDatabaseSchema {
       ON $goalCheckInsTable(
         ${MotionDbColumns.currentLoggedInUser},
         ${MotionDbColumns.date}
+      )
+    ''');
+
+    await db.execute('''
+      CREATE INDEX IF NOT EXISTS idx_goal_pause_periods_goal_start
+      ON $goalPausePeriodsTable(
+        ${MotionDbColumns.goalId},
+        ${MotionDbColumns.goalPauseStartDate}
+      )
+    ''');
+
+    await db.execute('''
+      CREATE INDEX IF NOT EXISTS idx_goal_pause_periods_user_start
+      ON $goalPausePeriodsTable(
+        ${MotionDbColumns.currentLoggedInUser},
+        ${MotionDbColumns.goalPauseStartDate}
+      )
+    ''');
+
+    await db.execute('''
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_goal_pause_periods_one_open
+      ON $goalPausePeriodsTable(${MotionDbColumns.goalId})
+      WHERE ${MotionDbColumns.goalPauseResumeDate} IS NULL
+    ''');
+
+    await db.execute('''
+      CREATE INDEX IF NOT EXISTS idx_timeline_collections_user_name
+      ON $timelineCollectionsTable(
+        ${MotionDbColumns.currentLoggedInUser},
+        ${MotionDbColumns.timelineCollectionName}
+      )
+    ''');
+
+    await db.execute('''
+      CREATE INDEX IF NOT EXISTS idx_goals_user_collection_status
+      ON $goalsTable(
+        ${MotionDbColumns.currentLoggedInUser},
+        ${MotionDbColumns.timelineCollectionId},
+        ${MotionDbColumns.goalStatus}
       )
     ''');
   }

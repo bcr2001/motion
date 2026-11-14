@@ -17,6 +17,7 @@ class MotionDeletedDataSummary {
     required this.experiencePointRows,
     required this.assignerRows,
     required this.activeTimerRows,
+    required this.timelineCollectionRows,
     required this.goalRows,
     required this.goalCheckInRows,
   });
@@ -26,6 +27,7 @@ class MotionDeletedDataSummary {
   final int experiencePointRows;
   final int assignerRows;
   final int activeTimerRows;
+  final int timelineCollectionRows;
   final int goalRows;
   final int goalCheckInRows;
 
@@ -35,6 +37,7 @@ class MotionDeletedDataSummary {
       experiencePointRows +
       assignerRows +
       activeTimerRows +
+      timelineCollectionRows +
       goalRows +
       goalCheckInRows;
 }
@@ -46,6 +49,7 @@ class MotionDataSummary {
     required this.experiencePointRows,
     required this.assignerRows,
     required this.activeTimerRows,
+    required this.timelineCollectionRows,
     required this.goalRows,
     required this.goalCheckInRows,
     required this.firstTrackedDate,
@@ -57,6 +61,7 @@ class MotionDataSummary {
   final int experiencePointRows;
   final int assignerRows;
   final int activeTimerRows;
+  final int timelineCollectionRows;
   final int goalRows;
   final int goalCheckInRows;
   final String? firstTrackedDate;
@@ -68,11 +73,15 @@ class MotionDataSummary {
       experiencePointRows +
       assignerRows +
       activeTimerRows +
+      timelineCollectionRows +
       goalRows +
       goalCheckInRows;
 
   bool get hasExportableData =>
-      subcategoryRows > 0 || assignerRows > 0 || goalRows > 0;
+      subcategoryRows > 0 ||
+      assignerRows > 0 ||
+      timelineCollectionRows > 0 ||
+      goalRows > 0;
 }
 
 class MotionCsvBackupFile {
@@ -157,12 +166,22 @@ class MotionCsvDataTransfer {
         content: await _csvContentFromRows(await _assignerRows(currentUser)),
       ),
       MotionCsvBackupFile(
+        fileName: 'timeline_collections.csv',
+        content: await _csvContentFromRows(
+          await _timelineCollectionRows(currentUser),
+        ),
+      ),
+      MotionCsvBackupFile(
         fileName: 'goals.csv',
         content: await _csvContentFromRows(await _goalRows(currentUser)),
       ),
       MotionCsvBackupFile(
         fileName: 'goal_check_ins.csv',
         content: await _csvContentFromRows(await _goalCheckInRows(currentUser)),
+      ),
+      MotionCsvBackupFile(
+        fileName: 'goal_pause_periods.csv',
+        content: await _csvContentFromRows(await _goalPauseRows(currentUser)),
       ),
     ];
   }
@@ -184,12 +203,20 @@ class MotionCsvDataTransfer {
       rows: await _assignerRows(currentUser),
     );
     await _writeAndroidCsvFile(
+      fileName: '${fileNamePrefix}timeline_collections.csv',
+      rows: await _timelineCollectionRows(currentUser),
+    );
+    await _writeAndroidCsvFile(
       fileName: '${fileNamePrefix}goals.csv',
       rows: await _goalRows(currentUser),
     );
     await _writeAndroidCsvFile(
       fileName: '${fileNamePrefix}goal_check_ins.csv',
       rows: await _goalCheckInRows(currentUser),
+    );
+    await _writeAndroidCsvFile(
+      fileName: '${fileNamePrefix}goal_pause_periods.csv',
+      rows: await _goalPauseRows(currentUser),
     );
 
     return 'Downloads';
@@ -230,6 +257,11 @@ class MotionCsvDataTransfer {
     );
     await _writeCsvFile(
       directory: directory,
+      fileName: 'timeline_collections.csv',
+      rows: await _timelineCollectionRows(currentUser),
+    );
+    await _writeCsvFile(
+      directory: directory,
       fileName: 'goals.csv',
       rows: await _goalRows(currentUser),
     );
@@ -237,6 +269,11 @@ class MotionCsvDataTransfer {
       directory: directory,
       fileName: 'goal_check_ins.csv',
       rows: await _goalCheckInRows(currentUser),
+    );
+    await _writeCsvFile(
+      directory: directory,
+      fileName: 'goal_pause_periods.csv',
+      rows: await _goalPauseRows(currentUser),
     );
 
     return directory.path;
@@ -251,6 +288,7 @@ class MotionCsvDataTransfer {
     var mainCategoryRows = 0;
     var experiencePointRows = 0;
     var activeTimerRows = 0;
+    var timelineCollectionRows = 0;
     var goalRows = 0;
     var goalCheckInRows = 0;
 
@@ -266,6 +304,11 @@ class MotionCsvDataTransfer {
           0;
       goalRows = await txn.delete(
         MotionDbTables.goals,
+        where: '${MotionDbColumns.currentLoggedInUser} = ?',
+        whereArgs: [currentUser],
+      );
+      timelineCollectionRows = await txn.delete(
+        MotionDbTables.timelineCollections,
         where: '${MotionDbColumns.currentLoggedInUser} = ?',
         whereArgs: [currentUser],
       );
@@ -303,6 +346,7 @@ class MotionCsvDataTransfer {
       experiencePointRows: experiencePointRows,
       assignerRows: assignerRows,
       activeTimerRows: activeTimerRows,
+      timelineCollectionRows: timelineCollectionRows,
       goalRows: goalRows,
       goalCheckInRows: goalCheckInRows,
     );
@@ -424,7 +468,10 @@ class MotionCsvDataTransfer {
         MotionDbColumns.goalDescription,
         MotionDbColumns.goalStartDate,
         MotionDbColumns.goalCompletionDate,
+        MotionDbColumns.goalDeadlineDate,
         MotionDbColumns.goalStatus,
+        MotionDbColumns.timelineEntryType,
+        MotionDbColumns.timelineCollectionId,
         MotionDbColumns.goalCreatedAtEpochMs,
         MotionDbColumns.goalUpdatedAtEpochMs,
       ],
@@ -435,9 +482,40 @@ class MotionCsvDataTransfer {
             row[MotionDbColumns.goalDescription],
             row[MotionDbColumns.goalStartDate],
             row[MotionDbColumns.goalCompletionDate] ?? '',
+            row[MotionDbColumns.goalDeadlineDate] ?? '',
             row[MotionDbColumns.goalStatus],
+            row[MotionDbColumns.timelineEntryType],
+            row[MotionDbColumns.timelineCollectionId] ?? '',
             row[MotionDbColumns.goalCreatedAtEpochMs],
             row[MotionDbColumns.goalUpdatedAtEpochMs],
+          ]),
+    ];
+  }
+
+  Future<List<List<dynamic>>> _timelineCollectionRows(
+      String currentUser) async {
+    final db = await _trackerDatabase();
+    final rows = await db.query(
+      MotionDbTables.timelineCollections,
+      where: '${MotionDbColumns.currentLoggedInUser} = ?',
+      whereArgs: [currentUser],
+      orderBy: '${MotionDbColumns.timelineCollectionName} COLLATE NOCASE',
+    );
+
+    return [
+      [
+        MotionDbColumns.id,
+        MotionDbColumns.currentLoggedInUser,
+        MotionDbColumns.timelineCollectionName,
+        MotionDbColumns.timelineCollectionCreatedAtEpochMs,
+        MotionDbColumns.timelineCollectionUpdatedAtEpochMs,
+      ],
+      ...rows.map((row) => [
+            row[MotionDbColumns.id],
+            row[MotionDbColumns.currentLoggedInUser],
+            row[MotionDbColumns.timelineCollectionName],
+            row[MotionDbColumns.timelineCollectionCreatedAtEpochMs],
+            row[MotionDbColumns.timelineCollectionUpdatedAtEpochMs],
           ]),
     ];
   }
@@ -461,6 +539,36 @@ class MotionCsvDataTransfer {
             row[MotionDbColumns.goalId],
             row[MotionDbColumns.currentLoggedInUser],
             row[MotionDbColumns.date],
+          ]),
+    ];
+  }
+
+  Future<List<List<dynamic>>> _goalPauseRows(String currentUser) async {
+    final db = await _trackerDatabase();
+    final rows = await db.query(
+      MotionDbTables.goalPausePeriods,
+      where: '${MotionDbColumns.currentLoggedInUser} = ?',
+      whereArgs: [currentUser],
+      orderBy: '${MotionDbColumns.goalId}, '
+          '${MotionDbColumns.goalPauseStartDate}',
+    );
+
+    return [
+      [
+        MotionDbColumns.id,
+        MotionDbColumns.goalId,
+        MotionDbColumns.currentLoggedInUser,
+        MotionDbColumns.goalPauseStartDate,
+        MotionDbColumns.goalPauseResumeDate,
+        MotionDbColumns.goalPauseReason,
+      ],
+      ...rows.map((row) => [
+            row[MotionDbColumns.id],
+            row[MotionDbColumns.goalId],
+            row[MotionDbColumns.currentLoggedInUser],
+            row[MotionDbColumns.goalPauseStartDate],
+            row[MotionDbColumns.goalPauseResumeDate] ?? '',
+            row[MotionDbColumns.goalPauseReason] ?? '',
           ]),
     ];
   }
@@ -561,6 +669,17 @@ class MotionCsvDataTransfer {
         )) ??
         0;
 
+    final timelineCollectionCount =
+        Sqflite.firstIntValue(await trackerDb.rawQuery(
+              '''
+          SELECT COUNT(*)
+          FROM ${MotionDbTables.timelineCollections}
+          WHERE ${MotionDbColumns.currentLoggedInUser} = ?
+          ''',
+              [currentUser],
+            )) ??
+            0;
+
     final goalCount = Sqflite.firstIntValue(await trackerDb.rawQuery(
           '''
           SELECT COUNT(*)
@@ -608,6 +727,7 @@ class MotionCsvDataTransfer {
       experiencePointRows: experiencePointCount,
       assignerRows: assignerCount,
       activeTimerRows: activeTimerCount,
+      timelineCollectionRows: timelineCollectionCount,
       goalRows: goalCount,
       goalCheckInRows: goalCheckInCount,
       firstTrackedDate: dateRange.first['firstDate']?.toString(),

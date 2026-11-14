@@ -5,6 +5,7 @@ import 'package:motion/motion_core/motion_providers/goal_pvd/goal_tracker_pvd.da
 import 'package:motion/motion_core/motion_utils/motion_date_utils.dart';
 import 'package:motion/motion_reusable/motion_ui/motion_components.dart';
 import 'package:motion/motion_screens/ms_goals/goal_dialogs.dart';
+import 'package:motion/motion_screens/ms_goals/goal_deadline_status.dart';
 import 'package:motion/motion_themes/mth_styling/app_color.dart';
 import 'package:motion/motion_themes/mth_styling/motion_text_styling.dart';
 import 'package:provider/provider.dart';
@@ -28,7 +29,12 @@ class _GoalDetailPageState extends State<GoalDetailPage> {
   }
 
   Future<void> _edit(MotionGoal goal) async {
-    final draft = await showGoalEditorDialog(context: context, goal: goal);
+    final provider = context.read<GoalTrackerProvider>();
+    final draft = await showGoalEditorDialog(
+      context: context,
+      goal: goal,
+      collections: provider.collections,
+    );
     if (draft == null || !mounted) return;
     try {
       await context.read<GoalTrackerProvider>().editGoal(
@@ -36,10 +42,16 @@ class _GoalDetailPageState extends State<GoalDetailPage> {
             name: draft.name,
             description: draft.description,
             startDate: draft.startDate,
+            completionDate: draft.completionDate,
+            deadlineDate: draft.deadlineDate,
+            entryType: draft.entryType,
+            collectionId: draft.collectionId,
           );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Goal updated.')),
+          SnackBar(
+            content: Text(goal.isGoal ? 'Goal updated.' : 'Timeline updated.'),
+          ),
         );
       }
     } catch (error) {
@@ -54,9 +66,10 @@ class _GoalDetailPageState extends State<GoalDetailPage> {
   Future<void> _delete(MotionGoal goal) async {
     final confirmed = await showGoalConfirmation(
       context: context,
-      title: 'Delete Goal?',
-      message:
-          'This permanently removes ${goal.name} and its check-in history.',
+      title: goal.isGoal ? 'Delete Goal?' : 'Delete Timeline?',
+      message: goal.isGoal
+          ? 'This permanently removes ${goal.name} and its effort history.'
+          : 'This permanently removes ${goal.name}.',
       actionLabel: 'Delete',
       icon: Icons.delete_outline_rounded,
       actionColor: Colors.redAccent,
@@ -77,11 +90,12 @@ class _GoalDetailPageState extends State<GoalDetailPage> {
   Future<void> _achieve(MotionGoal goal) async {
     final confirmed = await showGoalConfirmation(
       context: context,
-      title: 'Mark as Achieved?',
-      message:
-          'Motion will stop the counter today and preserve every check-in for ${goal.name}.',
-      actionLabel: 'Achieved',
-      icon: Icons.emoji_events_rounded,
+      title: goal.isGoal ? 'Mark as Achieved?' : 'Complete Timeline?',
+      message: goal.isGoal
+          ? 'Motion will stop the counter today and preserve the effort history for ${goal.name}.'
+          : 'Motion will stop the counter today and preserve the full elapsed history for ${goal.name}.',
+      actionLabel: goal.isGoal ? 'Achieved' : 'Complete',
+      icon: goal.isGoal ? Icons.emoji_events_rounded : Icons.check_rounded,
       actionColor: Colors.green,
     );
     if (!confirmed || !mounted) return;
@@ -94,9 +108,50 @@ class _GoalDetailPageState extends State<GoalDetailPage> {
         await showGoalAchievedDialog(
           context: context,
           goal: updated,
-          days: updated.elapsedDaysAt(provider.today),
+          days: provider.activeDaysFor(updated),
         );
       }
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(_message(error))),
+        );
+      }
+    }
+  }
+
+  Future<void> _pause(MotionGoal goal) async {
+    final draft = await showPauseGoalDialog(
+      context: context,
+      goalName: goal.name,
+    );
+    if (draft == null || !mounted) return;
+    try {
+      await context.read<GoalTrackerProvider>().pauseGoal(
+            goal,
+            reason: draft.reason,
+          );
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(_message(error))),
+        );
+      }
+    }
+  }
+
+  Future<void> _resumePaused(MotionGoal goal) async {
+    final confirmed = await showGoalConfirmation(
+      context: context,
+      title: 'Resume Goal?',
+      message:
+          'The active-day counter will continue from where it stopped. Today becomes an active day again.',
+      actionLabel: 'Resume',
+      icon: Icons.play_arrow_rounded,
+    );
+    if (!confirmed || !mounted) return;
+    try {
+      await context.read<GoalTrackerProvider>().resumePausedGoal(goal);
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -109,10 +164,11 @@ class _GoalDetailPageState extends State<GoalDetailPage> {
   Future<void> _reopen(MotionGoal goal) async {
     final confirmed = await showGoalConfirmation(
       context: context,
-      title: 'Reopen Goal?',
-      message:
-          'The counter will resume from the original start date. Existing check-ins will remain.',
-      actionLabel: 'Reopen',
+      title: goal.isGoal ? 'Reopen Goal?' : 'Resume Timeline?',
+      message: goal.isGoal
+          ? 'The counter will resume from the original start date. Existing effort history will remain.'
+          : 'The counter will resume from the original start date.',
+      actionLabel: goal.isGoal ? 'Reopen' : 'Resume',
       icon: Icons.replay_rounded,
     );
     if (!confirmed || !mounted) return;
@@ -134,24 +190,25 @@ class _GoalDetailPageState extends State<GoalDetailPage> {
         final goal = provider.goalById(widget.goalId);
         return Scaffold(
           appBar: AppBar(
-            title: Text(goal?.name ?? 'Goal Details'),
+            title: Text(goal?.name ?? 'Entry Details'),
             actions: goal == null
                 ? null
                 : [
                     PopupMenuButton<String>(
-                      tooltip: 'Goal options',
+                      tooltip:
+                          goal.isGoal ? 'Goal options' : 'Timeline options',
                       onSelected: (value) {
                         if (value == 'edit') _edit(goal);
                         if (value == 'delete') _delete(goal);
                       },
-                      itemBuilder: (_) => const [
+                      itemBuilder: (_) => [
                         PopupMenuItem(
                           value: 'edit',
                           child: Row(
                             children: [
-                              Icon(Icons.edit_outlined, size: 19),
-                              SizedBox(width: 10),
-                              Text('Edit Goal'),
+                              const Icon(Icons.edit_outlined, size: 19),
+                              const SizedBox(width: 10),
+                              Text(goal.isGoal ? 'Edit Goal' : 'Edit Timeline'),
                             ],
                           ),
                         ),
@@ -159,13 +216,15 @@ class _GoalDetailPageState extends State<GoalDetailPage> {
                           value: 'delete',
                           child: Row(
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.delete_outline_rounded,
                                 size: 19,
                                 color: Colors.redAccent,
                               ),
-                              SizedBox(width: 10),
-                              Text('Delete Goal'),
+                              const SizedBox(width: 10),
+                              Text(
+                                goal.isGoal ? 'Delete Goal' : 'Delete Timeline',
+                              ),
                             ],
                           ),
                         ),
@@ -195,11 +254,20 @@ class _GoalDetailPageState extends State<GoalDetailPage> {
     if (_visibleMonth!.isBefore(firstMonth)) _visibleMonth = firstMonth;
     if (_visibleMonth!.isAfter(lastMonth)) _visibleMonth = lastMonth;
     final checkIns = provider.checkInsFor(goal.id!);
+    final pausePeriods = provider.pausePeriodsFor(goal.id!);
+    final isPaused = provider.isPaused(goal);
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
       children: [
-        _GoalSummary(goal: goal, today: provider.today),
+        _GoalSummary(
+          goal: goal,
+          today: provider.today,
+          collection: provider.collectionById(goal.collectionId),
+          activeDays: provider.activeDaysFor(goal),
+          pausedDays: provider.pausedDaysFor(goal),
+          isPaused: isPaused,
+        ),
         const SizedBox(height: 14),
         _GoalCalendar(
           goal: goal,
@@ -208,6 +276,7 @@ class _GoalDetailPageState extends State<GoalDetailPage> {
           canGoBack: _visibleMonth!.isAfter(firstMonth),
           canGoForward: _visibleMonth!.isBefore(lastMonth),
           isCheckedIn: (date) => provider.isCheckedIn(goal.id!, date),
+          isPausedDate: (date) => provider.isDatePaused(goal, date),
           onPreviousMonth: () => setState(() {
             _visibleMonth =
                 DateTime(_visibleMonth!.year, _visibleMonth!.month - 1);
@@ -229,8 +298,18 @@ class _GoalDetailPageState extends State<GoalDetailPage> {
           },
         ),
         const SizedBox(height: 14),
-        _CheckInHistory(checkIns: checkIns),
-        const SizedBox(height: 18),
+        if (goal.isGoal) ...[
+          _CheckInHistory(checkIns: checkIns),
+          if (pausePeriods.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            _PauseHistory(
+              periods: pausePeriods,
+              today: provider.today,
+            ),
+          ],
+          const SizedBox(height: 18),
+        ] else
+          const SizedBox(height: 4),
         if (goal.isAchieved)
           OutlinedButton.icon(
             onPressed: provider.isSaving ? null : () => _reopen(goal),
@@ -243,7 +322,55 @@ class _GoalDetailPageState extends State<GoalDetailPage> {
               ),
             ),
             icon: const Icon(Icons.replay_rounded),
-            label: const Text('Reopen Goal'),
+            label: Text(goal.isGoal ? 'Reopen Goal' : 'Resume Timeline'),
+          )
+        else if (goal.isGoal)
+          Column(
+            children: [
+              if (isPaused)
+                FilledButton.icon(
+                  onPressed:
+                      provider.isSaving ? null : () => _resumePaused(goal),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 50),
+                    backgroundColor: AppColor.blueMainColor,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  icon: const Icon(Icons.play_arrow_rounded),
+                  label: const Text('Resume Goal'),
+                )
+              else
+                OutlinedButton.icon(
+                  onPressed: provider.isSaving ? null : () => _pause(goal),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 50),
+                    foregroundColor: Colors.orange,
+                    side: const BorderSide(color: Colors.orange),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  icon: const Icon(Icons.pause_rounded),
+                  label: const Text('Pause Goal'),
+                ),
+              const SizedBox(height: 10),
+              FilledButton.icon(
+                onPressed: provider.isSaving ? null : () => _achieve(goal),
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 50),
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: const Icon(Icons.emoji_events_rounded),
+                label: const Text('Mark as Achieved'),
+              ),
+            ],
           )
         else
           FilledButton.icon(
@@ -256,8 +383,12 @@ class _GoalDetailPageState extends State<GoalDetailPage> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            icon: const Icon(Icons.emoji_events_rounded),
-            label: const Text('Mark as Achieved'),
+            icon: Icon(
+              goal.isGoal ? Icons.emoji_events_rounded : Icons.check_rounded,
+            ),
+            label: Text(
+              goal.isGoal ? 'Mark as Achieved' : 'Complete Timeline',
+            ),
           ),
       ],
     );
@@ -284,7 +415,7 @@ class _GoalUnavailable extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'Goal unavailable',
+              'Entry unavailable',
               textAlign: TextAlign.center,
               style: AppTextStyle.subSectionTextStyle(
                 fontsize: 17,
@@ -304,7 +435,7 @@ class _GoalUnavailable extends StatelessWidget {
             FilledButton.icon(
               onPressed: onBack,
               icon: const Icon(Icons.arrow_back_rounded, size: 18),
-              label: const Text('Back to Goals'),
+              label: const Text('Back to Timelines'),
             ),
           ],
         ),
@@ -314,15 +445,31 @@ class _GoalUnavailable extends StatelessWidget {
 }
 
 class _GoalSummary extends StatelessWidget {
-  const _GoalSummary({required this.goal, required this.today});
+  const _GoalSummary({
+    required this.goal,
+    required this.today,
+    required this.collection,
+    required this.activeDays,
+    required this.pausedDays,
+    required this.isPaused,
+  });
 
   final MotionGoal goal;
   final DateTime today;
+  final MotionTimelineCollection? collection;
+  final int activeDays;
+  final int pausedDays;
+  final bool isPaused;
 
   @override
   Widget build(BuildContext context) {
     final elapsed = goal.elapsedDaysAt(today);
-    final statusColor = goal.isAchieved ? Colors.green : AppColor.blueMainColor;
+    final statusColor = goal.isAchieved
+        ? Colors.green
+        : isPaused
+            ? Colors.orange
+            : AppColor.blueMainColor;
+    final deadlineStatus = deadlineStatusFor(goal, today);
     return MotionPanel(
       padding: const EdgeInsets.all(16),
       borderRadius: 16,
@@ -352,34 +499,147 @@ class _GoalSummary extends StatelessWidget {
                         ),
                       ),
                     ],
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: [
+                        _DetailTag(
+                          icon: goal.isGoal
+                              ? Icons.flag_outlined
+                              : Icons.timeline_rounded,
+                          label: goal.isGoal ? 'Goal' : 'Timeline',
+                          color: goal.isGoal
+                              ? Colors.orange
+                              : AppColor.blueMainColor,
+                        ),
+                        _DetailTag(
+                          icon: collection == null
+                              ? Icons.inbox_outlined
+                              : Icons.folder_outlined,
+                          label: collection?.name ?? 'Uncategorized',
+                          color: Colors.blueGrey,
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
               const SizedBox(width: 10),
               MotionStatusPill(
-                label: goal.isAchieved ? 'Achieved' : 'Active',
+                label: goal.isGoal
+                    ? goal.isAchieved
+                        ? 'Achieved'
+                        : isPaused
+                            ? 'Paused'
+                            : 'Active'
+                    : goal.isAchieved
+                        ? 'Completed'
+                        : 'Ongoing',
                 color: statusColor,
               ),
             ],
           ),
           const SizedBox(height: 18),
-          Row(
-            children: [
-              Expanded(
-                child: MotionMetric(
-                  label: goal.isAchieved ? 'Time taken' : 'Days elapsed',
-                  value: '$elapsed ${elapsed == 1 ? 'day' : 'days'}',
+          if (goal.isGoal) ...[
+            Row(
+              children: [
+                Expanded(
+                  child: MotionMetric(
+                    label: 'Active effort',
+                    value: '$activeDays ${activeDays == 1 ? 'day' : 'days'}',
+                  ),
                 ),
-              ),
-              Expanded(
-                child: MotionMetric(
-                  label: 'Started',
-                  value: DateFormat('MMM d, yyyy').format(goal.startDate),
-                  alignRight: true,
+                Expanded(
+                  child: MotionMetric(
+                    label: 'Calendar duration',
+                    value: '$elapsed ${elapsed == 1 ? 'day' : 'days'}',
+                    alignRight: true,
+                  ),
                 ),
+              ],
+            ),
+            const SizedBox(height: 13),
+            Row(
+              children: [
+                Expanded(
+                  child: MotionMetric(
+                    label: 'Started',
+                    value: DateFormat('MMM d, yyyy').format(goal.startDate),
+                  ),
+                ),
+                Expanded(
+                  child: MotionMetric(
+                    label: 'Paused',
+                    value: '$pausedDays ${pausedDays == 1 ? 'day' : 'days'}',
+                    alignRight: true,
+                  ),
+                ),
+              ],
+            ),
+          ] else
+            Row(
+              children: [
+                Expanded(
+                  child: MotionMetric(
+                    label: goal.isAchieved ? 'Total duration' : 'Days elapsed',
+                    value: '$elapsed ${elapsed == 1 ? 'day' : 'days'}',
+                  ),
+                ),
+                Expanded(
+                  child: MotionMetric(
+                    label: 'Started',
+                    value: DateFormat('MMM d, yyyy').format(goal.startDate),
+                    alignRight: true,
+                  ),
+                ),
+              ],
+            ),
+          if (deadlineStatus != null) ...[
+            const SizedBox(height: 13),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: deadlineStatus.color.withValues(alpha: 0.09),
+                borderRadius: BorderRadius.circular(10),
               ),
-            ],
-          ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.event_rounded,
+                    color: deadlineStatus.color,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Deadline ${DateFormat('MMM d, yyyy').format(deadlineStatus.deadline)}',
+                          style: AppTextStyle.subSectionTextStyle(
+                            fontsize: 10,
+                            fontweight: FontWeight.w700,
+                            color: Colors.blueGrey,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          deadlineStatus.label,
+                          style: AppTextStyle.subSectionTextStyle(
+                            fontsize: 11.5,
+                            fontweight: FontWeight.w900,
+                            color: deadlineStatus.color,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           if (goal.completionDate != null) ...[
             const SizedBox(height: 13),
             Container(
@@ -417,6 +677,44 @@ class _GoalSummary extends StatelessWidget {
   }
 }
 
+class _DetailTag extends StatelessWidget {
+  const _DetailTag({
+    required this.icon,
+    required this.label,
+    required this.color,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.09),
+        borderRadius: BorderRadius.circular(7),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: color),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: AppTextStyle.subSectionTextStyle(
+              fontsize: 9,
+              fontweight: FontWeight.w800,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _GoalCalendar extends StatelessWidget {
   const _GoalCalendar({
     required this.goal,
@@ -425,6 +723,7 @@ class _GoalCalendar extends StatelessWidget {
     required this.canGoBack,
     required this.canGoForward,
     required this.isCheckedIn,
+    required this.isPausedDate,
     required this.onPreviousMonth,
     required this.onNextMonth,
     required this.onCheckIn,
@@ -436,6 +735,7 @@ class _GoalCalendar extends StatelessWidget {
   final bool canGoBack;
   final bool canGoForward;
   final bool Function(DateTime date) isCheckedIn;
+  final bool Function(DateTime date) isPausedDate;
   final VoidCallback onPreviousMonth;
   final VoidCallback onNextMonth;
   final ValueChanged<DateTime> onCheckIn;
@@ -478,9 +778,11 @@ class _GoalCalendar extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      goal.isAchieved
-                          ? 'Check-in history'
-                          : 'Tap a day to mark still working',
+                      goal.isTimeline
+                          ? 'Every elapsed day is shown automatically'
+                          : goal.isAchieved
+                              ? 'Effort history'
+                              : 'Tap a day you worked toward this goal',
                       style: AppTextStyle.subSectionTextStyle(
                         fontsize: 9.5,
                         fontweight: FontWeight.normal,
@@ -528,30 +830,40 @@ class _GoalCalendar extends StatelessWidget {
               final inRange =
                   !date.isBefore(goal.startDate) && !date.isAfter(endDate);
               final checked = inRange && isCheckedIn(date);
+              final paused = inRange && isPausedDate(date);
+              final isElapsed = goal.isTimeline && inRange;
               final isToday = MotionDateUtils.isSameDate(date, today);
-              final canTap = inRange && !goal.isAchieved;
-              final textColor = checked
-                  ? Colors.white
-                  : inRange
-                      ? Theme.of(context).textTheme.bodyMedium?.color
-                      : Colors.blueGrey.withValues(alpha: 0.35);
+              final canTap =
+                  goal.isGoal && inRange && !goal.isAchieved && !paused;
+              final highlighted = checked || isElapsed;
+              final textColor = paused
+                  ? Colors.orange
+                  : highlighted
+                      ? Colors.white
+                      : inRange
+                          ? Theme.of(context).textTheme.bodyMedium?.color
+                          : Colors.blueGrey.withValues(alpha: 0.35);
               return Semantics(
                 button: canTap,
-                selected: checked,
-                label:
-                    '${MotionDateUtils.formatDisplayDate(date)}${checked ? ', checked in' : ''}',
+                selected: highlighted,
+                label: '${MotionDateUtils.formatDisplayDate(date)}'
+                    '${checked ? ', worked toward goal' : ''}'
+                    '${paused ? ', paused' : ''}'
+                    '${isElapsed ? ', elapsed timeline day' : ''}',
                 child: InkWell(
                   onTap: canTap ? () => onCheckIn(date) : null,
                   borderRadius: BorderRadius.circular(9),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 180),
                     decoration: BoxDecoration(
-                      color: checked ? AppColor.blueMainColor : neutral,
+                      color: paused
+                          ? Colors.orange.withValues(alpha: 0.12)
+                          : highlighted
+                              ? AppColor.blueMainColor
+                              : neutral,
                       borderRadius: BorderRadius.circular(9),
                       border: Border.all(
-                        color: isToday
-                            ? AppColor.blueMainColor
-                            : Colors.transparent,
+                        color: isToday ? Colors.orange : Colors.transparent,
                         width: isToday ? 1.5 : 1,
                       ),
                     ),
@@ -566,13 +878,23 @@ class _GoalCalendar extends StatelessWidget {
                             color: textColor,
                           ),
                         ),
-                        if (checked)
+                        if (checked && goal.isGoal)
                           const Positioned(
                             right: 2,
                             top: 2,
                             child: Icon(
                               Icons.check_rounded,
                               color: Colors.white,
+                              size: 10,
+                            ),
+                          ),
+                        if (paused)
+                          const Positioned(
+                            right: 2,
+                            top: 2,
+                            child: Icon(
+                              Icons.pause_rounded,
+                              color: Colors.orange,
                               size: 10,
                             ),
                           ),
@@ -584,16 +906,26 @@ class _GoalCalendar extends StatelessWidget {
             },
           ),
           const SizedBox(height: 12),
-          const Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _CalendarLegend(color: AppColor.blueMainColor, label: 'Checked'),
-              SizedBox(width: 16),
               _CalendarLegend(
                 color: AppColor.blueMainColor,
+                label: goal.isGoal ? 'Worked' : 'Elapsed',
+              ),
+              const SizedBox(width: 16),
+              const _CalendarLegend(
+                color: Colors.orange,
                 label: 'Today',
                 outlined: true,
               ),
+              if (goal.isGoal) ...[
+                const SizedBox(width: 16),
+                const _CalendarLegend(
+                  color: Colors.orange,
+                  label: 'Paused',
+                ),
+              ],
             ],
           ),
         ],
@@ -685,7 +1017,7 @@ class _CheckInHistory extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Check-In History',
+                  'Effort History',
                   style: AppTextStyle.subSectionTextStyle(
                     fontsize: 14,
                     fontweight: FontWeight.w900,
@@ -693,7 +1025,8 @@ class _CheckInHistory extends StatelessWidget {
                 ),
               ),
               MotionStatusPill(
-                label: '${checkIns.length} marked',
+                label:
+                    '${checkIns.length} ${checkIns.length == 1 ? 'day' : 'days'}',
                 color: AppColor.blueMainColor,
               ),
             ],
@@ -701,7 +1034,7 @@ class _CheckInHistory extends StatelessWidget {
           const SizedBox(height: 11),
           if (recent.isEmpty)
             Text(
-              'No days have been checked yet.',
+              'No effort days have been marked yet.',
               style: AppTextStyle.subSectionTextStyle(
                 fontsize: 11.5,
                 fontweight: FontWeight.normal,
@@ -738,7 +1071,7 @@ class _CheckInHistory extends StatelessWidget {
           if (checkIns.length > recent.length) ...[
             const SizedBox(height: 9),
             Text(
-              '${checkIns.length - recent.length} older check-ins remain visible in the calendar.',
+              '${checkIns.length - recent.length} older effort days remain visible in the calendar.',
               style: AppTextStyle.subSectionTextStyle(
                 fontsize: 10,
                 fontweight: FontWeight.normal,
@@ -746,6 +1079,106 @@ class _CheckInHistory extends StatelessWidget {
               ),
             ),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+class _PauseHistory extends StatelessWidget {
+  const _PauseHistory({required this.periods, required this.today});
+
+  final List<GoalPausePeriod> periods;
+  final DateTime today;
+
+  @override
+  Widget build(BuildContext context) {
+    return MotionPanel(
+      padding: const EdgeInsets.all(14),
+      borderRadius: 16,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.pause_circle_outline_rounded,
+                color: Colors.orange,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Pause History',
+                  style: AppTextStyle.subSectionTextStyle(
+                    fontsize: 14,
+                    fontweight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              MotionStatusPill(
+                label: '${periods.length}',
+                color: Colors.orange,
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          ...periods.map((period) {
+            final end = period.resumeDate ?? today;
+            final days = end.isAfter(period.startDate)
+                ? end.difference(period.startDate).inDays
+                : 0;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 9),
+              child: Container(
+                width: double.infinity,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(9),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(
+                      Icons.pause_rounded,
+                      color: Colors.orange,
+                      size: 17,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            period.isOpen
+                                ? 'Paused since ${MotionDateUtils.formatDisplayDate(period.startDate)}'
+                                : '${MotionDateUtils.formatDisplayDate(period.startDate)} - ${MotionDateUtils.formatDisplayDate(period.resumeDate!)}',
+                            style: AppTextStyle.subSectionTextStyle(
+                              fontsize: 10.5,
+                              fontweight: FontWeight.w800,
+                              color: Colors.orange,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '${period.isOpen ? 'Currently paused' : '$days ${days == 1 ? 'day' : 'days'}'}'
+                            '${period.reason.isEmpty ? '' : '  •  ${period.reason}'}',
+                            style: AppTextStyle.subSectionTextStyle(
+                              fontsize: 9.5,
+                              fontweight: FontWeight.normal,
+                              color: Colors.blueGrey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }),
         ],
       ),
     );

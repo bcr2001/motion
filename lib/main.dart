@@ -154,7 +154,7 @@ void main() async {
         activityTimerProvider.initialize,
       ),
       _initializeSafely(
-        'Goal tracker',
+        'Timelines',
         goalTrackerProvider.initialize,
       ),
     ]),

@@ -23,7 +23,7 @@ class MotionActionButtons extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         IconButton(
-          tooltip: 'Goal Tracker',
+          tooltip: 'Timelines',
           onPressed: () {
             Navigator.push(
               context,
@@ -32,7 +32,7 @@ class MotionActionButtons extends StatelessWidget {
               ),
             );
           },
-          icon: const Icon(Icons.flag_outlined),
+          icon: const Icon(Icons.timeline_rounded),
         ),
         // report gif
         Tooltip(
