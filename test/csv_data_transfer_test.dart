@@ -57,6 +57,7 @@ void main() {
           'goals.csv',
           'goal_check_ins.csv',
           'goal_pause_periods.csv',
+          'goal_dependencies.csv',
         ],
       );
       expect(files[0].content, contains('education,work,skills'));
@@ -115,6 +116,11 @@ void main() {
       );
       expect(
         File('${tempDir.path}${Platform.pathSeparator}goal_pause_periods.csv')
+            .existsSync(),
+        isTrue,
+      );
+      expect(
+        File('${tempDir.path}${Platform.pathSeparator}goal_dependencies.csv')
             .existsSync(),
         isTrue,
       );

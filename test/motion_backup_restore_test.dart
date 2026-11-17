@@ -185,6 +185,80 @@ void main() {
       );
     });
 
+    test('preserves failed attempt details in a Drive backup restore',
+        () async {
+      await _seedBackupData(trackerDb, assignerDb, user: 'user-1');
+      final failedGoal = (await trackerDb.query(
+        MotionDbTables.goals,
+        where: '${MotionDbColumns.currentLoggedInUser} = ?',
+        whereArgs: ['user-1'],
+      ))
+          .single;
+      await trackerDb.update(
+        MotionDbTables.goals,
+        {
+          MotionDbColumns.goalFailureDate: '2026-07-07',
+          MotionDbColumns.goalFailureReason: 'Opened social media',
+          MotionDbColumns.goalTargetDays: 7,
+          MotionDbColumns.goalStatus: 'active',
+        },
+        where: '${MotionDbColumns.currentLoggedInUser} = ?',
+        whereArgs: ['user-1'],
+      );
+      await trackerDb.insert(MotionDbTables.goals, {
+        MotionDbColumns.currentLoggedInUser: 'user-1',
+        MotionDbColumns.goalName: 'Get a Job',
+        MotionDbColumns.goalDescription: 'Find the right opportunity',
+        MotionDbColumns.goalStartDate: '2026-07-07',
+        MotionDbColumns.goalActivationDate: '2026-07-07',
+        MotionDbColumns.goalCompletionDate: null,
+        MotionDbColumns.goalDeadlineDate: '2026-09-07',
+        MotionDbColumns.goalTargetDays: 7,
+        MotionDbColumns.goalRetryOfId: failedGoal[MotionDbColumns.id],
+        MotionDbColumns.goalStatus: 'active',
+        MotionDbColumns.timelineEntryType: 'goal',
+        MotionDbColumns.timelineCollectionId:
+            failedGoal[MotionDbColumns.timelineCollectionId],
+        MotionDbColumns.goalCreatedAtEpochMs: 2,
+        MotionDbColumns.goalUpdatedAtEpochMs: 2,
+      });
+      final files = await transfer.backupFiles(currentUser: 'user-1');
+
+      await _replaceWithTemporaryData(trackerDb, assignerDb, user: 'user-1');
+      final backup = restoreService.validateBackup(
+        files: files,
+        currentUser: 'user-1',
+      );
+      await restoreService.restoreBackup(
+        backup: backup,
+        currentUser: 'user-1',
+      );
+
+      final restoredRows = await trackerDb.query(
+        MotionDbTables.goals,
+        where: '${MotionDbColumns.currentLoggedInUser} = ?',
+        whereArgs: ['user-1'],
+      );
+      expect(restoredRows, hasLength(2));
+      final restoredFailed = restoredRows.firstWhere(
+        (row) => row[MotionDbColumns.goalFailureDate] != null,
+      );
+      final restoredRetry = restoredRows.firstWhere(
+        (row) => row[MotionDbColumns.goalFailureDate] == null,
+      );
+      expect(restoredFailed[MotionDbColumns.goalFailureDate], '2026-07-07');
+      expect(
+        restoredFailed[MotionDbColumns.goalFailureReason],
+        'Opened social media',
+      );
+      expect(restoredFailed[MotionDbColumns.goalTargetDays], 7);
+      expect(restoredFailed[MotionDbColumns.goalStatus], 'active');
+      expect(
+        restoredRetry[MotionDbColumns.goalRetryOfId],
+        restoredFailed[MotionDbColumns.id],
+      );
+    });
+
     test('restores older five-file backups as uncategorized timelines',
         () async {
       await _seedBackupData(trackerDb, assignerDb, user: 'user-1');
@@ -209,6 +283,92 @@ void main() {
           .single;
       expect(restoredGoal[MotionDbColumns.timelineEntryType], 'timeline');
       expect(restoredGoal[MotionDbColumns.timelineCollectionId], isNull);
+    });
+
+    test('preserves locked prerequisite progressions through backup restore',
+        () async {
+      await _seedBackupData(trackerDb, assignerDb, user: 'user-1');
+      final collection = (await trackerDb.query(
+        MotionDbTables.timelineCollections,
+        where: '${MotionDbColumns.currentLoggedInUser} = ?',
+        whereArgs: ['user-1'],
+      ))
+          .single;
+      final prerequisite = (await trackerDb.query(
+        MotionDbTables.goals,
+        where: '${MotionDbColumns.currentLoggedInUser} = ?',
+        whereArgs: ['user-1'],
+      ))
+          .single;
+      final dependentId = await trackerDb.insert(MotionDbTables.goals, {
+        MotionDbColumns.currentLoggedInUser: 'user-1',
+        MotionDbColumns.goalName: 'First Promotion',
+        MotionDbColumns.goalDescription: '',
+        MotionDbColumns.goalStartDate: '2026-08-01',
+        MotionDbColumns.goalActivationDate: null,
+        MotionDbColumns.goalAutoStartAfterPrerequisites: 1,
+        MotionDbColumns.goalCompletionDate: null,
+        MotionDbColumns.goalDeadlineDate: null,
+        MotionDbColumns.goalStatus: 'active',
+        MotionDbColumns.timelineEntryType: 'goal',
+        MotionDbColumns.timelineCollectionId: collection[MotionDbColumns.id],
+        MotionDbColumns.goalCreatedAtEpochMs: 2,
+        MotionDbColumns.goalUpdatedAtEpochMs: 2,
+      });
+      await trackerDb.insert(MotionDbTables.goalDependencies, {
+        MotionDbColumns.dependentGoalId: dependentId,
+        MotionDbColumns.prerequisiteGoalId: prerequisite[MotionDbColumns.id],
+        MotionDbColumns.currentLoggedInUser: 'user-1',
+      });
+
+      final files = await transfer.backupFiles(currentUser: 'user-1');
+      await _replaceWithTemporaryData(
+        trackerDb,
+        assignerDb,
+        user: 'user-1',
+      );
+      final backup = restoreService.validateBackup(
+        files: files,
+        currentUser: 'user-1',
+      );
+      await restoreService.restoreBackup(
+        backup: backup,
+        currentUser: 'user-1',
+      );
+
+      final goals = await trackerDb.query(
+        MotionDbTables.goals,
+        where: '${MotionDbColumns.currentLoggedInUser} = ?',
+        whereArgs: ['user-1'],
+      );
+      final restoredDependent = goals.singleWhere(
+        (row) => row[MotionDbColumns.goalName] == 'First Promotion',
+      );
+      final restoredPrerequisite = goals.singleWhere(
+        (row) => row[MotionDbColumns.goalName] == 'Get a Job',
+      );
+      expect(
+        restoredDependent[MotionDbColumns.goalActivationDate],
+        isNull,
+      );
+      expect(
+        restoredDependent[MotionDbColumns.goalAutoStartAfterPrerequisites],
+        1,
+      );
+      final dependency = (await trackerDb.query(
+        MotionDbTables.goalDependencies,
+        where: '${MotionDbColumns.currentLoggedInUser} = ?',
+        whereArgs: ['user-1'],
+      ))
+          .single;
+      expect(
+        dependency[MotionDbColumns.dependentGoalId],
+        restoredDependent[MotionDbColumns.id],
+      );
+      expect(
+        dependency[MotionDbColumns.prerequisiteGoalId],
+        restoredPrerequisite[MotionDbColumns.id],
+      );
     });
 
     test('restores a backup containing only an empty collection', () async {
@@ -530,6 +690,11 @@ Future<void> _replaceWithTemporaryData(
 }) async {
   await trackerDb.transaction((txn) async {
     await txn.delete(
+      MotionDbTables.goalDependencies,
+      where: '${MotionDbColumns.currentLoggedInUser} = ?',
+      whereArgs: [user],
+    );
+    await txn.delete(
       MotionDbTables.goals,
       where: '${MotionDbColumns.currentLoggedInUser} = ?',
       whereArgs: [user],
@@ -606,7 +771,8 @@ List<MotionCsvBackupFile> _asLegacyFiveFileBackup(
       .where(
     (file) =>
         file.fileName != 'timeline_collections.csv' &&
-        file.fileName != 'goal_pause_periods.csv',
+        file.fileName != 'goal_pause_periods.csv' &&
+        file.fileName != 'goal_dependencies.csv',
   )
       .map((file) {
     if (file.fileName != 'goals.csv') return file;
@@ -614,9 +780,10 @@ List<MotionCsvBackupFile> _asLegacyFiveFileBackup(
     final legacyRows = rows
         .map(
           (row) => [
-            ...row.take(6),
+            ...row.take(5),
             row[7],
-            ...row.skip(10),
+            row[13],
+            ...row.skip(16),
           ],
         )
         .toList(growable: false);

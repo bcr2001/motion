@@ -3,6 +3,7 @@ import 'package:motion/motion_core/mc_sql_table/goal.dart';
 import 'package:motion/motion_core/motion_providers/goal_pvd/goal_tracker_pvd.dart';
 import 'package:motion/motion_core/motion_utils/motion_date_utils.dart';
 import 'package:motion/motion_reusable/motion_ui/motion_components.dart';
+import 'package:motion/motion_reusable/motion_ui/motion_snack_bar.dart';
 import 'package:motion/motion_screens/ms_goals/goal_detail_page.dart';
 import 'package:motion/motion_screens/ms_goals/goal_deadline_status.dart';
 import 'package:motion/motion_screens/ms_goals/goal_dialogs.dart';
@@ -19,6 +20,7 @@ class GoalTrackerPage extends StatelessWidget {
     final draft = await showGoalEditorDialog(
       context: context,
       collections: provider.collections,
+      goals: provider.goals,
       initialCollectionId:
           provider.showAllCollections ? null : provider.selectedCollectionId,
     );
@@ -30,10 +32,31 @@ class GoalTrackerPage extends StatelessWidget {
             startDate: draft.startDate,
             completionDate: draft.completionDate,
             deadlineDate: draft.deadlineDate,
+            targetDays: draft.targetDays,
             entryType: draft.entryType,
             collectionId: draft.collectionId,
+            prerequisiteId: draft.prerequisiteId,
+            startsAutomaticallyAfterPrerequisites:
+                draft.startsAutomaticallyAfterPrerequisites,
           );
       if (!context.mounted || goal.id == null) return;
+      final reminderUnavailable = goal.isUpcomingAt(provider.today) &&
+          provider.reminderPermissionGranted == false;
+      final isUpcoming = goal.isUpcomingAt(provider.today);
+      showMotionSnackBar(
+        context,
+        message: reminderUnavailable
+            ? '${goal.isGoal ? 'Goal' : 'Timeline'} created. Allow Motion notifications to receive its start reminder.'
+            : isUpcoming
+                ? '${goal.isGoal ? 'Goal' : 'Timeline'} created. Start reminder set for 9:00 AM.'
+                : '${goal.isGoal ? 'Goal' : 'Timeline'} created.',
+        icon: reminderUnavailable
+            ? Icons.notifications_off_outlined
+            : isUpcoming
+                ? Icons.notifications_active_outlined
+                : Icons.check_circle_outline_rounded,
+        iconColor: reminderUnavailable ? Colors.orange : AppColor.blueMainColor,
+      );
       await Navigator.push(
         context,
         MaterialPageRoute(
@@ -42,8 +65,11 @@ class GoalTrackerPage extends StatelessWidget {
       );
     } catch (error) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(_message(error))),
+      showMotionSnackBar(
+        context,
+        message: _message(error),
+        icon: Icons.error_outline_rounded,
+        iconColor: Colors.redAccent,
       );
     }
   }
@@ -94,6 +120,11 @@ class GoalTrackerPage extends StatelessWidget {
               message: _message(provider.error!),
             );
           }
+          final showCollectionProgression =
+              _showsCollectionProgression(provider);
+          final selectedCollection = provider.collectionById(
+            provider.selectedCollectionId,
+          );
           return RefreshIndicator(
             color: AppColor.blueMainColor,
             onRefresh: provider.refresh,
@@ -125,11 +156,15 @@ class GoalTrackerPage extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            switch (provider.filter) {
-                              GoalFilter.all => 'All Entries',
-                              GoalFilter.active => 'Ongoing',
-                              GoalFilter.achieved => 'Completed',
-                            },
+                            showCollectionProgression &&
+                                    selectedCollection != null
+                                ? selectedCollection.name
+                                : switch (provider.filter) {
+                                    GoalFilter.all => 'All Entries',
+                                    GoalFilter.active => 'Ongoing',
+                                    GoalFilter.achieved => 'Completed',
+                                    GoalFilter.failed => 'Failed',
+                                  },
                             style: AppTextStyle.subSectionTextStyle(
                               fontsize: 13.5,
                               fontweight: FontWeight.w900,
@@ -154,14 +189,27 @@ class GoalTrackerPage extends StatelessWidget {
                     child: _GoalEmptyState(
                       title: provider.goals.isEmpty
                           ? 'No timelines or goals yet'
-                          : provider.filter == GoalFilter.active
-                              ? 'No ongoing entries'
-                              : 'No completed entries',
+                          : switch (provider.filter) {
+                              GoalFilter.active => 'No ongoing entries',
+                              GoalFilter.achieved => 'No completed entries',
+                              GoalFilter.failed => 'No failed attempts',
+                              GoalFilter.all => 'No entries',
+                            },
                       message: provider.goals.isEmpty
                           ? 'Create a timeline or goal and Motion will count every day with you.'
                           : 'Choose another filter or collection to see your entries.',
                       showCreateButton: provider.goals.isEmpty,
                       onCreate: () => _createGoal(context),
+                    ),
+                  )
+                else if (showCollectionProgression)
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 28),
+                    sliver: SliverToBoxAdapter(
+                      child: _CollectionProgression(
+                        provider: provider,
+                        goals: provider.filteredGoals,
+                      ),
                     ),
                   )
                 else
@@ -171,18 +219,9 @@ class GoalTrackerPage extends StatelessWidget {
                       itemCount: provider.filteredGoals.length,
                       separatorBuilder: (_, __) => const SizedBox(height: 10),
                       itemBuilder: (context, index) {
-                        return _GoalCard(
+                        return _ProviderGoalCard(
+                          provider: provider,
                           goal: provider.filteredGoals[index],
-                          today: provider.today,
-                          collection: provider.collectionById(
-                            provider.filteredGoals[index].collectionId,
-                          ),
-                          activeDays: provider.activeDaysFor(
-                            provider.filteredGoals[index],
-                          ),
-                          isPaused: provider.isPaused(
-                            provider.filteredGoals[index],
-                          ),
                         );
                       },
                     ),
@@ -194,6 +233,17 @@ class GoalTrackerPage extends StatelessWidget {
       ),
     );
   }
+}
+
+bool _showsCollectionProgression(GoalTrackerProvider provider) {
+  if (provider.showAllCollections || provider.selectedCollectionId == null) {
+    return false;
+  }
+  return provider.filteredGoals.any(
+    (goal) =>
+        provider.prerequisiteIdsFor(goal).isNotEmpty ||
+        provider.dependentsFor(goal).isNotEmpty,
+  );
 }
 
 class _GoalOverview extends StatelessWidget {
@@ -232,6 +282,15 @@ class _GoalOverview extends StatelessWidget {
               value: provider.achievedCount,
               label: 'Completed',
               color: Colors.green,
+            ),
+          ),
+          const _OverviewDivider(),
+          Expanded(
+            child: _OverviewMetric(
+              icon: Icons.cancel_outlined,
+              value: provider.failedCount,
+              label: 'Failed',
+              color: Colors.redAccent,
             ),
           ),
         ],
@@ -433,6 +492,7 @@ class _GoalFilters extends StatelessWidget {
             GoalFilter.all => 'All',
             GoalFilter.active => 'Ongoing',
             GoalFilter.achieved => 'Completed',
+            GoalFilter.failed => 'Failed',
           };
           return Expanded(
             child: InkWell(
@@ -476,6 +536,491 @@ class _GoalFilters extends StatelessWidget {
   }
 }
 
+class _CollectionProgression extends StatelessWidget {
+  const _CollectionProgression({
+    required this.provider,
+    required this.goals,
+  });
+
+  final GoalTrackerProvider provider;
+  final List<MotionGoal> goals;
+
+  @override
+  Widget build(BuildContext context) {
+    final linked = goals
+        .where(
+          (goal) =>
+              provider.prerequisiteIdsFor(goal).isNotEmpty ||
+              provider.dependentsFor(goal).isNotEmpty,
+        )
+        .toList(growable: false);
+    final linkedIds = linked.map((goal) => goal.id).whereType<int>().toSet();
+    final independent = goals
+        .where((goal) => !linkedIds.contains(goal.id))
+        .toList(growable: false)
+      ..sort(_compareProgressionGoals);
+    final groups = _buildProgressionGroups(linked, provider);
+
+    return Column(
+      key: const Key('collectionProgression'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _ProgressionSectionLabel(
+          icon: Icons.account_tree_outlined,
+          title: 'Progression',
+          count: linked.length,
+          color: AppColor.blueMainColor,
+        ),
+        const SizedBox(height: 10),
+        ...groups.indexed.expand((entry) {
+          final index = entry.$1;
+          final group = entry.$2;
+          return <Widget>[
+            if (groups.length > 1) ...[
+              Text(
+                'PATH ${index + 1}',
+                style: AppTextStyle.subSectionTextStyle(
+                  fontsize: 9,
+                  fontweight: FontWeight.w900,
+                  color: Colors.blueGrey,
+                ),
+              ),
+              const SizedBox(height: 7),
+            ],
+            _ProgressionGroup(provider: provider, goals: group),
+            if (index != groups.length - 1) const SizedBox(height: 18),
+          ];
+        }),
+        if (independent.isNotEmpty) ...[
+          const SizedBox(height: 22),
+          _ProgressionSectionLabel(
+            icon: Icons.view_list_outlined,
+            title: 'Other entries',
+            count: independent.length,
+            color: Colors.blueGrey,
+          ),
+          const SizedBox(height: 10),
+          ...independent.indexed.expand(
+            (entry) => <Widget>[
+              _ProviderGoalCard(provider: provider, goal: entry.$2),
+              if (entry.$1 != independent.length - 1)
+                const SizedBox(height: 10),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _ProgressionSectionLabel extends StatelessWidget {
+  const _ProgressionSectionLabel({
+    required this.icon,
+    required this.title,
+    required this.count,
+    required this.color,
+  });
+
+  final IconData icon;
+  final String title;
+  final int count;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 17, color: color),
+        const SizedBox(width: 7),
+        Expanded(
+          child: Text(
+            title,
+            style: AppTextStyle.subSectionTextStyle(
+              fontsize: 12.5,
+              fontweight: FontWeight.w900,
+            ),
+          ),
+        ),
+        Text(
+          '$count',
+          style: AppTextStyle.subSectionTextStyle(
+            fontsize: 10,
+            fontweight: FontWeight.w900,
+            color: color,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ProgressionGroup extends StatelessWidget {
+  const _ProgressionGroup({required this.provider, required this.goals});
+
+  final GoalTrackerProvider provider;
+  final List<MotionGoal> goals;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        for (var index = 0; index < goals.length; index++) ...[
+          Builder(
+            builder: (context) {
+              final previousGoal = index == 0 ? null : goals[index - 1];
+              final nextGoal =
+                  index == goals.length - 1 ? null : goals[index + 1];
+              final hasIncomingConnection = previousGoal != null &&
+                  _isDirectProgressionStep(
+                    provider,
+                    prerequisite: previousGoal,
+                    dependent: goals[index],
+                  );
+              final hasOutgoingConnection = nextGoal != null &&
+                  _isDirectProgressionStep(
+                    provider,
+                    prerequisite: goals[index],
+                    dependent: nextGoal,
+                  );
+              return _ProgressionStep(
+                provider: provider,
+                goal: goals[index],
+                previousGoal: hasIncomingConnection ? previousGoal : null,
+                hasNext: hasOutgoingConnection,
+              );
+            },
+          ),
+          if (index < goals.length - 1 &&
+              _isDirectProgressionStep(
+                provider,
+                prerequisite: goals[index],
+                dependent: goals[index + 1],
+              ))
+            _ProgressionGap(goal: goals[index]),
+        ],
+      ],
+    );
+  }
+}
+
+bool _isDirectProgressionStep(
+  GoalTrackerProvider provider, {
+  required MotionGoal prerequisite,
+  required MotionGoal dependent,
+}) {
+  final prerequisiteId = prerequisite.id;
+  return prerequisiteId != null &&
+      provider.prerequisiteIdsFor(dependent).contains(prerequisiteId);
+}
+
+class _ProgressionStep extends StatelessWidget {
+  const _ProgressionStep({
+    required this.provider,
+    required this.goal,
+    required this.previousGoal,
+    required this.hasNext,
+  });
+
+  final GoalTrackerProvider provider;
+  final MotionGoal goal;
+  final MotionGoal? previousGoal;
+  final bool hasNext;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = _goalStatusColor(
+      goal,
+      today: provider.today,
+      isPaused: provider.isPaused(goal),
+    );
+    final incomingColor = previousGoal == null
+        ? Colors.transparent
+        : _progressionConnectorColor(previousGoal!);
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(
+            width: 34,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                if (previousGoal != null)
+                  Positioned(
+                    left: 16,
+                    top: 0,
+                    height: 24,
+                    width: 2,
+                    child: _ProgressionLine(
+                      color: incomingColor,
+                      dashed: !previousGoal!.isAchieved,
+                    ),
+                  ),
+                if (hasNext)
+                  Positioned(
+                    left: 16,
+                    top: 24,
+                    bottom: 0,
+                    width: 2,
+                    child: _ProgressionLine(
+                      color: _progressionConnectorColor(goal),
+                      dashed: !goal.isAchieved,
+                    ),
+                  ),
+                Positioned(
+                  left: 6,
+                  top: 14,
+                  child: Container(
+                    key: Key('progressionNode_${goal.id}'),
+                    height: 22,
+                    width: 22,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).scaffoldBackgroundColor,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: color, width: 2),
+                    ),
+                    alignment: Alignment.center,
+                    child: Icon(
+                      goal.isLocked
+                          ? Icons.lock_rounded
+                          : goal.isFailed
+                              ? Icons.close_rounded
+                              : goal.isAchieved
+                                  ? Icons.check_rounded
+                                  : goal.isUpcomingAt(provider.today)
+                                      ? Icons.schedule_rounded
+                                      : Icons.play_arrow_rounded,
+                      size: 12,
+                      color: color,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 7),
+          Expanded(
+            child: _ProviderGoalCard(provider: provider, goal: goal),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProgressionGap extends StatelessWidget {
+  const _ProgressionGap({required this.goal});
+
+  final MotionGoal goal;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 10,
+      child: Row(
+        children: [
+          SizedBox(
+            width: 34,
+            child: Center(
+              child: SizedBox(
+                width: 2,
+                height: 10,
+                child: _ProgressionLine(
+                  color: _progressionConnectorColor(goal),
+                  dashed: !goal.isAchieved,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 7),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProgressionLine extends StatelessWidget {
+  const _ProgressionLine({required this.color, required this.dashed});
+
+  final Color color;
+  final bool dashed;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: _ProgressionLinePainter(color: color, dashed: dashed),
+    );
+  }
+}
+
+class _ProgressionLinePainter extends CustomPainter {
+  const _ProgressionLinePainter({required this.color, required this.dashed});
+
+  final Color color;
+  final bool dashed;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = size.width
+      ..strokeCap = StrokeCap.round;
+    final x = size.width / 2;
+    if (!dashed) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+      return;
+    }
+    const dash = 4.0;
+    const gap = 3.0;
+    for (var y = 0.0; y < size.height; y += dash + gap) {
+      canvas.drawLine(
+        Offset(x, y),
+        Offset(x, (y + dash).clamp(0, size.height)),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_ProgressionLinePainter oldDelegate) {
+    return color != oldDelegate.color || dashed != oldDelegate.dashed;
+  }
+}
+
+class _ProviderGoalCard extends StatelessWidget {
+  const _ProviderGoalCard({required this.provider, required this.goal});
+
+  final GoalTrackerProvider provider;
+  final MotionGoal goal;
+
+  @override
+  Widget build(BuildContext context) {
+    return _GoalCard(
+      goal: goal,
+      today: provider.today,
+      collection: provider.collectionById(goal.collectionId),
+      activeDays: provider.activeDaysFor(goal),
+      isPaused: provider.isPaused(goal),
+      prerequisite: provider.primaryPrerequisiteFor(goal),
+      attemptNumber: provider.attemptNumberFor(goal),
+      showAttemptNumber: provider.isPartOfAttemptSeries(goal),
+    );
+  }
+}
+
+List<List<MotionGoal>> _buildProgressionGroups(
+  List<MotionGoal> goals,
+  GoalTrackerProvider provider,
+) {
+  final goalsById = <int, MotionGoal>{
+    for (final goal in goals)
+      if (goal.id != null) goal.id!: goal,
+  };
+  final adjacency = <int, Set<int>>{
+    for (final id in goalsById.keys) id: <int>{},
+  };
+  for (final goal in goalsById.values) {
+    for (final prerequisiteId in provider.prerequisiteIdsFor(goal)) {
+      if (!goalsById.containsKey(prerequisiteId)) continue;
+      adjacency[goal.id!]!.add(prerequisiteId);
+      adjacency[prerequisiteId]!.add(goal.id!);
+    }
+  }
+
+  final visited = <int>{};
+  final groups = <List<MotionGoal>>[];
+  for (final startId in goalsById.keys) {
+    if (!visited.add(startId)) continue;
+    final component = <int>{startId};
+    final pending = <int>[startId];
+    while (pending.isNotEmpty) {
+      final current = pending.removeLast();
+      for (final next in adjacency[current] ?? const <int>{}) {
+        if (visited.add(next)) {
+          component.add(next);
+          pending.add(next);
+        }
+      }
+    }
+    groups.add(_topologicalProgression(component, goalsById, provider));
+  }
+  groups.sort((first, second) {
+    if (first.isEmpty) return 1;
+    if (second.isEmpty) return -1;
+    return _compareProgressionGoals(first.first, second.first);
+  });
+  return groups;
+}
+
+List<MotionGoal> _topologicalProgression(
+  Set<int> component,
+  Map<int, MotionGoal> goalsById,
+  GoalTrackerProvider provider,
+) {
+  final indegree = <int, int>{};
+  for (final id in component) {
+    final goal = goalsById[id]!;
+    indegree[id] =
+        provider.prerequisiteIdsFor(goal).where(component.contains).length;
+  }
+  final ready = component.where((id) => indegree[id] == 0).toList()
+    ..sort((a, b) => _compareProgressionGoals(goalsById[a]!, goalsById[b]!));
+  final ordered = <MotionGoal>[];
+  while (ready.isNotEmpty) {
+    final id = ready.removeAt(0);
+    final goal = goalsById[id]!;
+    ordered.add(goal);
+    for (final dependent in provider.dependentsFor(goal)) {
+      final dependentId = dependent.id;
+      if (dependentId == null || !component.contains(dependentId)) continue;
+      indegree[dependentId] = indegree[dependentId]! - 1;
+      if (indegree[dependentId] == 0) {
+        ready.add(dependentId);
+        ready.sort(
+            (a, b) => _compareProgressionGoals(goalsById[a]!, goalsById[b]!));
+      }
+    }
+  }
+  if (ordered.length != component.length) {
+    final remaining = component
+        .where((id) => ordered.every((goal) => goal.id != id))
+        .map((id) => goalsById[id]!)
+        .toList()
+      ..sort(_compareProgressionGoals);
+    ordered.addAll(remaining);
+  }
+  return ordered;
+}
+
+int _compareProgressionGoals(MotionGoal first, MotionGoal second) {
+  final created = first.createdAtEpochMs.compareTo(second.createdAtEpochMs);
+  if (created != 0) return created;
+  final start = first.startDate.compareTo(second.startDate);
+  if (start != 0) return start;
+  return first.name.toLowerCase().compareTo(second.name.toLowerCase());
+}
+
+Color _progressionConnectorColor(MotionGoal goal) {
+  return goal.isAchieved
+      ? Colors.green.withValues(alpha: 0.68)
+      : goal.isFailed
+          ? Colors.redAccent.withValues(alpha: 0.55)
+          : Colors.blueGrey.withValues(alpha: 0.42);
+}
+
+Color _goalStatusColor(
+  MotionGoal goal, {
+  required DateTime today,
+  required bool isPaused,
+}) {
+  if (goal.isLocked) return Colors.blueGrey;
+  if (goal.isFailed) return Colors.redAccent;
+  if (goal.isAchieved) return Colors.green;
+  if (goal.isUpcomingAt(today)) return Colors.deepPurpleAccent;
+  if (isPaused) return Colors.orange;
+  return AppColor.blueMainColor;
+}
+
 class _GoalCard extends StatelessWidget {
   const _GoalCard({
     required this.goal,
@@ -483,6 +1028,9 @@ class _GoalCard extends StatelessWidget {
     required this.collection,
     required this.activeDays,
     required this.isPaused,
+    required this.prerequisite,
+    required this.attemptNumber,
+    required this.showAttemptNumber,
   });
 
   final MotionGoal goal;
@@ -490,15 +1038,20 @@ class _GoalCard extends StatelessWidget {
   final MotionTimelineCollection? collection;
   final int activeDays;
   final bool isPaused;
+  final MotionGoal? prerequisite;
+  final int attemptNumber;
+  final bool showAttemptNumber;
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = goal.isAchieved
-        ? Colors.green
-        : isPaused
-            ? Colors.orange
-            : AppColor.blueMainColor;
+    final isUpcoming = goal.isUpcomingAt(today);
+    final statusColor = _goalStatusColor(
+      goal,
+      today: today,
+      isPaused: isPaused,
+    );
     final elapsedDays = goal.isGoal ? activeDays : goal.elapsedDaysAt(today);
+    final daysUntilStart = goal.effectiveStartDate.difference(today).inDays;
     final deadlineStatus = deadlineStatusFor(goal, today);
     return InkWell(
       onTap: () => Navigator.push(
@@ -522,11 +1075,17 @@ class _GoalCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(11),
               ),
               child: Icon(
-                goal.isAchieved
-                    ? Icons.check_rounded
-                    : goal.isGoal
-                        ? Icons.flag_outlined
-                        : Icons.timeline_rounded,
+                goal.isLocked
+                    ? Icons.lock_outline_rounded
+                    : goal.isFailed
+                        ? Icons.close_rounded
+                        : goal.isAchieved
+                            ? Icons.check_rounded
+                            : isUpcoming
+                                ? Icons.schedule_rounded
+                                : goal.isGoal
+                                    ? Icons.flag_outlined
+                                    : Icons.timeline_rounded,
                 size: 20,
                 color: statusColor,
               ),
@@ -567,6 +1126,12 @@ class _GoalCard extends StatelessWidget {
                             collection?.name.toUpperCase() ?? 'UNCATEGORIZED',
                         color: Colors.blueGrey,
                       ),
+                      if (showAttemptNumber)
+                        _EntryLabel(
+                          icon: Icons.replay_rounded,
+                          label: 'ATTEMPT $attemptNumber',
+                          color: Colors.deepPurpleAccent,
+                        ),
                     ],
                   ),
                   if (goal.description.isNotEmpty) ...[
@@ -620,15 +1185,21 @@ class _GoalCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 5),
                       Text(
-                        goal.isGoal
-                            ? goal.isAchieved
-                                ? 'Achieved'
-                                : isPaused
-                                    ? 'Paused'
-                                    : 'Active'
-                            : goal.isAchieved
-                                ? 'Completed'
-                                : 'Ongoing',
+                        goal.isLocked
+                            ? 'Locked'
+                            : goal.isFailed
+                                ? 'Failed'
+                                : isUpcoming
+                                    ? 'Upcoming'
+                                    : goal.isGoal
+                                        ? goal.isAchieved
+                                            ? 'Achieved'
+                                            : isPaused
+                                                ? 'Paused'
+                                                : 'Active'
+                                        : goal.isAchieved
+                                            ? 'Completed'
+                                            : 'Ongoing',
                         style: AppTextStyle.subSectionTextStyle(
                           fontsize: 9,
                           fontweight: FontWeight.w800,
@@ -644,9 +1215,13 @@ class _GoalCard extends StatelessWidget {
                       const SizedBox(width: 7),
                       Expanded(
                         child: Text(
-                          goal.isAchieved
-                              ? 'Completed ${MotionDateUtils.formatDisplayDate(goal.completionDate!)}'
-                              : 'Started ${MotionDateUtils.formatDisplayDate(goal.startDate)}',
+                          goal.isLocked
+                              ? 'Complete ${prerequisite?.name ?? 'the prerequisite'} to unlock'
+                              : goal.isFailed
+                                  ? 'Failed ${MotionDateUtils.formatDisplayDate(goal.failureDate!)}'
+                                  : goal.isAchieved
+                                      ? 'Completed ${MotionDateUtils.formatDisplayDate(goal.completionDate!)}'
+                                      : '${isUpcoming ? 'Starts' : 'Started'} ${MotionDateUtils.formatDisplayDate(goal.effectiveStartDate)}',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppTextStyle.subSectionTextStyle(
@@ -666,7 +1241,9 @@ class _GoalCard extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  '$elapsedDays',
+                  goal.isLocked
+                      ? '--'
+                      : '${isUpcoming ? daysUntilStart : elapsedDays}',
                   style: AppTextStyle.subSectionTextStyle(
                     fontsize: 18,
                     fontweight: FontWeight.w900,
@@ -674,7 +1251,13 @@ class _GoalCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  elapsedDays == 1 ? 'DAY' : 'DAYS',
+                  goal.isLocked
+                      ? 'LOCKED'
+                      : isUpcoming
+                          ? 'TO START'
+                          : elapsedDays == 1
+                              ? 'DAY'
+                              : 'DAYS',
                   style: AppTextStyle.subSectionTextStyle(
                     fontsize: 8,
                     fontweight: FontWeight.w800,

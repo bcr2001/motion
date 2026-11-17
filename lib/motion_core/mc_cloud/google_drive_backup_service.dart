@@ -90,6 +90,7 @@ class GoogleDriveBackupService {
     'goals.csv',
     'goal_check_ins.csv',
     'goal_pause_periods.csv',
+    'goal_dependencies.csv',
   ];
 
   Future<GoogleDriveBackupResult> uploadBackupFiles({

@@ -5,9 +5,11 @@ import android.Manifest
 import android.app.AlarmManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
+import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
 import android.provider.MediaStore
@@ -21,10 +23,22 @@ class MainActivity : FlutterActivity() {
     private val downloadsChannel = "motion/downloads"
     private val homeWidgetChannel = "motion/home_widget"
     private val timerNotificationChannel = "motion/activity_timer_notification"
+    private val goalReminderChannel = "motion/goal_start_reminder"
     private val notificationPermissionRequestCode = 4102
     private var pendingTimerPermissionResult: MethodChannel.Result? = null
     private var pendingRequiresExactAlarm = false
     private var waitingForExactAlarmPermission = false
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        maybeShowGoalReminderTest(intent)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        maybeShowGoalReminderTest(intent)
+    }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -139,6 +153,99 @@ class MainActivity : FlutterActivity() {
                     else -> result.notImplemented()
                 }
             }
+
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, goalReminderChannel)
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "requestPermission" -> requestTimerPermissions(
+                        result = result,
+                        requiresExactAlarm = false,
+                    )
+                    "sync" -> {
+                        try {
+                            val rawReminders =
+                                call.argument<List<*>>("reminders").orEmpty()
+                            val reminders = rawReminders.mapNotNull { value ->
+                                val map = value as? Map<*, *> ?: return@mapNotNull null
+                                val goalId = (map["goalId"] as? Number)?.toInt()
+                                    ?: return@mapNotNull null
+                                val name = map["name"]?.toString().orEmpty()
+                                val entryType = map["entryType"]?.toString().orEmpty()
+                                val year = (map["year"] as? Number)?.toInt() ?: 0
+                                val month = (map["month"] as? Number)?.toInt() ?: 0
+                                val day = (map["day"] as? Number)?.toInt() ?: 0
+                                if (name.isBlank() || entryType.isBlank() ||
+                                    year <= 0 || month !in 1..12 || day !in 1..31
+                                ) {
+                                    return@mapNotNull null
+                                }
+                                MotionGoalStartReminder(
+                                    goalId = goalId,
+                                    name = name,
+                                    entryType = entryType,
+                                    year = year,
+                                    month = month,
+                                    day = day,
+                                )
+                            }
+                            MotionGoalReminderScheduler.sync(
+                                applicationContext,
+                                reminders,
+                            )
+                            result.success(null)
+                        } catch (error: Exception) {
+                            result.error(
+                                "goal_reminder_sync_failed",
+                                error.message,
+                                null,
+                            )
+                        }
+                    }
+                    "notifyUnlocked" -> {
+                        val goalId = call.argument<Int>("goalId")
+                        val name = call.argument<String>("name")
+                        val entryType = call.argument<String>("entryType")
+                        if (goalId == null || name.isNullOrBlank() ||
+                            entryType.isNullOrBlank()
+                        ) {
+                            result.error(
+                                "invalid_unlock_args",
+                                "The unlocked entry details are required.",
+                                null,
+                            )
+                            return@setMethodCallHandler
+                        }
+                        try {
+                            MotionGoalReminderScheduler.showUnlockedNotification(
+                                applicationContext,
+                                goalId,
+                                name,
+                                entryType,
+                            )
+                            result.success(null)
+                        } catch (error: Exception) {
+                            result.error(
+                                "goal_unlock_notification_failed",
+                                error.message,
+                                null,
+                            )
+                        }
+                    }
+                    else -> result.notImplemented()
+                }
+            }
+    }
+
+    private fun maybeShowGoalReminderTest(intent: Intent?) {
+        val isDebuggable =
+            applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
+        if (!isDebuggable ||
+            intent?.getBooleanExtra("motion_goal_reminder_test", false) != true
+        ) {
+            return
+        }
+        intent.removeExtra("motion_goal_reminder_test")
+        MotionGoalReminderScheduler.showDebugNotification(applicationContext)
     }
 
     private fun requestTimerPermissions(

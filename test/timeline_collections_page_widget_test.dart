@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:motion/motion_core/mc_sql_table/goal.dart';
 import 'package:motion/motion_core/motion_providers/firebase_pvd/uid_pvd.dart';
 import 'package:motion/motion_core/motion_providers/goal_pvd/goal_tracker_pvd.dart';
+import 'package:motion/motion_core/motion_services/goal_start_reminder_bridge.dart';
 import 'package:motion/motion_screens/ms_goals/goal_tracker_page.dart';
 import 'package:provider/provider.dart';
 
@@ -16,6 +18,7 @@ void main() {
       );
       final goalProvider = GoalTrackerProvider(
         userUidProvider: userProvider,
+        reminderBridge: _NoopGoalStartReminderBridge(),
         now: () => DateTime(2026, 11, 14),
       );
       addTearDown(() {
@@ -49,4 +52,15 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   }
+}
+
+class _NoopGoalStartReminderBridge implements GoalStartReminderBridge {
+  @override
+  Future<bool> requestPermission() async => true;
+
+  @override
+  Future<void> sync(List<GoalStartReminder> reminders) async {}
+
+  @override
+  Future<void> notifyUnlocked(MotionGoal goal) async {}
 }

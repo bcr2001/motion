@@ -7,6 +7,7 @@ class MotionDbTables {
   static const String goals = 'goals';
   static const String goalCheckIns = 'goal_check_ins';
   static const String goalPausePeriods = 'goal_pause_periods';
+  static const String goalDependencies = 'goal_dependencies';
   static const String timelineCollections = 'timeline_collections';
 }
 
@@ -60,14 +61,23 @@ class MotionDbColumns {
   static const String goalName = 'goalName';
   static const String goalDescription = 'goalDescription';
   static const String goalStartDate = 'goalStartDate';
+  static const String goalActivationDate = 'goalActivationDate';
+  static const String goalAutoStartAfterPrerequisites =
+      'autoStartAfterPrerequisites';
   static const String goalCompletionDate = 'goalCompletionDate';
   static const String goalDeadlineDate = 'goalDeadlineDate';
+  static const String goalFailureDate = 'goalFailureDate';
+  static const String goalFailureReason = 'goalFailureReason';
+  static const String goalTargetDays = 'goalTargetDays';
+  static const String goalRetryOfId = 'goalRetryOfId';
   static const String goalStatus = 'goalStatus';
   static const String goalCreatedAtEpochMs = 'goalCreatedAtEpochMs';
   static const String goalUpdatedAtEpochMs = 'goalUpdatedAtEpochMs';
   static const String goalPauseStartDate = 'pauseStartDate';
   static const String goalPauseResumeDate = 'resumeDate';
   static const String goalPauseReason = 'pauseReason';
+  static const String dependentGoalId = 'dependentGoalId';
+  static const String prerequisiteGoalId = 'prerequisiteGoalId';
   static const String timelineEntryType = 'entryType';
   static const String timelineCollectionId = 'collectionId';
   static const String timelineCollectionName = 'collectionName';

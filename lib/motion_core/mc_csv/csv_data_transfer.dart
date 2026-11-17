@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:csv/csv.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:motion/motion_core/mc_sql_table/goal.dart';
 import 'package:motion/motion_core/mc_sqlite/database_constants.dart';
 import 'package:motion/motion_core/mc_sqlite/sql_assigner_db.dart';
 import 'package:motion/motion_core/mc_sqlite/sql_tracker_db.dart';
@@ -183,6 +184,11 @@ class MotionCsvDataTransfer {
         fileName: 'goal_pause_periods.csv',
         content: await _csvContentFromRows(await _goalPauseRows(currentUser)),
       ),
+      MotionCsvBackupFile(
+        fileName: 'goal_dependencies.csv',
+        content:
+            await _csvContentFromRows(await _goalDependencyRows(currentUser)),
+      ),
     ];
   }
 
@@ -217,6 +223,10 @@ class MotionCsvDataTransfer {
     await _writeAndroidCsvFile(
       fileName: '${fileNamePrefix}goal_pause_periods.csv',
       rows: await _goalPauseRows(currentUser),
+    );
+    await _writeAndroidCsvFile(
+      fileName: '${fileNamePrefix}goal_dependencies.csv',
+      rows: await _goalDependencyRows(currentUser),
     );
 
     return 'Downloads';
@@ -275,6 +285,11 @@ class MotionCsvDataTransfer {
       fileName: 'goal_pause_periods.csv',
       rows: await _goalPauseRows(currentUser),
     );
+    await _writeCsvFile(
+      directory: directory,
+      fileName: 'goal_dependencies.csv',
+      rows: await _goalDependencyRows(currentUser),
+    );
 
     return directory.path;
   }
@@ -302,6 +317,11 @@ class MotionCsvDataTransfer {
             [currentUser],
           )) ??
           0;
+      await txn.delete(
+        MotionDbTables.goalDependencies,
+        where: '${MotionDbColumns.currentLoggedInUser} = ?',
+        whereArgs: [currentUser],
+      );
       goalRows = await txn.delete(
         MotionDbTables.goals,
         where: '${MotionDbColumns.currentLoggedInUser} = ?',
@@ -453,6 +473,15 @@ class MotionCsvDataTransfer {
 
   Future<List<List<dynamic>>> _goalRows(String currentUser) async {
     final db = await _trackerDatabase();
+    final dependencyRows = await db.query(
+      MotionDbTables.goalDependencies,
+      columns: [MotionDbColumns.dependentGoalId],
+      where: '${MotionDbColumns.currentLoggedInUser} = ?',
+      whereArgs: [currentUser],
+    );
+    final dependentIds = dependencyRows
+        .map((row) => (row[MotionDbColumns.dependentGoalId] as num).toInt())
+        .toSet();
     final rows = await db.query(
       MotionDbTables.goals,
       where: '${MotionDbColumns.currentLoggedInUser} = ?',
@@ -467,8 +496,14 @@ class MotionCsvDataTransfer {
         MotionDbColumns.goalName,
         MotionDbColumns.goalDescription,
         MotionDbColumns.goalStartDate,
+        MotionDbColumns.goalActivationDate,
+        MotionDbColumns.goalAutoStartAfterPrerequisites,
         MotionDbColumns.goalCompletionDate,
         MotionDbColumns.goalDeadlineDate,
+        MotionDbColumns.goalFailureDate,
+        MotionDbColumns.goalFailureReason,
+        MotionDbColumns.goalTargetDays,
+        MotionDbColumns.goalRetryOfId,
         MotionDbColumns.goalStatus,
         MotionDbColumns.timelineEntryType,
         MotionDbColumns.timelineCollectionId,
@@ -481,9 +516,20 @@ class MotionCsvDataTransfer {
             row[MotionDbColumns.goalName],
             row[MotionDbColumns.goalDescription],
             row[MotionDbColumns.goalStartDate],
+            row[MotionDbColumns.goalActivationDate] ??
+                (dependentIds.contains(row[MotionDbColumns.id])
+                    ? ''
+                    : row[MotionDbColumns.goalStartDate]),
+            row[MotionDbColumns.goalAutoStartAfterPrerequisites] ?? 0,
             row[MotionDbColumns.goalCompletionDate] ?? '',
             row[MotionDbColumns.goalDeadlineDate] ?? '',
-            row[MotionDbColumns.goalStatus],
+            row[MotionDbColumns.goalFailureDate] ?? '',
+            row[MotionDbColumns.goalFailureReason] ?? '',
+            row[MotionDbColumns.goalTargetDays] ?? '',
+            row[MotionDbColumns.goalRetryOfId] ?? '',
+            row[MotionDbColumns.goalFailureDate] != null
+                ? GoalStatus.failed.name
+                : row[MotionDbColumns.goalStatus],
             row[MotionDbColumns.timelineEntryType],
             row[MotionDbColumns.timelineCollectionId] ?? '',
             row[MotionDbColumns.goalCreatedAtEpochMs],
@@ -569,6 +615,30 @@ class MotionCsvDataTransfer {
             row[MotionDbColumns.goalPauseStartDate],
             row[MotionDbColumns.goalPauseResumeDate] ?? '',
             row[MotionDbColumns.goalPauseReason] ?? '',
+          ]),
+    ];
+  }
+
+  Future<List<List<dynamic>>> _goalDependencyRows(String currentUser) async {
+    final db = await _trackerDatabase();
+    final rows = await db.query(
+      MotionDbTables.goalDependencies,
+      where: '${MotionDbColumns.currentLoggedInUser} = ?',
+      whereArgs: [currentUser],
+      orderBy: '${MotionDbColumns.dependentGoalId}, '
+          '${MotionDbColumns.prerequisiteGoalId}',
+    );
+
+    return [
+      [
+        MotionDbColumns.dependentGoalId,
+        MotionDbColumns.prerequisiteGoalId,
+        MotionDbColumns.currentLoggedInUser,
+      ],
+      ...rows.map((row) => [
+            row[MotionDbColumns.dependentGoalId],
+            row[MotionDbColumns.prerequisiteGoalId],
+            row[MotionDbColumns.currentLoggedInUser],
           ]),
     ];
   }

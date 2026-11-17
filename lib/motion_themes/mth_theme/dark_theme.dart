@@ -15,22 +15,20 @@ ThemeData darkThemeData = ThemeData(
       headlineLarge: AppTextStyle.headingLarge(true),
       headlineMedium: AppTextStyle.headingMedium(true),
       headlineSmall: AppTextStyle.headingSmall(true)),
-      
+
   colorScheme: const ColorScheme.dark(primary: AppColor.darkThemeWidgetBgColor),
 
   // text form field
-  dialogTheme: const DialogThemeData(
-      backgroundColor: AppColor.darkModeContentWidget),
+  dialogTheme:
+      const DialogThemeData(backgroundColor: AppColor.darkModeContentWidget),
 
   // app bar theme
   appBarTheme:
       const AppBarTheme(centerTitle: true, backgroundColor: Colors.black),
 
   // card theme
-  cardTheme:  CardThemeData(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(25.0)
-      ),
+  cardTheme: CardThemeData(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0)),
       elevation: 1,
       margin: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
       color: AppColor.darkModeContentWidget),
@@ -57,12 +55,20 @@ ThemeData darkThemeData = ThemeData(
   visualDensity: VisualDensity.adaptivePlatformDensity,
   brightness: Brightness.dark,
 
-  // snakbar theme (dark mode)
+  // Snackbar theme
   snackBarTheme: const SnackBarThemeData(
+    behavior: SnackBarBehavior.floating,
+    backgroundColor: Color(0xFF252C3B),
+    actionTextColor: AppColor.blueMainColor,
+    elevation: 5,
+    insetPadding: EdgeInsets.fromLTRB(16, 0, 16, 12),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(10)),
+    ),
     contentTextStyle: TextStyle(
+      color: Colors.white,
       fontSize: 14,
-    )
+      fontWeight: FontWeight.w600,
+    ),
   ),
-  
-
 );

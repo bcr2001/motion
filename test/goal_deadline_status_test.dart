@@ -53,6 +53,7 @@ MotionGoal _goal({required DateTime deadline, DateTime? completion}) {
     currentLoggedInUser: 'user-1',
     name: 'Get a Job',
     startDate: DateTime(2026, 1, 1),
+    activationDate: DateTime(2026, 1, 1),
     deadlineDate: deadline,
     completionDate: completion,
     status: completion == null ? GoalStatus.active : GoalStatus.achieved,

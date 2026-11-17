@@ -23,7 +23,8 @@ ThemeData lightThemeData = ThemeData(
 
   // alert dialog theme
   dialogTheme: const DialogThemeData(
-      backgroundColor: AppColor.lightModeContentWidget,),
+    backgroundColor: AppColor.lightModeContentWidget,
+  ),
 
   // card theme
   cardTheme: const CardThemeData(
@@ -50,18 +51,25 @@ ThemeData lightThemeData = ThemeData(
           elevation: WidgetStatePropertyAll(0.0),
           backgroundColor:
               WidgetStatePropertyAll(AppColor.lightModeContentWidget))),
-  
-  // snakbar theme (dark mode)
-  snackBarTheme: const SnackBarThemeData(
-    contentTextStyle: TextStyle(
-      fontSize: 14,
-    )
-  ),
 
-  
+  // Snackbar theme
+  snackBarTheme: const SnackBarThemeData(
+    behavior: SnackBarBehavior.floating,
+    backgroundColor: Color(0xFF202738),
+    actionTextColor: AppColor.blueMainColor,
+    elevation: 5,
+    insetPadding: EdgeInsets.fromLTRB(16, 0, 16, 12),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(10)),
+    ),
+    contentTextStyle: TextStyle(
+      color: Colors.white,
+      fontSize: 14,
+      fontWeight: FontWeight.w600,
+    ),
+  ),
 
   useMaterial3: true,
   visualDensity: VisualDensity.adaptivePlatformDensity,
   brightness: Brightness.light,
-
 );
